@@ -1,0 +1,39 @@
+# .NET
+**/bin/
+**/obj/
+*.user
+*.suo
+.vs/
+**/appsettings.*.json
+!**/appsettings.json
+!**/appsettings.Development.json
+
+# Node / Bun 
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+bun.lockb    
+
+# Pulumi 
+**/Pulumi.*.yaml
+!Pulumi.yaml
+.pulumi/
+
+# Docker
+.dockerignore
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test results
+**/TestResults/
+**/coverage/
+playwright-report/
+test-results/
+
+# Env vars
+.env.*
+!.env.example
