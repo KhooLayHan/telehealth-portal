@@ -1,4 +1,4 @@
-namespace MyTestProject;
+namespace Telehealth.UnitTests;
 
 public class AdditionDataGeneratorAttribute : DataSourceGeneratorAttribute<int, int, int>
 {

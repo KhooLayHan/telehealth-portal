@@ -1,6 +1,6 @@
 using TUnit.Core.Interfaces;
 
-namespace MyTestProject;
+namespace Telehealth.UnitTests;
 
 public class InMemoryDb : IAsyncInitializer, IAsyncDisposable
 {

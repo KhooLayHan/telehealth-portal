@@ -1,4 +1,4 @@
-namespace MyTestProject;
+namespace Telehealth.UnitTests;
 
 public class Calculator
 {
