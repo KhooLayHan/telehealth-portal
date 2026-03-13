@@ -1,0 +1,13 @@
+{
+  "sdk": {
+    "version": "10.0.100",
+    "allowPrerelease": false,
+    "rollForward": "latestPatch",
+    "errorMessage": "The required .NET SDK wasn't found. Please run ./dotnet-install.sh to install it."
+  },
+  "projects": [
+    "backend",
+    "backend/src",
+    "backend/tests"
+  ]
+}   
