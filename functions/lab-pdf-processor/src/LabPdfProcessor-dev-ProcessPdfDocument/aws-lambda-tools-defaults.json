@@ -8,8 +8,9 @@
   "profile": "",
   "region": "",
   "configuration": "Release",
+  "function-architecture": "x86_64",
   "function-runtime": "dotnet10",
   "function-memory-size": 512,
   "function-timeout": 30,
-  "function-handler": "AppointmentReminder-dev-SentReminders::AppointmentReminder_dev_SentReminders.Function::FunctionHandler"
+  "function-handler": "LabPdfProcessor-dev-ProcessPdfDocument::LabPdfProcessor_dev_ProcessPdfDocument.Function::FunctionHandler"
 }
