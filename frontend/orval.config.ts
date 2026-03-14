@@ -1,5 +1,5 @@
 import { defineConfig } from "orval";
- 
+
 export default defineConfig({
   telehealth: {
     input: {
@@ -26,7 +26,7 @@ export default defineConfig({
       workspace: "src",
     },
     hooks: {
-        afterAllFilesWrite: ['biome', 'check', '--write', '.']
-    }
+      afterAllFilesWrite: ["biome", "check", "--write", "."],
+    },
   },
 });

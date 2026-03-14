@@ -1,5 +1,54 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "files": {
+    "ignoreUnknown": true,
+    "includes": [
+      "!node_modules",
+      "!.next",
+      "!dist",
+      "!build",
+      "!.storybook",
+      "!src/stories"
+    ]
+  },
+  "overrides": [
+    {
+      "includes": ["src/components/**", "src/stories/**", "src/App.*"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": {
+              "level": "warn",
+              "options": {
+                "filenameCases": ["PascalCase"]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "src/features/**",
+        "src/lib/**",
+        "src/services/**",
+        "src/hooks/**",
+        "src/store/**"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": {
+              "level": "warn",
+              "options": {
+                "filenameCases": ["kebab-case"]
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
   "extends": [
     "ultracite/biome/core",
     "ultracite/biome/react",
