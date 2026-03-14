@@ -13,18 +13,18 @@ function App() {
           <img
             alt="Vite logo"
             className="logo"
-            height="200"
+            height="100"
             src={viteLogo}
-            width="200"
+            width="100"
           />
         </a>
         <a href="https://react.dev" rel="noopener" target="_blank">
           <img
             alt="React logo"
             className="logo react"
-            height="200"
+            height="100"
             src={reactLogo}
-            width="200"
+            width="100"
           />
         </a>
       </div>

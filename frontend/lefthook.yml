@@ -17,7 +17,7 @@ pre-commit:
       run: bunx ultracite check {staged_files}
     
     - name: "fix"
-      run: bunx ultracite fix
+      run: bunx ultracite fix {staged_files}
       glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc,css}"
       stage_fixed: true
 
@@ -27,5 +27,5 @@ pre-push:
   jobs:
     - name: "check"
       glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc,css}"
-      run: bunx ultracite check {staged_files}
+      run: bunx ultracite check {pushed_files}
 
