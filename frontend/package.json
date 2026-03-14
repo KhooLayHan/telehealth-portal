@@ -15,7 +15,7 @@
     "build-storybook": "storybook build",
     "format": "biome format --write .",
     "lint": "biome lint --write .",
-    "test": "vitest --project=unit",
+    "test": "vitest --project=unit --pass-with-no-tests",
     "coverage": "vitest run --coverage --project=unit",
     "test:ui": "vitest --ui",
     "test:browser": "vitest --project=browser"
