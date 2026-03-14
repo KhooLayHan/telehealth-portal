@@ -8,14 +8,14 @@ export default defineConfig({
     projects: [
       {
         test: {
-          include: ["frontend/src"],
+          include: ["src/**/*.{test,spec}.{ts,tsx}"],
           name: "unit",
         },
       },
       {
         test: {
           name: "browser",
-          include: ["frontend/src"],
+          include: ["src/**/*.{test,spec}.{ts,tsx}"],
           browser: {
             enabled: true,
             provider: playwright(),

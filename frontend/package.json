@@ -10,7 +10,7 @@
     "check": "ultracite check",
     "fix": "ultracite fix",
     "generate:api": "orval",
-    "prepare": "lefthook install",
+    "lefthook": "lefthook install",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "format": "biome format --write .",
