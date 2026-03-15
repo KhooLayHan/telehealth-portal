@@ -6,35 +6,35 @@
 
 **1. `roles`**
 
-* `id` (PK, BigInt)
+* `id` (PK, Int)
 * `slug` (String, Unique) ➡️ *'admin', 'doctor', 'patient', 'receptionist', 'lab-tech'*
 * `name` (String)
 * `created_at` (timestamptz)
 
 **2. `departments`**
 
-* `id` (PK, BigInt)
+* `id` (PK, Int)
 * `slug` (String, Unique)
 * `name` (String)
 * `created_at` (timestamptz)
 
 **3. `appointment_statuses`**
 
-* `id` (PK, BigInt)
+* `id` (PK, Int)
 * `slug` (String, Unique) ➡️ *'booked', 'completed', 'cancelled', 'no-show'*
 * `name` (String)
 * `created_at` (timestamptz)
 
 **4. `schedule_statuses`**
 
-* `id` (PK, BigInt)
+* `id` (PK, Int)
 * `slug` (String, Unique) ➡️ *'available', 'booked', 'unavailable'*
 * `name` (String)
 * `created_at` (timestamptz)
 
 **5. `lab_report_statuses`**
 
-* `id` (PK, BigInt)
+* `id` (PK, Int)
 * `slug` (String, Unique) ➡️ *'pending', 'processing', 'completed', 'rejected'*
 * `name` (String)
 * `created_at` (timestamptz)
@@ -64,6 +64,7 @@
 
 **7. `user_roles`**
 
+* `id` (PK, BigInt)
 * `user_id` (PK, FK ➡️ users.id)
 * `role_id` (PK, FK ➡️ roles.id)
 * `created_at` (timestamptz)
