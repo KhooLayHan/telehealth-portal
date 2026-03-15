@@ -54,4 +54,8 @@
     "*.css": "tailwindcss",
     "*.scss": "tailwindcss",
   },
+  "colorize.decoration_type": "dot",
+  "markdownlint.config": {
+    "MD001": false
+  }
 }
