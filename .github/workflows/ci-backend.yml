@@ -1,0 +1,41 @@
+name: CI — Backend
+ 
+on:
+  pull_request:
+    branches: ["main"]
+    paths: ["backend"]
+  push:
+    branches: ["main"]
+    paths: ["backend"]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dotnet-version: [ '8.0.x', '9.0.x', '10.0.x' ]
+
+    steps:
+      - uses: actions/checkout@v6
+ 
+      - name: Setup .NET ${{matrix.dotnet-version}}
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+          cache: true
+ 
+      - name: Restore dependencies
+        run: dotnet restore backend/src/TeleHealth.Api/TeleHealth.Api.csproj
+ 
+      - name: Build
+        run: dotnet build backend/src/TeleHealth.Api/TeleHealth.Api.csproj --no-restore
+ 
+      - name: Check formatting and linting 
+        run: dotnet csharpier check .
+          
+      - name: Unit Tests
+        run: dotnet test backend/tests/TeleHealth.UnitTests/TeleHealth.UnitTests.csproj --no-build 
+ 
+      - name: Integration Tests
+        run: dotnet test backend/tests/TeleHealth.IntegrationTests/TeleHealth.IntegrationTests.csproj 
+ 
