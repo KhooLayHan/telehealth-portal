@@ -39,7 +39,7 @@
 
 ## Table Summary
 
-### Core Tables (16 Total)
+### Core Tables (17 Total)
 
 | Category | Count | Tables |
 | ---------- | ------- | -------- |
@@ -47,7 +47,7 @@
 | **Lookup Tables** | 5 | departments, appointment_statuses, schedule_statuses, lab_report_statuses |
 | **Identity Profiles** | 2 | doctors, patients |
 | **Clinic Operations** | 5 | doctor_schedules, appointments, consultations, prescriptions, lab_reports |
-| **System & Audit** | 1 | notifications, audit_logs |
+| **System & Audit** | 2 | notifications, audit_logs |
 
 ---
 
@@ -424,6 +424,10 @@ Medication prescriptions from consultations.
 | created_at | TIMESTAMPTZ | NOT NULL, DEFAULT NOW() | Creation timestamp |
 | updated_at | TIMESTAMPTZ | | Last update (trigger-managed) |
 | deleted_at | TIMESTAMPTZ | | Soft delete timestamp |
+
+**Constraints:**
+
+- `chk_prescriptions_duration_positive`: CHECK (duration_days > 0)
 
 **Sample Fake Data (Bogus):**
 

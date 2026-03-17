@@ -1,5 +1,5 @@
-// using Scalar.AspNetCore;
-// using Serilog;
+using Scalar.AspNetCore;
+using Serilog;
 // using TeleHealth.Api.Common.Extensions;
 // using TeleHealth.Api.Infrastructure.SignalR;
 
@@ -7,8 +7,8 @@
 //     .WriteTo.Console()
 //     .CreateBootstrapLogger();
 
-// try
-// {
+try
+{
 //     var builder = WebApplication.CreateBuilder(args);
 
 //     builder.Host.UseSerilog((ctx, cfg) => cfg
@@ -54,12 +54,12 @@
 //     app.MapEndpoints();
 
 //     app.Run();
-// }
-// catch (Exception ex) when (ex is not HostAbortedException)
-// {
+}
+catch (Exception ex) when (ex is not HostAbortedException)
+{
 //     Log.Fatal(ex, "Application terminated unexpectedly");
-// }
-// finally
-// {
+}
+finally
+{
 //     Log.CloseAndFlush();
-// }
+}

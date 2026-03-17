@@ -3,10 +3,16 @@ name: CI — Backend
 on:
   pull_request:
     branches: ["main"]
-    paths: ["backend"]
+    paths:
+      - "backend/**"
+      - "dotnet-tools.json"
+      - ".github/workflows/ci-backend.yml"
   push:
     branches: ["main"]
-    paths: ["backend"]
+    paths:
+      - "backend/**"
+      - "dotnet-tools.json"
+      - ".github/workflows/ci-backend.yml"
 
 jobs:
   backend:
@@ -30,6 +36,9 @@ jobs:
       - name: Build
         run: dotnet build backend/src/TeleHealth.Api/TeleHealth.Api.csproj --no-restore
  
+      - name: Restore local .NET tools
+        run: dotnet tool restore
+
       - name: Check formatting and linting 
         run: dotnet csharpier check .
           
