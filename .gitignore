@@ -37,3 +37,6 @@ test-results/
 # Env vars
 .env.*
 !.env.example
+
+# IDEA-specific
+*.idea

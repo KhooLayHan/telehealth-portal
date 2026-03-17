@@ -1,6 +1,10 @@
 # Database Schema Version 1  
 
-#### 📘 CATEGORY 1: LOOKUP TABLES
+> **Version:** 1.0 — DDAC
+
+## Quick Reference
+
+### 📘 CATEGORY 1: LOOKUP TABLES
 
 *These tables change rarely. They only need `created_at`.*
 
@@ -41,7 +45,7 @@
 
 ---
 
-#### 👤 CATEGORY 2: IDENTITY & PROFILES
+### 👤 CATEGORY 2: IDENTITY & PROFILES
 
 *These are domain tables. They get `created_at`, `updated_at`, and `deleted_at`.*
 
@@ -94,7 +98,7 @@
 
 ---
 
-#### 🏥 CATEGORY 3: CLINIC OPERATIONS & AWS
+### 🏥 CATEGORY 3: CLINIC OPERATIONS & AWS
 
 *The core transactional tables.*
 
