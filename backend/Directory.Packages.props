@@ -5,59 +5,53 @@
 
     <ItemGroup>
         <!-- AWS Services (Task 1 & 2) -->
-        <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.24" />
-        <PackageReference Include="AWSSDK.S3" Version="4.0.18.8" />
-        <PackageReference Include="AWSSDK.SimpleNotificationService" Version="4.0.2.18" />
-        <PackageReference Include="AWSSDK.SQS" Version="4.0.2.16" />
+        <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.24" />
+        <PackageVersion Include="AWSSDK.S3" Version="4.0.18.8" />
+        <PackageVersion Include="AWSSDK.SimpleNotificationService" Version="4.0.2.18" />
+        <PackageVersion Include="AWSSDK.SQS" Version="4.0.2.16" />
 
         <!-- EF Core & PostgreSQL -->
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.4">
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        <PrivateAssets>all</PrivateAssets>
-        </PackageReference>
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
+        <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.4" />
+        <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
 
         <!-- VSA, Mapping & Validation -->
-        <PackageReference Include="Facet" Version="5.8.2" />
-        <PackageReference Include="Facet.Extensions" Version="5.8.2" />
-        <PackageReference Include="Facet.Extensions.EFCore" Version="5.8.2" />
-        <PackageReference Include="FluentValidation" Version="12.1.1" />
-        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
-        <PackageReference Include="Scrutor" Version="7.0.0" />
+        <PackageVersion Include="Facet" Version="5.8.2" />
+        <PackageVersion Include="Facet.Extensions" Version="5.8.2" />
+        <PackageVersion Include="Facet.Extensions.EFCore" Version="5.8.2" />
+        <PackageVersion Include="FluentValidation" Version="12.1.1" />
+        <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+        <PackageVersion Include="Scrutor" Version="7.0.0" />
 
         <!-- Auth & Identity -->
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.4" />
-        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.4" />
+        <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.4" />
+        <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.4" />
 
         <!-- Observability & Telemetry (Task 3) -->
-        <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.15.0" />
-        <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.0" />
-        <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.15.0" />
-        <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.15.1" />
-        <PackageReference Include="OpenTelemetry.Instrumentation.AWS" Version="1.15.0" />
-        <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
-        <PackageReference Include="Serilog.Sinks.AwsCloudWatch" Version="4.4.42" />
-        <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+        <PackageVersion Include="OpenTelemetry.Exporter.Console" Version="1.15.0" />
+        <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.0" />
+        <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.15.0" />
+        <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.15.1" />
+        <PackageVersion Include="OpenTelemetry.Instrumentation.AWS" Version="1.15.0" />
+        <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
+        <PackageVersion Include="Serilog.Sinks.AwsCloudWatch" Version="4.4.42" />
+        <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
         
         <!-- API Specification & Documentation -->
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3" />
-        <PackageReference Include="Scalar.AspNetCore" Version="2.13.6" />
-        <PackageReference Include="Scalar.AspNetCore.Microsoft" Version="2.13.5" />
+        <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3" />
+        <PackageVersion Include="Scalar.AspNetCore" Version="2.13.6" />
+        <PackageVersion Include="Scalar.AspNetCore.Microsoft" Version="2.13.5" />
         
         <!-- Resilience & Utilities -->
-        <PackageReference Include="Humanizer.Core" Version="3.0.10" />
-        <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.4.0" />
-        <PackageReference Include="NodaTime" Version="3.3.1" />
-        <PackageReference Include="Polly.Core" Version="8.6.6" />
-        <PackageReference Include="Refit" Version="10.0.1" />
-        <PackageReference Include="Refit.HttpClientFactory" Version="10.0.1" />
-        <PackageReference Include="UnitsNet" Version="5.75.0" />
-        <PackageReference Include="UnitsNet.NumberExtensions" Version="5.75.0" />
+        <PackageVersion Include="Humanizer.Core" Version="3.0.10" />
+        <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.4.0" />
+        <PackageVersion Include="NodaTime" Version="3.3.1" />
+        <PackageVersion Include="Polly.Core" Version="8.6.6" />
+        <PackageVersion Include="Refit" Version="10.0.1" />
+        <PackageVersion Include="Refit.HttpClientFactory" Version="10.0.1" />
+        <PackageVersion Include="UnitsNet" Version="5.75.0" />
+        <PackageVersion Include="UnitsNet.NumberExtensions" Version="5.75.0" />
 
         <!-- SonarQube Bug Detection -->
-        <PackageReference Include="SonarAnalyzer.CSharp" Version="10.21.0.135717">
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        <PrivateAssets>all</PrivateAssets>
-        </PackageReference>
+        <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.21.0.135717" />
     </ItemGroup>
 </Project>
