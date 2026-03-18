@@ -4,10 +4,16 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- AWS Services (Task 1 & 2) -->
+    <PackageVersion Include="Amazon.Lambda.CloudWatchEvents" Version="4.4.1" />
+    <PackageVersion Include="Amazon.Lambda.Core" Version="2.8.0" />
+    <PackageVersion Include="Amazon.Lambda.Serialization.SystemTextJson" Version="2.4.4" />
+    <PackageVersion Include="Amazon.Lambda.SQSEvents" Version="2.2.1" />
+    <PackageVersion Include="Amazon.Lambda.S3Events" Version="3.1.2" />
     <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.24" />
-    <PackageVersion Include="AWSSDK.S3" Version="4.0.18.8" />
-    <PackageVersion Include="AWSSDK.SimpleNotificationService" Version="4.0.2.18" />
+    <PackageVersion Include="AWSSDK.SimpleNotificationService" Version="4.0.2.19" />
     <PackageVersion Include="AWSSDK.SQS" Version="4.0.2.16" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.18.8" />
+    
     <!-- EF Core & PostgreSQL -->
     <PackageVersion Include="Bogus" Version="35.6.5" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.4" />
