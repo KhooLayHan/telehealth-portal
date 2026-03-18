@@ -44,7 +44,7 @@ jobs:
         run: dotnet csharpier check .
           
       - name: Unit Tests
-        run: dotnet test backend/tests/TeleHealth.UnitTests/TeleHealth.UnitTests.csproj --no-build 
+        run: dotnet test backend/tests/TeleHealth.UnitTests/TeleHealth.UnitTests.csproj 
  
       - name: Integration Tests
         run: dotnet test backend/tests/TeleHealth.IntegrationTests/TeleHealth.IntegrationTests.csproj 
