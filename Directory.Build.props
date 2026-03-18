@@ -16,10 +16,6 @@
     
     <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
 
-    <PropertyGroup Condition="'$(MSBuildProjectName)' == 'TeleHealth.Api' and '$(IsTestProject)' != 'true'">
-      <IsAotCompatible>true</IsAotCompatible>
-      
-      <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
-    </PropertyGroup>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
 </Project>

@@ -29,9 +29,10 @@ jobs:
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
           cache: true
+          cache-dependency-path: backend/**/packages.lock.json
  
       - name: Restore dependencies
-        run: dotnet restore backend/src/TeleHealth.Api/TeleHealth.Api.csproj
+        run: dotnet restore backend/src/TeleHealth.Api/TeleHealth.Api.csproj --locked-mode
  
       - name: Build
         run: dotnet build backend/src/TeleHealth.Api/TeleHealth.Api.csproj --no-restore
