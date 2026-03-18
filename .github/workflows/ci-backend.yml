@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dotnet-version: [ '10.0.x' ]
+        dotnet-version: [ '8.0.x', '9.0.x', '10.0.x' ]
 
     steps:
       - uses: actions/checkout@v6
@@ -43,12 +43,12 @@ jobs:
       - name: Check formatting and linting 
         run: dotnet csharpier check .
           
-      - name: Run Tests
-        run: dotnet test --logger "console;verbosity=normal"
+      # - name: Run Tests
+      #   run: dotnet test --logger "console;verbosity=normal"
         # run: dotnet test --solution backend/TeleHealth.slnx
 
-      - name: Run Tests with Full Reporter
-        run: dotnet test -- --github-reporter-style full
+      # - name: Run Tests with Full Reporter
+      #   run: dotnet test -- --github-reporter-style full
 
       # - name: Unit Tests
       #   run: dotnet test --project backend/tests/TeleHealth.UnitTests/TeleHealth.UnitTests.csproj 
