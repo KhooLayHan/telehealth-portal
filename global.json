@@ -7,7 +7,12 @@
   },
   "projects": [
     "backend",
-    "backend/src",
-    "backend/tests"
-  ]
+    "backend/src/TeleHealth.Api",
+    "backend/tests",
+    "infra",
+    "functions"
+  ],
+  "test": {
+    "runner": "Microsoft.Testing.Platform"
+  }
 }   

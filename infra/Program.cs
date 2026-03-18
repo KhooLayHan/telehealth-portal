@@ -1,6 +1,6 @@
-﻿using Pulumi;
+﻿using System.Collections.Generic;
+using Pulumi;
 using Pulumi.Aws.S3;
-using System.Collections.Generic;
 
 return await Deployment.RunAsync(() =>
 {
@@ -8,8 +8,5 @@ return await Deployment.RunAsync(() =>
     var bucket = new Bucket("my-bucket");
 
     // Export the name of the bucket
-    return new Dictionary<string, object?>
-    {
-        ["bucketName"] = bucket.Id
-    };
+    return new Dictionary<string, object?> { ["bucketName"] = bucket.Id };
 });

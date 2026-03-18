@@ -1,13 +1,15 @@
 using Amazon.Lambda.Core;
 using Amazon.SimpleNotificationService;
+
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
-[assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
+[assembly: LambdaSerializer(
+    typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer)
+)]
 
 namespace AppointmentReminder_dev_SentReminder;
 
 public class Function
 {
-    
     /// <summary>
     /// A simple function that takes a string and does a ToUpper
     /// </summary>

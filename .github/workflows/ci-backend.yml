@@ -1,0 +1,63 @@
+name: CI — Backend
+ 
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "backend/**"
+      - "dotnet-tools.json"
+      - ".github/workflows/ci-backend.yml"
+  push:
+    branches: ["main"]
+    paths:
+      - "backend/**"
+      - "dotnet-tools.json"
+      - ".github/workflows/ci-backend.yml"
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dotnet-version: [ '8.0.x', '9.0.x', '10.0.x' ]
+
+    steps:
+      - uses: actions/checkout@v6
+ 
+      - name: Setup .NET ${{matrix.dotnet-version}}
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+          cache: true
+          cache-dependency-path: backend/**/packages.lock.json
+ 
+      - name: Restore dependencies
+        run: dotnet restore backend/src/TeleHealth.Api/TeleHealth.Api.csproj --locked-mode
+ 
+      - name: Build
+        run: dotnet build backend/TeleHealth.slnx --no-restore
+ 
+      - name: Restore local .NET tools
+        run: dotnet tool restore
+
+      - name: Check formatting and linting 
+        run: dotnet csharpier check .
+          
+      # - name: Run Tests
+      #   run: dotnet test --logger "console;verbosity=normal"
+        # run: dotnet test --solution backend/TeleHealth.slnx
+
+      # - name: Run Tests with Full Reporter
+      #   run: dotnet test -- --github-reporter-style full
+
+      # - name: Unit Tests
+      #   run: dotnet test --project backend/tests/TeleHealth.UnitTests/TeleHealth.UnitTests.csproj 
+ 
+      # - name: Integration Tests
+      #   run: dotnet test --project backend/tests/TeleHealth.IntegrationTests/TeleHealth.IntegrationTests.csproj 
+
+      # - name: End-to-End Tests
+      #   run: dotnet test --project backend/tests/TeleHealth.E2ETests/TeleHealth.E2E.csproj 
+
+      
+ 

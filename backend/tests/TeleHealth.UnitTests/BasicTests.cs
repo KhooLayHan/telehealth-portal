@@ -47,7 +47,6 @@ public class BasicTests
 
         var action = () => calculator.Divide(1, 0);
 
-        await Assert.That(action).ThrowsException()
-            .WithMessage("Attempted to divide by zero.");
+        await Assert.That(action).ThrowsException().WithMessage("Attempted to divide by zero.");
     }
 }
