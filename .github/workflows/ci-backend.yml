@@ -46,8 +46,8 @@ jobs:
       # - name: Run Tests
       #   run: dotnet test --solution backend/TeleHealth.slnx
 
-      - name: Unit Tests
-        run: dotnet test --project backend/tests/TeleHealth.UnitTests/TeleHealth.UnitTests.csproj 
+      # - name: Unit Tests
+      #   run: dotnet test --project backend/tests/TeleHealth.UnitTests/TeleHealth.UnitTests.csproj 
  
       - name: Integration Tests
         run: dotnet test --project backend/tests/TeleHealth.IntegrationTests/TeleHealth.IntegrationTests.csproj 

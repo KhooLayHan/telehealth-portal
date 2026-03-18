@@ -639,7 +639,10 @@ BEGIN
         performed_by_system
     ) VALUES (
         TG_TABLE_NAME,
-        COALESCE(NEW.id, OLD.id),
+        CASE
+            WHEN TG_OP = 'DELETE' THEN OLD.id
+            ELSE NEW.id
+        END,
         TG_OP,
         v_old_values,
         v_new_values,
