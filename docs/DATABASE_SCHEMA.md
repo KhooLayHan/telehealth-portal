@@ -39,7 +39,7 @@
 
 ## Table Summary
 
-### Core Tables (17 Total)
+### Core Tables (16 Total)
 
 | Category | Count | Tables |
 | ---------- | --- | -------- |
@@ -190,7 +190,7 @@ Core user identity table with dual ID strategy.
 | slug | VARCHAR(100) | NOT NULL, UNIQUE | URL-friendly identifier |
 | username | VARCHAR(50) | NOT NULL | Login username |
 | email | VARCHAR(255) | NOT NULL | Email address |
-| password_hash | VARCHAR(255) | NOT NULL | BCrypt hash |
+| password_hash | VARCHAR(255) | NOT NULL | ASP.NET Core Identity hash |
 | first_name | VARCHAR(100) | NOT NULL | For UI greetings: "Hello, John" |
 | last_name | VARCHAR(100) | NOT NULL | Family name |
 | avatar_url | TEXT | | S3 URL: `https://s3.amazonaws.com/avatars/user-uuid.jpg` |
