@@ -21,32 +21,3 @@ WORKDIR /app
 USER $APP_UID
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "TeleHealth.Api.dll"]
-
-
-
-
-# ARG BUILD_CONFIGURATION=Release
-
-# FROM mcr.microsoft.com/dotnet/sdk:10-alpine AS build
-
-# WORKDIR /backend/src
-
-# COPY . .
-
-# RUN dotnet restore 
-
-# RUN dotnet build -c $BUILD_CONFIGURATION -o /app/build
-
-# ARG TARGETARCH
-
-# FROM mcr.microsoft.com/dotnet/aspnet:10-alpine AS final
-# WORKDIR /app
-# EXPOSE 8080
-
-# # Copy everything needed to run the app from the "build" stage.
-# COPY --from=build /app .
-
-
-# USER $APP_UID
-
-# ENTRYPOINT ["dotnet", "TeleHealth.Api.dll"]
