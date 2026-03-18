@@ -1,65 +1,41 @@
-using Scalar.AspNetCore;
-using Serilog;
-// using TeleHealth.Api.Common.Extensions;
-// using TeleHealth.Api.Infrastructure.SignalR;
+var builder = WebApplication.CreateBuilder(args);
 
-// Log.Logger = new LoggerConfiguration()
-//     .WriteTo.Console()
-//     .CreateBootstrapLogger();
+// Add services to the container.
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddOpenApi();
 
-try
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
 {
-//     var builder = WebApplication.CreateBuilder(args);
-
-//     builder.Host.UseSerilog((ctx, cfg) => cfg
-//         .ReadFrom.Configuration(ctx.Configuration)
-//         .Enrich.FromLogContext()
-//         .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}"));
-
-//     // ── Services ──────────────────────────────────────────────────────────────
-//     builder.Services
-//         .AddDatabase(builder.Configuration)
-//         .AddIdentityServices(builder.Configuration)
-//         .AddApplicationServices()
-//         .AddAwsServices(builder.Configuration)
-//         .AddSignalR()
-//         .AddOpenApi()
-//         .AddCors(opts => opts.AddDefaultPolicy(p =>
-//             p.WithOrigins(builder.Configuration["Frontend:BaseUrl"] ?? "http://localhost:5173")
-//              .AllowAnyHeader()
-//              .AllowAnyMethod()
-//              .AllowCredentials()));
-
-//     // ── Endpoint registration (VSA) ───────────────────────────────────────────
-//     builder.Services.AddEndpointsFromAssembly();
-
-//     var app = builder.Build();
-
-//     // ── Middleware pipeline ───────────────────────────────────────────────────
-//     app.UseSerilogRequestLogging();
-//     app.UseCors();
-//     app.UseAuthentication();
-//     app.UseAuthorization();
-
-//     if (app.Environment.IsDevelopment())
-//     {
-//         app.MapOpenApi();
-//         app.MapScalarApiReference("/api-docs");
-//     }
-
-//     // ── Hubs ──────────────────────────────────────────────────────────────────
-//     app.MapHub<NotificationHub>("/hubs/notifications");
-
-//     // ── Feature endpoints ─────────────────────────────────────────────────────
-//     app.MapEndpoints();
-
-//     app.Run();
+    app.MapOpenApi();
 }
-catch (Exception ex) when (ex is not HostAbortedException)
+
+app.UseHttpsRedirection();
+
+var summaries = new[]
 {
-//     Log.Fatal(ex, "Application terminated unexpectedly");
-}
-finally
+    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+};
+
+app.MapGet("/weatherforecast", () =>
+    {
+        var forecast = Enumerable.Range(1, 5).Select(index =>
+                new WeatherForecast
+                (
+                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
+                    Random.Shared.Next(-20, 55),
+                    summaries[Random.Shared.Next(summaries.Length)]
+                ))
+            .ToArray();
+        return forecast;
+    })
+    .WithName("GetWeatherForecast");
+
+await app.RunAsync();
+
+record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
-//     Log.CloseAndFlush();
+    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }
