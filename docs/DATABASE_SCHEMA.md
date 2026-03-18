@@ -42,9 +42,9 @@
 ### Core Tables (17 Total)
 
 | Category | Count | Tables |
-| ---------- | ------- | -------- |
+| ---------- | --- | -------- |
 | **Authentication & RBAC** | 3 | users, roles, user_roles |
-| **Lookup Tables** | 5 | departments, appointment_statuses, schedule_statuses, lab_report_statuses |
+| **Lookup Tables** | 4 | departments, appointment_statuses, schedule_statuses, lab_report_statuses |
 | **Identity Profiles** | 2 | doctors, patients |
 | **Clinic Operations** | 5 | doctor_schedules, appointments, consultations, prescriptions, lab_reports |
 | **System & Audit** | 2 | notifications, audit_logs |
@@ -184,12 +184,12 @@ INSERT INTO lab_report_statuses (slug, name, color_code, description) VALUES
 Core user identity table with dual ID strategy.
 
 | Column | Type | Constraints | Notes |
-| -------- | ------ | ------------- | ------- |
+| -------- | ------ | ----------- | ------- |
 | id | BIGINT | PRIMARY KEY, GENERATED ALWAYS AS IDENTITY | Internal ID for joins |
 | public_id | UUID | NOT NULL, UNIQUE, DEFAULT uuidv7() | API-exposed ID (UUIDv7) |
 | slug | VARCHAR(100) | NOT NULL, UNIQUE | URL-friendly identifier |
-| username | VARCHAR(50) | NOT NULL, UNIQUE | Login username |
-| email | VARCHAR(255) | NOT NULL, UNIQUE | Email address |
+| username | VARCHAR(50) | NOT NULL | Login username |
+| email | VARCHAR(255) | NOT NULL | Email address |
 | password_hash | VARCHAR(255) | NOT NULL | BCrypt hash |
 | first_name | VARCHAR(100) | NOT NULL | For UI greetings: "Hello, John" |
 | last_name | VARCHAR(100) | NOT NULL | Family name |
@@ -228,7 +228,7 @@ Junction table for many-to-many user-role relationships.
 | Column | Type | Constraints | Notes |
 | -------- | ------ | ------------- | ------- |
 | user_id | BIGINT | NOT NULL, REFERENCES users(id), ON DELETE CASCADE | User FK (part of PK) |
-| role_id | SMALLINT | NOT NULL, REFERENCES roles(id), ON DELETE CASCADE | Role FK (part of PK) |
+| role_id | INTEGER | NOT NULL, REFERENCES roles(id), ON DELETE CASCADE | Role FK (part of PK) |
 | created_at | TIMESTAMPTZ | NOT NULL, DEFAULT NOW() | Assignment timestamp |
 
 **Constraints:**
@@ -258,9 +258,9 @@ Doctor profile extension with qualifications and bio.
 | id | BIGINT | PRIMARY KEY, GENERATED ALWAYS AS IDENTITY | Internal ID |
 | public_id | UUID | NOT NULL, UNIQUE, DEFAULT uuidv7() | API-exposed ID |
 | slug | VARCHAR(100) | NOT NULL, UNIQUE | URL-friendly identifier |
-| user_id | BIGINT | NOT NULL, UNIQUE, REFERENCES users(id), ON DELETE CASCADE | User FK (one-to-one) |
-| department_id | SMALLINT | NOT NULL, REFERENCES departments(id) | Primary department |
-| license_number | VARCHAR(50) | NOT NULL, UNIQUE | Medical council registration |
+| user_id | BIGINT | NOT NULL, REFERENCES users(id), ON DELETE CASCADE | User FK (one-to-one) |
+| department_id | INTEGER | NOT NULL, REFERENCES departments(id) | Primary department |
+| license_number | VARCHAR(50) | NOT NULL | Medical council registration |
 | specialization | VARCHAR(255) | NOT NULL | Medical specialty |
 | consultation_fee | DECIMAL(10,2) | | Fee per consultation in MYR |
 | qualifications | JSONB | | Degrees and certifications array |
@@ -271,9 +271,9 @@ Doctor profile extension with qualifications and bio.
 
 **Constraints:**
 
+- `chk_doctors_fee_nonnegative`: CHECK (consultation_fee IS NULL OR consultation_fee >= 0)
 - `uq_doctors_user_active`: UNIQUE (user_id) WHERE deleted_at IS NULL
 - `uq_doctors_license_active`: UNIQUE (license_number) WHERE deleted_at IS NULL
-- `chk_doctors_fee_nonnegative`: CHECK (consultation_fee IS NULL OR consultation_fee >= 0)
 
 **Sample Fake Data (Bogus):**
 
@@ -291,7 +291,7 @@ Patient profile extension with medical information.
 | id | BIGINT | PRIMARY KEY, GENERATED ALWAYS AS IDENTITY | Internal ID |
 | public_id | UUID | NOT NULL, UNIQUE, DEFAULT uuidv7() | API-exposed ID |
 | slug | VARCHAR(100) | NOT NULL, UNIQUE | URL-friendly identifier |
-| user_id | BIGINT | NOT NULL, UNIQUE, REFERENCES users(id), ON DELETE CASCADE | User FK (one-to-one) |
+| user_id | BIGINT | NOT NULL, REFERENCES users(id), ON DELETE CASCADE | User FK (one-to-one) |
 | blood_group | VARCHAR(3) | | Blood type: 'O+', 'A-', etc. |
 | allergies | JSONB | | Known allergies array with allergen, severity, reaction |
 | emergency_contact | JSONB | | Single emergency contact: name, relationship, phone |
@@ -324,7 +324,7 @@ Doctor availability time slots.
 | id | BIGINT | PRIMARY KEY, GENERATED ALWAYS AS IDENTITY | Internal ID |
 | public_id | UUID | NOT NULL, UNIQUE, DEFAULT uuidv7() | API-exposed ID |
 | doctor_id | BIGINT | NOT NULL, REFERENCES doctors(id), ON DELETE CASCADE | Doctor FK |
-| status_id | SMALLINT | NOT NULL, REFERENCES schedule_statuses(id) | Current availability status |
+| status_id | INTEGER | NOT NULL, REFERENCES schedule_statuses(id) | Current availability status |
 | date | DATE | NOT NULL | Schedule date |
 | start_time | TIME | NOT NULL | Slot start time |
 | end_time | TIME | NOT NULL | Slot end time |
@@ -359,7 +359,7 @@ Patient appointment bookings linking doctors, patients, and schedules.
 | patient_id | BIGINT | NOT NULL, REFERENCES patients(id) | Patient FK |
 | doctor_id | BIGINT | NOT NULL, REFERENCES doctors(id) | Doctor FK |
 | schedule_id | BIGINT | NOT NULL, REFERENCES doctor_schedules(id), ON DELETE RESTRICT | Schedule slot (enforces no double-booking) |
-| status_id | SMALLINT | NOT NULL, REFERENCES appointment_statuses(id) | Current status |
+| status_id | INTEGER | NOT NULL, REFERENCES appointment_statuses(id) | Current status |
 | created_by_user_id | BIGINT | NOT NULL, REFERENCES users(id) | Who booked (receptionist or patient) |
 | visit_reason | VARCHAR(500) | NOT NULL | Reason for visit |
 | symptoms | JSONB | | Patient-reported symptoms at booking time |
@@ -451,7 +451,7 @@ Laboratory test reports with AWS S3/SQS integration.
 | slug | VARCHAR(100) | NOT NULL, UNIQUE | URL-friendly identifier |
 | consultation_id | BIGINT | REFERENCES consultations(id) | Optional link to consultation |
 | patient_id | BIGINT | NOT NULL, REFERENCES patients(id) | Patient FK |
-| status_id | SMALLINT | NOT NULL, REFERENCES lab_report_statuses(id) | Processing status |
+| status_id | INTEGER | NOT NULL, REFERENCES lab_report_statuses(id) | Processing status |
 | report_type | VARCHAR(100) | NOT NULL | Test type: 'Full Blood Count', 'Liver Function' |
 | s3_object_key | VARCHAR(500) | | S3 key: 'lab-reports/2026/03/report-uuid.pdf' |
 | file_name | VARCHAR(255) | | Original filename for UI display |

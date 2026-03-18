@@ -6,10 +6,6 @@
     
     <ImplicitUsings>enable</ImplicitUsings>
 
-    <IsAotCompatible>true</IsAotCompatible>
-    
-    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
-    
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     
     <AnalysisLevel>latest-Recommended</AnalysisLevel>
@@ -19,5 +15,11 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     
     <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+
+    <PropertyGroup Condition="'$(MSBuildProjectName)' == 'TeleHealth.Api' and '$(IsTestProject)' != 'true'">
+      <IsAotCompatible>true</IsAotCompatible>
+      
+      <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    </PropertyGroup>
   </PropertyGroup>
 </Project>
