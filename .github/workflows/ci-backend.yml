@@ -43,17 +43,21 @@ jobs:
       - name: Check formatting and linting 
         run: dotnet csharpier check .
           
-      # - name: Run Tests
-      #   run: dotnet test --solution backend/TeleHealth.slnx
+      - name: Run Tests
+        run: dotnet test --logger "console;verbosity=normal"
+        # run: dotnet test --solution backend/TeleHealth.slnx
+
+      - name: Run Tests with Full Reporter
+        run: dotnet test -- --github-reporter-style full
 
       # - name: Unit Tests
       #   run: dotnet test --project backend/tests/TeleHealth.UnitTests/TeleHealth.UnitTests.csproj 
  
-      - name: Integration Tests
-        run: dotnet test --project backend/tests/TeleHealth.IntegrationTests/TeleHealth.IntegrationTests.csproj 
+      # - name: Integration Tests
+      #   run: dotnet test --project backend/tests/TeleHealth.IntegrationTests/TeleHealth.IntegrationTests.csproj 
 
-      - name: End-to-End Tests
-        run: dotnet test --project backend/tests/TeleHealth.E2ETests/TeleHealth.E2E.csproj 
+      # - name: End-to-End Tests
+      #   run: dotnet test --project backend/tests/TeleHealth.E2ETests/TeleHealth.E2E.csproj 
 
       
  
