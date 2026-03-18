@@ -43,5 +43,17 @@ jobs:
       - name: Check formatting and linting 
         run: dotnet csharpier check .
           
-      - name: Run Tests
-        run: dotnet test --solution backend/TeleHealth.slnx
+      # - name: Run Tests
+      #   run: dotnet test --solution backend/TeleHealth.slnx
+
+      - name: Unit Tests
+        run: dotnet test --project backend/tests/TeleHealth.UnitTests/TeleHealth.UnitTests.csproj 
+ 
+      - name: Integration Tests
+        run: dotnet test --project backend/tests/TeleHealth.IntegrationTests/TeleHealth.IntegrationTests.csproj 
+
+      - name: End-to-End Tests
+        run: dotnet test --project backend/tests/TeleHealth.E2ETests/TeleHealth.E2E.csproj 
+
+      
+ 
