@@ -35,7 +35,7 @@ jobs:
         run: dotnet restore backend/src/TeleHealth.Api/TeleHealth.Api.csproj --locked-mode
  
       - name: Build
-        run: dotnet build backend/src/TeleHealth.Api/TeleHealth.Api.csproj --no-restore
+        run: dotnet build backend/TeleHealth.slnx --no-restore
  
       - name: Restore local .NET tools
         run: dotnet tool restore
@@ -43,9 +43,5 @@ jobs:
       - name: Check formatting and linting 
         run: dotnet csharpier check .
           
-      - name: Unit Tests
-        run: dotnet test backend/tests/TeleHealth.UnitTests/TeleHealth.UnitTests.csproj 
- 
-      - name: Integration Tests
-        run: dotnet test backend/tests/TeleHealth.IntegrationTests/TeleHealth.IntegrationTests.csproj 
- 
+      - name: Run Tests
+        run: dotnet test --solution backend/TeleHealth.slnx

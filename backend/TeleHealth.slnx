@@ -1,3 +1,7 @@
 <Solution>
   <Project Path="src/TeleHealth.Api/TeleHealth.Api.csproj" />
+  <Folder Name="tests">
+    <Project Path="tests/TeleHealth.UnitTests/TeleHealth.UnitTests.csproj" />
+    <Project Path="tests/TeleHealth.IntegrationTests/TeleHealth.IntegrationTests.csproj" />
+  </Folder>
 </Solution>

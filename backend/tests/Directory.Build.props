@@ -4,6 +4,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\TeleHealth.Api\TeleHealth.Api.csproj" />
+    <ProjectReference Include="..\src\TeleHealth.Api\TeleHealth.Api.csproj" />
   </ItemGroup>
 </Project>
