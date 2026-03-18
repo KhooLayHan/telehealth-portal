@@ -197,7 +197,7 @@ Core user identity table with dual ID strategy.
 | gender | CHAR(1) | NOT NULL | 'M'=Male, 'F'=Female, 'O'=Other, 'N'=Not specified |
 | date_of_birth | DATE | | Birth date (not future) |
 | phone | VARCHAR(20) | | E.164 format: '+60123456789' |
-| ic_number | VARCHAR(12) | NOT NULL, UNIQUE | Malaysian NRIC or passport |
+| ic_number | VARCHAR(12) | NOT NULL | Malaysian NRIC or passport |
 | address | JSONB | | Structured address: street, city, state, postal_code, country |
 | created_at | TIMESTAMPTZ | NOT NULL, DEFAULT NOW() | Account creation |
 | updated_at | TIMESTAMPTZ | | Last update (trigger-managed) |
@@ -209,6 +209,7 @@ Core user identity table with dual ID strategy.
 - `chk_users_dob_not_future`: CHECK (date_of_birth <= CURRENT_DATE)
 - `uq_users_email_active`: UNIQUE (email) WHERE deleted_at IS NULL
 - `uq_users_username_active`: UNIQUE (username) WHERE deleted_at IS NULL
+- `uq_users_ic_active`: UNIQUE (ic_number) WHERE deleted_at IS NULL
 
 **Sample Fake Data (Bogus):**
 
@@ -272,6 +273,7 @@ Doctor profile extension with qualifications and bio.
 
 - `uq_doctors_user_active`: UNIQUE (user_id) WHERE deleted_at IS NULL
 - `uq_doctors_license_active`: UNIQUE (license_number) WHERE deleted_at IS NULL
+- `chk_doctors_fee_nonnegative`: CHECK (consultation_fee IS NULL OR consultation_fee >= 0)
 
 **Sample Fake Data (Bogus):**
 
@@ -356,7 +358,7 @@ Patient appointment bookings linking doctors, patients, and schedules.
 | slug | VARCHAR(100) | NOT NULL, UNIQUE | URL-friendly identifier |
 | patient_id | BIGINT | NOT NULL, REFERENCES patients(id) | Patient FK |
 | doctor_id | BIGINT | NOT NULL, REFERENCES doctors(id) | Doctor FK |
-| schedule_id | BIGINT | NOT NULL, UNIQUE, REFERENCES doctor_schedules(id), ON DELETE RESTRICT | Schedule slot (enforces no double-booking) |
+| schedule_id | BIGINT | NOT NULL, REFERENCES doctor_schedules(id), ON DELETE RESTRICT | Schedule slot (enforces no double-booking) |
 | status_id | SMALLINT | NOT NULL, REFERENCES appointment_statuses(id) | Current status |
 | created_by_user_id | BIGINT | NOT NULL, REFERENCES users(id) | Who booked (receptionist or patient) |
 | visit_reason | VARCHAR(500) | NOT NULL | Reason for visit |
@@ -388,7 +390,7 @@ Medical consultation records created after appointment completion.
 | id | BIGINT | PRIMARY KEY, GENERATED ALWAYS AS IDENTITY | Internal ID |
 | public_id | UUID | NOT NULL, UNIQUE, DEFAULT uuidv7() | API-exposed ID |
 | slug | VARCHAR(100) | NOT NULL, UNIQUE | URL-friendly identifier |
-| appointment_id | BIGINT | NOT NULL, UNIQUE, REFERENCES appointments(id), ON DELETE RESTRICT | One-to-one with appointment |
+| appointment_id | BIGINT | NOT NULL, REFERENCES appointments(id), ON DELETE RESTRICT | One-to-one with appointment |
 | consultation_notes | JSONB | NOT NULL | SOAP format: subjective, objective, assessment, plan |
 | follow_up_date | DATE | | Optional scheduled follow-up |
 | consultation_datetime | TIMESTAMPTZ | NOT NULL | When consultation occurred |
