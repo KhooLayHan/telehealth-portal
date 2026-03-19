@@ -7,7 +7,7 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["backend/src/TeleHealth.Api/TeleHealth.Api.csproj", "./TeleHealth.Api/"]
-RUN dotnet restore "TeleHealth.Api.csproj"
+RUN dotnet restore "./TeleHealth.Api/TeleHealth.Api.csproj"
 COPY backend/src/TeleHealth.Api/ ./TeleHealth.Api/
 WORKDIR "/src/TeleHealth.Api"
 RUN dotnet build "TeleHealth.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
