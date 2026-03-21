@@ -59,7 +59,7 @@
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.10.0" />
     <PackageVersion Include="TUnit" Version="1.19.74" />
     <!-- Infrastructure (Pulumi) -->
-    <PackageVersion Include="Pulumi" Version="3.226.0" />
+    <PackageVersion Include="Pulumi" Version="3.102.0" />
     <PackageVersion Include="Pulumi.Aws" Version="7.23.0" />
     <!-- SonarQube Bug Detection -->
     <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.21.0.135717" />

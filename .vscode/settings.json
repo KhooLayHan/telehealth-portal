@@ -55,4 +55,7 @@
     "*.scss": "tailwindcss",
   },
   "colorize.decoration_type": "dot",
+  "[csharp]": {
+    "editor.defaultFormatter": "csharpier.csharpier-vscode"
+  }
 }
