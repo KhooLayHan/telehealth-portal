@@ -21,7 +21,8 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference(options =>
     {
         options
-            .WithTitle("TeleHealth API").WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
+            .WithTitle("TeleHealth API")
+            .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
     });
 }
 
