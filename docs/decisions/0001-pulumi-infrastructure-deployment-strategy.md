@@ -9,13 +9,14 @@ consulted: N/A
 informed: N/A
 ---
 
-# Pulumi Infrastructure Deployment Strategy
+## Pulumi Infrastructure Deployment Strategy
 
 ## Context and Problem Statement
 
 We need to deploy the TeleHealth Portal application to AWS using Infrastructure-as-Code (IaC) for a university assignment. The project requires three key tasks: server/DB deployment (Task 1), serverless/microservices (Task 2), and monitoring (Task 3). We need a clear deployment strategy that follows real-world best practices while remaining cost-effective for an MVP.
 
 Key constraints:
+
 - Must use Pulumi with C#/.NET 10 (team preference)
 - Must support dev and prod environments
 - Must stay within AWS Free Tier or use $100 credits efficiently
@@ -25,25 +26,29 @@ Key constraints:
 
 ## Decision Drivers
 
-* **Learning & Debugging**: The team needs to understand each AWS service individually to debug effectively
-* **Risk Management**: Complex infrastructure failures are harder to troubleshoot than isolated component failures
-* **Cost Efficiency**: AWS Free Tier limits must be respected to avoid unexpected charges
-* **Team Collaboration**: Four team members need to work on different components in parallel
-* **Assignment Requirements**: Must fulfill Task 1 (Server/DB), Task 2 (Serverless), Task 3 (Monitoring)
-* **Best Practices Demonstration**: Must showcase production-quality patterns (encryption, security, observability)
+**Learning & Debugging**: The team needs to understand each AWS service individually to debug effectively
+**Risk Management**: Complex infrastructure failures are harder to troubleshoot than isolated component failures
+**Cost Efficiency**: AWS Free Tier limits must be respected to avoid unexpected charges
+**Team Collaboration**: Four team members need to work on different components in parallel
+**Assignment Requirements**: Must fulfill Task 1 (Server/DB), Task 2 (Serverless), Task 3 (Monitoring)
+**Best Practices Demonstration**: Must showcase production-quality patterns (encryption, security, observability)
 
 ## Considered Options
 
 ### Option 1: Monolithic Single-Phase Deployment
+
 Deploy all infrastructure (VPC, RDS, Beanstalk, S3, Lambda, API Gateway, CloudWatch, X-Ray) in a single `pulumi up` execution.
 
 ### Option 2: Incremental Multi-Phase Deployment
+
 Deploy infrastructure in 6 distinct phases, with validation at each step before proceeding to the next.
 
 ### Option 3: Terraform Instead of Pulumi
+
 Use HashiCorp Terraform with HCL instead of Pulumi with C#.
 
 ### Option 4: Serverless-First Architecture
+
 Replace Elastic Beanstalk with API Gateway + Lambda for the entire backend, eliminating EC2 instances.
 
 ## Decision Outcome
@@ -54,26 +59,28 @@ Replace Elastic Beanstalk with API Gateway + Lambda for the entire backend, elim
 
 #### Positive
 
-* Team learns step-by-step and can debug incrementally
-* Reduces risk of complex cascading failures
-* Allows parallel work (different team members own different phases)
-* Demonstrates understanding of cloud architecture layers
-* Easier to rollback specific components without affecting entire infrastructure
-* Validates each service integration before adding complexity
+- Team learns step-by-step and can debug incrementally
+- Reduces risk of complex cascading failures
+- Allows parallel work (different team members own different phases)
+- Demonstrates understanding of cloud architecture layers
+- Easier to rollback specific components without affecting entire infrastructure
+- Validates each service integration before adding complexity
 
 #### Negative
 
-* Takes slightly more calendar time than monolithic approach
-* Requires more coordination between phases
-* May lead to temporary "orphan" resources during transitions
-* Team must understand inter-phase dependencies
+- Takes slightly more calendar time than monolithic approach
+- Requires more coordination between phases
+- May lead to temporary "orphan" resources during transitions
+- Team must understand inter-phase dependencies
 
 ## Phased Implementation Plan
 
 ### Phase 1: Foundation (Week 1)
+
 **Goal:** Establish networking and database layer
 
 **Components:**
+
 - VPC with public/private subnets (2 AZs)
 - Internet Gateway + NAT Gateway
 - RDS PostgreSQL (db.t4g.micro, Single-AZ, encrypted)
@@ -81,6 +88,7 @@ Replace Elastic Beanstalk with API Gateway + Lambda for the entire backend, elim
 - Default resource tagging strategy
 
 **Validation:**
+
 - Database connectivity test from local machine via bastion/security group
 - `pulumi stack output` shows RDS endpoint
 
@@ -91,9 +99,11 @@ Replace Elastic Beanstalk with API Gateway + Lambda for the entire backend, elim
 ---
 
 ### Phase 2: Compute Layer (Week 2)
+
 **Goal:** Deploy application hosting
 
 **Components:**
+
 - Elastic Beanstalk environment (Docker platform)
 - Application Load Balancer (ALB)
 - IAM instance profile with minimal permissions
@@ -101,6 +111,7 @@ Replace Elastic Beanstalk with API Gateway + Lambda for the entire backend, elim
 - Security group rules (ALB → Beanstalk → RDS)
 
 **Validation:**
+
 - API health check endpoint returns 200
 - Application can connect to RDS and perform CRUD operations
 - Logs visible in CloudWatch
@@ -112,9 +123,11 @@ Replace Elastic Beanstalk with API Gateway + Lambda for the entire backend, elim
 ---
 
 ### Phase 3: Storage & Messaging (Week 3)
+
 **Goal:** Enable asynchronous processing
 
 **Components:**
+
 - S3 bucket for medical PDFs (encrypted, blocked public access)
 - SNS topics (appointment-reminders, lab-reports-processed)
 - SQS queues (pdf-processing, email-notifications)
@@ -122,6 +135,7 @@ Replace Elastic Beanstalk with API Gateway + Lambda for the entire backend, elim
 - S3 event notifications → SQS
 
 **Validation:**
+
 - Upload PDF to S3 triggers SQS message
 - SNS publish delivers to all subscribers
 - DLQ receives messages after max retries
@@ -133,9 +147,11 @@ Replace Elastic Beanstalk with API Gateway + Lambda for the entire backend, elim
 ---
 
 ### Phase 4: Serverless (Week 3)
+
 **Goal:** Extract PDF processing to microservice
 
 **Components:**
+
 - Lambda function (.NET AOT compiled ZIP deployment)
 - API Gateway (REST API) as Lambda trigger
 - EventBridge rule (scheduled appointment reminders)
@@ -143,6 +159,7 @@ Replace Elastic Beanstalk with API Gateway + Lambda for the entire backend, elim
 - Lambda environment variables (no secrets in code)
 
 **Validation:**
+
 - POST to API Gateway triggers Lambda
 - Lambda processes PDF and stores results
 - EventBridge schedule invokes Lambda on schedule
@@ -154,15 +171,18 @@ Replace Elastic Beanstalk with API Gateway + Lambda for the entire backend, elim
 ---
 
 ### Phase 5: Observability (Week 4)
+
 **Goal:** Enable monitoring and debugging
 
 **Components:**
+
 - CloudWatch log groups (structured JSON from Serilog)
 - CloudWatch dashboards (Lambda metrics, RDS connections)
 - X-Ray tracing (Lambda, API Gateway, .NET OpenTelemetry)
 - CloudWatch alarms (Lambda errors, RDS CPU)
 
 **Validation:**
+
 - Application logs appear in CloudWatch with correlation IDs
 - X-Ray service map shows request flow
 - Alarms trigger on error threshold
@@ -174,15 +194,18 @@ Replace Elastic Beanstalk with API Gateway + Lambda for the entire backend, elim
 ---
 
 ### Phase 6: CI/CD Pipeline (Week 4)
+
 **Goal:** Automate deployments
 
 **Components:**
+
 - GitHub Actions workflow (pulumi preview on PR)
 - GitHub Actions workflow (pulumi up on merge to main)
 - Manual approval gate for prod deployments
 - Stack-specific configurations (dev vs prod)
 
 **Validation:**
+
 - PR triggers preview showing infrastructure changes
 - Merge to main deploys to dev automatically
 - Manual approval required for prod
@@ -197,11 +220,12 @@ Replace Elastic Beanstalk with API Gateway + Lambda for the entire backend, elim
 
 All resources follow the pattern:
 
-```
+```bash
 telehealth-{environment}-{service}-{resource-type}
 ```
 
 **Examples:**
+
 - `telehealth-dev-vpc`
 - `telehealth-dev-rds-postgres`
 - `telehealth-dev-s3-medical-reports`
@@ -215,6 +239,7 @@ telehealth-{environment}-{service}-{resource-type}
 ### Secrets Handling
 
 **Phase 1-2:** Use `pulumi config set --secret <key>`
+
 ```bash
 pulumi config set --secret dbPassword <password>
 pulumi config set --secret jwtSecret <secret>
@@ -251,7 +276,7 @@ config:
 ### Free Tier Limits (First 12 Months)
 
 | Service | Free Tier Limit | Our Usage | Status |
-|---------|----------------|-----------|--------|
+| --------- | ---------------- | ----------- | -------- |
 | EC2 (t3/t4g.micro) | 750 hours/month | ~720 hours | ✅ Safe |
 | RDS (db.t4g.micro) | 750 hours/month | ~720 hours | ✅ Safe |
 | S3 | 5GB storage | < 1GB | ✅ Safe |
@@ -271,7 +296,7 @@ config:
 
 ## Security & Best Practices Checklist
 
-### Every Phase Must Include:
+### Every Phase Must Include
 
 - [ ] **Encryption at rest** (KMS or SSE-S3 for S3, RDS encryption)
 - [ ] **Encryption in transit** (TLS 1.2+, security group rules)
@@ -328,7 +353,7 @@ awslocal rds restore-db-instance-from-db-snapshot \
 ## Timeline & Milestones
 
 | Week | Phase | Deliverable | Validation Criteria |
-|------|-------|-------------|---------------------|
+| ------ | ------- | ------------- | --------------------- |
 | 1 | Foundation | VPC + RDS | Database connection successful |
 | 2 | Compute | Beanstalk + ALB | API health check passes |
 | 3 | Storage & Messaging | S3 + SNS + SQS | PDF upload triggers queue |

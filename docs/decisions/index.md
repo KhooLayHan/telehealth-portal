@@ -7,7 +7,7 @@ An Architectural Decision Record (ADR) captures an important architectural decis
 ## The Records
 
 | ID | Title | Status | Date |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | [0001](0001-pulumi-infrastructure-deployment-strategy.md) | Pulumi Infrastructure Deployment Strategy | Proposed | 2026-03-20 |
 
 ## Contributing

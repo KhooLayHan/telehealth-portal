@@ -3,6 +3,7 @@
 **Phase Goal:** Establish networking and database layer with security best practices.
 
 **Components:**
+
 - VPC with public/private subnets (2 AZs)
 - Internet Gateway + NAT Gateway
 - RDS PostgreSQL (db.t4g.micro, Single-AZ, encrypted)
@@ -10,6 +11,7 @@
 - Default resource tagging strategy
 
 **Prerequisites:**
+
 - Pulumi CLI installed
 - AWS credentials configured
 - Pulumi Cloud backend initialized
@@ -18,7 +20,7 @@
 
 ## Architecture Overview
 
-```
+```bash
 ┌─────────────────────────────────────────────────────────────┐
 │                    VPC: telehealth-dev-vpc                  │
 │  CIDR: 10.0.0.0/16                                         │
@@ -558,7 +560,8 @@ pulumi preview
 ```
 
 **Expected Output:**
-```
+
+```bash
 Previewing update (dev)
 
      Type                                        Name                            Plan       Info
@@ -605,7 +608,8 @@ pulumi stack output
 ```
 
 **Expected Output:**
-```
+
+```bash
 Current stack outputs (9):
     DatabaseEndpoint      : telehealth-dev-rds-postgres.cxxxxxxxxxx.us-east-1.rds.amazonaws.com
     DatabaseKmsKeyId      : arn:aws:kms:us-east-1:123456789:key/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
@@ -702,6 +706,7 @@ awslocal ec2 describe-instances \
 **Cause:** RDS takes 5-10 minutes to provision.
 
 **Solution:** Wait longer or check status:
+
 ```bash
 awslocal rds describe-db-instances \
   --db-instance-identifier telehealth-dev-rds-postgres \
@@ -713,6 +718,7 @@ awslocal rds describe-db-instances \
 **Cause:** Security group only allows VPC-internal traffic.
 
 **Solution:**
+
 1. Connect from within VPC (EC2 instance)
 2. Or temporarily add your IP (see validation section)
 3. Or use AWS Systems Manager Session Manager (most secure)
@@ -735,9 +741,11 @@ pulumi destroy --stack dev
 **Cause:** KMS keys have a 7-30 day deletion window.
 
 **Solution:** If you see "KMS key pending deletion" errors, either:
+
 1. Wait for deletion period to end
 2. Use a new key alias
 3. Cancel deletion:
+
 ```bash
 aws kms cancel-key-deletion --key-id <key-id>
 ```
@@ -747,7 +755,7 @@ aws kms cancel-key-deletion --key-id <key-id>
 ## Cost Breakdown (Monthly Estimate)
 
 | Resource | Free Tier | Our Usage | Cost |
-|----------|-----------|-----------|------|
+| ---------- | ----------- | ----------- | ------ |
 | VPC | Free | 1 VPC | $0.00 |
 | NAT Gateway (2) | N/A | 2 x 730 hours | ~$70.00 ⚠️ |
 | RDS (db.t4g.micro) | 750 hrs | 1 instance | $0.00 ✅ |
@@ -756,11 +764,13 @@ aws kms cancel-key-deletion --key-id <key-id>
 | Data Transfer | 100GB | < 10GB | $0.00 ✅ |
 
 **⚠️ Cost Alert:** NAT Gateways are the biggest expense. For a university project:
+
 - Use NAT instances instead (cheaper but more complex)
 - Or accept the cost (~$80/month total for dev environment)
 - Or destroy dev stack when not actively developing
 
 **Money-Saving Alternative:**
+
 ```csharp
 // Use NAT instances instead of NAT Gateways (cheaper)
 // Add this to Networking.cs as an option:
@@ -784,6 +794,7 @@ new Instance(resourceName("ec2", $"nat-{i + 1}"), new InstanceArgs
 ## Next Steps
 
 After Phase 1 validation:
+
 1. ✅ Database connectivity confirmed
 2. ✅ Encryption enabled and verified
 3. ✅ Security groups properly configured
@@ -808,13 +819,16 @@ pulumi stack rm dev
 ```
 
 **⚠️ Warning:** This will delete the database and all data. Ensure you have:
-1. Created a manual snapshot if needed:
+
+- Created a manual snapshot if needed:
+
 ```bash
 awslocal rds create-db-snapshot \
   --db-instance-identifier telehealth-dev-rds-postgres \
   --db-snapshot-identifier telehealth-dev-backup-$(date +%Y%m%d)
 ```
-2. Exported any important data
+
+- Exported any important data
 
 ---
 

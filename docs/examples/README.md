@@ -7,6 +7,7 @@ This directory contains code examples and patterns referenced by the [Pulumi Inf
 ## Organization
 
 Each phase has its own example file showing:
+
 - Key Pulumi patterns (tagging, encryption, security)
 - AWS CLI validation commands
 - Common pitfalls and solutions
@@ -14,7 +15,7 @@ Each phase has its own example file showing:
 ## Quick Reference
 
 | Phase | File | Key Concepts |
-|-------|------|--------------|
+| ------- | ------ | -------------- |
 | Phase 1 | [phase1-networking-database.md](phase1-networking-database.md) | VPC, RDS, Security Groups, Tags |
 | Phase 2 | [phase2-compute.md](phase2-compute.md) | Beanstalk, IAM, ALB |
 | Phase 3 | [phase3-storage-messaging.md](phase3-storage-messaging.md) | S3, SNS, SQS, Dead Letter Queues |
