@@ -13,7 +13,6 @@
     <PackageVersion Include="AWSSDK.SimpleNotificationService" Version="4.0.2.19" />
     <PackageVersion Include="AWSSDK.SQS" Version="4.0.2.16" />
     <PackageVersion Include="AWSSDK.S3" Version="4.0.18.8" />
-
     <!-- EF Core & PostgreSQL -->
     <PackageVersion Include="Bogus" Version="35.6.5" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.4" />
