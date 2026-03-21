@@ -1,18 +1,24 @@
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using TeleHealth.Api;
-using TeleHealth.Api.Infrastructure.Persistance;
+using TeleHealth.Api.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddOpenApi();
 
-var app = builder.Build();
-
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Database"))
 );
+
+var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await dbContext.Database.MigrateAsync();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
