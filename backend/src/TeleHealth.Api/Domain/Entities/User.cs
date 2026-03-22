@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using NodaTime;
 
 namespace TeleHealth.Api.Domain.Entities;
@@ -22,5 +21,6 @@ public sealed class User
     public Instant CreatedAt { get; set; }
     public Instant? UpdatedAt { get; set; }
     public Instant? DeletedAt { get; set; }
-    public ICollection<Role> Roles { get; set; } = [];
+    public ICollection<Role> Roles { get; } = [];
+    public ICollection<UserRole> UserRoles { get; } = [];
 }

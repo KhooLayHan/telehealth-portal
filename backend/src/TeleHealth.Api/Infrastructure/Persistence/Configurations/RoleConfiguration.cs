@@ -1,8 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using NodaTime;
-using NodaTime.Extensions;
-using Npgsql.EntityFrameworkCore.PostgreSQL.ValueGeneration;
 using TeleHealth.Api.Domain.Entities;
 
 namespace TeleHealth.Api.Infrastructure.Persistence.Configurations;

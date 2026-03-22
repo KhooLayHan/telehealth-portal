@@ -38,7 +38,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(u => u.LastName).HasMaxLength(100).IsRequired();
 
-        builder.Property(u => u.AvatarUrl).HasMaxLength(100);
+        builder.Property(u => u.AvatarUrl).HasColumnType("TEXT");
 
         builder.Property(u => u.Gender).IsRequired();
 
@@ -71,6 +71,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder
             .HasMany(u => u.Roles)
             .WithMany(r => r.Users)
-            .UsingEntity((j => j.ToTable("user_roles")));
+            .UsingEntity<UserRole>(j =>
+                j.ToTable("user_roles").Property(e => e.CreatedAt).HasDefaultValueSql("NOW()")
+            );
     }
 }
