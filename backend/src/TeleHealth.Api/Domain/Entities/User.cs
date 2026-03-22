@@ -19,7 +19,7 @@ public sealed class User
     public string? Phone { get; set; }
     public required string IcNumber { get; set; }
     public Address? Address { get; set; }
-    public required Instant CreatedAt { get; set; }
+    public Instant CreatedAt { get; set; }
     public Instant? UpdatedAt { get; set; }
     public Instant? DeletedAt { get; set; }
     public ICollection<Role> Roles { get; set; } = [];

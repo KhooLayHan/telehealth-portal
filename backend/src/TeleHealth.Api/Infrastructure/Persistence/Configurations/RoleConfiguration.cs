@@ -31,7 +31,6 @@ public sealed class RoleConfiguration : IEntityTypeConfiguration<Role>
                 Slug = "admin",
                 Name = "Administrator",
                 Description = "System administrator with full access",
-                CreatedAt = SystemClock.Instance.GetCurrentInstant(),
             },
             new Role
             {
@@ -39,7 +38,6 @@ public sealed class RoleConfiguration : IEntityTypeConfiguration<Role>
                 Slug = "doctor",
                 Name = "Doctor",
                 Description = "Medical practitioner who can manage appointments and consultations",
-                CreatedAt = SystemClock.Instance.GetCurrentInstant(),
             },
             new Role
             {
@@ -47,7 +45,6 @@ public sealed class RoleConfiguration : IEntityTypeConfiguration<Role>
                 Slug = "patient",
                 Name = "Patient",
                 Description = "Patient user who can book appointments and view medical records",
-                CreatedAt = SystemClock.Instance.GetCurrentInstant(),
             },
             new Role
             {
@@ -55,7 +52,6 @@ public sealed class RoleConfiguration : IEntityTypeConfiguration<Role>
                 Slug = "receptionist",
                 Name = "Receptionist",
                 Description = "Front desk staff who manages appointments",
-                CreatedAt = SystemClock.Instance.GetCurrentInstant(),
             },
             new Role
             {
@@ -63,7 +59,6 @@ public sealed class RoleConfiguration : IEntityTypeConfiguration<Role>
                 Slug = "lab-tech",
                 Name = "Lab Technician",
                 Description = "Laboratory staff who process and upload lab reports",
-                CreatedAt = SystemClock.Instance.GetCurrentInstant(),
             }
         );
     }

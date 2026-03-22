@@ -51,7 +51,18 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(u => u.IcNumber).HasMaxLength(12);
 
-        builder.ComplexProperty(u => u.Address, d => d.ToJson());
+        builder.ComplexProperty(
+            u => u.Address,
+            d =>
+            {
+                d.Property(a => a.Street).HasMaxLength(100).IsRequired();
+                d.Property(a => a.City).HasMaxLength(50).IsRequired();
+                d.Property(a => a.State).HasMaxLength(50).IsRequired();
+                d.Property(a => a.PostalCode).HasMaxLength(50).IsRequired();
+                d.Property(a => a.Country).HasMaxLength(50).IsRequired();
+                d.ToJson();
+            }
+        );
 
         builder.Property(u => u.CreatedAt).IsRequired().HasDefaultValueSql("NOW()");
 
