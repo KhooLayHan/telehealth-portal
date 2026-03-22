@@ -62,7 +62,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder
             .HasMany(u => u.Roles)
-            .WithOne(r => r.Users)
-            .UsingEntity(j => j.ToTable("user_roles"));
+            .WithMany(r => r.Users)
+            .UsingEntity((j => j.ToTable("user_roles")));
     }
 }
