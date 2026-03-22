@@ -56,6 +56,7 @@
   },
   "colorize.decoration_type": "dot",
   "[csharp]": {
-    "editor.defaultFormatter": "csharpier.csharpier-vscode"
+    "editor.defaultFormatter": "csharpier.csharpier-vscode",
+    "editor.formatOnSave": true,
   }
 }

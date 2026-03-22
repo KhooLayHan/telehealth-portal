@@ -1,10 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <ItemGroup>
     <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" />
     <PackageReference Include="AWSSDK.S3" />
     <PackageReference Include="AWSSDK.SimpleNotificationService" />
     <PackageReference Include="AWSSDK.SQS" />
     <PackageReference Include="Bogus" />
+    <PackageReference Include="EFCore.NamingConventions" />
 
     <PackageReference Include="Facet" />
     <PackageReference Include="Facet.Extensions" />
@@ -27,6 +28,8 @@
     <PackageReference Include="NodaTime" />
 
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NodaTime" />
 
     <PackageReference Include="OpenTelemetry.Exporter.Console" />
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />

@@ -17,5 +17,7 @@
     <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
 
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+
+    <UserSecretsId>68dabf33-8366-49ce-9f56-62b1642d000a</UserSecretsId>
   </PropertyGroup>
 </Project>
