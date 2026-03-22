@@ -5,6 +5,7 @@
     <PackageReference Include="AWSSDK.SimpleNotificationService" />
     <PackageReference Include="AWSSDK.SQS" />
     <PackageReference Include="Bogus" />
+    <PackageReference Include="EFCore.NamingConventions" />
 
     <PackageReference Include="Facet" />
     <PackageReference Include="Facet.Extensions" />
