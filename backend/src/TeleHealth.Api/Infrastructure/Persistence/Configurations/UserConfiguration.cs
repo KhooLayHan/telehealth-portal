@@ -41,7 +41,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(u => u.LastName).HasMaxLength(100).IsRequired();
 
-        builder.Property(u => u.AvatarUrl).HasMaxLength(100).HasColumnType("TEXT");
+        builder.Property(u => u.AvatarUrl).HasMaxLength(100);
 
         builder.Property(u => u.Gender).IsRequired();
 
