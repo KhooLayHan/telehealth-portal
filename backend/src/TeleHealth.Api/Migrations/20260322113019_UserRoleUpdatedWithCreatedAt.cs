@@ -15,14 +15,24 @@ namespace TeleHealth.Api.Migrations
                 name: "fk_user_roles_roles_roles_id",
                 table: "user_roles");
 
-            migrationBuilder.DropPrimaryKey(
-                name: "pk_user_roles",
+            migrationBuilder.DropForeignKey(
+                name: "fk_user_roles_users_users_id",
                 table: "user_roles");
+
+            migrationBuilder.RenameColumn(
+                name: "users_id",
+                table: "user_roles",
+                newName: "user_id");
 
             migrationBuilder.RenameColumn(
                 name: "roles_id",
                 table: "user_roles",
-                newName: "user_id");
+                newName: "role_id");
+
+            migrationBuilder.RenameIndex(
+                name: "ix_user_roles_users_id",
+                table: "user_roles",
+                newName: "ix_user_roles_user_id");
 
             migrationBuilder.AlterColumn<string>(
                 name: "avatar_url",
@@ -34,13 +44,6 @@ namespace TeleHealth.Api.Migrations
                 oldMaxLength: 100,
                 oldNullable: true);
 
-            migrationBuilder.AddColumn<int>(
-                name: "role_id",
-                table: "user_roles",
-                type: "integer",
-                nullable: false,
-                defaultValue: 0);
-
             migrationBuilder.AddColumn<Instant>(
                 name: "created_at",
                 table: "user_roles",
@@ -48,16 +51,19 @@ namespace TeleHealth.Api.Migrations
                 nullable: false,
                 defaultValueSql: "NOW()");
 
-            migrationBuilder.AddPrimaryKey(
-                name: "pk_user_roles",
-                table: "user_roles",
-                columns: new[] { "role_id", "users_id" });
-
             migrationBuilder.AddForeignKey(
                 name: "fk_user_roles_roles_role_id",
                 table: "user_roles",
                 column: "role_id",
                 principalTable: "roles",
+                principalColumn: "id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "fk_user_roles_users_user_id",
+                table: "user_roles",
+                column: "user_id",
+                principalTable: "users",
                 principalColumn: "id",
                 onDelete: ReferentialAction.Cascade);
         }
@@ -69,12 +75,8 @@ namespace TeleHealth.Api.Migrations
                 name: "fk_user_roles_roles_role_id",
                 table: "user_roles");
 
-            migrationBuilder.DropPrimaryKey(
-                name: "pk_user_roles",
-                table: "user_roles");
-
-            migrationBuilder.DropColumn(
-                name: "role_id",
+            migrationBuilder.DropForeignKey(
+                name: "fk_user_roles_users_user_id",
                 table: "user_roles");
 
             migrationBuilder.DropColumn(
@@ -84,7 +86,17 @@ namespace TeleHealth.Api.Migrations
             migrationBuilder.RenameColumn(
                 name: "user_id",
                 table: "user_roles",
+                newName: "users_id");
+
+            migrationBuilder.RenameColumn(
+                name: "role_id",
+                table: "user_roles",
                 newName: "roles_id");
+
+            migrationBuilder.RenameIndex(
+                name: "ix_user_roles_user_id",
+                table: "user_roles",
+                newName: "ix_user_roles_users_id");
 
             migrationBuilder.AlterColumn<string>(
                 name: "avatar_url",
@@ -96,16 +108,19 @@ namespace TeleHealth.Api.Migrations
                 oldType: "TEXT",
                 oldNullable: true);
 
-            migrationBuilder.AddPrimaryKey(
-                name: "pk_user_roles",
-                table: "user_roles",
-                columns: new[] { "roles_id", "users_id" });
-
             migrationBuilder.AddForeignKey(
                 name: "fk_user_roles_roles_roles_id",
                 table: "user_roles",
                 column: "roles_id",
                 principalTable: "roles",
+                principalColumn: "id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "fk_user_roles_users_users_id",
+                table: "user_roles",
+                column: "users_id",
+                principalTable: "users",
                 principalColumn: "id",
                 onDelete: ReferentialAction.Cascade);
         }

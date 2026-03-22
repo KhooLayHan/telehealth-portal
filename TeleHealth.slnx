@@ -1,5 +1,8 @@
 <Solution>
   <Project Path="backend/src/TeleHealth.Api/TeleHealth.Api.csproj" />
+  <Project Path="backend/tests/TeleHealth.UnitTests/TeleHealth.UnitTests.csproj" />
+  <Project Path="backend/tests/TeleHealth.IntegrationTests/TeleHealth.IntegrationTests.csproj" />
+  <Project Path="backend/tests/TeleHealth.E2ETests/TeleHealth.E2ETests.csproj" />
   <Project Path="infra/TeleHealth.Infra.csproj" />
   <Project Path="functions/appointment-reminder/src/AppointmentReminder-dev-SentReminder/AppointmentReminder-dev-SentReminder.csproj" />
   <Project Path="functions/lab-pdf-processor/src/LabPdfProcessor-dev-ProcessPdfDocument/LabPdfProcessor-dev-ProcessPdfDocument.csproj" />

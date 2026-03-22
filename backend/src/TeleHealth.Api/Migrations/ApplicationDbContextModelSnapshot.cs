@@ -242,9 +242,9 @@ namespace TeleHealth.Api.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("role_id");
 
-                    b.Property<long>("UsersId")
+                    b.Property<long>("UserId")
                         .HasColumnType("bigint")
-                        .HasColumnName("users_id");
+                        .HasColumnName("user_id");
 
                     b.Property<Instant>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -252,15 +252,11 @@ namespace TeleHealth.Api.Migrations
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("NOW()");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("RoleId", "UsersId")
+                    b.HasKey("RoleId", "UserId")
                         .HasName("pk_user_roles");
 
-                    b.HasIndex("UsersId")
-                        .HasDatabaseName("ix_user_roles_users_id");
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_user_roles_user_id");
 
                     b.ToTable("user_roles", (string)null);
                 });
@@ -276,10 +272,10 @@ namespace TeleHealth.Api.Migrations
 
                     b.HasOne("TeleHealth.Api.Domain.Entities.User", null)
                         .WithMany("UserRoles")
-                        .HasForeignKey("UsersId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_user_roles_users_users_id");
+                        .HasConstraintName("fk_user_roles_users_user_id");
                 });
 
             modelBuilder.Entity("TeleHealth.Api.Domain.Entities.Role", b =>
