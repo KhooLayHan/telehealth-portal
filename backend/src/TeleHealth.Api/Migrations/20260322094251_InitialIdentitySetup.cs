@@ -6,6 +6,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 #nullable disable
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+#pragma warning disable CA1861 // Ignore auto-generated fields
 
 namespace TeleHealth.Api.Migrations
 {
