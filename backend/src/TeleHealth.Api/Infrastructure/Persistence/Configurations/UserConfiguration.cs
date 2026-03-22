@@ -9,18 +9,15 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
+        var genderCol = builder.Metadata.FindProperty(nameof(User.Gender))!.GetColumnName();
+        var dobCol = builder.Metadata.FindProperty(nameof(User.DateOfBirth))!.GetColumnName();
+
         builder.ToTable(
-            "Users",
+            "users",
             t =>
             {
-                t.HasCheckConstraint(
-                    "CHK_Users_Gender",
-                    $"{nameof(User.Gender)} IN ('M', 'F', 'O', 'N')"
-                );
-                t.HasCheckConstraint(
-                    "CHK_Users_Dob_NotFuture",
-                    $"{nameof(User.DateOfBirth)} <= CURRENT_DATE"
-                );
+                t.HasCheckConstraint("CHK_Users_Gender", $"{genderCol} IN ('M', 'F', 'O', 'N')");
+                t.HasCheckConstraint("CHK_Users_Dob_NotFuture", $"{dobCol} <= CURRENT_DATE");
             }
         );
 
