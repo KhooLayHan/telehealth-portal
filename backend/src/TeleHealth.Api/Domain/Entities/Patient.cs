@@ -1,6 +1,3 @@
 namespace TeleHealth.Api.Domain.Entities;
 
-public class Patient
-{
-    
-}
+public sealed class Patient { }
