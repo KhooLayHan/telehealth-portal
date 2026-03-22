@@ -23,4 +23,6 @@ public sealed class User
     public Instant? DeletedAt { get; set; }
     public ICollection<Role> Roles { get; } = [];
     public ICollection<UserRole> UserRoles { get; } = [];
+    public Doctor? Doctor { get; }
+    public Patient? Patient { get; }
 }

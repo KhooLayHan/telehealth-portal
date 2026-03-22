@@ -123,7 +123,7 @@ Immutable lookup for appointment lifecycle states.
 ```sql
 INSERT INTO appointment_statuses (slug, name, color_code, is_terminal, description) VALUES
   ('booked', 'Booked', '#3B82F6', FALSE, 'Appointment confirmed and scheduled'),
-  ('checked_in', 'Checked In', '#10B981', FALSE, 'Patient has arrived at clinic'),
+  ('checked-in', 'Checked In', '#10B981', FALSE, 'Patient has arrived at clinic'),
   ('in-progress', 'In Progress', '#F59E0B', FALSE, 'Consultation is currently ongoing'),
   ('completed', 'Completed', '#059669', TRUE, 'Appointment finished successfully'),
   ('cancelled', 'Cancelled', '#EF4444', TRUE, 'Appointment was cancelled'),
