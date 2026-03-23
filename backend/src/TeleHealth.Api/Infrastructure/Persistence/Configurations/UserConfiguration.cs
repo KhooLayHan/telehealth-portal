@@ -88,7 +88,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.UpdatedAt);
 
         builder.Property(u => u.DeletedAt);
-        builder.HasQueryFilter(u => u.DeletedAt == null);
+        builder.HasQueryFilter("SoftDeletionFilter", u => u.DeletedAt == null);
 
         builder
             .HasMany(u => u.Roles)

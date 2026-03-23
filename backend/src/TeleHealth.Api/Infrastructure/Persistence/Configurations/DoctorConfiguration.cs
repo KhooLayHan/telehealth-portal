@@ -70,7 +70,7 @@ public class DoctorConfiguration : IEntityTypeConfiguration<Doctor>
         builder.Property(d => d.UpdatedAt);
 
         builder.Property(d => d.DeletedAt);
-        builder.HasQueryFilter(d => d.DeletedAt == null);
+        builder.HasQueryFilter("SoftDeletionFilter", d => d.DeletedAt == null);
 
         builder
             .HasOne(d => d.User)
