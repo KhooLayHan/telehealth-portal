@@ -20,5 +20,5 @@ public sealed class Doctor
     public User User { get; } = null!;
     public Department Department { get; } = null!;
     public ICollection<DoctorSchedule> DoctorSchedules { get; } = [];
-    public ICollection<Appointment> Appointments { get; } = [];}
+    public ICollection<Appointment> Appointments { get; } = [];
 }
