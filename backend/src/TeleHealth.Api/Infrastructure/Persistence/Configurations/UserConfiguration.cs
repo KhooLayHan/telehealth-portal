@@ -29,7 +29,11 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.PublicId).HasValueGenerator<NpgsqlSequentialGuidValueGenerator>();
 
         builder.Property(u => u.Slug).HasMaxLength(100).IsRequired();
-        builder.HasIndex(u => u.Slug).IsUnique();
+        builder
+            .HasIndex(u => u.Slug)
+            .IsUnique()
+            .HasFilter($"{deletedAtColumn} is null")
+            .HasDatabaseName("uq_users_slug_active");
 
         builder.Property(u => u.Username).HasMaxLength(50).IsRequired();
         builder
