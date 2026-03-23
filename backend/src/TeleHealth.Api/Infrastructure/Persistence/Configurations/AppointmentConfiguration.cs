@@ -66,25 +66,26 @@ public class AppointmentConfiguration : IEntityTypeConfiguration<Appointment>
             .WithMany(p => p.Appointments)
             .HasForeignKey(a => a.PatientId)
             .IsRequired();
-        
+
         builder
             .HasOne(a => a.Doctor)
             .WithMany(d => d.Appointments)
             .HasForeignKey(a => a.DoctorId)
             .IsRequired();
-        
+
         builder
             .HasOne(a => a.DoctorSchedule)
             .WithOne(d => d.Appointment)
             .HasForeignKey<Appointment>(a => a.ScheduleId)
-            .IsRequired().OnDelete(DeleteBehavior.Restrict);
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder
             .HasOne(a => a.AppointmentStatus)
             .WithMany(s => s.Appointments)
             .HasForeignKey(a => a.StatusId)
             .IsRequired();
-        
+
         builder
             .HasOne(a => a.User)
             .WithMany(u => u.Appointments)

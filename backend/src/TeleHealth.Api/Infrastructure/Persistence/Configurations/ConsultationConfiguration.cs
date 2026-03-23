@@ -29,17 +29,20 @@ public class ConsultationConfiguration : IEntityTypeConfiguration<Consultation>
             .HasFilter($"{deletedAtColumn} is null")
             .HasDatabaseName("uq_consultations_appointment_active");
 
-        builder.ComplexProperty(c => c.ConsultationNotes, cb =>
-        {
-            cb.Property(cn => cn.Subjective).IsRequired();
-            cb.Property(cn => cn.Objective).IsRequired();
-            cb.Property(cn => cn.Assessment).IsRequired();
-            cb.Property(cn => cn.Plan).IsRequired();
-            cb.ToJson();
-        });
+        builder.ComplexProperty(
+            c => c.ConsultationNotes,
+            cb =>
+            {
+                cb.Property(cn => cn.Subjective).IsRequired();
+                cb.Property(cn => cn.Objective).IsRequired();
+                cb.Property(cn => cn.Assessment).IsRequired();
+                cb.Property(cn => cn.Plan).IsRequired();
+                cb.ToJson();
+            }
+        );
 
         builder.Property(c => c.FollowUpDate);
-        
+
         builder.Property(c => c.ConsultationDateTime).IsRequired();
 
         builder.Property(c => c.CreatedAt).IsRequired().HasDefaultValueSql("now()");
@@ -54,17 +57,18 @@ public class ConsultationConfiguration : IEntityTypeConfiguration<Consultation>
             .WithMany(p => p.Appointments)
             .HasForeignKey(a => a.PatientId)
             .IsRequired();
-        
+
         builder
             .HasOne(a => a.Doctor)
             .WithMany(d => d.Appointments)
             .HasForeignKey(a => a.DoctorId)
             .IsRequired();
-        
+
         builder
             .HasOne(c => c.Appointment)
             .WithOne(a => a.Consultation)
             .HasForeignKey<Consultation>(c => c.AppointmentId)
-            .IsRequired().OnDelete(DeleteBehavior.Restrict);
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -15,7 +15,7 @@ public class DoctorScheduleConfiguration : IEntityTypeConfiguration<DoctorSchedu
         var startTimeColumn = builder
             .Metadata.FindProperty(nameof(DoctorSchedule.StartTime))!
             .GetColumnName();
-        
+
         builder.ToTable(
             "doctor_schedules",
             t =>
