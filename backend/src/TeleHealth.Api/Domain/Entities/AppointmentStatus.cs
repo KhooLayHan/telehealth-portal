@@ -11,4 +11,5 @@ public sealed class AppointmentStatus
     public required bool IsTerminal { get; set; }
     public string? Description { get; set; }
     public Instant CreatedAt { get; set; }
+    public ICollection<Appointment> Appointments { get; } = [];
 }

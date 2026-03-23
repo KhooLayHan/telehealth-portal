@@ -10,4 +10,5 @@ public sealed class ScheduleStatus
     public string? ColorCode { get; set; }
     public string? Description { get; set; }
     public Instant CreatedAt { get; set; }
+    public ICollection<DoctorSchedule> DoctorSchedules { get; } = [];
 }
