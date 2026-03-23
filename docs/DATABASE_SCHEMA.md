@@ -61,13 +61,13 @@ These tables contain static reference data that rarely changes.
 
 Immutable lookup for role-based access control.
 
-| Column | Type | Constraints | Notes |
-| -------- | ------ | ------------- | ------- |
-| id | INTEGER | PRIMARY KEY, GENERATED ALWAYS AS IDENTITY | Internal ID |
-| slug | VARCHAR(50) | NOT NULL, UNIQUE | URL-friendly identifier: 'admin', 'doctor', 'patient', 'receptionist', 'lab_tech' |
-| name | VARCHAR(100) | NOT NULL | Display name: 'Administrator', 'Doctor', etc. |
-| description | VARCHAR(255) | | Role description |
-| created_at | TIMESTAMPTZ | NOT NULL, DEFAULT NOW() | Immutable timestamp |
+| Column | Type | Constraints | Notes                                                                             |
+| -------- | ------ | ------------- |-----------------------------------------------------------------------------------|
+| id | INTEGER | PRIMARY KEY, GENERATED ALWAYS AS IDENTITY | Internal ID                                                                       |
+| slug | VARCHAR(50) | NOT NULL, UNIQUE | URL-friendly identifier: 'admin', 'doctor', 'patient', 'receptionist', 'lab-tech' |
+| name | VARCHAR(100) | NOT NULL | Display name: 'Administrator', 'Doctor', etc.                                     |
+| description | VARCHAR(255) | | Role description                                                                  |
+| created_at | TIMESTAMPTZ | NOT NULL, DEFAULT NOW() | Immutable timestamp                                                               |
 
 **Seed Data:**
 
@@ -108,22 +108,22 @@ INSERT INTO departments (slug, name, description) VALUES
 
 Immutable lookup for appointment lifecycle states.
 
-| Column | Type | Constraints | Notes |
-| -------- | ------ | ------------- | ------- |
-| id | INTEGER | PRIMARY KEY, GENERATED ALWAYS AS IDENTITY | Internal ID |
-| slug | VARCHAR(50) | NOT NULL, UNIQUE | 'booked', 'checked_in', 'in_progress', 'completed', 'cancelled', 'no_show' |
-| name | VARCHAR(100) | NOT NULL | Display name |
-| color_code | CHAR(7) | | Hex color for UI, e.g. '#3B82F6' |
-| is_terminal | BOOLEAN | NOT NULL, DEFAULT FALSE | Final states prevent further updates |
-| description | VARCHAR(255) | | Status meaning |
-| created_at | TIMESTAMPTZ | NOT NULL, DEFAULT NOW() | Immutable timestamp |
+| Column | Type | Constraints | Notes                                                                      |
+| -------- | ------ | ------------- |----------------------------------------------------------------------------|
+| id | INTEGER | PRIMARY KEY, GENERATED ALWAYS AS IDENTITY | Internal ID                                                                |
+| slug | VARCHAR(50) | NOT NULL, UNIQUE | 'booked', 'checked-in', 'in-progress', 'completed', 'cancelled', 'no-show' |
+| name | VARCHAR(100) | NOT NULL | Display name                                                               |
+| color_code | CHAR(7) | | Hex color for UI, e.g. '#3B82F6'                                           |
+| is_terminal | BOOLEAN | NOT NULL, DEFAULT FALSE | Final states prevent further updates                                       |
+| description | VARCHAR(255) | | Status meaning                                                             |
+| created_at | TIMESTAMPTZ | NOT NULL, DEFAULT NOW() | Immutable timestamp                                                        |
 
 **Seed Data:**
 
 ```sql
 INSERT INTO appointment_statuses (slug, name, color_code, is_terminal, description) VALUES
   ('booked', 'Booked', '#3B82F6', FALSE, 'Appointment confirmed and scheduled'),
-  ('checked_in', 'Checked In', '#10B981', FALSE, 'Patient has arrived at clinic'),
+  ('checked-in', 'Checked In', '#10B981', FALSE, 'Patient has arrived at clinic'),
   ('in-progress', 'In Progress', '#F59E0B', FALSE, 'Consultation is currently ongoing'),
   ('completed', 'Completed', '#059669', TRUE, 'Appointment finished successfully'),
   ('cancelled', 'Cancelled', '#EF4444', TRUE, 'Appointment was cancelled'),

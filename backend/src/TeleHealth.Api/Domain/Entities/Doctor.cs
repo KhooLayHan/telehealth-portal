@@ -5,9 +5,18 @@ namespace TeleHealth.Api.Domain.Entities;
 public sealed class Doctor
 {
     public int Id { get; init; }
+    public Guid PublicId { get; init; }
     public required string Slug { get; init; }
-    public required string Name { get; set; }
-    public string? Description { get; set; }
+    public required long UserId { get; init; }
+    public required int DepartmentId { get; init; }
+    public required string LicenseNumber { get; set; }
+    public required string Specialization { get; set; }
+    public decimal? ConsultationFee { get; set; }
+    public List<Qualification>? Qualifications { get; set; } = [];
+    public string? Bio { get; set; }
     public Instant CreatedAt { get; set; }
-    public ICollection<Doctor> Users { get; } = [];
+    public Instant? UpdatedAt { get; set; }
+    public Instant? DeletedAt { get; set; }
+    public User User { get; } = null!;
+    public Department Department { get; } = null!;
 }

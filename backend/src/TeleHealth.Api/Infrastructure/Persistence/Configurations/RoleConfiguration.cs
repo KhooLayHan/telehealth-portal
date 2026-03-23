@@ -19,7 +19,7 @@ public sealed class RoleConfiguration : IEntityTypeConfiguration<Role>
 
         builder.Property(r => r.Description).HasMaxLength(255);
 
-        builder.Property(r => r.CreatedAt).IsRequired().HasDefaultValueSql("NOW()");
+        builder.Property(r => r.CreatedAt).IsRequired().HasDefaultValueSql("now()");
 
         builder.HasData(
             new Role
