@@ -11,7 +11,9 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
     {
         var genderColumn = builder.Metadata.FindProperty(nameof(User.Gender))!.GetColumnName();
         var dobColumn = builder.Metadata.FindProperty(nameof(User.DateOfBirth))!.GetColumnName();
-        var deletedAtColumn = builder.Metadata.FindProperty(nameof(User.DeletedAt))!.GetColumnName();
+        var deletedAtColumn = builder
+            .Metadata.FindProperty(nameof(User.DeletedAt))!
+            .GetColumnName();
 
         builder.ToTable(
             "users",
@@ -30,11 +32,17 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasIndex(u => u.Slug).IsUnique();
 
         builder.Property(u => u.Username).HasMaxLength(50).IsRequired();
-        builder.HasIndex(u => u.Username).IsUnique().HasFilter($"{deletedAtColumn} is null")
+        builder
+            .HasIndex(u => u.Username)
+            .IsUnique()
+            .HasFilter($"{deletedAtColumn} is null")
             .HasDatabaseName("uq_users_username_active");
 
         builder.Property(u => u.Email).HasMaxLength(255).IsRequired();
-        builder.HasIndex(u => u.Email).IsUnique().HasFilter($"{deletedAtColumn} is null")
+        builder
+            .HasIndex(u => u.Email)
+            .IsUnique()
+            .HasFilter($"{deletedAtColumn} is null")
             .HasDatabaseName("uq_users_email_active");
 
         builder.Property(u => u.PasswordHash).HasMaxLength(255).IsRequired();
@@ -52,7 +60,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.Phone).HasMaxLength(20);
 
         builder.Property(u => u.IcNumber).HasMaxLength(12);
-        builder.HasIndex(u => u.IcNumber).IsUnique().HasFilter($"{deletedAtColumn} is null")
+        builder
+            .HasIndex(u => u.IcNumber)
+            .IsUnique()
+            .HasFilter($"{deletedAtColumn} is null")
             .HasDatabaseName("uq_users_ic_active");
 
         builder.ComplexProperty(

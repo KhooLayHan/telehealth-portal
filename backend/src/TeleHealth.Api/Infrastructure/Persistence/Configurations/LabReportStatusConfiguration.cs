@@ -18,7 +18,7 @@ public sealed class LabReportStatusConfiguration : IEntityTypeConfiguration<LabR
         builder.Property(s => s.Name).HasMaxLength(100).IsRequired();
 
         builder.Property(s => s.ColorCode).HasMaxLength(7);
-        
+
         builder.Property(s => s.Description).HasMaxLength(255);
 
         builder.Property(s => s.CreatedAt).IsRequired().HasDefaultValueSql("now()");
