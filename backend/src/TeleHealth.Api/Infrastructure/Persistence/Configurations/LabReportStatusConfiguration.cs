@@ -24,7 +24,7 @@ public sealed class LabReportStatusConfiguration : IEntityTypeConfiguration<LabR
         builder.Property(s => s.CreatedAt).IsRequired().HasDefaultValueSql("now()");
 
         builder.HasData(
-            new ScheduleStatus
+            new LabReportStatus
             {
                 Id = 1,
                 Slug = "pending",
@@ -32,7 +32,7 @@ public sealed class LabReportStatusConfiguration : IEntityTypeConfiguration<LabR
                 ColorCode = "#6B7280",
                 Description = "Waiting for lab technician to upload PDF",
             },
-            new ScheduleStatus
+            new LabReportStatus
             {
                 Id = 2,
                 Slug = "processing",
@@ -40,7 +40,7 @@ public sealed class LabReportStatusConfiguration : IEntityTypeConfiguration<LabR
                 ColorCode = "#F59E0B",
                 Description = "Lambda function is extracting biomarkers",
             },
-            new ScheduleStatus
+            new LabReportStatus
             {
                 Id = 3,
                 Slug = "completed",
@@ -48,7 +48,7 @@ public sealed class LabReportStatusConfiguration : IEntityTypeConfiguration<LabR
                 ColorCode = "#10B981",
                 Description = "Lab report successfully processed and ready",
             },
-            new ScheduleStatus
+            new LabReportStatus
             {
                 Id = 4,
                 Slug = "rejected",

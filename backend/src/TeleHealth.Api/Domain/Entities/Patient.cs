@@ -1,5 +1,4 @@
 using NodaTime;
-using TeleHealth.Api.Infrastructure.Persistence.Configurations;
 
 namespace TeleHealth.Api.Domain.Entities;
 
@@ -15,5 +14,5 @@ public sealed class Patient
     public Instant CreatedAt { get; set; }
     public Instant? UpdatedAt { get; set; }
     public Instant? DeletedAt { get; set; }
-    public User User { get; } = null!;
+    public User User { get; private set;  } = null!;
 }

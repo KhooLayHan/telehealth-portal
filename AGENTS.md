@@ -80,7 +80,7 @@ bun x ultracite check   # Check all frontend issues
 
 ### Testing Standards
 
-**Frontend (Vitest + TUnit):**
+**Frontend (Vitest):**
 - Write assertions in `it()` or `test()` blocks
 - Use async/await, avoid done callbacks
 - Don't commit `.only` or `.skip`
@@ -100,7 +100,7 @@ public async Task TestName()
 
 ## Project Structure
 
-```
+```bash
 frontend/           # React 19 + TypeScript + Vite + Vitest
 backend/            # .NET 10 API + Tests (Unit/Integration/E2E)
 functions/          # AWS Lambda functions

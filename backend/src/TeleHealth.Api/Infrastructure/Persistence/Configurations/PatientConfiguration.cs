@@ -48,7 +48,7 @@ public class PatientConfiguration : IEntityTypeConfiguration<Patient>
             {
                 c.Property(e => e.Name).HasMaxLength(100).IsRequired();
                 c.Property(e => e.Relationship).HasMaxLength(100).IsRequired();
-                c.Property(e => e.Phone).HasMaxLength(100).IsRequired();
+                c.Property(e => e.Phone).HasMaxLength(16).IsRequired();
                 c.ToJson();
             }
         );
