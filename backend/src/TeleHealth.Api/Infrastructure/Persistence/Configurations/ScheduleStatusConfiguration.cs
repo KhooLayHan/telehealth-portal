@@ -21,7 +21,7 @@ public sealed class ScheduleStatusConfiguration : IEntityTypeConfiguration<Sched
         
         builder.Property(s => s.Description).HasMaxLength(255);
 
-        builder.Property(s => s.CreatedAt).IsRequired().HasDefaultValueSql("NOW()");
+        builder.Property(s => s.CreatedAt).IsRequired().HasDefaultValueSql("now()");
 
         builder.HasData(
             new ScheduleStatus

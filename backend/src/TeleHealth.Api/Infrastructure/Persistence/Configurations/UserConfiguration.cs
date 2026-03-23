@@ -9,15 +9,16 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
-        var genderCol = builder.Metadata.FindProperty(nameof(User.Gender))!.GetColumnName();
-        var dobCol = builder.Metadata.FindProperty(nameof(User.DateOfBirth))!.GetColumnName();
+        var genderColumn = builder.Metadata.FindProperty(nameof(User.Gender))!.GetColumnName();
+        var dobColumn = builder.Metadata.FindProperty(nameof(User.DateOfBirth))!.GetColumnName();
+        var deletedAtColumn = builder.Metadata.FindProperty(nameof(User.DeletedAt))!.GetColumnName();
 
         builder.ToTable(
             "users",
             t =>
             {
-                t.HasCheckConstraint("CHK_Users_Gender", $"{genderCol} IN ('M', 'F', 'O', 'N')");
-                t.HasCheckConstraint("CHK_Users_Dob_NotFuture", $"{dobCol} <= CURRENT_DATE");
+                t.HasCheckConstraint("chk_users_gender", $"{genderColumn} in ('M', 'F', 'O', 'N')");
+                t.HasCheckConstraint("chk_users_dob_not_future", $"{dobColumn} <= current_date");
             }
         );
 
@@ -25,12 +26,16 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(u => u.PublicId).HasValueGenerator<NpgsqlSequentialGuidValueGenerator>();
 
-        builder.Property(r => r.Slug).HasMaxLength(100).IsRequired();
-        builder.HasIndex(r => r.Slug).IsUnique();
+        builder.Property(u => u.Slug).HasMaxLength(100).IsRequired();
+        builder.HasIndex(u => u.Slug).IsUnique();
 
-        builder.Property(r => r.Username).HasMaxLength(50).IsRequired();
+        builder.Property(u => u.Username).HasMaxLength(50).IsRequired();
+        builder.HasIndex(u => u.Username).IsUnique().HasFilter($"{deletedAtColumn} is null")
+            .HasDatabaseName("uq_users_username_active");
 
         builder.Property(u => u.Email).HasMaxLength(255).IsRequired();
+        builder.HasIndex(u => u.Email).IsUnique().HasFilter($"{deletedAtColumn} is null")
+            .HasDatabaseName("uq_users_email_active");
 
         builder.Property(u => u.PasswordHash).HasMaxLength(255).IsRequired();
 
@@ -38,7 +43,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(u => u.LastName).HasMaxLength(100).IsRequired();
 
-        builder.Property(u => u.AvatarUrl).HasColumnType("TEXT");
+        builder.Property(u => u.AvatarUrl).HasColumnType("text");
 
         builder.Property(u => u.Gender).IsRequired();
 
@@ -47,21 +52,23 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.Phone).HasMaxLength(20);
 
         builder.Property(u => u.IcNumber).HasMaxLength(12);
+        builder.HasIndex(u => u.IcNumber).IsUnique().HasFilter($"{deletedAtColumn} is null")
+            .HasDatabaseName("uq_users_ic_active");
 
         builder.ComplexProperty(
             u => u.Address,
-            d =>
+            c =>
             {
-                d.Property(a => a.Street).HasMaxLength(100).IsRequired();
-                d.Property(a => a.City).HasMaxLength(50).IsRequired();
-                d.Property(a => a.State).HasMaxLength(50).IsRequired();
-                d.Property(a => a.PostalCode).HasMaxLength(50).IsRequired();
-                d.Property(a => a.Country).HasMaxLength(50).IsRequired();
-                d.ToJson();
+                c.Property(a => a.Street).HasMaxLength(100).IsRequired();
+                c.Property(a => a.City).HasMaxLength(50).IsRequired();
+                c.Property(a => a.State).HasMaxLength(50).IsRequired();
+                c.Property(a => a.PostalCode).HasMaxLength(50).IsRequired();
+                c.Property(a => a.Country).HasMaxLength(50).IsRequired();
+                c.ToJson();
             }
         );
 
-        builder.Property(u => u.CreatedAt).IsRequired().HasDefaultValueSql("NOW()");
+        builder.Property(u => u.CreatedAt).IsRequired().HasDefaultValueSql("now()");
 
         builder.Property(u => u.UpdatedAt);
 
@@ -72,7 +79,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMany(u => u.Roles)
             .WithMany(r => r.Users)
             .UsingEntity<UserRole>(j =>
-                j.ToTable("user_roles").Property(e => e.CreatedAt).HasDefaultValueSql("NOW()")
+                j.ToTable("user_roles").Property(ur => ur.CreatedAt).HasDefaultValueSql("now()")
             );
     }
 }

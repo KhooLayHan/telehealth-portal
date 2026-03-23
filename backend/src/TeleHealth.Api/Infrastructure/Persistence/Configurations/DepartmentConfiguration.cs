@@ -19,7 +19,7 @@ public sealed class DepartmentConfiguration : IEntityTypeConfiguration<Departmen
 
         builder.Property(d => d.Description).HasMaxLength(500);
 
-        builder.Property(d => d.CreatedAt).IsRequired().HasDefaultValueSql("NOW()");
+        builder.Property(d => d.CreatedAt).IsRequired().HasDefaultValueSql("now()");
 
         builder.HasData(
             new Department
