@@ -53,18 +53,6 @@ public class ConsultationConfiguration : IEntityTypeConfiguration<Consultation>
         builder.HasQueryFilter("SoftDeletionFilter", c => c.DeletedAt == null);
 
         builder
-            .HasOne(a => a.Patient)
-            .WithMany(p => p.Appointments)
-            .HasForeignKey(a => a.PatientId)
-            .IsRequired();
-
-        builder
-            .HasOne(a => a.Doctor)
-            .WithMany(d => d.Appointments)
-            .HasForeignKey(a => a.DoctorId)
-            .IsRequired();
-
-        builder
             .HasOne(c => c.Appointment)
             .WithOne(a => a.Consultation)
             .HasForeignKey<Consultation>(c => c.AppointmentId)
