@@ -10,4 +10,5 @@ public sealed class LabReportStatus
     public string? ColorCode { get; set; }
     public string? Description { get; set; }
     public Instant CreatedAt { get; set; }
+    public ICollection<LabReport> LabReports { get; } = [];
 }
