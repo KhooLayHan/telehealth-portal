@@ -15,4 +15,6 @@ public sealed class Consultation
     public Instant? UpdatedAt { get; set; }
     public Instant? DeletedAt { get; set; }
     public Appointment Appointment { get; } = null!;
+    public ICollection<Prescription> Prescriptions { get; } = [];
+    public ICollection<LabReport> LabReports { get; } = [];
 }
