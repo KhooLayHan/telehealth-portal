@@ -1,5 +1,4 @@
 using System.Text.Json;
-
 using NodaTime;
 
 namespace TeleHealth.Api.Domain.Entities;
@@ -17,6 +16,6 @@ public sealed class AuditLog
     public long? PerformedByUserId { get; set; }
     public bool PerformedBySystem { get; set; }
     public Instant CreatedAt { get; set; }
-    
+
     public User User { get; } = null!;
 }
