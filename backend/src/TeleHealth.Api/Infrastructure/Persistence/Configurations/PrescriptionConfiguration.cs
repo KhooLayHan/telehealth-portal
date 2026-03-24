@@ -36,7 +36,7 @@ public class PrescriptionConfiguration : IEntityTypeConfiguration<Prescription>
 
         builder.Property(p => p.Frequency).HasMaxLength(100).IsRequired();
 
-        builder.Property(p => p.Dosage).HasColumnType("smallint").IsRequired();
+        builder.Property(p => p.DurationDays).HasColumnType("smallint").IsRequired();
 
         builder.ComplexProperty(
             p => p.Instructions,

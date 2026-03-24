@@ -19,7 +19,7 @@ public sealed class LabReport
     public Instant CreatedAt { get; set; }
     public Instant? UpdatedAt { get; set; }
     public Instant? DeletedAt { get; set; }
-    public Consultation Consultation { get; } = null!;
+    public Consultation? Consultation { get; private set; } = null!;
     public Patient Patient { get; } = null!;
     public LabReportStatus LabReportStatus { get; } = null!;
 }
