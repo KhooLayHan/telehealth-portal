@@ -30,11 +30,11 @@ public class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
 
         builder.Property(a => a.Action).HasMaxLength(20).IsRequired();
 
-        builder.ComplexProperty(a => a.OldValues, c => c.ToJson());
+        builder.Property(a => a.OldValues);
 
-        builder.ComplexProperty(a => a.NewValues, c => c.ToJson());
+        builder.Property(a => a.NewValues);
 
-        builder.ComplexProperty(a => a.ChangedColumns, c => c.ToJson());
+        builder.Property(a => a.ChangedColumns);
 
         builder.Property(a => a.PerformedByUserId);
 
@@ -44,8 +44,8 @@ public class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
 
         builder
             .HasOne(a => a.User)
-            .WithOne(u => u.AuditLog)
-            .HasForeignKey<AuditLog>(a => a.PerformedByUserId)
+            .WithMany(u => u.AuditLogs)
+            .HasForeignKey(a => a.PerformedByUserId)
             .IsRequired(false);
     }
 }

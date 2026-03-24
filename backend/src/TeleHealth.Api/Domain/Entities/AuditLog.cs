@@ -3,7 +3,7 @@ using NodaTime;
 
 namespace TeleHealth.Api.Domain.Entities;
 
-public sealed class AuditLog
+public sealed class AuditLog : IDisposable
 {
     public long Id { get; init; }
     public Guid PublicId { get; init; }
@@ -16,6 +16,12 @@ public sealed class AuditLog
     public long? PerformedByUserId { get; set; }
     public bool PerformedBySystem { get; set; }
     public Instant CreatedAt { get; set; }
-
-    public User User { get; } = null!;
+    public User? User { get; }
+    
+    public void Dispose()
+    {
+        OldValues?.Dispose();
+        NewValues?.Dispose();
+        ChangedColumns?.ForEach(d => d.Dispose());
+    }
 }

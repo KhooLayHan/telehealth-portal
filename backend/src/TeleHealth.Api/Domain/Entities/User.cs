@@ -27,5 +27,5 @@ public sealed class User
     public Patient? Patient { get; } = null!;
     public ICollection<Appointment>? Appointments { get; } = [];
     public ICollection<Notification>? Notifications { get; } = [];
-    public AuditLog? AuditLog { get; } = null!;
+    public ICollection<AuditLog>? AuditLogs { get; } = [];
 }
