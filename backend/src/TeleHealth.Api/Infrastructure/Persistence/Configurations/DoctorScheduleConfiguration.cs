@@ -33,10 +33,8 @@ public class DoctorScheduleConfiguration : IEntityTypeConfiguration<DoctorSchedu
 
         builder.Property(d => d.StatusId).IsRequired();
 
-        builder.Property(d => d.DoctorId).IsRequired();
-
-        builder.Property(d => d.DoctorId).IsRequired();
-
+        builder.Property(d => d.Date).IsRequired();
+        
         builder.Property(d => d.StartTime).IsRequired();
 
         builder.Property(d => d.EndTime).IsRequired();
