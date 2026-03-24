@@ -4,7 +4,7 @@ namespace TeleHealth.Api.Domain.Entities;
 
 public sealed class Doctor
 {
-    public int Id { get; init; }
+    public long Id { get; init; }
     public Guid PublicId { get; init; }
     public required string Slug { get; init; }
     public required long UserId { get; init; }
