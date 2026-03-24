@@ -12,14 +12,17 @@ public class PrescriptionConfiguration : IEntityTypeConfiguration<Prescription>
         var durationDaysColumn = builder
             .Metadata.FindProperty(nameof(Prescription.DurationDays))!
             .GetColumnName();
-        
-        builder.ToTable("prescriptions", t =>
-        {
-            t.HasCheckConstraint(
-                "chk_prescriptions_duration_positive",
-                $"{durationDaysColumn} > 0"
-            );
-        });
+
+        builder.ToTable(
+            "prescriptions",
+            t =>
+            {
+                t.HasCheckConstraint(
+                    "chk_prescriptions_duration_positive",
+                    $"{durationDaysColumn} > 0"
+                );
+            }
+        );
 
         builder.HasKey(p => p.Id);
 
@@ -28,13 +31,13 @@ public class PrescriptionConfiguration : IEntityTypeConfiguration<Prescription>
         builder.Property(p => p.ConsultationId).IsRequired();
 
         builder.Property(p => p.MedicationName).HasMaxLength(255).IsRequired();
-        
+
         builder.Property(p => p.Dosage).HasMaxLength(100).IsRequired();
-        
+
         builder.Property(p => p.Frequency).HasMaxLength(100).IsRequired();
-        
+
         builder.Property(p => p.Dosage).HasColumnType("smallint").IsRequired();
-        
+
         builder.ComplexProperty(
             p => p.Instructions,
             c =>

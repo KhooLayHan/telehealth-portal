@@ -17,21 +17,21 @@ public class LabReportConfiguration : IEntityTypeConfiguration<LabReport>
 
         builder.Property(l => l.Slug).HasMaxLength(100).IsRequired();
         builder.HasIndex(l => l.Slug).IsUnique();
-        
+
         builder.Property(l => l.ConsultationId);
 
         builder.Property(l => l.PatientId).IsRequired();
-        
+
         builder.Property(l => l.StatusId).IsRequired();
-        
+
         builder.Property(l => l.ReportType).HasMaxLength(100).IsRequired();
-        
+
         builder.Property(l => l.S3ObjectKey).HasMaxLength(500);
-        
+
         builder.Property(l => l.FileName).HasMaxLength(255);
-        
+
         builder.Property(l => l.FileSizeBytes);
-        
+
         builder.ComplexCollection(
             l => l.Biomarkers,
             c =>
@@ -46,7 +46,7 @@ public class LabReportConfiguration : IEntityTypeConfiguration<LabReport>
         );
 
         builder.Property(l => l.UploadedAt);
-        
+
         builder.Property(l => l.CreatedAt).IsRequired().HasDefaultValueSql("now()");
 
         builder.Property(l => l.UpdatedAt);
@@ -59,13 +59,13 @@ public class LabReportConfiguration : IEntityTypeConfiguration<LabReport>
             .WithMany(c => c.LabReports)
             .HasForeignKey(l => l.ConsultationId)
             .IsRequired(false);
-        
+
         builder
             .HasOne(l => l.Patient)
             .WithMany(p => p.LabReports)
             .HasForeignKey(l => l.PatientId)
             .IsRequired();
-        
+
         builder
             .HasOne(l => l.LabReportStatus)
             .WithMany(s => s.LabReports)
