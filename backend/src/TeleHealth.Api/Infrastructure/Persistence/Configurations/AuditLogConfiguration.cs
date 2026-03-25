@@ -10,14 +10,26 @@ public class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
     public void Configure(EntityTypeBuilder<AuditLog> builder)
     {
         var actionColumn = builder.Metadata.FindProperty(nameof(AuditLog.Action))!.GetColumnName();
+        var userIdColumn = builder
+            .Metadata.FindProperty(nameof(AuditLog.PerformedByUserId))!
+            .GetColumnName();
+        var systemIdColumn = builder
+            .Metadata.FindProperty(nameof(AuditLog.PerformedBySystem))!
+            .GetColumnName();
 
         builder.ToTable(
             "audit_logs",
             t =>
+            {
                 t.HasCheckConstraint(
                     "chk_audit_action",
                     $"{actionColumn} in ('INSERT', 'UPDATE', 'DELETE')"
-                )
+                );
+                t.HasCheckConstraint(
+                    "chk_audit_logs_actor",
+                    $"{systemIdColumn} or {userIdColumn} is not null"
+                );
+            }
         );
 
         builder.HasKey(a => a.Id);
