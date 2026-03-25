@@ -26,9 +26,16 @@ namespace TeleHealth.Api.Migrations
                     DECLARE
                         v_old_values   JSONB;
                         v_new_values   JSONB;
-                        v_changed_cols JSONB;
+                        v_changed_cols JSONB[];
                         v_user_id      BIGINT;
                         v_is_system    BOOLEAN;
+
+                        v_sanitize_keys TEXT[] := ARRAY[
+                            'password_hash', 'password', 'hashed_password', 
+                            'national_id', 'ssn', 'medical_notes', 
+                            'diagnosis_details', 'prescription_data', 
+                            'lab_results', 'file_data', 'attachments'
+                        ];
                     BEGIN
                         -- Safely read session variables set by EF Core
                         BEGIN
@@ -41,20 +48,20 @@ namespace TeleHealth.Api.Migrations
 
                         IF (TG_OP = 'INSERT') THEN
                             v_old_values   := NULL;
-                            v_new_values   := to_jsonb(NEW);
+                            v_new_values   := to_jsonb(NEW) - v_sanitize_keys;;
                             v_changed_cols := NULL;
 
                         ELSIF (TG_OP = 'UPDATE') THEN
-                            v_old_values := to_jsonb(OLD);
-                            v_new_values := to_jsonb(NEW);
+                            v_old_values := to_jsonb(OLD) - v_sanitize_keys;;
+                            v_new_values := to_jsonb(NEW) - v_sanitize_keys;;
                             -- Collect only changed columns
-                            SELECT jsonb_agg(key)
+                            SELECT array_agg(to_jsonb(key))
                             INTO   v_changed_cols
                             FROM   jsonb_each(v_old_values) AS o(key, value)
                             WHERE  v_old_values->key IS DISTINCT FROM v_new_values->key;
 
                         ELSIF (TG_OP = 'DELETE') THEN
-                            v_old_values   := to_jsonb(OLD);
+                            v_old_values   := to_jsonb(OLD) - v_sanitize_keys;;
                             v_new_values   := NULL;
                             v_changed_cols := NULL;
                         END IF;
