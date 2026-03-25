@@ -1,3 +1,5 @@
+using FluentValidation;
+
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using TeleHealth.Api;
@@ -16,6 +18,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         )
         .UseSnakeCaseNamingConvention()
 );
+
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 var app = builder.Build();
 
