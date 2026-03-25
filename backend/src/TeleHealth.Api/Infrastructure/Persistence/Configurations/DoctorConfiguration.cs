@@ -9,7 +9,7 @@ public class DoctorConfiguration : IEntityTypeConfiguration<Doctor>
 {
     public void Configure(EntityTypeBuilder<Doctor> builder)
     {
-        var consultationFee = builder
+        var consultationFeeColumn = builder
             .Metadata.FindProperty(nameof(Doctor.ConsultationFee))!
             .GetColumnName();
         var deletedAtColumn = builder
@@ -21,7 +21,7 @@ public class DoctorConfiguration : IEntityTypeConfiguration<Doctor>
             t =>
                 t.HasCheckConstraint(
                     "chk_doctors_fee_nonnegative",
-                    $"{consultationFee} is null or {consultationFee} >= 0"
+                    $"{consultationFeeColumn} is null or {consultationFeeColumn} >= 0"
                 )
         );
 

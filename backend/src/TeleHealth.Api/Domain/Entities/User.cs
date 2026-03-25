@@ -25,5 +25,7 @@ public sealed class User
     public ICollection<UserRole> UserRoles { get; } = [];
     public Doctor? Doctor { get; } = null!;
     public Patient? Patient { get; } = null!;
-    public ICollection<Appointment>? Appointments { get; } = [];
+    public ICollection<Appointment> Appointments { get; } = [];
+    public ICollection<Notification> Notifications { get; } = [];
+    public ICollection<AuditLog> AuditLogs { get; } = [];
 }
