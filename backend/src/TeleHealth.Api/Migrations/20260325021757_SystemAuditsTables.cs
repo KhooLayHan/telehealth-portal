@@ -36,6 +36,7 @@ namespace TeleHealth.Api.Migrations
                 {
                     table.PrimaryKey("pk_audit_logs", x => x.id);
                     table.CheckConstraint("chk_audit_action", "action in ('INSERT', 'UPDATE', 'DELETE')");
+                    table.CheckConstraint("chk_audit_logs_actor", "performed_by_system or performed_by_user_id is not null");
                     table.ForeignKey(
                         name: "fk_audit_logs_users_performed_by_user_id",
                         column: x => x.performed_by_user_id,

@@ -315,6 +315,8 @@ namespace TeleHealth.Api.Migrations
                     b.ToTable("audit_logs", null, t =>
                         {
                             t.HasCheckConstraint("chk_audit_action", "action in ('INSERT', 'UPDATE', 'DELETE')");
+
+                            t.HasCheckConstraint("chk_audit_logs_actor", "performed_by_system or performed_by_user_id is not null");
                         });
                 });
 

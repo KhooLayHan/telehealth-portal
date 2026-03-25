@@ -15,7 +15,7 @@ using TeleHealth.Api.Infrastructure.Persistence;
 namespace TeleHealth.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260325020518_SystemAuditsTables")]
+    [Migration("20260325021757_SystemAuditsTables")]
     partial class SystemAuditsTables
     {
         /// <inheritdoc />
@@ -318,6 +318,8 @@ namespace TeleHealth.Api.Migrations
                     b.ToTable("audit_logs", null, t =>
                         {
                             t.HasCheckConstraint("chk_audit_action", "action in ('INSERT', 'UPDATE', 'DELETE')");
+
+                            t.HasCheckConstraint("chk_audit_logs_actor", "performed_by_system or performed_by_user_id is not null");
                         });
                 });
 
