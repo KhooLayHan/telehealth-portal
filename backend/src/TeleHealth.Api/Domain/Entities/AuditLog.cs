@@ -17,7 +17,7 @@ public sealed class AuditLog : IDisposable
     public bool PerformedBySystem { get; set; }
     public Instant CreatedAt { get; set; }
     public User? User { get; }
-    
+
     public void Dispose()
     {
         OldValues?.Dispose();
