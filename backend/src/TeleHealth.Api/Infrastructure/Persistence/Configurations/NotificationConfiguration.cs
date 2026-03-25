@@ -56,6 +56,6 @@ public class NotificationConfiguration : IEntityTypeConfiguration<Notification>
             .HasOne(n => n.User)
             .WithMany(u => u.Notifications)
             .HasForeignKey(n => n.RecipientUserId)
-            .IsRequired();
+            .IsRequired(false);
     }
 }

@@ -38,7 +38,7 @@ public class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
 
         builder.Property(a => a.PerformedByUserId);
 
-        builder.Property(a => a.PerformedBySystem).HasDefaultValueSql("false");
+        builder.Property(a => a.PerformedBySystem);
 
         builder.Property(a => a.CreatedAt).IsRequired().HasDefaultValueSql("now()");
 

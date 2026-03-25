@@ -19,5 +19,5 @@ public sealed class Notification
     public string? ErrorMessage { get; set; }
     public Instant CreatedAt { get; set; }
     public Instant? UpdatedAt { get; set; }
-    public User User { get; } = null!;
+    public User? User { get; } = null!;
 }
