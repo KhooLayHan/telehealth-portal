@@ -13,7 +13,7 @@ public sealed class Appointment
     public required int StatusId { get; init; }
     public required long CreatedByUserId { get; init; }
     public required string VisitReason { get; set; }
-    public List<Symptom>? Symptoms { get; set; } = [];
+    public List<Symptom>? Symptoms { get; set; }
     public Instant? CheckInDateTime { get; set; }
     public string? CancellationReason { get; set; }
     public Instant CreatedAt { get; set; }
