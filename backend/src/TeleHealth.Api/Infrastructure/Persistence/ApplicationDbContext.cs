@@ -10,10 +10,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<AppointmentStatus> AppointmentStatuses => Set<AppointmentStatus>();
     public DbSet<ScheduleStatus> ScheduleStatuses => Set<ScheduleStatus>();
     public DbSet<LabReportStatus> LabReportStatuses => Set<LabReportStatus>();
-    public DbSet<Qualification> Qualifications => Set<Qualification>();
-    public DbSet<Instruction> Instructions => Set<Instruction>();
-    public DbSet<Biomarker> Biomarkers => Set<Biomarker>();
-    
     public DbSet<User> Users => Set<User>();
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<Doctor> Doctors => Set<Doctor>();
@@ -25,7 +21,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<LabReport> LabReports => Set<LabReport>();
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
-    
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
