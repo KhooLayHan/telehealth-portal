@@ -1,8 +1,5 @@
 namespace TeleHealth.Api.Domain.Entities;
 
-public sealed class EmergencyContact
+public sealed record EmergencyContact(string Name, string Relationship, string Phone)
 {
-    public required string Name { get; set; }
-    public required string Relationship { get; set; }
-    public required string Phone { get; set; }
 }

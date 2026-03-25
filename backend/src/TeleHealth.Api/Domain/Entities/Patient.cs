@@ -9,7 +9,7 @@ public sealed class Patient
     public required string Slug { get; init; }
     public required long UserId { get; init; }
     public string? BloodGroup { get; set; }
-    public List<Allergies>? Allergies { get; set; } = [];
+    public List<Allergy>? Allergies { get; set; }
     public EmergencyContact? EmergencyContact { get; set; }
     public Instant CreatedAt { get; set; }
     public Instant? UpdatedAt { get; set; }

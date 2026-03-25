@@ -3,11 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TeleHealth.Api.Domain.Entities;
 
-public sealed class Address
+public sealed record class Address(string Street, string City, string State, string PostalCode, string Country)
 {
-    public required string Street { get; set; }
-    public required string City { get; set; }
-    public required string State { get; set; }
-    public required string PostalCode { get; set; }
-    public required string Country { get; set; }
 }

@@ -1,8 +1,5 @@
 namespace TeleHealth.Api.Domain.Entities;
 
-public sealed class Qualification
+public sealed record Qualification(string Degree, string Institution, int Year)
 {
-    public required string Degree { get; set; }
-    public required string Institution { get; set; }
-    public required int Year { get; set; }
 }
