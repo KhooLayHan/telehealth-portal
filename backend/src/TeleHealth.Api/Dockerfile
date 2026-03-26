@@ -9,6 +9,8 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
+COPY [".editorconfig", "./"]
+COPY [".csharpierignore", "./"]
 COPY ["Directory.Build.props", "./"]
 COPY ["Directory.Packages.props", "./"]
 COPY ["backend/src/TeleHealth.Api/TeleHealth.Api.csproj", "./TeleHealth.Api/"]
