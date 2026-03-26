@@ -39,4 +39,6 @@ if (app.Environment.IsDevelopment())
     await dbContext.Database.MigrateAsync();
 }
 
+app.UseHttpsRedirection();
+
 await app.RunAsync();

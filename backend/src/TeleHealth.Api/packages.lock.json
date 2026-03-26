@@ -44,6 +44,15 @@
         "resolved": "35.6.5",
         "contentHash": "2FGZn+aAVHjmCgClgmGkTDBVZk0zkLvAKGaxEf5JL6b3i9JbHTE4wnuY4vHCuzlCmJdU6VZjgDfHwmYkQF8VAA=="
       },
+      "Destructurama.Attributed": {
+        "type": "Direct",
+        "requested": "[5.2.0, )",
+        "resolved": "5.2.0",
+        "contentHash": "F03rTIBuyJQ8qs+mORc//pAl1LQJr7pMdNuJs8tpROiJ7JXDr9MQ95+8fUaNuReIXNH/YR/5eRKs7LWBiNLQuA==",
+        "dependencies": {
+          "Serilog": "4.3.0"
+        }
+      },
       "EFCore.NamingConventions": {
         "type": "Direct",
         "requested": "[10.0.1, )",
@@ -312,6 +321,12 @@
         "dependencies": {
           "Serilog": "4.0.0"
         }
+      },
+      "Slugify.Core": {
+        "type": "Direct",
+        "requested": "[5.1.1, )",
+        "resolved": "5.1.1",
+        "contentHash": "9dsxewpdgnLgOVN6dIRX3XvlEy1XpLbE2nd2bFebcW0XPdysU1WgQUXChFcAfjHpdfImBxMUe33PTwZOuU531Q=="
       },
       "SonarAnalyzer.CSharp": {
         "type": "Direct",
