@@ -8,7 +8,7 @@ public static class CreateUserEndpoint
     {
         app.MapPost("/api/v1/users", async (CreateUserCommand command, CreateUserHandler handler, CancellationToken cancellation) =>
         {
-            var result = await handler.hand(command);
+            var result = await handler.handleAsync(command);
             return Results.Ok(result);
         })
         .WithName("CreateUser")
