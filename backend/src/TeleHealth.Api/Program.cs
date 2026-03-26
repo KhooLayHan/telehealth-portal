@@ -1,5 +1,4 @@
 using FluentValidation;
-
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using TeleHealth.Api;
@@ -33,7 +32,7 @@ if (app.Environment.IsDevelopment())
             .WithTitle("TeleHealth API")
             .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
     });
-    
+
     using var scope = app.Services.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     await dbContext.Database.MigrateAsync();

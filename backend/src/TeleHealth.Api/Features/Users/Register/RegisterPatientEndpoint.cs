@@ -6,21 +6,31 @@ public static class RegisterPatientEndpoint
 {
     public static IEndpointRouteBuilder MapRegisterPatientEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/v1/auth/register-patient", async (RegisterPatientCommand command, RegisterPatientHandler handler, CancellationToken token) => 
-        {
-            try
-            {
-                var patientId = await handler.HandleAsync(command, token);
-                return Results.Created($"/api/v1/patients/{patientId}", new { PatientId = patientId });
-            }
-            catch (ArgumentException ex)
-            {
-                return Results.Conflict(new { Error = ex.Message });
-            }
-        })
-        .WithName("RegisterPatient")
-        .WithTags("Authentication")
-        .AddEndpointFilter<ValidationFilter<RegisterPatientCommand>>();
+        app.MapPost(
+                "/api/v1/auth/register-patient",
+                async (
+                    RegisterPatientCommand command,
+                    RegisterPatientHandler handler,
+                    CancellationToken token
+                ) =>
+                {
+                    try
+                    {
+                        var patientId = await handler.HandleAsync(command, token);
+                        return Results.Created(
+                            $"/api/v1/patients/{patientId}",
+                            new { PatientId = patientId }
+                        );
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        return Results.Conflict(new { Error = ex.Message });
+                    }
+                }
+            )
+            .WithName("RegisterPatient")
+            .WithTags("Authentication")
+            .AddEndpointFilter<ValidationFilter<RegisterPatientCommand>>();
 
         return app;
     }
