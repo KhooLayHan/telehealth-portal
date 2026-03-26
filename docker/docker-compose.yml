@@ -9,6 +9,8 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
       ASPNETCORE_HTTP_PORTS: ${ASPNETCORE_HTTP_PORT}
+      OTEL_EXPORTER_OLTP_ENDPOINT: ${OTEL_EXPORTER_OLTP_ENDPOINT}
+      OTEL_EXPORTER_OLTP_PROTOCOL: ${OTEL_EXPORTER_OLTP_PROTOCOL}
     ports:
       - "${ASPNETCORE_HTTP_PORT}:8080"
     depends_on:
@@ -50,6 +52,17 @@ services:
     volumes:
       - localstack_data:/var/lib/localstack
       - "/var/run/docker.sock:/var/run/docker.sock"
+    restart: unless-stopped
+
+  seq:
+    image: datalust/seq:latest
+    container_name: telehealth_seq
+    environment:
+      ACCEPT_EULA: Y
+    ports:
+      - "5341:5341"
+    volumes:
+      - seq-data:/data
     restart: unless-stopped
 
 volumes:
