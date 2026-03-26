@@ -6,9 +6,9 @@ public static class CreateUserEndpoint
 {
     public static void MapCreateUserEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/v1/users", async (CreateUserCommand command, CreateUserHandler handler, CancellationToken cancellation) =>
+        app.MapPost("/api/v1/users", async (CreateUserCommand command, CreateUserHandler handler, CancellationToken token) =>
         {
-            var result = await handler.handleAsync(command);
+            var result = await handler.HandleAsync(command, token);
             return Results.Ok(result);
         })
         .WithName("CreateUser")

@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Infrastructure.Persistence;
 
-namespace TeleHealth.Api.Features.Users.Register;
+namespace TeleHealth.Api.Features.Users.CreateUser;
 
-public sealed class RegisterPatientHandler(ApplicationDbContext db, IPasswordHasher<User> passwordHasher)
+public class CreateUserHandler(ApplicationDbContext db, IPasswordHasher<User> passwordHasher)
 {
-    public async Task<Guid> HandleAsync(RegisterPatientCommand command, CancellationToken token)
+    public async Task<Guid> HandleAsync(CreateUserCommand command, CancellationToken token)
     {
         var existingUser = await db.Users.FirstOrDefaultAsync(u => u.Email == command.Email || u.IcNumber == command.IcNumber, token);
 

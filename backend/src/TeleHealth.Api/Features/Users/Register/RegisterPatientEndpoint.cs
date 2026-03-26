@@ -8,14 +8,20 @@ public static class RegisterPatientEndpoint
     {
         app.MapPost("/api/v1/auth/register-patient", async (RegisterPatientCommand command, RegisterPatientHandler handler, CancellationToken token) => 
         {
-            var patientId = await handler.HandleAsync(command, token);
-            
-            return patientId != null
-                ? Results.Created($"/api/v1/patients/{patientId}", new { PatientId = patientId })
-                : Results.BadRequest("Failed to register patient.");
+            try
+            {
+                var patientId = await handler.HandleAsync(command, token);
+                return Results.Created($"/api/v1/patients/{patientId}", new { PatientId = patientId });
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.Conflict(new { Error = ex.Message });
+            }
         })
         .WithName("RegisterPatient")
         .WithTags("Authentication")
         .AddEndpointFilter<ValidationFilter<RegisterPatientCommand>>();
+
+        return app;
     }
 }
