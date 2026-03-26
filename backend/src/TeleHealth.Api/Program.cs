@@ -16,19 +16,17 @@ builder.Host.UseSerilog((context, config) => config.ReadFrom.Configuration(conte
 builder
     .Services.AddOpenTelemetry()
     .WithMetrics(metrics =>
-    {
         metrics
             .AddAspNetCoreInstrumentation()
             .AddAWSInstrumentation()
-            .AddHttpClientInstrumentation();
-    })
+            .AddHttpClientInstrumentation()
+    )
     .WithTracing(tracing =>
-    {
         tracing
             .AddAspNetCoreInstrumentation()
             .AddAWSInstrumentation()
-            .AddHttpClientInstrumentation();
-    });
+            .AddHttpClientInstrumentation()
+    );
 
 builder.Services.AddOpenApi();
 
@@ -47,11 +45,10 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference(options =>
-    {
         options
             .WithTitle("TeleHealth API")
-            .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
-    });
+            .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
+    );
 
     using var scope = app.Services.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
