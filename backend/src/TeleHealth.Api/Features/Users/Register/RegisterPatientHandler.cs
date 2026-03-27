@@ -42,7 +42,7 @@ public sealed class RegisterPatientHandler(
 
         db.Users.Add(user);
         await db.SaveChangesAsync(token);
-        
+
         var patient = new Patient
         {
             PublicId = patientPublicId,
