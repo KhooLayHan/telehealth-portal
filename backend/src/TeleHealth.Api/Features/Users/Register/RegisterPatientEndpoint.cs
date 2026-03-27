@@ -4,7 +4,7 @@ namespace TeleHealth.Api.Features.Users.Register;
 
 public static class RegisterPatientEndpoint
 {
-    public static IEndpointRouteBuilder MapRegisterPatientEndpoint(this IEndpointRouteBuilder app)
+    public static IEndpointRouteBuilder MapRegisterPatientEndpoint(this RouteGroupBuilder app)
     {
         app.MapPost(
                 "/auth/register-patient",
@@ -22,7 +22,7 @@ public static class RegisterPatientEndpoint
                             new { PatientId = patientId }
                         );
                     }
-                    catch (ArgumentException ex)
+                    catch (InvalidOperationException ex)
                     {
                         return Results.Conflict(new { Error = ex.Message });
                     }

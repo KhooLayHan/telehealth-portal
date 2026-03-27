@@ -4,7 +4,7 @@ namespace TeleHealth.Api.Features.Users.Login;
 
 public static class LoginEndpoint
 {
-    public static void MapLoginEndpoint(this IEndpointRouteBuilder app)
+    public static void MapLoginEndpoint(this RouteGroupBuilder app)
     {
         app.MapPost("/auth/login", async (LoginCommand command, LoginHandler handler, CancellationToken token) =>
         {

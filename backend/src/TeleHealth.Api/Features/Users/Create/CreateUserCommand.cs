@@ -1,11 +1,13 @@
+using Destructurama.Attributed;
+
 using NodaTime;
 
 namespace TeleHealth.Api.Features.Users.CreateUser;
 
-public record CreateUserCommand(
+public sealed record CreateUserCommand(
     string Username,
     string Email,
-    string Password,
+    [property: NotLogged] string Password,
     string FirstName,
     string LastName,
     char Gender,

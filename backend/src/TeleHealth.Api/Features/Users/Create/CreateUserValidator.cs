@@ -27,8 +27,8 @@ public class CreateUserValidator : AbstractValidator<CreateUserCommand>
         RuleFor(x => x.LastName).NotEmpty().MaximumLength(100);
 
         RuleFor(x => x.Gender)
-            .Must(g => "MFON".Contains(g))
-            .WithMessage("Gender must be M, F, O, or N.");
+            .Must(g => g is 'M' or 'F' or 'O' or 'N')
+            .WithMessage("Gender must be one of M, F, O, or N.");
 
         RuleFor(x => x.DateOfBirth)
             .Must(dob => dob <= SystemClock.Instance.GetCurrentInstant().InUtc().Date)

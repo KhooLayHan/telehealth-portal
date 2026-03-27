@@ -33,7 +33,12 @@ builder.Services.AddAuthentication(x =>
     })
     .AddJwtBearer(options =>
     {
-        var secretKey = builder.Configuration["Jwt:Secret"] ?? "SuperSecretTeleHealthKeyThatIsAtLeast32BytesLong!";
+        var secretKey = builder.Configuration["Jwt:Secret"];
+
+        if (string.IsNullOrWhiteSpace(secretKey))
+        {
+            throw new InvalidOperationException("Jwt:Secret configuration is required.");
+        }
 
         options.TokenValidationParameters = new TokenValidationParameters
         {
@@ -82,11 +87,9 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseHttpsRedirection();
-
 var api = app.MapGroup("/api/v1");
 api.MapLoginEndpoint();
-api.MapCreateUserEndpoint();
-api.MapRegisterPatientEndpoint();
+
+app.UseHttpsRedirection();
 
 await app.RunAsync();
