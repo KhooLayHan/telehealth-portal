@@ -13,7 +13,22 @@
   },
   "overrides": [
     {
-      "includes": ["src/components/**", "src/stories/**", "src/App.*"],
+      "includes": ["src/store/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": {
+              "level": "warn",
+              "options": {
+                "filenameCases": ["camelCase"]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/stories/**", "src/App.*"],
       "linter": {
         "rules": {
           "style": {
@@ -28,13 +43,7 @@
       }
     },
     {
-      "includes": [
-        "src/features/**",
-        "src/lib/**",
-        "src/services/**",
-        "src/hooks/**",
-        "src/store/**"
-      ],
+      "includes": ["src/lib/**", "src/services/**", "src/hooks/**"],
       "linter": {
         "rules": {
           "style": {
