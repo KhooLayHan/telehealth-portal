@@ -19,6 +19,7 @@ public static class LoginEndpoint
             )
             .WithName("LoginUser")
             .WithTags("Authentication")
-            .AddEndpointFilter<ValidationFilter<LoginCommand>>();
+            .AddEndpointFilter<ValidationFilter<LoginCommand>>()
+            .RequireAuthorization();
     }
 }
