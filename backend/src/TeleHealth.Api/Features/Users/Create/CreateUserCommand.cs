@@ -9,7 +9,7 @@ public sealed record CreateUserCommand(
     [property: NotLogged] string Password,
     string FirstName,
     string LastName,
-    char Gender,
+    string Gender,
     LocalDate DateOfBirth,
     string Phone,
     string IcNumber

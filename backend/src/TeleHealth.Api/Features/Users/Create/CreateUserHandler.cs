@@ -33,7 +33,7 @@ public class CreateUserHandler(ApplicationDbContext db, IPasswordHasher<User> pa
             FirstName = command.FirstName,
             LastName = command.LastName,
             IcNumber = command.IcNumber,
-            Gender = command.Gender,
+            Gender = command.Gender[0],
             DateOfBirth = command.DateOfBirth,
             Phone = command.Phone,
         };

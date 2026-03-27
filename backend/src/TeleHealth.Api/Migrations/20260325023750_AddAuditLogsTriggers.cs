@@ -26,9 +26,10 @@ namespace TeleHealth.Api.Migrations
                     DECLARE
                         v_old_values   JSONB;
                         v_new_values   JSONB;
-                        v_changed_cols JSONB[];
+                        v_changed_cols TEXT[];
                         v_user_id      BIGINT;
                         v_is_system    BOOLEAN;
+                        v_metadata     JSONB;
 
                         v_sanitize_keys TEXT[] := ARRAY[
                             'password_hash', 'password', 'hashed_password', 
@@ -46,6 +47,13 @@ namespace TeleHealth.Api.Migrations
                             v_is_system := TRUE;
                         END;
 
+                        -- ✅ Build metadata from session context
+                        v_metadata := jsonb_build_object(
+                            'ip_address',  current_setting('app.ip_address',  true),
+                            'user_agent',  current_setting('app.user_agent',  true),
+                            'request_id',  current_setting('app.request_id',  true)
+                        );
+
                         IF (TG_OP = 'INSERT') THEN
                             v_old_values   := NULL;
                             v_new_values   := to_jsonb(NEW) - v_sanitize_keys;;
@@ -55,7 +63,7 @@ namespace TeleHealth.Api.Migrations
                             v_old_values := to_jsonb(OLD) - v_sanitize_keys;;
                             v_new_values := to_jsonb(NEW) - v_sanitize_keys;;
                             -- Collect only changed columns
-                            SELECT array_agg(to_jsonb(key))
+                            SELECT array_agg(key)
                             INTO   v_changed_cols
                             FROM   jsonb_each(v_old_values) AS o(key, value)
                             WHERE  v_old_values->key IS DISTINCT FROM v_new_values->key;
@@ -73,6 +81,7 @@ namespace TeleHealth.Api.Migrations
                             old_values,
                             new_values,
                             changed_columns,
+                            metadata,
                             performed_by_user_id,
                             performed_by_system
                         ) VALUES (
@@ -85,6 +94,7 @@ namespace TeleHealth.Api.Migrations
                             v_old_values,
                             v_new_values,
                             v_changed_cols,
+                            v_metadata,
                             v_user_id,
                             v_is_system
                         );

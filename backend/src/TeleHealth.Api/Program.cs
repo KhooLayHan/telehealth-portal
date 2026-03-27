@@ -96,6 +96,7 @@ app.UseAuthorization();
 var api = app.MapGroup("/api/v1");
 api.MapLoginEndpoint();
 api.MapRegisterPatientEndpoint();
+api.MapCreateUserEndpoint();
 
 app.UseHttpsRedirection();
 

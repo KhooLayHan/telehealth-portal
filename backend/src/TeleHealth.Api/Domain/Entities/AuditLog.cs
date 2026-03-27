@@ -12,7 +12,8 @@ public sealed class AuditLog : IDisposable
     public required string Action { get; set; }
     public JsonDocument? OldValues { get; set; }
     public JsonDocument? NewValues { get; set; }
-    public List<JsonDocument>? ChangedColumns { get; set; }
+    public string[]? ChangedColumns { get; set; }
+    public JsonDocument? Metadata { get; set; }
     public long? PerformedByUserId { get; set; }
     public bool PerformedBySystem { get; set; }
     public Instant CreatedAt { get; set; }
@@ -22,6 +23,6 @@ public sealed class AuditLog : IDisposable
     {
         OldValues?.Dispose();
         NewValues?.Dispose();
-        ChangedColumns?.ForEach(d => d.Dispose());
+        Metadata?.Dispose();
     }
 }
