@@ -1,5 +1,11 @@
+using System.Text;
+
 using FluentValidation;
+
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+
 using Scalar.AspNetCore;
 using TeleHealth.Api;
 using TeleHealth.Api.Infrastructure.Persistence;
@@ -17,6 +23,40 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         )
         .UseSnakeCaseNamingConvention()
 );
+
+builder.Services.AddAuthentication(x =>
+    {
+        x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        var secretKey = builder.Configuration["Jwt:Secret"] ?? "SuperSecretTeleHealthKeyThatIsAtLeast32BytesLong!";
+
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = "TeleHealthApi",
+            ValidAudience = "TeleHealthFrontend",
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+        };
+
+        // CRITICAL FOR SPAs: Tell JWT to look for the token in the Cookie!
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                context.Token = context.Request.Cookies["X-Access-Token"];
+                return Task.CompletedTask;
+            }
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
@@ -37,6 +77,9 @@ if (app.Environment.IsDevelopment())
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     await dbContext.Database.MigrateAsync();
 }
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseHttpsRedirection();
 
