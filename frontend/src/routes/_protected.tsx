@@ -1,7 +1,6 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { useAuthStore } from "../store/useAuthStore";
 
-// biome-ignore-all
 export const Route = createFileRoute("/_protected")({
   beforeLoad: () => {
     const isAuthenticated = useAuthStore.getState().isAuthenticated;
