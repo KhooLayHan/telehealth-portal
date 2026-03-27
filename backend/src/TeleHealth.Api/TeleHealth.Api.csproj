@@ -5,6 +5,7 @@
     <PackageReference Include="AWSSDK.SimpleNotificationService" />
     <PackageReference Include="AWSSDK.SQS" />
     <PackageReference Include="Bogus" />
+    <PackageReference Include="Destructurama.Attributed" />
     <PackageReference Include="EFCore.NamingConventions" />
 
     <PackageReference Include="Facet" />
@@ -51,6 +52,7 @@
     <PackageReference Include="Serilog.AspNetCore" />
     <PackageReference Include="Serilog.Sinks.AwsCloudWatch" />
     <PackageReference Include="Serilog.Sinks.Console" />
+    <PackageReference Include="Slugify.Core" />
     <PackageReference Include="Serilog.Sinks.OpenTelemetry" />
     <PackageReference Include="Serilog.Sinks.Seq" />
 

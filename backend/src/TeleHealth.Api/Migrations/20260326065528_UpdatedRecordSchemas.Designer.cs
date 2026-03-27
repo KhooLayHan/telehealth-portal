@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -14,9 +15,11 @@ using TeleHealth.Api.Infrastructure.Persistence;
 namespace TeleHealth.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260326065528_UpdatedRecordSchemas")]
+    partial class UpdatedRecordSchemas
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -266,8 +269,8 @@ namespace TeleHealth.Api.Migrations
                         .HasColumnType("character varying(20)")
                         .HasColumnName("action");
 
-                    b.PrimitiveCollection<string[]>("ChangedColumns")
-                        .HasColumnType("text[]")
+                    b.PrimitiveCollection<List<JsonDocument>>("ChangedColumns")
+                        .HasColumnType("jsonb[]")
                         .HasColumnName("changed_columns");
 
                     b.Property<Instant>("CreatedAt")
@@ -275,10 +278,6 @@ namespace TeleHealth.Api.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("now()");
-
-                    b.Property<JsonDocument>("Metadata")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("metadata");
 
                     b.Property<JsonDocument>("NewValues")
                         .HasColumnType("jsonb")

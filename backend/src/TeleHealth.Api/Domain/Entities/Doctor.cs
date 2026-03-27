@@ -12,7 +12,7 @@ public sealed class Doctor
     public required string LicenseNumber { get; set; }
     public required string Specialization { get; set; }
     public decimal? ConsultationFee { get; set; }
-    public List<Qualification>? Qualifications { get; set; } = [];
+    public List<Qualification>? Qualifications { get; set; }
     public string? Bio { get; set; }
     public Instant CreatedAt { get; set; }
     public Instant? UpdatedAt { get; set; }

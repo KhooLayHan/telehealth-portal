@@ -1,8 +1,17 @@
+using System.Text;
+using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Scalar.AspNetCore;
 using Serilog;
+using TeleHealth.Api.Domain.Entities;
+using TeleHealth.Api.Features.Users.CreateUser;
+using TeleHealth.Api.Features.Users.Login;
+using TeleHealth.Api.Features.Users.Register;
 using TeleHealth.Api.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,6 +46,52 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         .UseSnakeCaseNamingConvention()
 );
 
+builder
+    .Services.AddAuthentication(x =>
+    {
+        x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        var secretKey = builder.Configuration["Jwt:Secret"];
+
+        if (string.IsNullOrWhiteSpace(secretKey))
+        {
+            throw new InvalidOperationException("Jwt:Secret configuration is required.");
+        }
+
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = "TeleHealthApi",
+            ValidAudience = "TeleHealthFrontend",
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+        };
+
+        // CRITICAL FOR SPAs: Tell JWT to look for the token in the Cookie!
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                context.Token = context.Request.Cookies["X-Access-Token"];
+                return Task.CompletedTask;
+            },
+        };
+    });
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+builder.Services.AddScoped<LoginHandler>();
+builder.Services.AddScoped<RegisterPatientHandler>();
+builder.Services.AddScoped<CreateUserHandler>();
+builder.Services.AddHttpContextAccessor();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -52,6 +107,14 @@ if (app.Environment.IsDevelopment())
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     await dbContext.Database.MigrateAsync();
 }
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+var api = app.MapGroup("/api/v1");
+api.MapLoginEndpoint();
+api.MapRegisterPatientEndpoint();
+api.MapCreateUserEndpoint();
 
 app.UseHttpsRedirection();
 
