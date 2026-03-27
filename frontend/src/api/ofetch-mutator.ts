@@ -16,5 +16,6 @@ export const ofetchMutator = async <T>(
     throw { status: response.status, data: errorData }; // Throws the ProblemDetails JSON!
   }
 
-  return response.json();
+  const text = await response.text();
+  return text ? (JSON.parse(text) as T) : (undefined as T);
 };
