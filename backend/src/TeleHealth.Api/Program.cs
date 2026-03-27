@@ -5,8 +5,6 @@ using Scalar.AspNetCore;
 using Serilog;
 using TeleHealth.Api.Infrastructure.Persistence;
 
-using Serilog.Events;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog((context, config) => config.ReadFrom.Configuration(context.Configuration));
@@ -60,4 +58,3 @@ app.UseSerilogRequestLogging();
 Log.Information("Starting TeleHealth API Boot Sequence...");
 
 await app.RunAsync();
-
