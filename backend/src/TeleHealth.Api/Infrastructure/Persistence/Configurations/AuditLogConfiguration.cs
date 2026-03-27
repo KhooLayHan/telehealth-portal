@@ -49,7 +49,7 @@ public class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
         builder.Property(a => a.ChangedColumns).HasColumnType("text[]");
 
         builder.Property(a => a.Metadata);
-        
+
         builder.Property(a => a.PerformedByUserId);
 
         builder.Property(a => a.PerformedBySystem);

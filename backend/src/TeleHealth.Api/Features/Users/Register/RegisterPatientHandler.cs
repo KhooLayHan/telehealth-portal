@@ -23,7 +23,7 @@ public sealed class RegisterPatientHandler(
         }
 
         await using var transaction = await db.Database.BeginTransactionAsync(token);
-        
+
         var publicId = Guid.NewGuid();
         var patientPublicId = Guid.NewGuid();
         var userSlug = $"user-{publicId:N}";
@@ -57,7 +57,7 @@ public sealed class RegisterPatientHandler(
         await db.SaveChangesAsync(token);
 
         await transaction.CommitAsync(token);
-        
+
         return patient.PublicId;
     }
 }
