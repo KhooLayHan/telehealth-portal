@@ -1,12 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Scalar.AspNetCore;
 using Serilog;
-using Serilog.Sinks.OpenTelemetry;
-using TeleHealth.Api;
 using TeleHealth.Api.Infrastructure.Persistence;
 
 using Serilog.Events;
