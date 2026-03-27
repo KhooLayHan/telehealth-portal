@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using Npgsql;
 using TeleHealth.Api.Common;
 
 namespace TeleHealth.Api.Features.Users.Register;

@@ -23,9 +23,11 @@ public class CreateUserHandler(ApplicationDbContext db, IPasswordHasher<User> pa
         var patientPublicId = Guid.NewGuid();
         var userSlug = $"user-{publicId:N}";
 
+        await using var transaction = await db.Database.BeginTransactionAsync(token);
+        
         var user = new User
         {
-            PublicId = patientPublicId,
+            PublicId = publicId,
             Slug = userSlug,
             Username = command.Username,
             Email = command.Email,
@@ -52,6 +54,8 @@ public class CreateUserHandler(ApplicationDbContext db, IPasswordHasher<User> pa
         db.Patients.Add(patient);
         await db.SaveChangesAsync(token);
 
+        await transaction.CommitAsync(token);
+        
         return patient.PublicId;
     }
 }
