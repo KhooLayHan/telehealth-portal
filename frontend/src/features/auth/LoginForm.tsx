@@ -31,30 +31,28 @@ export function LoginForm() {
     },
     onSubmit: async ({ value }) => {
       // Trigger the backend API call
-      loginMutation.mutateAsync(
-        { data: value },
-        {
-          onSuccess: () => {
-            // HttpOnly cookie is set! Update global Zustand state
-            setAuth({
-              publicId: "123",
-              email: value.email,
-              firstName: "User",
-              role: "Patient",
-            });
+      try {
+        await loginMutation.mutateAsync(
+          { data: value },
+          {
+            onSuccess: () => {
+              // HttpOnly cookie is set! Update global Zustand state
+              setAuth({
+                publicId: "123",
+                email: value.email,
+                firstName: "User",
+                role: "Patient",
+              });
 
-            // Redirect to the protected dashboard via TanStack Router
-            navigate({ to: "/dashboard" });
-          },
-          onError: (error: any) => {
-            // The ASP.NET ProblemDetails JSON is caught here
-            console.error(
-              "Login failed:",
-              error.data?.title || "Unknown error"
-            );
-          },
-        }
-      );
+              // Redirect to the protected dashboard via TanStack Router
+              navigate({ to: "/dashboard" });
+            },
+          }
+        );
+      } catch (error) {
+        // Error is handled by mutation state (loginMutation.isError)
+        // UI already shows error alert via loginMutation.isError check
+      }
     },
   });
 
