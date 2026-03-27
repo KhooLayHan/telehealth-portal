@@ -59,6 +59,7 @@ services:
     container_name: telehealth_seq
     environment:
       ACCEPT_EULA: Y
+      SEQ_FIRSTRUN_ADMINPASSWORDHASH: ${SEQ_ADMIN_PASSWORD}
     ports:
       - "5341:5341"
     volumes:
