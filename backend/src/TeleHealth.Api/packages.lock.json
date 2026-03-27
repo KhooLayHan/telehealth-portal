@@ -331,11 +331,6 @@
           "Serilog": "4.0.0"
         }
       },
-      "Slugify.Core": {
-        "type": "Direct",
-        "requested": "[5.1.1, )",
-        "resolved": "5.1.1",
-        "contentHash": "9dsxewpdgnLgOVN6dIRX3XvlEy1XpLbE2nd2bFebcW0XPdysU1WgQUXChFcAfjHpdfImBxMUe33PTwZOuU531Q=="
       "Serilog.Sinks.OpenTelemetry": {
         "type": "Direct",
         "requested": "[4.2.0, )",
@@ -356,6 +351,12 @@
           "Serilog": "4.2.0",
           "Serilog.Sinks.File": "6.0.0"
         }
+      },
+      "Slugify.Core": {
+        "type": "Direct",
+        "requested": "[5.1.1, )",
+        "resolved": "5.1.1",
+        "contentHash": "9dsxewpdgnLgOVN6dIRX3XvlEy1XpLbE2nd2bFebcW0XPdysU1WgQUXChFcAfjHpdfImBxMUe33PTwZOuU531Q=="
       },
       "SonarAnalyzer.CSharp": {
         "type": "Direct",
