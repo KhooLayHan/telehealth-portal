@@ -64,6 +64,10 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
+builder.Services.AddScoped<LoginHandler>();
+builder.Services.AddScoped<RegisterPatientHandler>();
+builder.Services.AddScoped<CreateUserHandler>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -87,6 +91,7 @@ app.UseAuthorization();
 
 var api = app.MapGroup("/api/v1");
 api.MapLoginEndpoint();
+api.MapRegisterPatientEndpoint();
 
 app.UseHttpsRedirection();
 
