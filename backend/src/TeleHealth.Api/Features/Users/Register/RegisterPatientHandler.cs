@@ -23,11 +23,12 @@ public sealed class RegisterPatientHandler(
         }
 
         var publicId = Guid.NewGuid();
-        var userSlug = $"";
+        var patientPublicId = Guid.NewGuid();
+        var userSlug = $"user-{publicId:N}";
 
         var user = new User
         {
-            PublicId = publicId,
+            PublicId = patientPublicId,
             Slug = userSlug,
             Username = command.Email,
             Email = command.Email,
@@ -39,10 +40,13 @@ public sealed class RegisterPatientHandler(
             DateOfBirth = command.DateOfBirth,
         };
 
+        db.Users.Add(user);
+        await db.SaveChangesAsync(token);
+        
         var patient = new Patient
         {
-            PublicId = Guid.NewGuid(),
-            Slug = $"patient-{userSlug}",
+            PublicId = patientPublicId,
+            Slug = $"patient-{patientPublicId:N}",
             UserId = user.Id,
         };
 
