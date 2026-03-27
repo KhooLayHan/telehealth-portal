@@ -9,6 +9,8 @@ using Serilog.Sinks.OpenTelemetry;
 using TeleHealth.Api;
 using TeleHealth.Api.Infrastructure.Persistence;
 
+using Serilog.Events;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog((context, config) => config.ReadFrom.Configuration(context.Configuration));
@@ -59,4 +61,7 @@ app.UseHttpsRedirection();
 
 app.UseSerilogRequestLogging();
 
+Log.Information("Starting TeleHealth API Boot Sequence...");
+
 await app.RunAsync();
+
