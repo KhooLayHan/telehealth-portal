@@ -13,14 +13,11 @@ public sealed class LoginHandler(
     ApplicationDbContext db,
     IPasswordHasher<User> passwordHasher,
     IConfiguration config,
-    ILogger<LoginHandler> logger,
     IHttpContextAccessor httpContextAccessor
 )
 {
     public async Task<bool> HandleAsync(LoginCommand command, CancellationToken ct)
     {
-        logger.LogInformation("Login attempt for user {Email}", command.Email);
-
         var user = await db
             .Users.Include(u => u.Roles)
             .FirstOrDefaultAsync(u => u.Email == command.Email, ct);
@@ -74,8 +71,6 @@ public sealed class LoginHandler(
                 Expires = DateTimeOffset.UtcNow.AddHours(8),
             }
         );
-
-        logger.LogInformation("User {Email} logged in successfully.", user.Email);
 
         return true;
     }
