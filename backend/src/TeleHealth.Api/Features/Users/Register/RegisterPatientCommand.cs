@@ -1,5 +1,4 @@
 using Destructurama.Attributed;
-
 using NodaTime;
 
 namespace TeleHealth.Api.Features.Users.Register;

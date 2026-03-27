@@ -14,7 +14,7 @@ public sealed class Patient
     public Instant CreatedAt { get; set; }
     public Instant? UpdatedAt { get; set; }
     public Instant? DeletedAt { get; set; }
-    public User User { get; private set; } = null!;
+    public User User { get; } = null!;
     public ICollection<Appointment> Appointments { get; } = [];
     public ICollection<LabReport> LabReports { get; } = [];
 }

@@ -35,6 +35,7 @@ public class CreateUserValidator : AbstractValidator<CreateUserCommand>
             .WithMessage("Date of birth cannot be in the future.");
 
         RuleFor(x => x.IcNumber)
+            .NotEmpty()
             .Matches(@"^\d{12}$")
             .WithMessage("Malaysian IC Number must be exactly 12 digits without dashes.");
     }

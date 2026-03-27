@@ -1,11 +1,8 @@
 using System.Text;
-
 using FluentValidation;
-
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-
 using Scalar.AspNetCore;
 using TeleHealth.Api;
 using TeleHealth.Api.Features.Users.CreateUser;
@@ -27,7 +24,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         .UseSnakeCaseNamingConvention()
 );
 
-builder.Services.AddAuthentication(x =>
+builder
+    .Services.AddAuthentication(x =>
     {
         x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     })
@@ -48,7 +46,7 @@ builder.Services.AddAuthentication(x =>
             ValidateIssuerSigningKey = true,
             ValidIssuer = "TeleHealthApi",
             ValidAudience = "TeleHealthFrontend",
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
         };
 
         // CRITICAL FOR SPAs: Tell JWT to look for the token in the Cookie!
@@ -58,7 +56,7 @@ builder.Services.AddAuthentication(x =>
             {
                 context.Token = context.Request.Cookies["X-Access-Token"];
                 return Task.CompletedTask;
-            }
+            },
         };
     });
 
