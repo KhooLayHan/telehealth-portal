@@ -89,6 +89,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+
 builder.Services.AddScoped<LoginHandler>();
 builder.Services.AddScoped<RegisterPatientHandler>();
 builder.Services.AddScoped<CreateUserHandler>();
