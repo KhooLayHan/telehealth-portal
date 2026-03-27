@@ -50,9 +50,7 @@ public sealed class RegisterPatientHandler(
             UserId = user.Id,
         };
 
-        db.Users.Add(user);
         db.Patients.Add(patient);
-
         await db.SaveChangesAsync(token);
 
         return patient.PublicId;

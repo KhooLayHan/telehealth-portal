@@ -29,13 +29,15 @@ public class CreateUserHandler(ApplicationDbContext db, IPasswordHasher<User> pa
             Slug = userSlug,
             Username = command.Username,
             Email = command.Email,
-            PasswordHash = passwordHasher.HashPassword(null!, command.Password),
+            PasswordHash = string.Empty,
             FirstName = command.FirstName,
             LastName = command.LastName,
             IcNumber = command.IcNumber,
             Gender = command.Gender,
             DateOfBirth = command.DateOfBirth,
+            Phone = command.Phone,
         };
+        user.PasswordHash = passwordHasher.HashPassword(user, command.Password);
 
         db.Users.Add(user);
         await db.SaveChangesAsync(token);
