@@ -5,14 +5,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
-using TeleHealth.Api;
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Features.Users.CreateUser;
 using TeleHealth.Api.Features.Users.Login;
 using TeleHealth.Api.Features.Users.Register;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
-using Scalar.AspNetCore;
 using Serilog;
 using TeleHealth.Api.Infrastructure.Persistence;
 
