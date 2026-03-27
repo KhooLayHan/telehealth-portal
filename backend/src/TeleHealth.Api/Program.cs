@@ -10,11 +10,33 @@ using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Features.Users.CreateUser;
 using TeleHealth.Api.Features.Users.Login;
 using TeleHealth.Api.Features.Users.Register;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
+using Scalar.AspNetCore;
+using Serilog;
 using TeleHealth.Api.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Host.UseSerilog((context, config) => config.ReadFrom.Configuration(context.Configuration));
+
+builder
+    .Services.AddOpenTelemetry()
+    .WithMetrics(metrics =>
+        metrics
+            .AddAspNetCoreInstrumentation()
+            .AddAWSInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddOtlpExporter()
+    )
+    .WithTracing(tracing =>
+        tracing
+            .AddAspNetCoreInstrumentation()
+            .AddAWSInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddOtlpExporter()
+    );
+
 builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -74,16 +96,14 @@ builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference(options =>
-    {
         options
             .WithTitle("TeleHealth API")
-            .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
-    });
+            .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
+    );
 
     using var scope = app.Services.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -99,5 +119,9 @@ api.MapRegisterPatientEndpoint();
 api.MapCreateUserEndpoint();
 
 app.UseHttpsRedirection();
+
+app.UseSerilogRequestLogging();
+
+Log.Information("Starting TeleHealth API Boot Sequence...");
 
 await app.RunAsync();
