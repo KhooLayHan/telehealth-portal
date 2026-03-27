@@ -16,12 +16,14 @@ builder
             .AddAspNetCoreInstrumentation()
             .AddAWSInstrumentation()
             .AddHttpClientInstrumentation()
+            .AddOtlpExporter()
     )
     .WithTracing(tracing =>
         tracing
             .AddAspNetCoreInstrumentation()
             .AddAWSInstrumentation()
             .AddHttpClientInstrumentation()
+            .AddOtlpExporter()
     );
 
 builder.Services.AddOpenApi();

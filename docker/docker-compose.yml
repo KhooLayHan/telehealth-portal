@@ -59,9 +59,10 @@ services:
     container_name: telehealth_seq
     environment:
       ACCEPT_EULA: Y
-      SEQ_FIRSTRUN_ADMINPASSWORDHASH: ${SEQ_ADMIN_PASSWORD}
+      SEQ_FIRSTRUN_ADMINPASSWORD: ${SEQ_ADMIN_PASSWORD}
     ports:
       - "5341:5341"
+      - "8081:80"
     volumes:
       - seq-data:/data
     restart: unless-stopped
