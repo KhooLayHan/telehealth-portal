@@ -9,7 +9,8 @@
       "!build",
       "!.storybook",
       "!src/stories",
-      "!src/api/generated/**/*"
+      "!src/api/generated/**/*",
+      "!src/components/ui/**/*"
     ]
   },
   "overrides": [
@@ -29,7 +30,7 @@
       }
     },
     {
-      "includes": ["src/stories/**", "src/App.*"],
+      "includes": ["src/stories/**", "src/App.*", "src/features/**"],
       "linter": {
         "rules": {
           "style": {

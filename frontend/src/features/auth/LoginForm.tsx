@@ -49,7 +49,7 @@ export function LoginForm() {
             },
           }
         );
-      } catch (error) {
+      } catch (_error) {
         // Error is handled by mutation state (loginMutation.isError)
         // UI already shows error alert via loginMutation.isError check
       }
@@ -76,7 +76,10 @@ export function LoginForm() {
           >
             {/* Email Field */}
             <form.Field
-              children={(field) => (
+              name="email"
+              validators={{ onChange: loginSchema.shape.email }}
+            >
+              {(field) => (
                 <div className="space-y-2">
                   <Label htmlFor={field.name}>Email</Label>
                   <Input
@@ -99,13 +102,14 @@ export function LoginForm() {
                   )}
                 </div>
               )}
-              name="email"
-              validators={{ onChange: loginSchema.shape.email }}
-            />
+            </form.Field>
 
             {/* Password Field */}
             <form.Field
-              children={(field) => (
+              name="password"
+              validators={{ onChange: loginSchema.shape.password }}
+            >
+              {(field) => (
                 <div className="space-y-2">
                   <Label htmlFor={field.name}>Password</Label>
                   <Input
@@ -127,9 +131,7 @@ export function LoginForm() {
                   )}
                 </div>
               )}
-              name="password"
-              validators={{ onChange: loginSchema.shape.password }}
-            />
+            </form.Field>
 
             {/* Global API Error Alert (Optional) */}
             {loginMutation.isError && (
@@ -139,8 +141,8 @@ export function LoginForm() {
             )}
 
             {/* Submit Button (Subscribed to form state for performance!) */}
-            <form.Subscribe
-              children={(state) => (
+            <form.Subscribe>
+              {(state) => (
                 <Button
                   className="w-full"
                   disabled={
@@ -153,7 +155,7 @@ export function LoginForm() {
                   {loginMutation.isPending ? "Authenticating..." : "Login"}
                 </Button>
               )}
-            />
+            </form.Subscribe>
           </form>
         </CardContent>
       </Card>
