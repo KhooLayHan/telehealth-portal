@@ -8,6 +8,9 @@ using Microsoft.IdentityModel.Tokens;
 
 using Scalar.AspNetCore;
 using TeleHealth.Api;
+using TeleHealth.Api.Features.Users.CreateUser;
+using TeleHealth.Api.Features.Users.Login;
+using TeleHealth.Api.Features.Users.Register;
 using TeleHealth.Api.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,8 +30,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddAuthentication(x =>
     {
         x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
     })
     .AddJwtBearer(options =>
     {
@@ -82,5 +83,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseHttpsRedirection();
+
+var api = app.MapGroup("/api/v1");
+api.MapLoginEndpoint();
+api.MapCreateUserEndpoint();
+api.MapRegisterPatientEndpoint();
 
 await app.RunAsync();

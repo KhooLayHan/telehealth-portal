@@ -6,7 +6,7 @@ public static class LoginEndpoint
 {
     public static void MapLoginEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/v1/auth/login", async (LoginCommand command, LoginHandler handler, CancellationToken token) =>
+        app.MapPost("/auth/login", async (LoginCommand command, LoginHandler handler, CancellationToken token) =>
         {
             var success = await handler.HandleAsync(command, token);
             

@@ -7,7 +7,7 @@ public static class CreateUserEndpoint
     public static void MapCreateUserEndpoint(this IEndpointRouteBuilder app)
     {
         app.MapPost(
-                "/api/v1/users",
+                "/users",
                 async (
                     CreateUserCommand command,
                     CreateUserHandler handler,

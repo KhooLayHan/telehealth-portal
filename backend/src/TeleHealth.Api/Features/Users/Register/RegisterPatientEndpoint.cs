@@ -7,7 +7,7 @@ public static class RegisterPatientEndpoint
     public static IEndpointRouteBuilder MapRegisterPatientEndpoint(this IEndpointRouteBuilder app)
     {
         app.MapPost(
-                "/api/v1/auth/register-patient",
+                "/auth/register-patient",
                 async (
                     RegisterPatientCommand command,
                     RegisterPatientHandler handler,
@@ -18,7 +18,7 @@ public static class RegisterPatientEndpoint
                     {
                         var patientId = await handler.HandleAsync(command, token);
                         return Results.Created(
-                            $"/api/v1/patients/{patientId}",
+                            $"/patients/{patientId}",
                             new { PatientId = patientId }
                         );
                     }
