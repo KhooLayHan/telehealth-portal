@@ -16,6 +16,10 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      seq:
+        condition: service_started
+      localstack:
+        condition: service_started
     restart: unless-stopped
 
   db:
