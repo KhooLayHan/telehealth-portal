@@ -14,6 +14,8 @@ using TeleHealth.Api.Features.Users.Login;
 using TeleHealth.Api.Features.Users.Register;
 using TeleHealth.Api.Infrastructure.Persistence;
 
+Log.Information("Starting TeleHealth API Boot Sequence...");
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog((context, config) => config.ReadFrom.Configuration(context.Configuration));
@@ -137,6 +139,6 @@ app.UseHttpsRedirection();
 
 app.UseSerilogRequestLogging();
 
-Log.Information("Starting TeleHealth API Boot Sequence...");
+Log.Information("TeleHealth API successfully started.");
 
 await app.RunAsync();
