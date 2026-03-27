@@ -3,7 +3,7 @@ import { defineConfig } from "orval";
 export default defineConfig({
   telehealth: {
     input: {
-      target: "../../docs/api/openapi.json",
+      target: "http://localhost:5144/openapi/v1.json",
     },
     output: {
       baseUrl: {
@@ -18,11 +18,11 @@ export default defineConfig({
       operationSchemas: "src/api/schemas",
       override: {
         mutator: {
-          path: "src/lib/ofetch-mutator.ts",
+          path: "api/ofetch-mutator.ts",
           name: "ofetchMutator",
         },
       },
-      target: "src/services/generated",
+      target: "api/generated",
       workspace: "src",
     },
     hooks: {

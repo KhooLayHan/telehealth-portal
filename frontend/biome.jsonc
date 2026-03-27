@@ -8,12 +8,29 @@
       "!dist",
       "!build",
       "!.storybook",
-      "!src/stories"
+      "!src/stories",
+      "!src/api/generated/**/*",
+      "!src/components/ui/**/*"
     ]
   },
   "overrides": [
     {
-      "includes": ["src/components/**", "src/stories/**", "src/App.*"],
+      "includes": ["src/store/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": {
+              "level": "warn",
+              "options": {
+                "filenameCases": ["camelCase"]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/stories/**", "src/App.*", "src/features/**"],
       "linter": {
         "rules": {
           "style": {
@@ -28,13 +45,7 @@
       }
     },
     {
-      "includes": [
-        "src/features/**",
-        "src/lib/**",
-        "src/services/**",
-        "src/hooks/**",
-        "src/store/**"
-      ],
+      "includes": ["src/lib/**", "src/services/**", "src/hooks/**"],
       "linter": {
         "rules": {
           "style": {

@@ -14,6 +14,8 @@ using TeleHealth.Api.Features.Users.Login;
 using TeleHealth.Api.Features.Users.Register;
 using TeleHealth.Api.Infrastructure.Persistence;
 
+Log.Information("Starting TeleHealth API Boot Sequence...");
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog((context, config) => config.ReadFrom.Configuration(context.Configuration));
@@ -92,6 +94,21 @@ builder.Services.AddScoped<RegisterPatientHandler>();
 builder.Services.AddScoped<CreateUserHandler>();
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+        "AllowFrontend",
+        policy =>
+        {
+            policy
+                .WithOrigins("http://localhost:5173")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        }
+    );
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -108,6 +125,8 @@ if (app.Environment.IsDevelopment())
     await dbContext.Database.MigrateAsync();
 }
 
+app.UseCors("AllowFrontend");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -120,6 +139,6 @@ app.UseHttpsRedirection();
 
 app.UseSerilogRequestLogging();
 
-Log.Information("Starting TeleHealth API Boot Sequence...");
+Log.Information("TeleHealth API successfully started.");
 
 await app.RunAsync();
