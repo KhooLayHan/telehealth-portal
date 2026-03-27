@@ -9,14 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as FormRouteImport } from './routes/form'
 import { Route as ProtectedRouteImport } from './routes/_protected'
 
-const FormRoute = FormRouteImport.update({
-  id: '/form',
-  path: '/form',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ProtectedRoute = ProtectedRouteImport.update({
   id: '/_protected',
   getParentRoute: () => rootRouteImport,
@@ -24,39 +18,28 @@ const ProtectedRoute = ProtectedRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof ProtectedRoute
-  '/form': typeof FormRoute
 }
 export interface FileRoutesByTo {
   '/': typeof ProtectedRoute
-  '/form': typeof FormRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_protected': typeof ProtectedRoute
-  '/form': typeof FormRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/form'
+  fullPaths: '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/form'
-  id: '__root__' | '/_protected' | '/form'
+  to: '/'
+  id: '__root__' | '/_protected'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   ProtectedRoute: typeof ProtectedRoute
-  FormRoute: typeof FormRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/form': {
-      id: '/form'
-      path: '/form'
-      fullPath: '/form'
-      preLoaderRoute: typeof FormRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_protected': {
       id: '/_protected'
       path: ''
@@ -69,7 +52,6 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   ProtectedRoute: ProtectedRoute,
-  FormRoute: FormRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

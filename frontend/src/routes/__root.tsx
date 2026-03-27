@@ -6,7 +6,7 @@ export const Route = createRootRoute({
     <div className="min-h-screen bg-base-200 font-sans">
       {/* Your Top Navbar goes here */}
       <Outlet />
-      <TanStackRouterDevtools />
+      <TanStackRouterDevtools initialIsOpen={true}/>
     </div>
   ),
 });
