@@ -1,5 +1,10 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { RouterProvider, createRouter, createRootRoute, createRoute } from "@tanstack/react-router";
+import {
+  createRootRoute,
+  createRoute,
+  createRouter,
+  RouterProvider,
+} from "@tanstack/react-router";
 import { LoginForm } from "./features/auth/LoginForm"; // <-- Make sure this path matches where you saved it!
 
 // 1. Initialize TanStack Query

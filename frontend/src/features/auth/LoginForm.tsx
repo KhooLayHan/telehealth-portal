@@ -23,6 +23,8 @@ export function LoginForm() {
   // 2. Orval TanStack Query Mutation
   const loginMutation = useLoginUser();
 
+  console.log(loginMutation);
+
   // 3. TanStack Form Setup
   const form = useForm({
     defaultValues: {
