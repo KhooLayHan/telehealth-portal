@@ -1,6 +1,5 @@
 import { useForm } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
-import { zodValidator } from "@tanstack/zod-form-adapter";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -13,7 +12,7 @@ import { useAuthStore } from "../../store/useAuthStore";
 
 // 1. Zod Schema
 const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: z.email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
@@ -30,7 +29,6 @@ export function LoginForm() {
       email: "",
       password: "",
     },
-    validatorAdapter: zodValidator(),
     onSubmit: async ({ value }) => {
       // Trigger the backend API call
       loginMutation.mutateAsync(
@@ -144,18 +142,19 @@ export function LoginForm() {
 
             {/* Submit Button (Subscribed to form state for performance!) */}
             <form.Subscribe
-              children={([canSubmit, isSubmitting]) => (
+              children={(state) => (
                 <Button
                   className="w-full"
                   disabled={
-                    !canSubmit || isSubmitting || loginMutation.isPending
+                    !state.canSubmit ||
+                    state.isSubmitting ||
+                    loginMutation.isPending
                   }
                   type="submit"
                 >
                   {loginMutation.isPending ? "Authenticating..." : "Login"}
                 </Button>
               )}
-              selector={(state) => [state.canSubmit, state.isSubmitting]}
             />
           </form>
         </CardContent>
