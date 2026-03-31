@@ -27,9 +27,10 @@ public sealed class TokenService(IConfiguration configuration) : ITokenService
             ?? throw new InvalidOperationException("Jwt:Secret configuration is required.");
         var issuer = configuration["Jwt:Issuer"] ?? "TeleHealthApi";
         var audience = configuration["Jwt:Audience"] ?? "TeleHealthFrontend";
-        var expiryMinutes = int.TryParse(configuration["Jwt:ExpiryMinutes"], out var minutes) && minutes > 0
-            ? minutes
-            : 60;
+        var expiryMinutes =
+            int.TryParse(configuration["Jwt:ExpiryMinutes"], out var minutes) && minutes > 0
+                ? minutes
+                : 60;
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
