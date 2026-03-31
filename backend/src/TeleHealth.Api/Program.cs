@@ -8,6 +8,7 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Scalar.AspNetCore;
 using Serilog;
+using TeleHealth.Api.Common.Security;
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Features.Users.CreateUser;
 using TeleHealth.Api.Features.Users.Login;
@@ -84,11 +85,18 @@ builder
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(AuthConstants.AdminPolicy, policy => policy.RequireRole("admin"));
+    options.AddPolicy(AuthConstants.DoctorPolicy, policy => policy.RequireRole("doctor"));
+    options.AddPolicy(AuthConstants.PatientPolicy, policy => policy.RequireRole("patient"));
+    options.AddPolicy(AuthConstants.LabTechPolicy, policy => policy.RequireRole("lab-technician"));
+});
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 builder.Services.AddScoped<LoginHandler>();
 builder.Services.AddScoped<RegisterPatientHandler>();

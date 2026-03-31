@@ -8,9 +8,14 @@ public static class LoginEndpoint
     {
         app.MapPost(
                 "/auth/login",
-                async (LoginCommand command, LoginHandler handler, CancellationToken token) =>
+                async (
+                    LoginCommand command,
+                    LoginHandler handler,
+                    HttpContext httpContext,
+                    CancellationToken token
+                ) =>
                 {
-                    var success = await handler.HandleAsync(command, token);
+                    var success = await handler.HandleAsync(command, httpContext, token);
 
                     return success
                         ? Results.Ok(new { Message = "Login successful" })
@@ -19,7 +24,6 @@ public static class LoginEndpoint
             )
             .WithName("LoginUser")
             .WithTags("Authentication")
-            .AddEndpointFilter<ValidationFilter<LoginCommand>>()
-            .RequireAuthorization();
+            .AddEndpointFilter<ValidationFilter<LoginCommand>>();
     }
 }
