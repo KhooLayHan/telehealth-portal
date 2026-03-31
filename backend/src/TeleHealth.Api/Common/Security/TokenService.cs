@@ -27,7 +27,7 @@ public sealed class TokenService(IConfiguration configuration) : ITokenService
             ?? throw new InvalidOperationException("Jwt:Secret configuration is required.");
         var issuer = configuration["Jwt:Issuer"] ?? "TeleHealthApi";
         var audience = configuration["Jwt:Audience"] ?? "TeleHealthFrontend";
-        var expiryMinutes = int.TryParse(configuration["Jwt:ExpiryMinutes"], out var minutes)
+        var expiryMinutes = int.TryParse(configuration["Jwt:ExpiryMinutes"], out var minutes) && minutes > 0
             ? minutes
             : 60;
 
