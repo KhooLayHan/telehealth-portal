@@ -1,11 +1,17 @@
+using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TeleHealth.Api.Domain.Entities;
+using TeleHealth.Api.Features.Users.CreateUser;
 using TeleHealth.Api.Infrastructure.Persistence;
 
-namespace TeleHealth.Api.Features.Users.CreateUser;
+namespace TeleHealth.Api.Features.Users.Create;
 
-public class CreateUserHandler(ApplicationDbContext db, IPasswordHasher<User> passwordHasher)
+public class CreateUserHandler(
+    ApplicationDbContext db,
+    IPasswordHasher<User> passwordHasher,
+    IPublishEndpoint publishEndpoint
+)
 {
     public async Task<Guid> HandleAsync(CreateUserCommand command, CancellationToken token)
     {
@@ -54,8 +60,17 @@ public class CreateUserHandler(ApplicationDbContext db, IPasswordHasher<User> pa
         db.Patients.Add(patient);
         await db.SaveChangesAsync(token);
 
+        await publishEndpoint.Publish(
+            new UserCreatedEvent(user.PublicId, user.Username, user.Email),
+            token
+        );
+
+        await db.SaveChangesAsync(token);
+
         await transaction.CommitAsync(token);
 
         return patient.PublicId;
     }
 }
+
+public record UserCreatedEvent(Guid UserPublicId, string Username, string Email);

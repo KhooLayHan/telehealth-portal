@@ -8,6 +8,7 @@ using Serilog;
 using TeleHealth.Api.Common.Extensions;
 using TeleHealth.Api.Common.Security;
 using TeleHealth.Api.Domain.Entities;
+using TeleHealth.Api.Features.Users.Create;
 using TeleHealth.Api.Features.Users.CreateUser;
 using TeleHealth.Api.Features.Users.Login;
 using TeleHealth.Api.Features.Users.Register;
@@ -50,6 +51,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddAuthorizationPolicies();
 builder.Services.AddCorsConfiguration(builder.Configuration);
+
+builder.Services.AddMassTransitConfiguration(builder.Configuration, builder.Environment);
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 

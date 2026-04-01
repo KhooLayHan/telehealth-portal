@@ -112,6 +112,36 @@
         "resolved": "3.0.10",
         "contentHash": "yZIhtw8sYuvsONzQbZxWpR60tMWYHXoo0DL6nyOqSFiU5POjBTSEyWFpTQtJEZuy+oqiYTXKXY/Mjx7KnqIQFw=="
       },
+      "MassTransit": {
+        "type": "Direct",
+        "requested": "[8.5.8, )",
+        "resolved": "8.5.8",
+        "contentHash": "O5bx+rziwwjLnar/9R6HTSL3Q++SOX20sufGIuXCKh7aowQ+4XGbhpVdaSYuTV7H0ndIomK24d2/vX3rlsSHng==",
+        "dependencies": {
+          "MassTransit.Abstractions": "8.5.8"
+        }
+      },
+      "MassTransit.AmazonSQS": {
+        "type": "Direct",
+        "requested": "[8.5.8, )",
+        "resolved": "8.5.8",
+        "contentHash": "pOYWgvfmYxiNcCdVq5fECwJPPo8tIcjUJ1cH+B+DxCrEIQS9Kca+M4AKnBkuI6x4tQ29AJpuGzexrT/aObJZbA==",
+        "dependencies": {
+          "AWSSDK.SQS": "4.0.2.14",
+          "AWSSDK.SimpleNotificationService": "4.0.2.16",
+          "MassTransit": "8.5.8"
+        }
+      },
+      "MassTransit.EntityFrameworkCore": {
+        "type": "Direct",
+        "requested": "[8.5.8, )",
+        "resolved": "8.5.8",
+        "contentHash": "DKAWYq54ajSs0TDDdVyJ6a30gKjek7PWLa/kRN/7bUFs0EgIabhRVbRHG5CCwVpbW11DkzvOVRs0wI53zV3Zcw==",
+        "dependencies": {
+          "MassTransit": "8.5.8",
+          "Microsoft.EntityFrameworkCore.Relational": "10.0.0"
+        }
+      },
       "Microsoft.AspNetCore.Authentication.JwtBearer": {
         "type": "Direct",
         "requested": "[10.0.5, )",
@@ -422,6 +452,11 @@
         "dependencies": {
           "Grpc.Core.Api": "2.70.0"
         }
+      },
+      "MassTransit.Abstractions": {
+        "type": "Transitive",
+        "resolved": "8.5.8",
+        "contentHash": "f1XJz88+JZNLl1iHWSGNoD91ownowoP4Vl+2DmVM7ljAxQebvolVKdlyY+iZBSdODCeyLGCcM9jrfZXWkDHtow=="
       },
       "Microsoft.Build.Framework": {
         "type": "Transitive",
