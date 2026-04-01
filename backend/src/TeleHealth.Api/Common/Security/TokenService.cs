@@ -52,7 +52,7 @@ public sealed class TokenService(IConfiguration configuration) : ITokenService
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddMinutes(expiryMinutes),
             }
         );
