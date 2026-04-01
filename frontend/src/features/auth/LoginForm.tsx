@@ -103,7 +103,6 @@ export function LoginForm() {
                 </div>
               )}
             </form.Field>
-
             {/* Password Field */}
             <form.Field
               name="password"
