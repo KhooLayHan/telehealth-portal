@@ -2,9 +2,10 @@ using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TeleHealth.Api.Domain.Entities;
+using TeleHealth.Api.Features.Users.CreateUser;
 using TeleHealth.Api.Infrastructure.Persistence;
 
-namespace TeleHealth.Api.Features.Users.CreateUser;
+namespace TeleHealth.Api.Features.Users.Create;
 
 public class CreateUserHandler(
     ApplicationDbContext db,
