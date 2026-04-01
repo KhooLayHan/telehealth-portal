@@ -64,7 +64,9 @@ public class CreateUserHandler(
             new UserCreatedEvent(user.PublicId, user.Username, user.Email),
             token
         );
-
+        
+        await db.SaveChangesAsync(token);
+        
         await transaction.CommitAsync(token);
 
         return patient.PublicId;
