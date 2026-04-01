@@ -13,7 +13,7 @@ public static class AuthorizationExtensions
             options.AddPolicy(AuthConstants.PatientPolicy, policy => policy.RequireRole("patient"));
             options.AddPolicy(
                 AuthConstants.LabTechPolicy,
-                policy => policy.RequireRole("lab-technician")
+                policy => policy.RequireRole("lab-tech")
             );
         });
 
