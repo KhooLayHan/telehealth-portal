@@ -1,4 +1,5 @@
 using TeleHealth.Api.Common;
+using TeleHealth.Api.Features.Users.Create;
 
 namespace TeleHealth.Api.Features.Users.CreateUser;
 
