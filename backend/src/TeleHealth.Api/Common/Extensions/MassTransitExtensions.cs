@@ -45,6 +45,7 @@ public static class MassTransitExtensions
                                 h.SecretKey(configuration["AWS:SecretKey"]!);
                             }
                         );
+                        cfg.ConfigureEndpoints(ctx);
                     }
                 );
             }

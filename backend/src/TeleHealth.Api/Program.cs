@@ -51,6 +51,8 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddAuthorizationPolicies();
 builder.Services.AddCorsConfiguration(builder.Configuration);
 
+builder.Services.AddMassTransitConfiguration(builder.Configuration, builder.Environment);
+
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
