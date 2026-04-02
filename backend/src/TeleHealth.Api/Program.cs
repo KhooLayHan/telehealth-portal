@@ -35,6 +35,7 @@ builder.Services.AddProblemDetails(options =>
     };
 });
 builder.Services.AddExceptionHandler<ProblemExceptionHandler>();
+builder.Services.AddExceptionHandler<UnexpectedExceptionHandler>();
 
 builder
     .Services.AddOpenTelemetry()

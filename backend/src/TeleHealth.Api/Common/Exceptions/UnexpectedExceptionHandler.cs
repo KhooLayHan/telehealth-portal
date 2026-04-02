@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace TeleHealth.Api.Common.Exceptions;
 
-internal sealed class ProblemExceptionHandler(IProblemDetailsService problemDetailsService)
+internal sealed class UnexpectedExceptionHandler(IProblemDetailsService problemDetailsService)
     : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(
@@ -13,19 +14,19 @@ internal sealed class ProblemExceptionHandler(IProblemDetailsService problemDeta
         CancellationToken cancellationToken
     )
     {
-        if (exception is not ProblemException problemException)
+        if (exception is ProblemException)
         {
             return false;
         }
 
-        httpContext.Response.StatusCode = problemException.StatusCode;
+        httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
 
         var problemDetails = new ProblemDetails
         {
-            Title = problemException.Title,
-            Type = problemException.ErrorCode,
-            Detail = problemException.Message,
-            Status = problemException.StatusCode,
+            Title = ReasonPhrases.GetReasonPhrase(StatusCodes.Status500InternalServerError),
+            Type = "InternalError",
+            Detail = "An unexpected error occurred.",
+            Status = StatusCodes.Status500InternalServerError,
         };
 
         return await problemDetailsService.TryWriteAsync(
