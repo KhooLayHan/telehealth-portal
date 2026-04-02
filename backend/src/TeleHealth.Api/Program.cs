@@ -1,12 +1,10 @@
 using FluentValidation;
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Scalar.AspNetCore;
 using Serilog;
-using TeleHealth.Api.Common.Exceptions;
 using TeleHealth.Api.Common.Extensions;
 using TeleHealth.Api.Common.Security;
 using TeleHealth.Api.Domain.Entities;
@@ -22,20 +20,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog((context, config) => config.ReadFrom.Configuration(context.Configuration));
 
-builder.Services.AddProblemDetails(options =>
-{
-    options.CustomizeProblemDetails = context =>
-    {
-        context.ProblemDetails.Instance =
-            $"{context.HttpContext.Request.Method} {context.HttpContext.Request.Path}";
-        context.ProblemDetails.Extensions.TryAdd("requestId", context.HttpContext.TraceIdentifier);
-
-        var activity = context.HttpContext.Features.Get<IHttpActivityFeature>()?.Activity;
-        context.ProblemDetails.Extensions.TryAdd("traceId", activity?.Id);
-    };
-});
-builder.Services.AddExceptionHandler<ProblemExceptionHandler>();
-builder.Services.AddExceptionHandler<UnexpectedExceptionHandler>();
+builder.Services.AddProblemDetailsExceptionHandling();
 
 builder
     .Services.AddOpenTelemetry()

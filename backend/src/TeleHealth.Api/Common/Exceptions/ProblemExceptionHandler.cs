@@ -20,12 +20,16 @@ internal sealed class ProblemExceptionHandler(IProblemDetailsService problemDeta
 
         httpContext.Response.StatusCode = problemException.StatusCode;
 
+        var isDevelopment = httpContext
+            .RequestServices.GetRequiredService<IHostEnvironment>()
+            .IsDevelopment();
+
         var problemDetails = new ProblemDetails
         {
             Title = problemException.Title,
             Type = problemException.ErrorCode,
-            Detail = problemException.Message,
             Status = problemException.StatusCode,
+            Detail = isDevelopment ? problemException.Message : "An unexpected error occurred.",
         };
 
         return await problemDetailsService.TryWriteAsync(
