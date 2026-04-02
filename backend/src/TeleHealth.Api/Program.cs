@@ -6,7 +6,6 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Scalar.AspNetCore;
 using Serilog;
-
 using TeleHealth.Api.Common.Exceptions;
 using TeleHealth.Api.Common.Extensions;
 using TeleHealth.Api.Common.Security;

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using TeleHealth.Api.Common.Exceptions;
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Infrastructure.Persistence;
 
@@ -19,7 +20,7 @@ public sealed class RegisterPatientHandler(
 
         if (existingUser is not null)
         {
-            throw new InvalidOperationException("User with this email already exists.");
+            throw new ConflictException("User with this email already exists.");
         }
 
         await using var transaction = await db.Database.BeginTransactionAsync(token);

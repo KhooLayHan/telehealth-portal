@@ -1,6 +1,7 @@
 using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using TeleHealth.Api.Common.Exceptions;
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Features.Users.CreateUser;
 using TeleHealth.Api.Infrastructure.Persistence;
@@ -22,7 +23,7 @@ public class CreateUserHandler(
 
         if (existingUser is not null)
         {
-            throw new InvalidOperationException("User with this email already exists.");
+            throw new ConflictException("User with this email already exists.");
         }
 
         var publicId = Guid.NewGuid();

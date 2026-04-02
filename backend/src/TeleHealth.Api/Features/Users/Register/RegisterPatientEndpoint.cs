@@ -14,18 +14,8 @@ public static class RegisterPatientEndpoint
                     CancellationToken token
                 ) =>
                 {
-                    try
-                    {
-                        var patientId = await handler.HandleAsync(command, token);
-                        return Results.Created(
-                            $"/patients/{patientId}",
-                            new { PatientId = patientId }
-                        );
-                    }
-                    catch (InvalidOperationException ex)
-                    {
-                        return Results.Conflict(new { Error = ex.Message });
-                    }
+                    var patientId = await handler.HandleAsync(command, token);
+                    return Results.Created($"/patients/{patientId}", new { PatientId = patientId });
                 }
             )
             .WithName("RegisterPatient")
