@@ -51,8 +51,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddAuthorizationPolicies();
 builder.Services.AddCorsConfiguration(builder.Configuration);
-
 builder.Services.AddMassTransitConfiguration(builder.Configuration, builder.Environment);
+builder.Services.AddApiVersioningConfiguration();
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
@@ -85,7 +85,7 @@ app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 
-var api = app.MapGroup("/api/v1");
+var api = app.CreateVersionedApiGroup(1, 0);
 api.MapLoginEndpoint();
 api.MapRegisterPatientEndpoint();
 api.MapCreateUserEndpoint();

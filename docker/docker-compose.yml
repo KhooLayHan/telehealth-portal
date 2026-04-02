@@ -43,7 +43,7 @@ services:
 
   localstack:
     container_name: "telehealth_awslocal"
-    image: localstack/localstack
+    image: localstack/localstack-pro
     ports:
       - "127.0.0.1:4566:4566"            # LocalStack Gateway
       - "127.0.0.1:4510-4559:4510-4559"  # External services port range
