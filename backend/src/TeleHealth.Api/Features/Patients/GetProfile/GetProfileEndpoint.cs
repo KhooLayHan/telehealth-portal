@@ -26,4 +26,3 @@ public static class GetProfileEndpoint
             .RequireAuthorization(AuthConstants.PatientPolicy);
     }
 }
- 
