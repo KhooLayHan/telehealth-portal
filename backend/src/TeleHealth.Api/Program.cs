@@ -10,7 +10,6 @@ using TeleHealth.Api.Common.Extensions;
 using TeleHealth.Api.Common.Security;
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Features.Patients.GetProfile;
-using TeleHealth.Api.Features.Patients.UpdateMedicalInfo;
 using TeleHealth.Api.Features.Patients.UpdateMedicalRecord;
 using TeleHealth.Api.Features.Users.Create;
 using TeleHealth.Api.Features.Users.Login;
@@ -100,7 +99,7 @@ api.MapLoginEndpoint();
 api.MapRegisterPatientEndpoint();
 api.MapCreateUserEndpoint();
 api.MapGetProfileEndpoint();
-api.MapUpdateMedicalInfoEndpoint();
+api.MapUpdateMedicalRecordEndpoint();
 
 app.UseHttpsRedirection();
 

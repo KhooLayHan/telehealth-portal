@@ -1,6 +1,6 @@
 using TeleHealth.Api.Domain.Entities;
 
-namespace TeleHealth.Api.Features.Patients.UpdateMedicalInfo;
+namespace TeleHealth.Api.Features.Patients.UpdateMedicalRecord;
 
 public sealed record UpdateMedicalRecordCommand(
     string BloodGroup,

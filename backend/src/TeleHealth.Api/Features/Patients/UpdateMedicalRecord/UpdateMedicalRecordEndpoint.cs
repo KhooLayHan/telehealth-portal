@@ -2,13 +2,14 @@ using System.Security.Claims;
 using TeleHealth.Api.Common;
 using TeleHealth.Api.Common.Security;
 using TeleHealth.Api.Features.Patients.GetProfile;
+using TeleHealth.Api.Features.Patients.UpdateMedicalInfo;
 using TeleHealth.Api.Features.Patients.UpdateMedicalRecord;
 
-namespace TeleHealth.Api.Features.Patients.UpdateMedicalInfo;
+namespace TeleHealth.Api.Features.Patients.UpdateMedicalRecord;
 
 public static class UpdateMedicalRecordEndpoint
 {
-    public static void MapUpdateMedicalInfoEndpoint(this RouteGroupBuilder group)
+    public static void MapUpdateMedicalRecordEndpoint(this RouteGroupBuilder group)
     {
         group
             .MapPut(

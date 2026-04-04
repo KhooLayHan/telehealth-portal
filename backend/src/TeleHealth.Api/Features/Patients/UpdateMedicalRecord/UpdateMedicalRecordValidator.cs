@@ -1,7 +1,6 @@
 using FluentValidation;
-using TeleHealth.Api.Domain.Entities;
 
-namespace TeleHealth.Api.Features.Patients.UpdateMedicalInfo;
+namespace TeleHealth.Api.Features.Patients.UpdateMedicalRecord;
 
 public class UpdateMedicalRecordValidator : AbstractValidator<UpdateMedicalRecordCommand>
 {
