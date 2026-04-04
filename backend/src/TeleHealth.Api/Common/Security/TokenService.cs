@@ -33,14 +33,14 @@ public sealed class TokenService(IConfiguration configuration) : ITokenService
                 : 60;
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
             issuer: issuer,
             audience: audience,
             claims: claims,
             expires: DateTime.UtcNow.AddMinutes(expiryMinutes),
-            signingCredentials: creds
+            signingCredentials: credentials
         );
 
         var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
