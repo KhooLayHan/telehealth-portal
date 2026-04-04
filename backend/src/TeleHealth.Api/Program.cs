@@ -1,10 +1,13 @@
 using FluentValidation;
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Scalar.AspNetCore;
 using Serilog;
+
+using TeleHealth.Api.Common;
 using TeleHealth.Api.Common.Extensions;
 using TeleHealth.Api.Common.Security;
 using TeleHealth.Api.Domain.Entities;
@@ -94,7 +97,7 @@ app.UseStatusCodePages();
 app.UseAuthentication();
 app.UseAuthorization();
 
-var api = app.CreateVersionedApiGroup(1, 0);
+var api = app.CreateVersionedApiGroup(ApiEndpoints.MajorVersion);
 api.MapLoginEndpoint();
 api.MapRegisterPatientEndpoint();
 api.MapCreateUserEndpoint();

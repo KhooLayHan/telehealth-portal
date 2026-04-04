@@ -2,12 +2,13 @@ namespace TeleHealth.Api.Common;
 
 public static class ApiEndpoints
 {
-    private const string ApiBase = "api";
-    private const string VersionBase = $"{ApiBase}/v1";
+    public const string ApiBase = "api";
+    public const int MajorVersion = 1;
+    public const int MinorVersion = 0;
 
     public static class Patients
     {
-        private const string Base = $"{VersionBase}/patients";
+        private const string Base = "patients";
 
         public const string Me = $"{Base}/me";
 
@@ -18,7 +19,7 @@ public static class ApiEndpoints
 
     public static class Auth
     {
-        private const string Base = $"{VersionBase}/auth";
+        private const string Base = "auth";
 
         public const string Login = $"{Base}/login";
 
