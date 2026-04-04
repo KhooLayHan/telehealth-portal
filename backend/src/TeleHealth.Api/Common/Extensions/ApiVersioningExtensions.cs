@@ -33,7 +33,7 @@ public static class ApiVersioningExtensions
         var version = new ApiVersion(majorVersion, minorVersion);
         var versionSet = app.NewApiVersionSet().HasApiVersion(version).ReportApiVersions().Build();
 
-        return app.MapGroup($"api/v{{version:apiVersion}}")
+        return app.MapGroup($"{ApiEndpoints.ApiBase}/v{{version:apiVersion}}/")
             .WithApiVersionSet(versionSet)
             .MapToApiVersion(version);
     }

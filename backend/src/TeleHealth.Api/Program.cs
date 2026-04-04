@@ -5,9 +5,12 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Scalar.AspNetCore;
 using Serilog;
+using TeleHealth.Api.Common;
 using TeleHealth.Api.Common.Extensions;
 using TeleHealth.Api.Common.Security;
 using TeleHealth.Api.Domain.Entities;
+using TeleHealth.Api.Features.Patients.GetProfile;
+using TeleHealth.Api.Features.Patients.UpdateMedicalRecord;
 using TeleHealth.Api.Features.Users.Create;
 using TeleHealth.Api.Features.Users.Login;
 using TeleHealth.Api.Features.Users.Register;
@@ -63,6 +66,8 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<LoginHandler>();
 builder.Services.AddScoped<RegisterPatientHandler>();
 builder.Services.AddScoped<CreateUserHandler>();
+builder.Services.AddScoped<GetProfileHandler>();
+builder.Services.AddScoped<UpdateMedicalRecordHandler>();
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
@@ -89,10 +94,12 @@ app.UseStatusCodePages();
 app.UseAuthentication();
 app.UseAuthorization();
 
-var api = app.CreateVersionedApiGroup(1, 0);
+var api = app.CreateVersionedApiGroup(ApiEndpoints.MajorVersion);
 api.MapLoginEndpoint();
 api.MapRegisterPatientEndpoint();
 api.MapCreateUserEndpoint();
+api.MapGetProfileEndpoint();
+api.MapUpdateMedicalRecordEndpoint();
 
 app.UseHttpsRedirection();
 

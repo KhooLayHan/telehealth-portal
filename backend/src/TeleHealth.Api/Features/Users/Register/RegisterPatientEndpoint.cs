@@ -7,7 +7,7 @@ public static class RegisterPatientEndpoint
     public static IEndpointRouteBuilder MapRegisterPatientEndpoint(this RouteGroupBuilder app)
     {
         app.MapPost(
-                "/auth/register-patient",
+                $"{ApiEndpoints.Auth.SignUpPatient}",
                 async (
                     RegisterPatientCommand command,
                     RegisterPatientHandler handler,

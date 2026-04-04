@@ -1,15 +1,16 @@
 using System.Security.Claims;
+using TeleHealth.Api.Common;
 using TeleHealth.Api.Common.Security;
 
 namespace TeleHealth.Api.Features.Patients.GetProfile;
 
 public static class GetProfileEndpoint
 {
-    public static void MapGetMyProfileFeature(this RouteGroupBuilder group)
+    public static void MapGetProfileEndpoint(this RouteGroupBuilder group)
     {
         group
             .MapGet(
-                "/me",
+                $"{ApiEndpoints.Patients.Me}",
                 async (ClaimsPrincipal user, GetProfileHandler handler, CancellationToken ct) =>
                 {
                     var publicIdString = user.FindFirstValue(ClaimTypes.NameIdentifier);
