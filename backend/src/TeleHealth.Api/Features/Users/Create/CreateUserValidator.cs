@@ -1,7 +1,7 @@
 using FluentValidation;
 using NodaTime;
 
-namespace TeleHealth.Api.Features.Users.CreateUser;
+namespace TeleHealth.Api.Features.Users.Create;
 
 public class CreateUserValidator : AbstractValidator<CreateUserCommand>
 {

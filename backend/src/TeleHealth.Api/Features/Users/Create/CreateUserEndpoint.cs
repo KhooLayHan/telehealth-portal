@@ -1,7 +1,7 @@
 using TeleHealth.Api.Common;
 using TeleHealth.Api.Features.Users.Create;
 
-namespace TeleHealth.Api.Features.Users.CreateUser;
+namespace TeleHealth.Api.Features.Users.Create;
 
 public static class CreateUserEndpoint
 {

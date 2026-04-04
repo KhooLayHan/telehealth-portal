@@ -1,9 +1,9 @@
 using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Slugify;
 using TeleHealth.Api.Common.Exceptions;
 using TeleHealth.Api.Domain.Entities;
-using TeleHealth.Api.Features.Users.CreateUser;
 using TeleHealth.Api.Infrastructure.Persistence;
 
 namespace TeleHealth.Api.Features.Users.Create;
@@ -16,6 +16,8 @@ public class CreateUserHandler(
 {
     public async Task<Guid> HandleAsync(CreateUserCommand command, CancellationToken token)
     {
+        SlugHelper slugHelper = new();
+
         var existingUser = await db.Users.FirstOrDefaultAsync(
             u => u.Email == command.Email || u.IcNumber == command.IcNumber,
             token
@@ -27,8 +29,7 @@ public class CreateUserHandler(
         }
 
         var publicId = Guid.NewGuid();
-        var patientPublicId = Guid.NewGuid();
-        var userSlug = $"user-{publicId:N}";
+        var userSlug = slugHelper.GenerateSlug($"user-{publicId}");
 
         await using var transaction = await db.Database.BeginTransactionAsync(token);
 
@@ -51,10 +52,13 @@ public class CreateUserHandler(
         db.Users.Add(user);
         await db.SaveChangesAsync(token);
 
+        var patientPublicId = Guid.NewGuid();
+        var patientSlug = slugHelper.GenerateSlug($"patient-{patientPublicId:N}");
+
         var patient = new Patient
         {
             PublicId = patientPublicId,
-            Slug = $"patient-{patientPublicId:N}",
+            Slug = patientSlug,
             UserId = user.Id,
         };
 

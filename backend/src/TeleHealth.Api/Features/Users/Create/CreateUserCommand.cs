@@ -1,7 +1,7 @@
 using Destructurama.Attributed;
 using NodaTime;
 
-namespace TeleHealth.Api.Features.Users.CreateUser;
+namespace TeleHealth.Api.Features.Users.Create;
 
 public sealed record CreateUserCommand(
     string Username,
