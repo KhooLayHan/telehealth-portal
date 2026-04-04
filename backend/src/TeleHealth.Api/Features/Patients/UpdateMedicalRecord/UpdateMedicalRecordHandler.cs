@@ -1,7 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-
 using NodaTime;
-
 using TeleHealth.Api.Features.Patients.UpdateMedicalInfo;
 using TeleHealth.Api.Infrastructure.Persistence;
 

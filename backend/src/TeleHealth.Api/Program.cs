@@ -1,12 +1,10 @@
 using FluentValidation;
-
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Scalar.AspNetCore;
 using Serilog;
-
 using TeleHealth.Api.Common;
 using TeleHealth.Api.Common.Extensions;
 using TeleHealth.Api.Common.Security;
