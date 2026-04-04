@@ -3,9 +3,9 @@ using TeleHealth.Api.Domain.Entities;
 
 namespace TeleHealth.Api.Features.Patients.UpdateMedicalInfo;
 
-public class UpdateMedicalInfoValidator : AbstractValidator<UpdateMedicalInfoCommand>
+public class UpdateMedicalRecordValidator : AbstractValidator<UpdateMedicalRecordCommand>
 {
-    public UpdateMedicalInfoValidator()
+    public UpdateMedicalRecordValidator()
     {
         RuleFor(x => x.BloodGroup)
             .MaximumLength(3)

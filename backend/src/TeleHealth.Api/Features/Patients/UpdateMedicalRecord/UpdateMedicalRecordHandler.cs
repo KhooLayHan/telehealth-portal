@@ -3,11 +3,11 @@ using TeleHealth.Api.Infrastructure.Persistence;
 
 namespace TeleHealth.Api.Features.Patients.UpdateMedicalInfo;
 
-public sealed class UpdateMedicalInfoHandler(ApplicationDbContext db)
+public sealed class UpdateMedicalRecordHandler(ApplicationDbContext db)
 {
     public async Task<bool> HandleAsync(
         Guid userPublicId,
-        UpdateMedicalInfoCommand cmd,
+        UpdateMedicalRecordCommand cmd,
         CancellationToken ct
     )
     {

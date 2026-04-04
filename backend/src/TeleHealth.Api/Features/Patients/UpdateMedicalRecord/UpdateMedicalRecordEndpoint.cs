@@ -5,7 +5,7 @@ using TeleHealth.Api.Features.Patients.GetProfile;
 
 namespace TeleHealth.Api.Features.Patients.UpdateMedicalInfo;
 
-public static class UpdateMedicalInfoEndpoint
+public static class UpdateMedicalRecordEndpoint
 {
     public static void MapUpdateMedicalInfoFeature(this RouteGroupBuilder group)
     {
@@ -14,9 +14,9 @@ public static class UpdateMedicalInfoEndpoint
                 $"{ApiEndpoints.Patients.MedicalRecord}",
                 async (
                     ClaimsPrincipal user,
-                    UpdateMedicalInfoCommand command,
+                    UpdateMedicalRecordCommand command,
                     GetProfileHandler handler,
-                    UpdateMedicalInfoHandler updateHandler,
+                    UpdateMedicalRecordHandler updateHandler,
                     CancellationToken ct
                 ) =>
                 {
@@ -38,6 +38,6 @@ public static class UpdateMedicalInfoEndpoint
             .WithName("UpdateMedicalInfo")
             .WithTags("Patients")
             .RequireAuthorization(AuthConstants.PatientPolicy)
-            .AddEndpointFilter<ValidationFilter<UpdateMedicalInfoCommand>>();
+            .AddEndpointFilter<ValidationFilter<UpdateMedicalRecordCommand>>();
     }
 }
