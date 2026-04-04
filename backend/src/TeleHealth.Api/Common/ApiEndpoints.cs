@@ -11,7 +11,7 @@ public static class ApiEndpoints
 
         public const string Me = $"{Base}/me";
 
-        public const string MedicalRecord  = $"{Me}/medical-record";
+        public const string MedicalRecord = $"{Me}/medical-record";
 
         public const string GetById = $"{Base}/{{id:guid}}";
     }
