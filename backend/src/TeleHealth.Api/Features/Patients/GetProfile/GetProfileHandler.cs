@@ -12,12 +12,6 @@ public sealed class GetProfileHandler(ApplicationDbContext db)
         return await db
             .Patients.AsNoTracking()
             .Where(p => p.User.PublicId == userPublicId)
-            .Select(p => new PatientProfileDto
-            {
-                FirstName = p.User.FirstName,
-                LastName = p.User.LastName,
-                Email = p.User.Email,
-            })
             .SelectFacet<Patient, PatientProfileDto>()
             .FirstOrDefaultAsync(ct);
     }
