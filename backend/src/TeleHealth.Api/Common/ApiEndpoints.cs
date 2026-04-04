@@ -27,4 +27,11 @@ public static class ApiEndpoints
 
         public const string SignUpPatient = $"{Base}/signup-patient";
     }
+    
+    public static class LabReports
+    {
+        public const string Base = "lab-reports";
+     
+        public const string Create = Base; 
+    }
 }
