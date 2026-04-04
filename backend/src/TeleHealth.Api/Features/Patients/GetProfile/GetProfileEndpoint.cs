@@ -6,7 +6,7 @@ namespace TeleHealth.Api.Features.Patients.GetProfile;
 
 public static class GetProfileEndpoint
 {
-    public static void MapGetMyProfileFeature(this RouteGroupBuilder group)
+    public static void MapGetProfileEndpoint(this RouteGroupBuilder group)
     {
         group
             .MapGet(
