@@ -7,7 +7,7 @@ public static class LoginEndpoint
     public static void MapLoginEndpoint(this RouteGroupBuilder app)
     {
         app.MapPost(
-                "/auth/login",
+                $"{ApiEndpoints.Auth.Login}",
                 async (
                     LoginCommand command,
                     LoginHandler handler,

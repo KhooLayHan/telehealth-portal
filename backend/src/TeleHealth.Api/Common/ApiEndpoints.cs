@@ -10,6 +10,8 @@ public static class ApiEndpoints
     {
         private const string Base = "patients";
 
+        public const string Create = Base;
+
         public const string Me = $"{Base}/me";
 
         public const string MedicalRecord = $"{Me}/medical-record";
