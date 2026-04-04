@@ -11,7 +11,7 @@ public static class UpdateMedicalInfoEndpoint
     {
         group
             .MapPut(
-                "/me/medical-info",
+                $"{ApiEndpoints.Patients.MedicalRecord}",
                 async (
                     ClaimsPrincipal user,
                     UpdateMedicalInfoCommand command,
