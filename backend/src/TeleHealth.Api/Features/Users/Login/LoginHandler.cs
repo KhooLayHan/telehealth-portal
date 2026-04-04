@@ -1,7 +1,5 @@
-using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Serilog;
 using TeleHealth.Api.Common.Security;
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Infrastructure.Persistence;
