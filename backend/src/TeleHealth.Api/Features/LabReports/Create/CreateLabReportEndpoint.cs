@@ -9,7 +9,7 @@ public static class CreateLabReportEndpoint
     {
         group
             .MapPost(
-                $"{ApiEndpoints.Patients.Create}",
+                $"{ApiEndpoints.LabReports.Create}",
                 async (
                     CreateLabReportCommand cmd,
                     CreateLabReportHandler handler,
