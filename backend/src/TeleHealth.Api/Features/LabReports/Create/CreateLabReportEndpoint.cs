@@ -7,7 +7,8 @@ public static class CreateLabReportEndpoint
 {
     public static void MapCreateLabReportEndpoint(this RouteGroupBuilder group)
     {
-        group.MapPost(
+        group
+            .MapPost(
                 $"{ApiEndpoints.Patients.Create}",
                 async (
                     CreateLabReportCommand cmd,
@@ -16,7 +17,10 @@ public static class CreateLabReportEndpoint
                 ) =>
                 {
                     var response = await handler.HandleAsync(cmd, ct);
-                    return TypedResults.Created($"{ApiEndpoints.LabReports.Base}/{response.PublicId}", response);
+                    return TypedResults.Created(
+                        $"{ApiEndpoints.LabReports.Base}/{response.PublicId}",
+                        response
+                    );
                 }
             )
             .WithName("CreateLabReport")

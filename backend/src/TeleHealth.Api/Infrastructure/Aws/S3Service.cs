@@ -5,9 +5,15 @@ namespace TeleHealth.Api.Infrastructure.Aws;
 
 public sealed class S3Service(IAmazonS3 s3Client, IConfiguration configuration) : IS3Service
 {
-    public string GeneratePreSignedUploadUrl(string objectKey, string contentType, int expiresMinutes = 15)
+    public string GeneratePreSignedUploadUrl(
+        string objectKey,
+        string contentType,
+        int expiresMinutes = 15
+    )
     {
-        var bucketName = configuration["Aws:S3:BucketName"] ?? throw new InvalidOperationException("S3 Bucket Name missing");
+        var bucketName =
+            configuration["Aws:S3:BucketName"]
+            ?? throw new InvalidOperationException("S3 Bucket Name missing");
 
         var request = new GetPreSignedUrlRequest()
         {
@@ -17,7 +23,7 @@ public sealed class S3Service(IAmazonS3 s3Client, IConfiguration configuration) 
             ContentType = contentType,
             Expires = DateTime.UtcNow.AddMinutes(expiresMinutes),
         };
-        
+
         return s3Client.GetPreSignedURL(request);
     }
 }
