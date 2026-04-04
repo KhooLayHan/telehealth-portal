@@ -1,16 +1,16 @@
 using System.Security.Claims;
 using TeleHealth.Api.Common;
 using TeleHealth.Api.Common.Security;
-using TeleHealth.Api.Features.Patients.UpdateMedicalInfo;
+using TeleHealth.Api.Features.Patients.GetProfile;
 
-namespace TeleHealth.Api.Features.Patients.GetProfile;
+namespace TeleHealth.Api.Features.Patients.UpdateMedicalInfo;
 
 public static class UpdateMedicalInfoEndpoint
 {
     public static void MapUpdateMedicalInfoFeature(this RouteGroupBuilder group)
     {
         group
-            .MapGet(
+            .MapPut(
                 "/me/medical-info",
                 async (
                     ClaimsPrincipal user,
@@ -29,7 +29,10 @@ public static class UpdateMedicalInfoEndpoint
                         return Results.NotFound("Patient profile not found.");
 
                     var updatedProfile = await handler.HandleAsync(publicId, ct);
-                    return Results.Ok(updatedProfile);
+
+                    return updatedProfile is not null
+                        ? Results.Ok(updatedProfile)
+                        : Results.NotFound("Patient profile not found.");
                 }
             )
             .WithName("UpdateMedicalInfo")

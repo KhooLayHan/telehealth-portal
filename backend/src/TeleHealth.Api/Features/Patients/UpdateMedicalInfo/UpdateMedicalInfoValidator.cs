@@ -20,7 +20,7 @@ public class UpdateMedicalInfoValidator : AbstractValidator<UpdateMedicalInfoCom
             {
                 RuleFor(x => x.EmergencyContact!.Name).NotEmpty().MaximumLength(100);
                 RuleFor(x => x.EmergencyContact!.Relationship).NotEmpty().MaximumLength(50);
-                RuleFor(x => x.EmergencyContact!.Phone).NotEmpty().MaximumLength(20);
+                RuleFor(x => x.EmergencyContact!.Phone).NotEmpty().MaximumLength(16);
             }
         );
 
