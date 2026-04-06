@@ -1,5 +1,4 @@
 using Amazon.S3;
-
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -72,8 +71,8 @@ builder.Services.AddScoped<CreateUserHandler>();
 builder.Services.AddScoped<GetProfileHandler>();
 builder.Services.AddScoped<UpdateMedicalRecordHandler>();
 
-services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
-services.AddAWSService<IAmazonS3>();
+builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
+builder.Services.AddAWSService<IAmazonS3>();
 builder.Services.AddScoped<IS3Service, S3Service>();
 
 builder.Services.AddHttpContextAccessor();
