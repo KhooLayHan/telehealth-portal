@@ -10,6 +10,7 @@ public class CreateLabReportValidator : AbstractValidator<CreateLabReportCommand
         RuleFor(x => x.ReportType).NotEmpty().MaximumLength(100);
         RuleFor(x => x.FileName).NotEmpty().MaximumLength(255);
         RuleFor(x => x.ContentType)
+            .NotEmpty()
             .Must(c => c == "application/pdf" || c.StartsWith("image/", StringComparison.Ordinal))
             .WithMessage("Only PDFs and Images are allowed.");
     }
