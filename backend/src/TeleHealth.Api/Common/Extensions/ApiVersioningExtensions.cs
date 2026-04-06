@@ -10,7 +10,7 @@ public static class ApiVersioningExtensions
         services
             .AddApiVersioning(options =>
             {
-                options.DefaultApiVersion = new ApiVersion(1, 0);
+                options.DefaultApiVersion = new ApiVersion(ApiEndpoints.MajorVersion, ApiEndpoints.MinorVersion);
                 options.AssumeDefaultVersionWhenUnspecified = true;
                 options.ReportApiVersions = true;
                 options.ApiVersionReader = new UrlSegmentApiVersionReader();
@@ -26,8 +26,8 @@ public static class ApiVersioningExtensions
 
     public static RouteGroupBuilder CreateVersionedApiGroup(
         this IEndpointRouteBuilder app,
-        int majorVersion,
-        int minorVersion = 0
+        int majorVersion = ApiEndpoints.MajorVersion,
+        int minorVersion = ApiEndpoints.MinorVersion
     )
     {
         var version = new ApiVersion(majorVersion, minorVersion);
