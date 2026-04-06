@@ -10,7 +10,10 @@ public static class ApiVersioningExtensions
         services
             .AddApiVersioning(options =>
             {
-                options.DefaultApiVersion = new ApiVersion(ApiEndpoints.MajorVersion, ApiEndpoints.MinorVersion);
+                options.DefaultApiVersion = new ApiVersion(
+                    ApiEndpoints.MajorVersion,
+                    ApiEndpoints.MinorVersion
+                );
                 options.AssumeDefaultVersionWhenUnspecified = true;
                 options.ReportApiVersions = true;
                 options.ApiVersionReader = new UrlSegmentApiVersionReader();
