@@ -1,3 +1,4 @@
+using Amazon.S3;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +15,7 @@ using TeleHealth.Api.Features.Patients.UpdateMedicalRecord;
 using TeleHealth.Api.Features.Users.Create;
 using TeleHealth.Api.Features.Users.Login;
 using TeleHealth.Api.Features.Users.Register;
+using TeleHealth.Api.Infrastructure.Aws;
 using TeleHealth.Api.Infrastructure.Persistence;
 
 Log.Information("Starting TeleHealth API Boot Sequence...");
@@ -68,6 +70,11 @@ builder.Services.AddScoped<RegisterPatientHandler>();
 builder.Services.AddScoped<CreateUserHandler>();
 builder.Services.AddScoped<GetProfileHandler>();
 builder.Services.AddScoped<UpdateMedicalRecordHandler>();
+
+builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
+builder.Services.AddAWSService<IAmazonS3>();
+builder.Services.AddScoped<IS3Service, S3Service>();
+
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
@@ -94,7 +101,7 @@ app.UseStatusCodePages();
 app.UseAuthentication();
 app.UseAuthorization();
 
-var api = app.CreateVersionedApiGroup(ApiEndpoints.MajorVersion);
+var api = app.CreateVersionedApiGroup();
 api.MapLoginEndpoint();
 api.MapRegisterPatientEndpoint();
 api.MapCreateUserEndpoint();
