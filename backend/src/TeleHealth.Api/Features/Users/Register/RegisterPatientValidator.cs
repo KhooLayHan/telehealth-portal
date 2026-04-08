@@ -8,7 +8,7 @@ public class RegisterPatientValidator : AbstractValidator<RegisterPatientCommand
     public RegisterPatientValidator()
     {
         RuleFor(x => x.Username).NotEmpty().MaximumLength(50);
-        
+
         RuleFor(x => x.Email).NotEmpty().EmailAddress().MaximumLength(255);
 
         RuleFor(x => x.Password)
