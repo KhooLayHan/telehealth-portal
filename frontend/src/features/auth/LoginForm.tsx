@@ -3,8 +3,8 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { Eye, EyeOff, Heart } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
-import { useLoginUser } from "@/api/generated/authentication";
-import type { ApiError } from "@/api/ofetch-mutator";
+import { useLoginUser } from "@/api/generated/authentication/authentication";
+import type { ApiError } from "src/api/ofetch-mutator";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -27,7 +27,7 @@ export function LoginForm() {
   const setAuth = useAuthStore((state) => state.setAuth);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [_globalError, setGlobalError] = useState<string | null>(null);
+  const [globalError, setGlobalError] = useState<string | null>(null);
 
   // TanStack Query Mutation
   const loginMutation = useLoginUser();
@@ -38,7 +38,6 @@ export function LoginForm() {
       password: "",
     },
     onSubmit: async ({ value }) => {
-      console.log("Login submitted", { ...value, rememberMe });
       setGlobalError(null);
 
       try {
@@ -52,7 +51,6 @@ export function LoginForm() {
           role: "Patient", // Or read from profile endpoint later
         });
 
-        // 3. Redirect to Dashboard
         navigate({ to: "/dashboard" });
       } catch (err) {
         const apiError = err as ApiError;
@@ -60,9 +58,7 @@ export function LoginForm() {
         if (apiError.status === 401) {
           setGlobalError("Invalid email or password.");
         } else {
-          setGlobalError(
-            apiError.data?.title || "An unexpected error occurred."
-          );
+          setGlobalError(apiError.data?.title || "An unexpected error occurred.");
         }
       }
     },
@@ -92,11 +88,13 @@ export function LoginForm() {
             }}
           >
             {/* Global Error Alert */}
-            {globalError && (
-              <div className="rounded-md border border-destructive/20 bg-destructive/10 p-3 text-destructive-foreground text-sm">
-                {globalError}
-              </div>
-            )}
+            <div
+              aria-live="assertive"
+              role="alert"
+              className="rounded-md border border-destructive/20 bg-destructive/10 p-3 text-destructive-foreground text-sm"
+            >
+              {globalError}
+            </div>
 
             {/* Email */}
             <form.Field

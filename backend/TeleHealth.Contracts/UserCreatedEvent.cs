@@ -2,4 +2,4 @@
 
 namespace TeleHealth.Contracts;
 
-public record UserCreatedEvent(Guid PublicId, Instant? OccuredAt);
+public record UserCreatedEvent(Guid PublicId, Instant? OccurredAt);

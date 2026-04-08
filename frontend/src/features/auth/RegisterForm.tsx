@@ -3,8 +3,8 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { Eye, EyeOff, Heart } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
-import { useRegisterPatient } from "@/api/generated/authentication";
-import type { ApiError } from "@/api/ofetch-mutator";
+import { useRegisterPatient } from "@/api/generated/authentication/authentication";
+import type { ApiError } from "src/api/ofetch-mutator";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -38,17 +38,18 @@ export function RegisterForm() {
 
   const form = useForm({
     defaultValues: {
+      username: "",
       firstName: "",
       lastName: "",
       email: "",
       role: "",
       dateOfBirth: "",
       password: "",
+      icNumber: "",
+      gender: "",
       confirmPassword: "",
     },
     onSubmit: async ({ value }) => {
-      // TODO: Wire up to actual registration API
-      console.log("Register submitted", value);
       setGlobalError(null);
 
       try {
@@ -62,8 +63,8 @@ export function RegisterForm() {
         const apiError = err as ApiError;
 
         setGlobalError(
-          apiError.data?.detail ||
-            apiError.data?.title ||
+          apiError.data?.detail ??
+            apiError.data?.title ??
             "Registration failed."
         );
       }
@@ -96,11 +97,13 @@ export function RegisterForm() {
             }}
           >
             {/* Global Error Alert */}
-            {globalError && (
-              <div className="rounded-md border border-destructive/20 bg-destructive/10 p-3 text-destructive-foreground text-sm">
-                {globalError}
-              </div>
-            )}
+            <div
+              aria-live="assertive"
+              role="alert"
+              className="rounded-md border border-destructive/20 bg-destructive/10 p-3 text-destructive-foreground text-sm"
+            >
+              {globalError}
+            </div>
 
             {/* First name + Last name */}
             <div className="grid grid-cols-2 gap-3">

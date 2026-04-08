@@ -2,4 +2,4 @@
 
 namespace TeleHealth.Contracts;
 
-public sealed record PatientRegisteredEvent(Guid PublicId, Instant OccuredAt);
+public sealed record PatientRegisteredEvent(Guid PublicId, Instant OccurredAt);
