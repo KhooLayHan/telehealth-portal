@@ -55,7 +55,9 @@ export function LoginForm() {
         };
 
         if (!profile?.publicId) {
-          setGlobalError("Signed in, but could not load your profile. Please try again.");
+          setGlobalError(
+            "Signed in, but could not load your profile. Please try again."
+          );
           return;
         }
 

@@ -28,7 +28,7 @@ export const ofetchMutator = async <T>(
 ): Promise<T> => {
   const response = await fetch(url, {
     ...options,
-    credentials: "include", 
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...options.headers,
