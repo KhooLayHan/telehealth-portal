@@ -15,9 +15,12 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  LoginCommand,
+  LoginCommand
+} from '../teleHealthApiV1.schemas/loginCommand';
+
+import type {
   RegisterPatientCommand
-} from '../teleHealthApiV1.schemas';
+} from '../teleHealthApiV1.schemas/registerPatientCommand';
 
 import { ofetchMutator } from '../../ofetch-mutator';
 

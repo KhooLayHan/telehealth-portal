@@ -25,7 +25,7 @@ import type {
 
 import type {
   UpdateMedicalRecordCommand
-} from '../teleHealthApiV1.schemas';
+} from '../teleHealthApiV1.schemas/updateMedicalRecordCommand';
 
 import { ofetchMutator } from '../../ofetch-mutator';
 

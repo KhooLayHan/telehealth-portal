@@ -16,7 +16,7 @@ import type {
 
 import type {
   CreateUserCommand
-} from '../teleHealthApiV1.schemas';
+} from '../teleHealthApiV1.schemas/createUserCommand';
 
 import { ofetchMutator } from '../../ofetch-mutator';
 

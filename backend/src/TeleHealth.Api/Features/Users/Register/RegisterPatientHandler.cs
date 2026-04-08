@@ -69,7 +69,7 @@ public sealed class RegisterPatientHandler(
 
         var patient = new Patient
         {
-            PublicId = Guid.NewGuid(),
+            PublicId = patientPublicId,
             Slug = slugHelper.GenerateSlug($"patient-{patientPublicId:N}"),
             UserId = user.Id,
         };
