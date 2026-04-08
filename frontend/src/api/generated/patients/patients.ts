@@ -24,6 +24,14 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  PatientProfileDto
+} from '../teleHealthApiV1.schemas/patientProfileDto';
+
+import type {
+  ProblemDetails
+} from '../teleHealthApiV1.schemas/problemDetails';
+
+import type {
   UpdateMedicalRecordCommand
 } from '../teleHealthApiV1.schemas/updateMedicalRecordCommand';
 
@@ -35,16 +43,23 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 export type getMyProfileResponse200 = {
-  data: void
+  data: PatientProfileDto
   status: 200
+}
+
+export type getMyProfileResponse404 = {
+  data: ProblemDetails
+  status: 404
 }
 
 export type getMyProfileResponseSuccess = (getMyProfileResponse200) & {
   headers: Headers;
 };
-;
+export type getMyProfileResponseError = (getMyProfileResponse404) & {
+  headers: Headers;
+};
 
-export type getMyProfileResponse = (getMyProfileResponseSuccess)
+export type getMyProfileResponse = (getMyProfileResponseSuccess | getMyProfileResponseError)
 
 export const getGetMyProfileUrl = () => {
 
@@ -76,7 +91,7 @@ export const getGetMyProfileQueryKey = () => {
     }
 
 
-export const getGetMyProfileQueryOptions = <TData = Awaited<ReturnType<typeof getMyProfile>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyProfile>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+export const getGetMyProfileQueryOptions = <TData = Awaited<ReturnType<typeof getMyProfile>>, TError = ProblemDetails>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyProfile>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -95,10 +110,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type GetMyProfileQueryResult = NonNullable<Awaited<ReturnType<typeof getMyProfile>>>
-export type GetMyProfileQueryError = unknown
+export type GetMyProfileQueryError = ProblemDetails
 
 
-export function useGetMyProfile<TData = Awaited<ReturnType<typeof getMyProfile>>, TError = unknown>(
+export function useGetMyProfile<TData = Awaited<ReturnType<typeof getMyProfile>>, TError = ProblemDetails>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyProfile>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getMyProfile>>,
@@ -108,7 +123,7 @@ export function useGetMyProfile<TData = Awaited<ReturnType<typeof getMyProfile>>
       >, request?: SecondParameter<typeof ofetchMutator>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetMyProfile<TData = Awaited<ReturnType<typeof getMyProfile>>, TError = unknown>(
+export function useGetMyProfile<TData = Awaited<ReturnType<typeof getMyProfile>>, TError = ProblemDetails>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyProfile>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getMyProfile>>,
@@ -118,12 +133,12 @@ export function useGetMyProfile<TData = Awaited<ReturnType<typeof getMyProfile>>
       >, request?: SecondParameter<typeof ofetchMutator>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetMyProfile<TData = Awaited<ReturnType<typeof getMyProfile>>, TError = unknown>(
+export function useGetMyProfile<TData = Awaited<ReturnType<typeof getMyProfile>>, TError = ProblemDetails>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyProfile>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useGetMyProfile<TData = Awaited<ReturnType<typeof getMyProfile>>, TError = unknown>(
+export function useGetMyProfile<TData = Awaited<ReturnType<typeof getMyProfile>>, TError = ProblemDetails>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyProfile>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {

@@ -28,7 +28,7 @@ export const ofetchMutator = async <T>(
 ): Promise<T> => {
   const response = await fetch(url, {
     ...options,
-    credentials: "include", // 🔥 CRITICAL FOR HTTPONLY COOKIES
+    credentials: "include", 
     headers: {
       "Content-Type": "application/json",
       ...options.headers,
@@ -41,7 +41,13 @@ export const ofetchMutator = async <T>(
   }
 
   const text = await response.text();
-  return text ? (JSON.parse(text) as T) : (undefined as T);
+  const data = text ? JSON.parse(text) : undefined;
+
+  return {
+    data,
+    status: response.status,
+    headers: response.headers,
+  } as T;
 };
 
 export { ApiError };

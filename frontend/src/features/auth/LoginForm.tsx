@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuthStore } from "@/store/useAuthStore";
+import { getMyProfile } from "@/api/generated/patients/patients";
 
 const loginSchema = z.object({
   email: z.email("Invalid email address"),
@@ -43,12 +44,26 @@ export function LoginForm() {
       try {
         await loginMutation.mutateAsync({ data: value });
 
-        // TODO: Ideally, you'd call a useGetMyProfile() hook here to get real user data)
+        const profileResponse = await getMyProfile();
+
+        const profile = profileResponse.data as {
+          publicId: string;
+          firstName: string;
+          lastName: string;
+          email: string;
+          role: string;
+        };
+
+        if (!profile?.publicId) {
+          setGlobalError("Signed in, but could not load your profile. Please try again.");
+          return;
+        }
+
         setAuth({
-          publicId: "authenticated-user",
-          email: value.email,
-          firstName: "Welcome",
-          role: "Patient", // Or read from profile endpoint later
+          publicId: profile.publicId,
+          email: profile.email,
+          firstName: profile.firstName,
+          role: profile.role,
         });
 
         navigate({ to: "/dashboard" });

@@ -35,6 +35,35 @@ export interface LoginCommand {
   password: string;
 }
 
+export interface PatientProfileDto {
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  publicId?: string;
+  /** @nullable */
+  bloodGroup?: string | null;
+  /** @nullable */
+  allergies?: Allergy[] | null;
+  emergencyContact?: null | EmergencyContact;
+}
+
+export interface ProblemDetails {
+  /** @nullable */
+  type?: string | null;
+  /** @nullable */
+  title?: string | null;
+  /**
+     * @nullable
+     * @pattern ^-?(?:0|[1-9]\d*)$
+     */
+  status?: number | string | null;
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+}
+
 export interface RegisterPatientCommand {
   username: string;
   email: string;
