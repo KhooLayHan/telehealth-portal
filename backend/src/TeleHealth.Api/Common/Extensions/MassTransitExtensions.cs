@@ -1,4 +1,6 @@
 using MassTransit;
+using NodaTime;
+using NodaTime.Serialization.SystemTextJson;
 using TeleHealth.Api.Infrastructure.Persistence;
 
 namespace TeleHealth.Api.Common.Extensions;
@@ -27,6 +29,11 @@ public static class MassTransitExtensions
                     (ctx, cfg) =>
                     {
                         cfg.LocalstackHost();
+
+                        cfg.ConfigureJsonSerializerOptions(options =>
+                            options.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb)
+                        );
+
                         cfg.ConfigureEndpoints(ctx);
                     }
                 );
@@ -45,6 +52,11 @@ public static class MassTransitExtensions
                                 h.SecretKey(configuration["AWS:SecretKey"]!);
                             }
                         );
+
+                        cfg.ConfigureJsonSerializerOptions(options =>
+                            options.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb)
+                        );
+
                         cfg.ConfigureEndpoints(ctx);
                     }
                 );

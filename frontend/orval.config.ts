@@ -16,7 +16,7 @@ export default defineConfig({
       httpClient: "fetch",
       mode: "tags-split",
       namingConvention: "camelCase",
-      operationSchemas: "src/api/schemas",
+      operationSchemas: "api/schemas",
       override: {
         mutator: {
           path: "api/ofetch-mutator.ts",
@@ -25,9 +25,6 @@ export default defineConfig({
       },
       target: "api/generated",
       workspace: "src",
-    },
-    hooks: {
-      // afterAllFilesWrite: ["bun", "run", "check", "--write"],
     },
   },
 });

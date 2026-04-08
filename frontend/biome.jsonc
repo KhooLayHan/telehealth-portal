@@ -9,7 +9,7 @@
       "!build",
       "!.storybook",
       "!src/stories",
-      "!src/api/generated/**/*",
+      "src/api/generated/**/*",
       "!src/components/ui/**/*"
     ]
   },
