@@ -90,13 +90,15 @@ export function LoginForm() {
             }}
           >
             {/* Global Error Alert */}
-            <div
-              aria-live="assertive"
-              role="alert"
-              className="rounded-md border border-destructive/20 bg-destructive/10 p-3 text-destructive-foreground text-sm"
-            >
-              {globalError}
-            </div>
+            {globalError ? (
+              <div
+                aria-live="assertive"
+                className="rounded-md border border-destructive/20 bg-destructive/10 p-3 text-destructive-foreground text-sm"
+                role="alert"
+              >
+                {globalError}
+              </div>
+            ) : null}
 
             {/* Email */}
             <form.Field

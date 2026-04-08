@@ -46,12 +46,12 @@ public sealed class RegisterPatientHandler(
         await using var transaction = await db.Database.BeginTransactionAsync(ct);
 
         var publicId = Guid.NewGuid();
-        var userSlug = slugHelper.GenerateSlug($"{cmd.FirstName}-{cmd.LastName}-{publicId}");
+        var patientPublicId = Guid.NewGuid();
 
         var user = new User
         {
             PublicId = publicId,
-            Slug = userSlug,
+            Slug = slugHelper.GenerateSlug($"user-{publicId:N}"),
             Username = cmd.Username,
             Email = cmd.Email,
             PasswordHash = string.Empty,
@@ -70,7 +70,7 @@ public sealed class RegisterPatientHandler(
         var patient = new Patient
         {
             PublicId = Guid.NewGuid(),
-            Slug = slugHelper.GenerateSlug($"patient-{userSlug}"),
+            Slug = slugHelper.GenerateSlug($"patient-{patientPublicId:N}"),
             UserId = user.Id,
         };
 
