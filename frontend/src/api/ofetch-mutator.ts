@@ -18,7 +18,7 @@ class ApiError extends Error {
     super(`API error: ${status}`);
     this.name = "ApiError";
     this.status = status;
-    this.data = (data as ProblemDetails) || {};
+    this.data = (data as ProblemDetails) ?? {};
   }
 }
 

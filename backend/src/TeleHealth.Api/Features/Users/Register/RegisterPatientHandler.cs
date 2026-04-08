@@ -41,7 +41,11 @@ public sealed class RegisterPatientHandler(
             throw new ConflictException("IC Number is already registered.");
         }
 
-        var patientRole = await db.Roles.SingleAsync(r => r.Slug == "patient", ct);
+        var patientRole =
+            await db.Roles.SingleOrDefaultAsync(r => r.Slug == "patient", ct)
+            ?? throw new InvalidOperationException(
+                "Required 'patient' role is not configured in the system."
+            );
 
         await using var transaction = await db.Database.BeginTransactionAsync(ct);
 
@@ -77,7 +81,7 @@ public sealed class RegisterPatientHandler(
         db.Patients.Add(patient);
 
         await publishEndpoint.Publish(
-            new PatientRegisteredEvent(user.PublicId, SystemClock.Instance.GetCurrentInstant()),
+            new PatientRegisteredEvent(patient.PublicId, SystemClock.Instance.GetCurrentInstant()),
             ct
         );
 
