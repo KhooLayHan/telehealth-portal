@@ -1,6 +1,9 @@
 using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+
+using NodaTime;
+
 using Serilog;
 using Slugify;
 using TeleHealth.Api.Common.Exceptions;
@@ -18,10 +21,15 @@ public sealed class RegisterPatientHandler(
 {
     public async Task<Guid> HandleAsync(RegisterPatientCommand cmd, CancellationToken ct)
     {
-        Log.Information("Attempting to register new patient. Email: {Email}", cmd.Email);
+        Log.Information("Attempting to register new patient.");
 
         SlugHelper slugHelper = new();
 
+        var usernameExists = await db.Users.AnyAsync(u => u.Username == cmd.Username, ct);
+                if (usernameExists)
+                    {
+                        throw new ConflictException("Username is already registered.");         }
+        
         var emailExists = await db.Users.AnyAsync(u => u.Email == cmd.Email, ct);
         if (emailExists)
         {
@@ -69,13 +77,13 @@ public sealed class RegisterPatientHandler(
 
         db.Patients.Add(patient);
 
-        await db.SaveChangesAsync(ct);
-
         await publishEndpoint.Publish(
-            new PatientRegisteredEvent(user.PublicId, user.Email, user.FirstName),
+            new PatientRegisteredEvent(user.PublicId, SystemClock.Instance.GetCurrentInstant()),
             ct
         );
 
+        
+        await db.SaveChangesAsync(ct);
         await transaction.CommitAsync(ct);
 
         Log.Information("Successfully registered Patient {PublicId}", patient.PublicId);

@@ -1,3 +1,5 @@
-﻿namespace TeleHealth.Contracts;
+﻿using NodaTime;
 
-public sealed record PatientRegisteredEvent(Guid PublicId, string Email, string FirstName);
+namespace TeleHealth.Contracts;
+
+public sealed record PatientRegisteredEvent(Guid PublicId, Instant OccuredAt);
