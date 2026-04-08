@@ -48,8 +48,8 @@ public static class MassTransitExtensions
                             configuration["Aws:Region"]!,
                             h =>
                             {
-                                h.AccessKey(configuration["AWS:AccessKey"]!);
-                                h.SecretKey(configuration["AWS:SecretKey"]!);
+                                h.AccessKey(configuration["Aws:AccessKey"]!);
+                                h.SecretKey(configuration["Aws:SecretKey"]!);
                             }
                         );
 

@@ -14,9 +14,8 @@ public static class UpdateMedicalRecordEndpoint
                 $"{ApiEndpoints.Patients.MedicalRecord}",
                 async (
                     ClaimsPrincipal user,
-                    UpdateMedicalRecordCommand command,
-                    GetProfileHandler handler,
-                    UpdateMedicalRecordHandler updateHandler,
+                    UpdateMedicalRecordCommand cmd,
+                    UpdateMedicalRecordHandler handler,
                     CancellationToken ct
                 ) =>
                 {
@@ -24,11 +23,7 @@ public static class UpdateMedicalRecordEndpoint
                     if (!Guid.TryParse(publicIdString, out var publicId))
                         return Results.Unauthorized();
 
-                    var success = await updateHandler.HandleAsync(publicId, command, ct);
-                    if (!success)
-                        return Results.NotFound("Patient profile not found.");
-
-                    var updatedProfile = await handler.HandleAsync(publicId, ct);
+                    var updatedProfile = await handler.HandleAsync(publicId, cmd, ct);
 
                     return updatedProfile is not null
                         ? Results.Ok(updatedProfile)
@@ -38,6 +33,8 @@ public static class UpdateMedicalRecordEndpoint
             .WithName("UpdateMedicalInfo")
             .WithTags("Patients")
             .RequireAuthorization(AuthConstants.PatientPolicy)
-            .AddEndpointFilter<ValidationFilter<UpdateMedicalRecordCommand>>();
+            .AddEndpointFilter<ValidationFilter<UpdateMedicalRecordCommand>>()
+            .Produces<PatientProfileDto>()
+            .ProducesProblem(StatusCodes.Status404NotFound);
     }
 }

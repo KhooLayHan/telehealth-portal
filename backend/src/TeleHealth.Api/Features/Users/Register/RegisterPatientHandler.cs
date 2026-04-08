@@ -90,6 +90,6 @@ public sealed class RegisterPatientHandler(
 
         Log.Information("Successfully registered Patient {PublicId}", patient.PublicId);
 
-        return patient.PublicId;
+        return publicId;
     }
 }

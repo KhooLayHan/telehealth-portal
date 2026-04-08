@@ -7,9 +7,9 @@ public class UpdateMedicalRecordValidator : AbstractValidator<UpdateMedicalRecor
     public UpdateMedicalRecordValidator()
     {
         RuleFor(x => x.BloodGroup)
+            .NotEmpty()
             .MaximumLength(3)
             .Matches("^(A|B|AB|O)[+-]$")
-            .When(x => !string.IsNullOrEmpty(x.BloodGroup))
             .WithMessage("Invalid blood group format. Use format like A+ or O-");
 
         // Validate the JSONB Emergency Contact

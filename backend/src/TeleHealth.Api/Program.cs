@@ -117,6 +117,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowFrontend");
 
+app.UseHttpsRedirection();
+
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 
@@ -129,8 +131,6 @@ api.MapRegisterPatientEndpoint();
 api.MapCreateUserEndpoint();
 api.MapGetProfileEndpoint();
 api.MapUpdateMedicalRecordEndpoint();
-
-app.UseHttpsRedirection();
 
 app.UseSerilogRequestLogging();
 
