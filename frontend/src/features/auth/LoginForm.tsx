@@ -26,6 +26,7 @@ export function LoginForm() {
   const setAuth = useAuthStore((state) => state.setAuth);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [globalError, setGlobalError] = useState<string | null>(null);
 
   const form = useForm({
     defaultValues: {
@@ -33,15 +34,31 @@ export function LoginForm() {
       password: "",
     },
     onSubmit: ({ value }) => {
-      // TODO: Wire up to actual API via useLoginUser()
       console.log("Login submitted", { ...value, rememberMe });
-      setAuth({
-        publicId: "mock-id",
-        email: value.email,
-        firstName: "User",
-        role: "Patient",
-      });
-      navigate({ to: "/dashboard" });
+        setGlobalError(null);
+
+        try {
+            await loginMutation.mutateAsync({ data: value });
+
+            // TODO: Ideally, you'd call a useGetMyProfile() hook here to get real user data)
+            setAuth({
+                publicId: "authenticated-user",
+                email: value.email,
+                firstName: "Welcome",
+                role: "Patient", // Or read from profile endpoint later
+            });
+
+            // 3. Redirect to Dashboard
+            navigate({ to: "/dashboard" });
+        } catch (err) {
+            const apiError = err as ApiError;
+            
+            if (apiError.status === 401) {
+                setGlobalError("Invalid email or password.");
+            } else {
+                setGlobalError(apiError.data?.title || "An unexpected error occurred.");
+            }
+        }
     },
   });
 

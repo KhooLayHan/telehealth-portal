@@ -15,6 +15,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+import { useRegisterPatient } from "@/api/generated/authentication";
+
 const registerSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
@@ -30,6 +32,7 @@ export function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [globalError, setGlobalError] = useState<string | null>(null);
 
   const form = useForm({
     defaultValues: {
@@ -44,7 +47,20 @@ export function RegisterForm() {
     onSubmit: ({ value }) => {
       // TODO: Wire up to actual registration API
       console.log("Register submitted", value);
-      navigate({ to: "/login" });
+        setGlobalError(null);
+    
+        try {
+            // Strip out confirmPassword as backend doesn't need it
+            const { confirmPassword, ...commandData } = value;
+    
+            await registerMutation.mutateAsync({ data: commandData });
+            
+            navigate({ to: "/login" });
+        } catch (err) {
+            const apiError = err as ApiError;
+            
+            setGlobalError(apiError.data?.detail || apiError.data?.title || "Registration failed.");
+        }
     },
   });
 
