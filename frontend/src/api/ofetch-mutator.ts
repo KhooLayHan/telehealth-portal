@@ -8,7 +8,6 @@ export interface ProblemDetails {
   [key: string]: any; // Allow any other extensions (like traceId)
 }
 
-
 class ApiError extends Error {
   status: number;
   data: ProblemDetails; // 2. Tell TS that 'data' is ProblemDetails!
@@ -17,7 +16,7 @@ class ApiError extends Error {
     super(`API error: ${status}`);
     this.name = "ApiError";
     this.status = status;
-    this.data = (data as ProblemDetails) || {}; 
+    this.data = (data as ProblemDetails) || {};
   }
 }
 
