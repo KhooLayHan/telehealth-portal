@@ -1,12 +1,23 @@
+// 1. Define the ASP.NET ProblemDetails standard shape
+export interface ProblemDetails {
+  type?: string;
+  title?: string;
+  status?: number;
+  detail?: string;
+  instance?: string;
+  [key: string]: any; // Allow any other extensions (like traceId)
+}
+
+
 class ApiError extends Error {
   status: number;
-  data: unknown;
+  data: ProblemDetails; // 2. Tell TS that 'data' is ProblemDetails!
 
   constructor(status: number, data: unknown) {
     super(`API error: ${status}`);
     this.name = "ApiError";
     this.status = status;
-    this.data = data;
+    this.data = (data as ProblemDetails) || {}; 
   }
 }
 

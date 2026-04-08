@@ -58,7 +58,9 @@ export function LoginForm() {
         if (apiError.status === 401) {
           setGlobalError("Invalid email or password.");
         } else {
-          setGlobalError(apiError.data?.title || "An unexpected error occurred.");
+          setGlobalError(
+            apiError.data?.title || "An unexpected error occurred."
+          );
         }
       }
     },

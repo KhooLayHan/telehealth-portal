@@ -54,9 +54,20 @@ export function RegisterForm() {
 
       try {
         // Strip out confirmPassword as backend doesn't need it
-        const { confirmPassword, ...commandData } = value;
+        // const { confirmPassword, ...commandData } = value;
 
-        await registerMutation.mutateAsync({ data: commandData });
+        const commandData = {
+          username: value.username,
+          email: value.email,
+          password: value.password,
+          firstName: value.firstName,
+          lastName: value.lastName,
+          icNumber: value.icNumber,
+          gender: value.gender,
+          dateOfBirth: value.dateOfBirth,
+        };
+
+        await registerMutation.mutateAsync({ data: commandData as any });
 
         navigate({ to: "/login" });
       } catch (err) {
