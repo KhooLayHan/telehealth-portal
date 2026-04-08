@@ -3,7 +3,8 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { Eye, EyeOff, Heart } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
-
+import { useLoginUser } from "@/api/generated/authentication";
+import type { ApiError } from "@/api/ofetch-mutator";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -26,39 +27,44 @@ export function LoginForm() {
   const setAuth = useAuthStore((state) => state.setAuth);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [globalError, setGlobalError] = useState<string | null>(null);
+  const [_globalError, setGlobalError] = useState<string | null>(null);
+
+  // TanStack Query Mutation
+  const loginMutation = useLoginUser();
 
   const form = useForm({
     defaultValues: {
       email: "",
       password: "",
     },
-    onSubmit: ({ value }) => {
+    onSubmit: async ({ value }) => {
       console.log("Login submitted", { ...value, rememberMe });
-        setGlobalError(null);
+      setGlobalError(null);
 
-        try {
-            await loginMutation.mutateAsync({ data: value });
+      try {
+        await loginMutation.mutateAsync({ data: value });
 
-            // TODO: Ideally, you'd call a useGetMyProfile() hook here to get real user data)
-            setAuth({
-                publicId: "authenticated-user",
-                email: value.email,
-                firstName: "Welcome",
-                role: "Patient", // Or read from profile endpoint later
-            });
+        // TODO: Ideally, you'd call a useGetMyProfile() hook here to get real user data)
+        setAuth({
+          publicId: "authenticated-user",
+          email: value.email,
+          firstName: "Welcome",
+          role: "Patient", // Or read from profile endpoint later
+        });
 
-            // 3. Redirect to Dashboard
-            navigate({ to: "/dashboard" });
-        } catch (err) {
-            const apiError = err as ApiError;
-            
-            if (apiError.status === 401) {
-                setGlobalError("Invalid email or password.");
-            } else {
-                setGlobalError(apiError.data?.title || "An unexpected error occurred.");
-            }
+        // 3. Redirect to Dashboard
+        navigate({ to: "/dashboard" });
+      } catch (err) {
+        const apiError = err as ApiError;
+
+        if (apiError.status === 401) {
+          setGlobalError("Invalid email or password.");
+        } else {
+          setGlobalError(
+            apiError.data?.title || "An unexpected error occurred."
+          );
         }
+      }
     },
   });
 
@@ -85,6 +91,13 @@ export function LoginForm() {
               form.handleSubmit();
             }}
           >
+            {/* Global Error Alert */}
+            {globalError && (
+              <div className="rounded-md border border-destructive/20 bg-destructive/10 p-3 text-destructive-foreground text-sm">
+                {globalError}
+              </div>
+            )}
+
             {/* Email */}
             <form.Field
               name="email"

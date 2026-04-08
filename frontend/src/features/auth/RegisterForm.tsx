@@ -3,7 +3,8 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { Eye, EyeOff, Heart } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
-
+import { useRegisterPatient } from "@/api/generated/authentication";
+import type { ApiError } from "@/api/ofetch-mutator";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,8 +15,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-import { useRegisterPatient } from "@/api/generated/authentication";
 
 const registerSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -34,6 +33,9 @@ export function RegisterForm() {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [globalError, setGlobalError] = useState<string | null>(null);
 
+  // TanStack Query Mutation
+  const registerMutation = useRegisterPatient();
+
   const form = useForm({
     defaultValues: {
       firstName: "",
@@ -44,23 +46,27 @@ export function RegisterForm() {
       password: "",
       confirmPassword: "",
     },
-    onSubmit: ({ value }) => {
+    onSubmit: async ({ value }) => {
       // TODO: Wire up to actual registration API
       console.log("Register submitted", value);
-        setGlobalError(null);
-    
-        try {
-            // Strip out confirmPassword as backend doesn't need it
-            const { confirmPassword, ...commandData } = value;
-    
-            await registerMutation.mutateAsync({ data: commandData });
-            
-            navigate({ to: "/login" });
-        } catch (err) {
-            const apiError = err as ApiError;
-            
-            setGlobalError(apiError.data?.detail || apiError.data?.title || "Registration failed.");
-        }
+      setGlobalError(null);
+
+      try {
+        // Strip out confirmPassword as backend doesn't need it
+        const { confirmPassword, ...commandData } = value;
+
+        await registerMutation.mutateAsync({ data: commandData });
+
+        navigate({ to: "/login" });
+      } catch (err) {
+        const apiError = err as ApiError;
+
+        setGlobalError(
+          apiError.data?.detail ||
+            apiError.data?.title ||
+            "Registration failed."
+        );
+      }
     },
   });
 
@@ -89,6 +95,13 @@ export function RegisterForm() {
               form.handleSubmit();
             }}
           >
+            {/* Global Error Alert */}
+            {globalError && (
+              <div className="rounded-md border border-destructive/20 bg-destructive/10 p-3 text-destructive-foreground text-sm">
+                {globalError}
+              </div>
+            )}
+
             {/* First name + Last name */}
             <div className="grid grid-cols-2 gap-3">
               <form.Field
