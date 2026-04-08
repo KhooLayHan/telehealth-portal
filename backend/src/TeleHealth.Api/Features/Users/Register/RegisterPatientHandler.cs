@@ -1,63 +1,84 @@
+using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Slugify;
 using TeleHealth.Api.Common.Exceptions;
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Infrastructure.Persistence;
+using TeleHealth.Contracts;
 
 namespace TeleHealth.Api.Features.Users.Register;
 
 public sealed class RegisterPatientHandler(
     ApplicationDbContext db,
-    IPasswordHasher<User> passwordHasher
+    IPasswordHasher<User> passwordHasher,
+    IPublishEndpoint publishEndpoint
 )
 {
-    public async Task<Guid> HandleAsync(RegisterPatientCommand command, CancellationToken token)
+    public async Task<Guid> HandleAsync(RegisterPatientCommand cmd, CancellationToken ct)
     {
-        var existingUser = await db.Users.FirstOrDefaultAsync(
-            u => u.Email == command.Email || u.IcNumber == command.IcNumber,
-            token
-        );
+        Log.Information("Attempting to register new patient. Email: {Email}", cmd.Email);
 
-        if (existingUser is not null)
+        SlugHelper slugHelper = new();
+
+        var emailExists = await db.Users.AnyAsync(u => u.Email == cmd.Email, ct);
+        if (emailExists)
         {
-            throw new ConflictException("User with this email already exists.");
+            throw new ConflictException("Email is already registered.");
         }
 
-        await using var transaction = await db.Database.BeginTransactionAsync(token);
+        var icExists = await db.Users.AnyAsync(u => u.IcNumber == cmd.IcNumber, ct);
+        if (icExists)
+        {
+            throw new ConflictException("IC Number is already registered.");
+        }
+
+        var patientRole = await db.Roles.SingleAsync(r => r.Slug == "patient", ct);
+
+        await using var transaction = await db.Database.BeginTransactionAsync(ct);
 
         var publicId = Guid.NewGuid();
-        var patientPublicId = Guid.NewGuid();
-        var userSlug = $"user-{publicId:N}";
+        var userSlug = slugHelper.GenerateSlug($"{cmd.FirstName}-{cmd.LastName}-{publicId}");
 
         var user = new User
         {
             PublicId = publicId,
             Slug = userSlug,
-            Username = command.Email,
-            Email = command.Email,
+            Username = cmd.Username,
+            Email = cmd.Email,
             PasswordHash = string.Empty,
-            FirstName = command.FirstName,
-            LastName = command.LastName,
-            IcNumber = command.IcNumber,
-            Gender = command.Gender,
-            DateOfBirth = command.DateOfBirth,
+            FirstName = cmd.FirstName,
+            LastName = cmd.LastName,
+            IcNumber = cmd.IcNumber,
+            Gender = cmd.Gender,
+            DateOfBirth = cmd.DateOfBirth,
+            Roles = { patientRole },
         };
-        user.PasswordHash = passwordHasher.HashPassword(user, command.Password);
+        user.PasswordHash = passwordHasher.HashPassword(user, cmd.Password);
 
         db.Users.Add(user);
-        await db.SaveChangesAsync(token);
+        await db.SaveChangesAsync(ct);
 
         var patient = new Patient
         {
-            PublicId = patientPublicId,
-            Slug = $"patient-{patientPublicId:N}",
+            PublicId = Guid.NewGuid(),
+            Slug = slugHelper.GenerateSlug($"patient-{userSlug}"),
             UserId = user.Id,
         };
 
         db.Patients.Add(patient);
-        await db.SaveChangesAsync(token);
 
-        await transaction.CommitAsync(token);
+        await db.SaveChangesAsync(ct);
+
+        await publishEndpoint.Publish(
+            new PatientRegisteredEvent(user.PublicId, user.Email, user.FirstName),
+            ct
+        );
+
+        await transaction.CommitAsync(ct);
+
+        Log.Information("Successfully registered Patient {PublicId}", patient.PublicId);
 
         return patient.PublicId;
     }

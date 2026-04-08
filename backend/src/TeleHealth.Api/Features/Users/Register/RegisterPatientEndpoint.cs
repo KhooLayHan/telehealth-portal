@@ -15,7 +15,10 @@ public static class RegisterPatientEndpoint
                 ) =>
                 {
                     var patientId = await handler.HandleAsync(command, token);
-                    return Results.Created($"/patients/{patientId}", new { PatientId = patientId });
+                    return Results.Created(
+                        $"{ApiEndpoints.Patients.Create}/{patientId}",
+                        new { PatientId = patientId }
+                    );
                 }
             )
             .WithName("RegisterPatient")

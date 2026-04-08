@@ -895,6 +895,9 @@
           "Microsoft.IdentityModel.JsonWebTokens": "8.0.1",
           "Microsoft.IdentityModel.Tokens": "8.0.1"
         }
+      },
+      "telehealth.contracts": {
+        "type": "Project"
       }
     }
   }
