@@ -1,11 +1,13 @@
 // 1. Define the ASP.NET ProblemDetails standard shape
 export interface ProblemDetails {
-  type?: string;
-  title?: string;
-  status?: number;
   detail?: string;
   instance?: string;
-  [key: string]: any; // Allow any other extensions (like traceId)
+  requestId?: string;
+  status?: number;
+  title?: string;
+  traceId?: string;
+  type?: string;
+  [key: string]: unknown;
 }
 
 class ApiError extends Error {

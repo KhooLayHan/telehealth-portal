@@ -10,41 +10,7 @@ export interface Allergy {
   reaction: string;
 }
 
-export interface Era {
-  /** @nullable */
-  name?: string | null;
-}
-
-export interface CalendarSystem {
-  /** @nullable */
-  id?: string | null;
-  /** @nullable */
-  name?: string | null;
-  /** @pattern ^-?(?:0|[1-9]\d*)$ */
-  minYear?: number | string;
-  /** @pattern ^-?(?:0|[1-9]\d*)$ */
-  maxYear?: number | string;
-  /** @nullable */
-  eras?: Era[] | null;
-}
-
-export type IsoDayOfWeek = number;
-
-export interface LocalDate {
-  calendar?: CalendarSystem;
-  /** @pattern ^-?(?:0|[1-9]\d*)$ */
-  year?: number | string;
-  /** @pattern ^-?(?:0|[1-9]\d*)$ */
-  month?: number | string;
-  /** @pattern ^-?(?:0|[1-9]\d*)$ */
-  day?: number | string;
-  dayOfWeek?: IsoDayOfWeek;
-  /** @pattern ^-?(?:0|[1-9]\d*)$ */
-  yearOfEra?: number | string;
-  era?: Era;
-  /** @pattern ^-?(?:0|[1-9]\d*)$ */
-  dayOfYear?: number | string;
-}
+export type LocalDate = string;
 
 export interface CreateUserCommand {
   username: string;

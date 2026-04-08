@@ -67,7 +67,7 @@ export function RegisterForm() {
           dateOfBirth: value.dateOfBirth,
         };
 
-        await registerMutation.mutateAsync({ data: commandData as any });
+        await registerMutation.mutateAsync({ data: commandData });
 
         navigate({ to: "/login" });
       } catch (err) {
