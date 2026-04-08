@@ -17,11 +17,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 const registerSchema = z.object({
+  username: z.string().min(1, "Username is required").max(50, "Username must be at most 50 characters"),
   firstName: z.string().min(2, "First name must be at least 2 characters"),
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
   email: z.email("Invalid email address"),
-  role: z.string().min(1, "Please select a role"),
-  dateOfBirth: z.string().optional(),
+  gender: z.enum(["M", "F", "O", "N"], { message: "Please select a gender" }),
+  dateOfBirth: z.string().min(1, "Date of birth is required"),
+  icNumber: z.string().regex(/^\d{12}$/, "IC Number must be exactly 12 digits"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   confirmPassword: z.string().min(1, "Please confirm your password"),
 });
@@ -33,7 +35,6 @@ export function RegisterForm() {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [globalError, setGlobalError] = useState<string | null>(null);
 
-  // TanStack Query Mutation
   const registerMutation = useRegisterPatient();
 
   const form = useForm({
@@ -42,41 +43,33 @@ export function RegisterForm() {
       firstName: "",
       lastName: "",
       email: "",
-      role: "",
+      gender: "" as "M" | "F" | "O" | "N" | "",
       dateOfBirth: "",
-      password: "",
       icNumber: "",
-      gender: "",
+      password: "",
       confirmPassword: "",
     },
     onSubmit: async ({ value }) => {
       setGlobalError(null);
 
+      const commandData = {
+        username: value.username,
+        email: value.email,
+        password: value.password,
+        firstName: value.firstName,
+        lastName: value.lastName,
+        icNumber: value.icNumber,
+        gender: value.gender as "M" | "F" | "O" | "N",
+        dateOfBirth: value.dateOfBirth,
+      };
+
       try {
-        // Strip out confirmPassword as backend doesn't need it
-        // const { confirmPassword, ...commandData } = value;
-
-        const commandData = {
-          username: value.username,
-          email: value.email,
-          password: value.password,
-          firstName: value.firstName,
-          lastName: value.lastName,
-          icNumber: value.icNumber,
-          gender: value.gender,
-          dateOfBirth: value.dateOfBirth,
-        };
-
         await registerMutation.mutateAsync({ data: commandData });
-
         navigate({ to: "/login" });
       } catch (err) {
         const apiError = err as ApiError;
-
         setGlobalError(
-          apiError.data?.detail ??
-            apiError.data?.title ??
-            "Registration failed."
+          apiError.data?.detail ?? apiError.data?.title ?? "Registration failed."
         );
       }
     },
@@ -84,7 +77,6 @@ export function RegisterForm() {
 
   return (
     <div className="space-y-6">
-      {/* Mobile-only branding */}
       <div className="flex items-center justify-center gap-2 lg:hidden">
         <Heart className="size-6 text-primary" />
         <span className="font-bold text-xl">TeleHealth</span>
@@ -107,7 +99,6 @@ export function RegisterForm() {
               form.handleSubmit();
             }}
           >
-            {/* Global Error Alert */}
             {globalError ? (
               <div
                 aria-live="assertive"
@@ -117,6 +108,32 @@ export function RegisterForm() {
                 {globalError}
               </div>
             ) : null}
+
+            {/* Username */}
+            <form.Field
+              name="username"
+              validators={{ onChange: registerSchema.shape.username }}
+            >
+              {(field) => (
+                <div className="space-y-1.5">
+                  <Label htmlFor={field.name}>Username</Label>
+                  <Input
+                    aria-invalid={field.state.meta.errors.length > 0}
+                    id={field.name}
+                    name={field.name}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    placeholder="johndoe123"
+                    value={field.state.value}
+                  />
+                  {field.state.meta.errors.length > 0 && (
+                    <p className="text-destructive text-xs">
+                      {field.state.meta.errors.join(", ")}
+                    </p>
+                  )}
+                </div>
+              )}
+            </form.Field>
 
             {/* First name + Last name */}
             <div className="grid grid-cols-2 gap-3">
@@ -198,29 +215,55 @@ export function RegisterForm() {
               )}
             </form.Field>
 
-            {/* Role + Date of Birth */}
+            {/* IC Number */}
+            <form.Field
+              name="icNumber"
+              validators={{ onChange: registerSchema.shape.icNumber }}
+            >
+              {(field) => (
+                <div className="space-y-1.5">
+                  <Label htmlFor={field.name}>IC Number</Label>
+                  <Input
+                    aria-invalid={field.state.meta.errors.length > 0}
+                    id={field.name}
+                    name={field.name}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    placeholder="012345678901"
+                    value={field.state.value}
+                  />
+                  {field.state.meta.errors.length > 0 && (
+                    <p className="text-destructive text-xs">
+                      {field.state.meta.errors.join(", ")}
+                    </p>
+                  )}
+                </div>
+              )}
+            </form.Field>
+
+            {/* Gender + Date of Birth */}
             <div className="grid grid-cols-2 gap-3">
               <form.Field
-                name="role"
-                validators={{ onChange: registerSchema.shape.role }}
+                name="gender"
+                validators={{ onChange: registerSchema.shape.gender }}
               >
                 {(field) => (
                   <div className="space-y-1.5">
-                    <Label htmlFor={field.name}>Role</Label>
+                    <Label htmlFor={field.name}>Gender</Label>
                     <select
                       aria-invalid={field.state.meta.errors.length > 0}
-                      className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
+                      className="h-9 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
                       id={field.name}
                       name={field.name}
                       onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
+                      onChange={(e) => field.handleChange(e.target.value as "M" | "F" | "O" | "N")}
                       value={field.state.value}
                     >
-                      <option disabled value="">
-                        Select role
-                      </option>
-                      <option value="Patient">Patient</option>
-                      <option value="Doctor">Doctor</option>
+                      <option disabled value="">Select gender</option>
+                      <option value="M">Male</option>
+                      <option value="F">Female</option>
+                      <option value="O">Other</option>
+                      <option value="N">Prefer not to say</option>
                     </select>
                     {field.state.meta.errors.length > 0 && (
                       <p className="text-destructive text-xs">
@@ -231,16 +274,15 @@ export function RegisterForm() {
                 )}
               </form.Field>
 
-              <form.Field name="dateOfBirth">
+              <form.Field
+                name="dateOfBirth"
+                validators={{ onChange: registerSchema.shape.dateOfBirth }}
+              >
                 {(field) => (
                   <div className="space-y-1.5">
-                    <Label htmlFor={field.name}>
-                      Date of birth{" "}
-                      <span className="font-normal text-muted-foreground">
-                        (optional)
-                      </span>
-                    </Label>
+                    <Label htmlFor={field.name}>Date of birth</Label>
                     <Input
+                      aria-invalid={field.state.meta.errors.length > 0}
                       id={field.name}
                       name={field.name}
                       onBlur={field.handleBlur}
@@ -248,6 +290,11 @@ export function RegisterForm() {
                       type="date"
                       value={field.state.value}
                     />
+                    {field.state.meta.errors.length > 0 && (
+                      <p className="text-destructive text-xs">
+                        {field.state.meta.errors.join(", ")}
+                      </p>
+                    )}
                   </div>
                 )}
               </form.Field>
@@ -274,18 +321,12 @@ export function RegisterForm() {
                       value={field.state.value}
                     />
                     <button
-                      aria-label={
-                        showPassword ? "Hide password" : "Show password"
-                      }
+                      aria-label={showPassword ? "Hide password" : "Show password"}
                       className="absolute top-1/2 right-2.5 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                       onClick={() => setShowPassword((v) => !v)}
                       type="button"
                     >
-                      {showPassword ? (
-                        <EyeOff className="size-4" />
-                      ) : (
-                        <Eye className="size-4" />
-                      )}
+                      {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                     </button>
                   </div>
                   {field.state.meta.errors.length > 0 && (
@@ -300,7 +341,15 @@ export function RegisterForm() {
             {/* Confirm Password */}
             <form.Field
               name="confirmPassword"
-              validators={{ onChange: registerSchema.shape.confirmPassword }}
+              validators={{
+                onChangeListenTo: ["password"],
+                onChange: ({ value, fieldApi }) => {
+                  const password = fieldApi.form.getFieldValue("password");
+                  if (!value) return "Please confirm your password.";
+                  if (value !== password) return "Passwords do not match.";
+                  return undefined;
+                },
+              }}
             >
               {(field) => (
                 <div className="space-y-1.5">
@@ -318,18 +367,12 @@ export function RegisterForm() {
                       value={field.state.value}
                     />
                     <button
-                      aria-label={
-                        showConfirmPassword ? "Hide password" : "Show password"
-                      }
+                      aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                       className="absolute top-1/2 right-2.5 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                       onClick={() => setShowConfirmPassword((v) => !v)}
                       type="button"
                     >
-                      {showConfirmPassword ? (
-                        <EyeOff className="size-4" />
-                      ) : (
-                        <Eye className="size-4" />
-                      )}
+                      {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                     </button>
                   </div>
                   {field.state.meta.errors.length > 0 && (
@@ -370,27 +413,19 @@ export function RegisterForm() {
               {(state) => (
                 <Button
                   className="w-full"
-                  disabled={
-                    !state.canSubmit || state.isSubmitting || !acceptTerms
-                  }
+                  disabled={!state.canSubmit || state.isSubmitting || !acceptTerms}
                   size="lg"
                   type="submit"
                 >
-                  {state.isSubmitting
-                    ? "Creating account..."
-                    : "Create account"}
+                  {state.isSubmitting ? "Creating account..." : "Create account"}
                 </Button>
               )}
             </form.Subscribe>
           </form>
 
-          {/* Sign in link */}
           <p className="mt-6 text-center text-muted-foreground text-sm">
             Already have an account?{" "}
-            <Link
-              className="font-medium text-primary hover:underline"
-              to="/login"
-            >
+            <Link className="font-medium text-primary hover:underline" to="/login">
               Sign in
             </Link>
           </p>

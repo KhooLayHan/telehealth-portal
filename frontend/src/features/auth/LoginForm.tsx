@@ -55,14 +55,12 @@ export function LoginForm() {
         };
 
         if (!profile?.publicId) {
-          setGlobalError(
-            "Signed in, but could not load your profile. Please try again."
-          );
+          setGlobalError("Signed in, but could not load your profile. Please try again.");
           return;
         }
 
         setAuth({
-          publicId: profile.UserPublicId,
+          publicId: profile.publicId,
           email: profile.email,
           firstName: profile.firstName,
           role: profile.role,
