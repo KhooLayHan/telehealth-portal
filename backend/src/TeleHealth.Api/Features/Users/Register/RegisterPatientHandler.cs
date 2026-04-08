@@ -2,6 +2,7 @@ using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
+using Npgsql;
 using Serilog;
 using Slugify;
 using TeleHealth.Api.Common.Exceptions;
@@ -22,24 +23,6 @@ public sealed class RegisterPatientHandler(
         Log.Information("Attempting to register new patient.");
 
         SlugHelper slugHelper = new();
-
-        var usernameExists = await db.Users.AnyAsync(u => u.Username == cmd.Username, ct);
-        if (usernameExists)
-        {
-            throw new ConflictException("Username is already registered.");
-        }
-
-        var emailExists = await db.Users.AnyAsync(u => u.Email == cmd.Email, ct);
-        if (emailExists)
-        {
-            throw new ConflictException("Email is already registered.");
-        }
-
-        var icExists = await db.Users.AnyAsync(u => u.IcNumber == cmd.IcNumber, ct);
-        if (icExists)
-        {
-            throw new ConflictException("IC Number is already registered.");
-        }
 
         var patientRole =
             await db.Roles.SingleOrDefaultAsync(r => r.Slug == "patient", ct)
@@ -69,7 +52,29 @@ public sealed class RegisterPatientHandler(
         user.PasswordHash = passwordHasher.HashPassword(user, cmd.Password);
 
         db.Users.Add(user);
-        await db.SaveChangesAsync(ct);
+
+        try
+        {
+            await db.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException ex)
+            when (ex.InnerException is PostgresException pg
+                && pg.SqlState == PostgresErrorCodes.UniqueViolation
+            )
+        {
+            await transaction.RollbackAsync(ct);
+
+            throw pg.ConstraintName switch
+            {
+                "uq_users_username_active" => new ConflictException(
+                    "Username is already registered."
+                ),
+                "uq_users_email_active" => new ConflictException("Email is already registered."),
+                "uq_users_ic_active" => new ConflictException("IC Number is already registered."),
+                "uq_users_slug_active" => new ConflictException("Username is already registered."),
+                _ => new ConflictException("A user with these details already exists."),
+            };
+        }
 
         var patient = new Patient
         {

@@ -60,7 +60,7 @@ export function LoginForm() {
         }
 
         setAuth({
-          publicId: profile.publicId,
+          publicId: profile.UserPublicId,
           email: profile.email,
           firstName: profile.firstName,
           role: profile.role,
