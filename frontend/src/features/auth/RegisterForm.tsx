@@ -17,7 +17,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 const registerSchema = z.object({
-  username: z.string().min(1, "Username is required").max(50, "Username must be at most 50 characters"),
+  username: z
+    .string()
+    .min(1, "Username is required")
+    .max(50, "Username must be at most 50 characters"),
   firstName: z.string().min(2, "First name must be at least 2 characters"),
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
   email: z.email("Invalid email address"),
@@ -69,7 +72,9 @@ export function RegisterForm() {
       } catch (err) {
         const apiError = err as ApiError;
         setGlobalError(
-          apiError.data?.detail ?? apiError.data?.title ?? "Registration failed."
+          apiError.data?.detail ??
+            apiError.data?.title ??
+            "Registration failed."
         );
       }
     },
@@ -256,10 +261,16 @@ export function RegisterForm() {
                       id={field.name}
                       name={field.name}
                       onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value as "M" | "F" | "O" | "N")}
+                      onChange={(e) =>
+                        field.handleChange(
+                          e.target.value as "M" | "F" | "O" | "N"
+                        )
+                      }
                       value={field.state.value}
                     >
-                      <option disabled value="">Select gender</option>
+                      <option disabled value="">
+                        Select gender
+                      </option>
                       <option value="M">Male</option>
                       <option value="F">Female</option>
                       <option value="O">Other</option>
@@ -321,12 +332,18 @@ export function RegisterForm() {
                       value={field.state.value}
                     />
                     <button
-                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
                       className="absolute top-1/2 right-2.5 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                       onClick={() => setShowPassword((v) => !v)}
                       type="button"
                     >
-                      {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                      {showPassword ? (
+                        <EyeOff className="size-4" />
+                      ) : (
+                        <Eye className="size-4" />
+                      )}
                     </button>
                   </div>
                   {field.state.meta.errors.length > 0 && (
@@ -367,12 +384,18 @@ export function RegisterForm() {
                       value={field.state.value}
                     />
                     <button
-                      aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                      aria-label={
+                        showConfirmPassword ? "Hide password" : "Show password"
+                      }
                       className="absolute top-1/2 right-2.5 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                       onClick={() => setShowConfirmPassword((v) => !v)}
                       type="button"
                     >
-                      {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                      {showConfirmPassword ? (
+                        <EyeOff className="size-4" />
+                      ) : (
+                        <Eye className="size-4" />
+                      )}
                     </button>
                   </div>
                   {field.state.meta.errors.length > 0 && (
@@ -413,11 +436,15 @@ export function RegisterForm() {
               {(state) => (
                 <Button
                   className="w-full"
-                  disabled={!state.canSubmit || state.isSubmitting || !acceptTerms}
+                  disabled={
+                    !state.canSubmit || state.isSubmitting || !acceptTerms
+                  }
                   size="lg"
                   type="submit"
                 >
-                  {state.isSubmitting ? "Creating account..." : "Create account"}
+                  {state.isSubmitting
+                    ? "Creating account..."
+                    : "Create account"}
                 </Button>
               )}
             </form.Subscribe>
@@ -425,7 +452,10 @@ export function RegisterForm() {
 
           <p className="mt-6 text-center text-muted-foreground text-sm">
             Already have an account?{" "}
-            <Link className="font-medium text-primary hover:underline" to="/login">
+            <Link
+              className="font-medium text-primary hover:underline"
+              to="/login"
+            >
               Sign in
             </Link>
           </p>
