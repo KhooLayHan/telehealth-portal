@@ -4,6 +4,12 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
+export interface Allergy {
+  allergen: string;
+  severity: string;
+  reaction: string;
+}
+
 export interface Era {
   /** @nullable */
   name?: string | null;
@@ -52,12 +58,19 @@ export interface CreateUserCommand {
   icNumber: string;
 }
 
+export interface EmergencyContact {
+  name: string;
+  relationship: string;
+  phone: string;
+}
+
 export interface LoginCommand {
   email: string;
   password: string;
 }
 
 export interface RegisterPatientCommand {
+  username: string;
   email: string;
   password: string;
   firstName: string;
@@ -69,5 +82,11 @@ export interface RegisterPatientCommand {
      */
   gender: string;
   dateOfBirth: LocalDate;
+}
+
+export interface UpdateMedicalRecordCommand {
+  bloodGroup: string;
+  emergencyContact: null | EmergencyContact;
+  allergies: Allergy[];
 }
 

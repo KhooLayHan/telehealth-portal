@@ -42,7 +42,7 @@ export const getCreateUserUrl = () => {
 
 
 
-  return `http://localhost:5144/api/v1/users`
+  return `http://localhost:5144/api/v1/patients`
 }
 
 export const createUser = async (createUserCommand: CreateUserCommand, options?: RequestInit): Promise<createUserResponse> => {

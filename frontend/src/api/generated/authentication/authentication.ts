@@ -119,7 +119,7 @@ export const getRegisterPatientUrl = () => {
 
 
 
-  return `http://localhost:5144/api/v1/auth/register-patient`
+  return `http://localhost:5144/api/v1/auth/signup-patient`
 }
 
 export const registerPatient = async (registerPatientCommand: RegisterPatientCommand, options?: RequestInit): Promise<registerPatientResponse> => {
