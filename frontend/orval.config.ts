@@ -27,7 +27,7 @@ export default defineConfig({
       workspace: "src",
     },
     hooks: {
-      afterAllFilesWrite: ["biome", "check", "--write", "."],
+      // afterAllFilesWrite: ["bun", "run", "check", "--write"],
     },
   },
 });
