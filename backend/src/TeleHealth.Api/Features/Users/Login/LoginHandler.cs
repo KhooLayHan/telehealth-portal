@@ -38,7 +38,10 @@ public sealed class LoginHandler(
 
         await tokenService.GenerateTokenAsync(user, httpContext, ct);
 
-        Log.Information("User with Public ID {PublicId} has successfully login.", user.PublicId);
+        Log.Information(
+            "User with Public ID {PublicId} has successfully logged in.",
+            user.PublicId
+        );
 
         return true;
     }

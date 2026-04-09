@@ -36,16 +36,17 @@ export interface LoginCommand {
 }
 
 export interface PatientProfileDto {
+  userPublicId: string;
+  patientPublicId: string;
   firstName: string;
   lastName: string;
   email: string;
   role: string;
-  publicId?: string;
   /** @nullable */
-  bloodGroup?: string | null;
+  bloodGroup: string | null;
+  emergencyContact: null | EmergencyContact;
   /** @nullable */
-  allergies?: Allergy[] | null;
-  emergencyContact?: null | EmergencyContact;
+  allergies: Allergy[] | null;
 }
 
 export interface ProblemDetails {

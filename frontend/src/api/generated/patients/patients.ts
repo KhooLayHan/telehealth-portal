@@ -154,16 +154,23 @@ export function useGetMyProfile<TData = Awaited<ReturnType<typeof getMyProfile>>
 
 
 export type updateMedicalInfoResponse200 = {
-  data: void
+  data: PatientProfileDto
   status: 200
+}
+
+export type updateMedicalInfoResponse404 = {
+  data: ProblemDetails
+  status: 404
 }
 
 export type updateMedicalInfoResponseSuccess = (updateMedicalInfoResponse200) & {
   headers: Headers;
 };
-;
+export type updateMedicalInfoResponseError = (updateMedicalInfoResponse404) & {
+  headers: Headers;
+};
 
-export type updateMedicalInfoResponse = (updateMedicalInfoResponseSuccess)
+export type updateMedicalInfoResponse = (updateMedicalInfoResponseSuccess | updateMedicalInfoResponseError)
 
 export const getUpdateMedicalInfoUrl = () => {
 
@@ -188,7 +195,7 @@ export const updateMedicalInfo = async (updateMedicalRecordCommand: UpdateMedica
 
 
 
-export const getUpdateMedicalInfoMutationOptions = <TError = unknown,
+export const getUpdateMedicalInfoMutationOptions = <TError = ProblemDetails,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateMedicalInfo>>, TError,{data: UpdateMedicalRecordCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateMedicalInfo>>, TError,{data: UpdateMedicalRecordCommand}, TContext> => {
 
@@ -217,9 +224,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type UpdateMedicalInfoMutationResult = NonNullable<Awaited<ReturnType<typeof updateMedicalInfo>>>
     export type UpdateMedicalInfoMutationBody = UpdateMedicalRecordCommand
-    export type UpdateMedicalInfoMutationError = unknown
+    export type UpdateMedicalInfoMutationError = ProblemDetails
 
-    export const useUpdateMedicalInfo = <TError = unknown,
+    export const useUpdateMedicalInfo = <TError = ProblemDetails,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateMedicalInfo>>, TError,{data: UpdateMedicalRecordCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof updateMedicalInfo>>,

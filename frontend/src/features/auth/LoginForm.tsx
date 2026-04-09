@@ -4,6 +4,7 @@ import { Eye, EyeOff, Heart } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
 import { useLoginUser } from "@/api/generated/authentication/authentication";
+import { getMyProfile } from "@/api/generated/patients/patients";
 import type { ApiError } from "@/api/ofetch-mutator";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,7 +17,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuthStore } from "@/store/useAuthStore";
-import { getMyProfile } from "@/api/generated/patients/patients";
 
 const loginSchema = z.object({
   email: z.email("Invalid email address"),
@@ -47,14 +47,14 @@ export function LoginForm() {
         const profileResponse = await getMyProfile();
 
         const profile = profileResponse.data as {
-          publicId: string;
+          userPublicId: string;
           firstName: string;
           lastName: string;
           email: string;
           role: string;
         };
 
-        if (!profile?.publicId) {
+        if (!profile?.userPublicId) {
           setGlobalError(
             "Signed in, but could not load your profile. Please try again."
           );
@@ -62,7 +62,7 @@ export function LoginForm() {
         }
 
         setAuth({
-          publicId: profile.publicId,
+          publicId: profile.userPublicId,
           email: profile.email,
           firstName: profile.firstName,
           role: profile.role,
