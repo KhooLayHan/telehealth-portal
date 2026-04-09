@@ -8,7 +8,7 @@ public sealed class DoctorSchedule
     public long Id { get; init; }
     public Guid PublicId { get; init; }
     public required long DoctorId { get; init; }
-    public required int StatusId { get; init; }
+    public required int StatusId { get; set; }
     public required LocalDate Date { get; set; }
     public required LocalTime StartTime { get; set; }
     public required LocalTime EndTime { get; set; }
