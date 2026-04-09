@@ -35,6 +35,7 @@
     <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
 
     <PackageReference Include="NodaTime" />
+    <PackageReference Include="NodaTime.Serialization.SystemTextJson" />
 
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
 
@@ -71,5 +72,8 @@
 
     <PackageReference Include="UnitsNet" />
     <PackageReference Include="UnitsNet.NumberExtensions" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\TeleHealth.Contracts\TeleHealth.Contracts.csproj" />
   </ItemGroup>
 </Project>

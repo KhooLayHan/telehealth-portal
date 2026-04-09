@@ -3,7 +3,9 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { Eye, EyeOff, Heart } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
-
+import { useLoginUser } from "@/api/generated/authentication/authentication";
+import { getMyProfile } from "@/api/generated/patients/patients";
+import type { ApiError } from "@/api/ofetch-mutator";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -26,22 +28,58 @@ export function LoginForm() {
   const setAuth = useAuthStore((state) => state.setAuth);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [globalError, setGlobalError] = useState<string | null>(null);
+
+  // TanStack Query Mutation
+  const loginMutation = useLoginUser();
 
   const form = useForm({
     defaultValues: {
       email: "",
       password: "",
     },
-    onSubmit: ({ value }) => {
-      // TODO: Wire up to actual API via useLoginUser()
-      console.log("Login submitted", { ...value, rememberMe });
-      setAuth({
-        publicId: "mock-id",
-        email: value.email,
-        firstName: "User",
-        role: "Patient",
-      });
-      navigate({ to: "/dashboard" });
+    onSubmit: async ({ value }) => {
+      setGlobalError(null);
+
+      try {
+        await loginMutation.mutateAsync({ data: value });
+
+        const profileResponse = await getMyProfile();
+
+        const profile = profileResponse.data as {
+          userPublicId: string;
+          firstName: string;
+          lastName: string;
+          email: string;
+          role: string;
+        };
+
+        if (!profile?.userPublicId) {
+          setGlobalError(
+            "Signed in, but could not load your profile. Please try again."
+          );
+          return;
+        }
+
+        setAuth({
+          publicId: profile.userPublicId,
+          email: profile.email,
+          firstName: profile.firstName,
+          role: profile.role,
+        });
+
+        navigate({ to: "/dashboard" });
+      } catch (err) {
+        const apiError = err as ApiError;
+
+        if (apiError.status === 401) {
+          setGlobalError("Invalid email or password.");
+        } else {
+          setGlobalError(
+            apiError.data?.title || "An unexpected error occurred."
+          );
+        }
+      }
     },
   });
 
@@ -68,6 +106,17 @@ export function LoginForm() {
               form.handleSubmit();
             }}
           >
+            {/* Global Error Alert */}
+            {globalError ? (
+              <div
+                aria-live="assertive"
+                className="rounded-md border border-destructive/20 bg-destructive/10 p-3 text-destructive-foreground text-sm"
+                role="alert"
+              >
+                {globalError}
+              </div>
+            ) : null}
+
             {/* Email */}
             <form.Field
               name="email"

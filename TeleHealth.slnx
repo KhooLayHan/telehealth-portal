@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/backend/">
+    <Project Path="backend/TeleHealth.Contracts/TeleHealth.Contracts.csproj" />
+  </Folder>
   <Project Path="backend/src/TeleHealth.Api/TeleHealth.Api.csproj" />
   <!-- <Project Path="backend/tests/TeleHealth.UnitTests/TeleHealth.UnitTests.csproj" /> -->
   <Project Path="backend/tests/TeleHealth.IntegrationTests/TeleHealth.IntegrationTests.csproj" />

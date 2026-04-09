@@ -24,6 +24,8 @@ public static class GetProfileEndpoint
             )
             .WithName("GetMyProfile")
             .WithTags("Patients")
-            .RequireAuthorization(AuthConstants.PatientPolicy);
+            .RequireAuthorization(AuthConstants.PatientPolicy)
+            .Produces<PatientProfileDto>()
+            .ProducesProblem(StatusCodes.Status404NotFound);
     }
 }

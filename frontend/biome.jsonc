@@ -9,7 +9,10 @@
       "!build",
       "!.storybook",
       "!src/stories",
-      "!src/api/generated/**/*",
+      "src/**",
+      "!src/routeTree.gen.ts",
+      "!src/stories",
+      "!src/api/generated",
       "!src/components/ui/**/*"
     ]
   },
@@ -30,7 +33,12 @@
       }
     },
     {
-      "includes": ["src/stories/**", "src/App.*", "src/features/**"],
+      "includes": [
+        "src/stories/**",
+        "src/App.*",
+        "src/features/**",
+        "src/api/src/**"
+      ],
       "linter": {
         "rules": {
           "style": {

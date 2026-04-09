@@ -13,20 +13,18 @@ export default defineConfig({
       clean: true,
       client: "react-query",
       httpClient: "fetch",
+      indexFiles: false,
       mode: "tags-split",
-      namingConvention: "camelCase",
-      operationSchemas: "src/api/schemas",
+      namingConvention: "PascalCase",
       override: {
         mutator: {
-          path: "api/ofetch-mutator.ts",
+          path: "ofetch-mutator.ts",
           name: "ofetchMutator",
         },
       },
-      target: "api/generated",
-      workspace: "src",
-    },
-    hooks: {
-      afterAllFilesWrite: ["biome", "check", "--write", "."],
+      schemas: "src/api/model",
+      target: "generated",
+      workspace: "src/api",
     },
   },
 });

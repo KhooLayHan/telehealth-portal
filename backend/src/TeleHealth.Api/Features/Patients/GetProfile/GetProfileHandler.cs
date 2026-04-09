@@ -12,7 +12,7 @@ public sealed class GetProfileHandler(ApplicationDbContext db)
         return await db
             .Patients.AsNoTracking()
             .Where(p => p.User.PublicId == userPublicId)
-            .SelectFacet<Patient, PatientProfileDto>()
+            .Select(PatientProfileDto.Projection)
             .FirstOrDefaultAsync(ct);
     }
 }

@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dependencies": {
+    "net10.0": {
+      "NodaTime": {
+        "type": "Direct",
+        "requested": "[3.3.1, )",
+        "resolved": "3.3.1",
+        "contentHash": "7zkTEqmakybTTuDuifpnzl5s8MkmpAdyvoqIPIO2+M2ThF8ixavPcPt1afPfFyCI+A6t3ySujgpGq/5iWc4/RQ=="
+      }
+    }
+  }
+}

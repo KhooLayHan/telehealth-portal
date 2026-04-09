@@ -1,7 +1,10 @@
 using Amazon.S3;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
+using NodaTime.Serialization.SystemTextJson;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Scalar.AspNetCore;
@@ -43,7 +46,26 @@ builder
             .AddOtlpExporter()
     );
 
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+{
+    options.AddSchemaTransformer(
+        (schema, context, cancellationToken) =>
+        {
+            if (context.JsonTypeInfo.Type == typeof(LocalDate))
+            {
+                schema.Type = Microsoft.OpenApi.JsonSchemaType.String;
+                schema.Format = "date";
+            }
+
+            return Task.CompletedTask;
+        }
+    );
+});
+
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
+});
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options
@@ -95,6 +117,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowFrontend");
 
+app.UseHttpsRedirection();
+
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 
@@ -107,8 +131,6 @@ api.MapRegisterPatientEndpoint();
 api.MapCreateUserEndpoint();
 api.MapGetProfileEndpoint();
 api.MapUpdateMedicalRecordEndpoint();
-
-app.UseHttpsRedirection();
 
 app.UseSerilogRequestLogging();
 

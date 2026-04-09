@@ -1,12 +1,24 @@
+// 1. Define the ASP.NET ProblemDetails standard shape
+export interface ProblemDetails {
+  detail?: string;
+  instance?: string;
+  requestId?: string;
+  status?: number;
+  title?: string;
+  traceId?: string;
+  type?: string;
+  [key: string]: unknown;
+}
+
 class ApiError extends Error {
   status: number;
-  data: unknown;
+  data: ProblemDetails; // 2. Tell TS that 'data' is ProblemDetails!
 
   constructor(status: number, data: unknown) {
     super(`API error: ${status}`);
     this.name = "ApiError";
     this.status = status;
-    this.data = data;
+    this.data = (data as ProblemDetails) ?? {};
   }
 }
 
@@ -16,7 +28,7 @@ export const ofetchMutator = async <T>(
 ): Promise<T> => {
   const response = await fetch(url, {
     ...options,
-    credentials: "include", // 🔥 CRITICAL FOR HTTPONLY COOKIES
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...options.headers,
@@ -29,7 +41,13 @@ export const ofetchMutator = async <T>(
   }
 
   const text = await response.text();
-  return text ? (JSON.parse(text) as T) : (undefined as T);
+  const data = text ? JSON.parse(text) : undefined;
+
+  return {
+    data,
+    status: response.status,
+    headers: response.headers,
+  } as T;
 };
 
 export { ApiError };

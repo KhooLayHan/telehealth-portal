@@ -1,10 +1,12 @@
 using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
 using Slugify;
 using TeleHealth.Api.Common.Exceptions;
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Infrastructure.Persistence;
+using TeleHealth.Contracts;
 
 namespace TeleHealth.Api.Features.Users.Create;
 
@@ -66,7 +68,7 @@ public class CreateUserHandler(
         await db.SaveChangesAsync(token);
 
         await publishEndpoint.Publish(
-            new UserCreatedEvent(user.PublicId, user.Username, user.Email),
+            new UserCreatedEvent(user.PublicId, SystemClock.Instance.GetCurrentInstant()),
             token
         );
 
@@ -77,5 +79,3 @@ public class CreateUserHandler(
         return patient.PublicId;
     }
 }
-
-public record UserCreatedEvent(Guid UserPublicId, string Username, string Email);

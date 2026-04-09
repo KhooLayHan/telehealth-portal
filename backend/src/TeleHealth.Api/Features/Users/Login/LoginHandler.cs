@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using TeleHealth.Api.Common.Security;
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Infrastructure.Persistence;
@@ -18,6 +19,8 @@ public sealed class LoginHandler(
         CancellationToken ct
     )
     {
+        Log.Information("A user is attempting to login...");
+
         var user = await db
             .Users.Include(u => u.Roles)
             .FirstOrDefaultAsync(u => u.Email == command.Email, ct);
@@ -34,6 +37,11 @@ public sealed class LoginHandler(
         }
 
         await tokenService.GenerateTokenAsync(user, httpContext, ct);
+
+        Log.Information(
+            "User with Public ID {PublicId} has successfully logged in.",
+            user.PublicId
+        );
 
         return true;
     }

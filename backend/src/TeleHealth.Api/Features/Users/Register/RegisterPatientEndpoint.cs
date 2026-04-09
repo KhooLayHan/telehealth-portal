@@ -14,8 +14,12 @@ public static class RegisterPatientEndpoint
                     CancellationToken token
                 ) =>
                 {
-                    var patientId = await handler.HandleAsync(command, token);
-                    return Results.Created($"/patients/{patientId}", new { PatientId = patientId });
+                    var result = await handler.HandleAsync(command, token);
+
+                    return Results.Created(
+                        $"{ApiEndpoints.Patients.GetById.Replace("{id:guid}", result.PatientPublicId.ToString())}",
+                        new { result.UserPublicId, result.PatientPublicId }
+                    );
                 }
             )
             .WithName("RegisterPatient")
