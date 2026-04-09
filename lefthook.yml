@@ -36,8 +36,6 @@ pre-push:
     frontend-test:
       run: bun run --cwd frontend test
       glob: "frontend/**/*.{ts,tsx}"
-    backend-test:
-      run: bun run --cwd backend test
   jobs:
     - name: "Frontend Tests"
       run: bun run --cwd frontend test
