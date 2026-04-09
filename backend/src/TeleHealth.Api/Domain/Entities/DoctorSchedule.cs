@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
 
@@ -20,5 +19,5 @@ public sealed class DoctorSchedule
     public Doctor Doctor { get; } = null!;
     public ScheduleStatus ScheduleStatus { get; } = null!;
     public Appointment Appointment { get; } = null!;
-    public byte[]? RowVersion { get; set; }
+    public uint RowVersion { get; set; }
 }
