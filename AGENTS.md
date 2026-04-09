@@ -13,6 +13,7 @@ Biome (the underlying engine) provides robust linting and formatting. Most issue
 ## Build/Test/Lint Commands
 
 ### Frontend (Bun + Vite)
+
 ```bash
 cd frontend
 bun install          # Install dependencies
@@ -26,6 +27,7 @@ bun run coverage     # Run tests with coverage
 ```
 
 **Run a single test file:**
+
 ```bash
 cd frontend
 bun run test -- src/components/Button.test.tsx
@@ -33,6 +35,7 @@ bun run test -- --test-name-pattern="should render"
 ```
 
 ### Backend (.NET 10)
+
 ```bash
 cd backend
 bun run build        # Build solution
@@ -43,6 +46,7 @@ dotnet tool restore                             # Restore local tools
 ```
 
 **Run tests:**
+
 ```bash
 cd backend
 bun run test         # All unit tests
@@ -52,6 +56,7 @@ dotnet test --filter "Name~Add_ReturnsSum"             # Single test method
 ```
 
 ### Global (root)
+
 ```bash
 bun x ultracite fix     # Fix all frontend issues
 bun x ultracite check   # Check all frontend issues
@@ -59,7 +64,7 @@ bun x ultracite check   # Check all frontend issues
 
 ## Project Structure
 
-```
+```text
 frontend/           # React 19 + TypeScript + Vite + Vitest
 backend/            # .NET 10 API + Tests (Unit/Integration/E2E)
   src/
@@ -71,6 +76,7 @@ infra/              # Pulumi infrastructure (C#)
 ```
 
 **Key Configuration Files:**
+
 - `.editorconfig` - C# formatting rules enforced
 - `Directory.Build.props` - Shared MSBuild properties
 - `global.json` - .NET SDK version (10.0.100)
@@ -79,6 +85,7 @@ infra/              # Pulumi infrastructure (C#)
 ## Code Style Guidelines
 
 ### TypeScript/React (Frontend)
+
 - **Formatter:** Biome via Ultracite
 - Use arrow functions for callbacks; prefer `for...of` over `.forEach()`
 - Use optional chaining (`?.`) and nullish coalescing (`??`)
@@ -102,6 +109,7 @@ infra/              # Pulumi infrastructure (C#)
 - Don't define components inside other components
 
 **Accessibility (ARIA):**
+
 - Provide meaningful alt text for images
 - Use proper heading hierarchy
 - Add labels for form inputs
@@ -109,18 +117,21 @@ infra/              # Pulumi infrastructure (C#)
 - Use semantic elements (`<button>`, `<nav>`, etc.) instead of divs with roles
 
 ### C# (Backend)
+
 - **Formatter:** CSharpier (enforced in CI)
 - **Target Framework:** .NET 10
 - **Nullable:** Enabled | **ImplicitUsings:** Enabled
 - **WarningsAsErrors:** Enabled | **AnalysisLevel:** latest-Recommended
 
 **Naming Conventions:**
+
 - PascalCase: types, interfaces (IPrefix), methods, properties, events, public fields
 - camelCase: local variables, parameters, local constants
 - _camelCase: private instance fields
 - s_camelCase: private static fields
 
 **Style Preferences:**
+
 - Use file-scoped namespaces
 - Use primary constructors where appropriate
 - Prefer `var` only when type is apparent (disabled by default)
@@ -131,12 +142,14 @@ infra/              # Pulumi infrastructure (C#)
 ### Testing Standards
 
 **Frontend (Vitest):**
+
 - Write assertions in `it()` or `test()` blocks
 - Use async/await, avoid done callbacks
 - Don't commit `.only` or `.skip`
 - Keep test suites flat, avoid deep `describe` nesting
 
 **Backend (TUnit):**
+
 ```csharp
 [Test]
 public async Task TestName()
@@ -144,6 +157,7 @@ public async Task TestName()
     await Assert.That(result).IsEqualTo(expected);
 }
 ```
+
 - Use `[Before(Class)]` / `[After(Class)]` for setup/teardown
 - Use `[Before(Test)]` / `[After(Test)]` for per-test hooks
 - Use AwesomeAssertions for assertions, NSubstitute for mocking

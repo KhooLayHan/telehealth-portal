@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "bun run --cwd frontend dev && bun run --cwd backend dev",
+    "dev": "bun run --cwd frontend dev & bun run --cwd backend dev",
     "build": "bun run --cwd frontend build && bun run --cwd backend build",
     "check": "ultracite check",
     "format": "bun run --cwd frontend fix && bun run --cwd backend format",
