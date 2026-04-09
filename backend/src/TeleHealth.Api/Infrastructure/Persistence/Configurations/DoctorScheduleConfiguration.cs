@@ -58,6 +58,6 @@ public class DoctorScheduleConfiguration : IEntityTypeConfiguration<DoctorSchedu
             .HasForeignKey(d => d.StatusId)
             .IsRequired();
 
-        builder.Property(d => d.RowVersion).IsRowVersion();
+        builder.Property(d => d.RowVersion).IsRowVersion().HasColumnName("xmin");
     }
 }
