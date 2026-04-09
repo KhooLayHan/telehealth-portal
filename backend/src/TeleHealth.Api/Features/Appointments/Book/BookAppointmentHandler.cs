@@ -80,7 +80,7 @@ public sealed class BookAppointmentHandler(
         schedule.UpdatedAt = SystemClock.Instance.GetCurrentInstant();
 
         db.Appointments.Add(appointment);
-        
+
         try
         {
             await db.SaveChangesAsync(ct);
@@ -106,7 +106,7 @@ public sealed class BookAppointmentHandler(
             ),
             ct
         );
-        
+
         Log.Information(
             "Successfully booked Appointment {PublicId} for Patient {PatientPublicId}.",
             publicId,

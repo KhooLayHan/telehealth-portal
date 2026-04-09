@@ -16,7 +16,11 @@ public static class BookAppointmentEndpoint
                     CancellationToken token
                 ) =>
                 {
-                    var userPublicId = Guid.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
+                    var nameIdentifier = user.FindFirstValue(ClaimTypes.NameIdentifier);
+                    if (!Guid.TryParse(nameIdentifier, out var userPublicId))
+                    {
+                        return Results.Unauthorized();
+                    }
 
                     var result = await handler.HandleAsync(userPublicId, command, token);
 
