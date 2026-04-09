@@ -2,6 +2,14 @@
 
 This is a full-stack TeleHealth application with React frontend, .NET backend, AWS Lambda functions, and Pulumi infrastructure.
 
+## Quick Reference
+
+- **Format code**: `bun x ultracite fix` | `dotnet csharpier format .`
+- **Check for issues**: `bun x ultracite check` | `dotnet csharpier check .`
+- **Diagnose setup**: `bun x ultracite doctor`
+
+Biome (the underlying engine) provides robust linting and formatting. Most issues are automatically fixable.
+
 ## Build/Test/Lint Commands
 
 ### Frontend (Bun + Vite)
@@ -26,8 +34,9 @@ bun run test -- --test-name-pattern="should render"
 
 ### Backend (.NET 10)
 ```bash
+cd backend
+bun run build        # Build solution
 dotnet restore --locked-mode                    # Restore packages
-dotnet build backend/TeleHealth.slnx            # Build solution
 dotnet csharpier check .                        # Check formatting
 dotnet csharpier format .                       # Format code
 dotnet tool restore                             # Restore local tools
@@ -35,7 +44,9 @@ dotnet tool restore                             # Restore local tools
 
 **Run tests:**
 ```bash
-dotnet test backend/tests/TeleHealth.UnitTests         # All unit tests
+cd backend
+bun run test         # All unit tests
+dotnet test tests/TeleHealth.UnitTests         # All unit tests
 dotnet test --filter "FullyQualifiedName~BasicTests" # Single test class
 dotnet test --filter "Name~Add_ReturnsSum"             # Single test method
 ```
@@ -45,6 +56,25 @@ dotnet test --filter "Name~Add_ReturnsSum"             # Single test method
 bun x ultracite fix     # Fix all frontend issues
 bun x ultracite check   # Check all frontend issues
 ```
+
+## Project Structure
+
+```
+frontend/           # React 19 + TypeScript + Vite + Vitest
+backend/            # .NET 10 API + Tests (Unit/Integration/E2E)
+  src/
+    TeleHealth.Api/
+    TeleHealth.Contracts/    # Shared contracts library
+  tests/
+functions/          # AWS Lambda functions
+infra/              # Pulumi infrastructure (C#)
+```
+
+**Key Configuration Files:**
+- `.editorconfig` - C# formatting rules enforced
+- `Directory.Build.props` - Shared MSBuild properties
+- `global.json` - .NET SDK version (10.0.100)
+- `frontend/vitest.config.ts` - Test projects: unit, browser, storybook
 
 ## Code Style Guidelines
 
@@ -57,6 +87,26 @@ bun x ultracite check   # Check all frontend issues
 - Use function components; React 19+ uses ref as prop (no `forwardRef`)
 - Use semantic HTML with ARIA attributes for accessibility
 - Remove `console.log` and `debugger` from production code
+- Prefer explicit types for function parameters and return values when they enhance clarity
+- Prefer `unknown` over `any` when the type is genuinely unknown
+- Use const assertions (`as const`) for immutable values and literal types
+- Leverage TypeScript's type narrowing instead of type assertions
+- Use meaningful variable names instead of magic numbers
+- Always `await` promises in async functions
+- Use `async/await` syntax instead of promise chains
+- Handle errors appropriately in async code with try-catch blocks
+- Use template literals over string concatenation
+- Use destructuring for object and array assignments
+- Use the `key` prop for elements in iterables (prefer unique IDs over array indices)
+- Nest children between opening and closing tags instead of passing as props
+- Don't define components inside other components
+
+**Accessibility (ARIA):**
+- Provide meaningful alt text for images
+- Use proper heading hierarchy
+- Add labels for form inputs
+- Include keyboard event handlers alongside mouse events
+- Use semantic elements (`<button>`, `<nav>`, etc.) instead of divs with roles
 
 ### C# (Backend)
 - **Formatter:** CSharpier (enforced in CI)
@@ -98,20 +148,17 @@ public async Task TestName()
 - Use `[Before(Test)]` / `[After(Test)]` for per-test hooks
 - Use AwesomeAssertions for assertions, NSubstitute for mocking
 
-## Project Structure
+## Error Handling & Debugging
 
-```bash
-frontend/           # React 19 + TypeScript + Vite + Vitest
-backend/            # .NET 10 API + Tests (Unit/Integration/E2E)
-functions/          # AWS Lambda functions
-infra/              # Pulumi infrastructure (C#)
-```
-
-**Key Configuration Files:**
-- `.editorconfig` - C# formatting rules enforced
-- `Directory.Build.props` - Shared MSBuild properties
-- `global.json` - .NET SDK version (10.0.100)
-- `frontend/vitest.config.ts` - Test projects: unit, browser, storybook
+- Remove `console.log`, `debugger`, and `alert` statements from production code
+- Throw `Error` objects with descriptive messages, not strings or other values
+- Use `try-catch` blocks meaningfully - don't catch errors just to rethrow them
+- Prefer early returns over nested conditionals for error cases
+- Keep functions focused and under reasonable cognitive complexity limits
+- Extract complex conditions into well-named boolean variables
+- Use early returns to reduce nesting
+- Prefer simple conditionals over nested ternary operators
+- Group related code together and separate concerns
 
 ## Security & Performance
 
@@ -121,3 +168,34 @@ infra/              # Pulumi infrastructure (C#)
 - Never commit secrets or API keys
 - Use Next.js `<Image>` component if using Next.js
 - Never use spread syntax in accumulators within loops
+- Use top-level regex literals instead of creating them in loops
+- Prefer specific imports over namespace imports
+- Avoid barrel files (index files that re-export everything)
+
+## Framework-Specific Guidance
+
+**Next.js:**
+- Use Next.js `<Image>` component for images
+- Use `next/head` or App Router metadata API for head elements
+- Use Server Components for async data fetching instead of async Client Components
+
+**React 19+:**
+- Use ref as a prop instead of `React.forwardRef`
+
+**Solid/Svelte/Vue/Qwik:**
+- Use `class` and `for` attributes (not `className` or `htmlFor`)
+
+## When Biome Can't Help
+
+Biome's linter will catch most issues automatically. Focus your attention on:
+
+1. **Business logic correctness** - Biome can't validate your algorithms
+2. **Meaningful naming** - Use descriptive names for functions, variables, and types
+3. **Architecture decisions** - Component structure, data flow, and API design
+4. **Edge cases** - Handle boundary conditions and error states
+5. **User experience** - Accessibility, performance, and usability considerations
+6. **Documentation** - Add comments for complex logic, but prefer self-documenting code
+
+---
+
+Most formatting and common issues are automatically fixed by Biome. Run `bun x ultracite fix` before committing to ensure compliance.

@@ -3,5 +3,16 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
-  "workspaces": ["frontend/**", "backend/**", "packages/**"]
+  "scripts": {
+    "dev": "bun run --cwd frontend dev",
+    "build": "bun run --cwd frontend build && bun run --cwd backend build",
+    "check": "bun x ultracite check && bun run --cwd backend format",
+    "fix": "bun x ultracite fix && bun run --cwd backend format:fix",
+    "test": "bun run --cwd frontend test && bun run --cwd backend test",
+    "lefthook": "lefthook install"
+  },
+  "devDependencies": {
+    "ultracite": "7.2.5",
+    "lefthook": "^2.1.3"
+  }
 }

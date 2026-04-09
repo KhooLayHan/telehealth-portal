@@ -1,0 +1,13 @@
+{
+  "name": "@telehealth/backend",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build": "dotnet build ../TeleHealth.slnx",
+    "restore": "dotnet restore --locked-mode",
+    "format": "dotnet csharpier check .",
+    "format:fix": "dotnet csharpier format .",
+    "test": "dotnet test tests/TeleHealth.UnitTests",
+    "test:all": "dotnet test ../TeleHealth.slnx"
+  }
+}
