@@ -48,72 +48,95 @@ public sealed class BookAppointmentHandler(
         if (patient is null)
             return null;
 
-        var schedule = await db
-            .DoctorSchedules.Include(s => s.Doctor)
-            .FirstOrDefaultAsync(s => s.PublicId == cmd.SchedulePublicId, ct);
-
-        if (schedule is null)
-            return null;
-
-        if (schedule.StatusId != availableScheduleStatus.Id)
-            throw new ConflictException("This schedule slot is no longer available.");
-
         await using var transaction = await db.Database.BeginTransactionAsync(ct);
-
-        SlugHelper slugHelper = new();
-        var publicId = Guid.NewGuid();
-
-        var appointment = new Appointment
-        {
-            PublicId = publicId,
-            Slug = slugHelper.GenerateSlug($"appt-{publicId:N}"[..24]),
-            PatientId = patient.Id,
-            DoctorId = schedule.DoctorId,
-            ScheduleId = schedule.Id,
-            StatusId = bookedAppointmentStatus.Id,
-            CreatedByUserId = patient.User.Id,
-            VisitReason = cmd.VisitReason,
-            Symptoms = cmd.Symptoms,
-        };
-
-        schedule.StatusId = bookedScheduleStatus.Id;
-        schedule.UpdatedAt = SystemClock.Instance.GetCurrentInstant();
-
-        db.Appointments.Add(appointment);
 
         try
         {
-            await db.SaveChangesAsync(ct);
+            var schedule = await db
+                .DoctorSchedules.Include(s => s.Doctor)
+                .FirstOrDefaultAsync(s => s.PublicId == cmd.SchedulePublicId, ct);
+
+            if (schedule is null)
+            {
+                await transaction.RollbackAsync(ct);
+                return null;
+            }
+
+            if (schedule.StatusId != availableScheduleStatus.Id)
+            {
+                await transaction.RollbackAsync(ct);
+                throw new ConflictException("This schedule slot is no longer available.");
+            }
+
+            SlugHelper slugHelper = new();
+            var publicId = Guid.NewGuid();
+
+            var appointment = new Appointment
+            {
+                PublicId = publicId,
+                Slug = slugHelper.GenerateSlug($"appt-{publicId:N}"[..24]),
+                PatientId = patient.Id,
+                DoctorId = schedule.DoctorId,
+                ScheduleId = schedule.Id,
+                StatusId = bookedAppointmentStatus.Id,
+                CreatedByUserId = patient.User.Id,
+                VisitReason = cmd.VisitReason,
+                Symptoms = cmd.Symptoms,
+            };
+
+            schedule.StatusId = bookedScheduleStatus.Id;
+            schedule.UpdatedAt = SystemClock.Instance.GetCurrentInstant();
+
+            db.Appointments.Add(appointment);
+
+            await publishEndpoint.Publish(
+                new AppointmentBookedEvent(
+                    publicId,
+                    patient.PublicId,
+                    schedule.PublicId,
+                    SystemClock.Instance.GetCurrentInstant()
+                ),
+                ct
+            );
+
+            try
+            {
+                await db.SaveChangesAsync(ct);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                await transaction.RollbackAsync(ct);
+                throw new ConflictException("This schedule slot is no longer available.");
+            }
+            catch (DbUpdateException ex)
+                when (ex.InnerException is PostgresException pg
+                    && pg.SqlState == PostgresErrorCodes.UniqueViolation
+                    && pg.ConstraintName == "uq_appointments_schedule_active"
+                )
+            {
+                await transaction.RollbackAsync(ct);
+                throw new ConflictException("This schedule slot has already been booked.");
+            }
+
+            await transaction.CommitAsync(ct);
+
+            Log.Information(
+                "Successfully booked Appointment {PublicId} for Patient {PatientPublicId}.",
+                publicId,
+                patient.PublicId
+            );
+
+            return new BookAppointmentResult(publicId);
         }
-        catch (DbUpdateException ex)
-            when (ex.InnerException is PostgresException pg
-                && pg.SqlState == PostgresErrorCodes.UniqueViolation
-                && pg.ConstraintName == "uq_appointments_schedule_active"
-            )
+        catch (ConflictException)
+        {
+            throw;
+        }
+        catch
         {
             await transaction.RollbackAsync(ct);
-            throw new ConflictException("This schedule slot has already been booked.");
+            throw;
         }
-
-        await transaction.CommitAsync(ct);
-
-        await publishEndpoint.Publish(
-            new AppointmentBookedEvent(
-                publicId,
-                patient.PublicId,
-                schedule.PublicId,
-                SystemClock.Instance.GetCurrentInstant()
-            ),
-            ct
-        );
-
-        Log.Information(
-            "Successfully booked Appointment {PublicId} for Patient {PatientPublicId}.",
-            publicId,
-            patient.PublicId
-        );
-
-        return new BookAppointmentResult(publicId);
     }
 }
 

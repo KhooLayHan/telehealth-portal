@@ -57,5 +57,7 @@ public class DoctorScheduleConfiguration : IEntityTypeConfiguration<DoctorSchedu
             .WithMany(s => s.DoctorSchedules)
             .HasForeignKey(d => d.StatusId)
             .IsRequired();
+        
+        builder.Property(d => d.RowVersion).IsRowVersion();
     }
 }
