@@ -6,13 +6,7 @@ import { z } from "zod";
 import { useRegisterPatient } from "@/api/generated/authentication/authentication";
 import type { ApiError } from "@/api/ofetch-mutator";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -71,11 +65,7 @@ export function RegisterForm() {
         navigate({ to: "/login" });
       } catch (err) {
         const apiError = err as ApiError;
-        setGlobalError(
-          apiError.data?.detail ??
-            apiError.data?.title ??
-            "Registration failed."
-        );
+        setGlobalError(apiError.data?.detail ?? apiError.data?.title ?? "Registration failed.");
       }
     },
   });
@@ -90,9 +80,7 @@ export function RegisterForm() {
       <Card className="shadow-sm">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl">Create an account</CardTitle>
-          <CardDescription>
-            Join TeleHealth to access quality healthcare
-          </CardDescription>
+          <CardDescription>Join TeleHealth to access quality healthcare</CardDescription>
         </CardHeader>
 
         <CardContent>
@@ -115,10 +103,7 @@ export function RegisterForm() {
             ) : null}
 
             {/* Username */}
-            <form.Field
-              name="username"
-              validators={{ onChange: registerSchema.shape.username }}
-            >
+            <form.Field name="username" validators={{ onChange: registerSchema.shape.username }}>
               {(field) => (
                 <div className="space-y-1.5">
                   <Label htmlFor={field.name}>Username</Label>
@@ -132,9 +117,7 @@ export function RegisterForm() {
                     value={field.state.value}
                   />
                   {field.state.meta.errors.length > 0 && (
-                    <p className="text-destructive text-xs">
-                      {field.state.meta.errors.join(", ")}
-                    </p>
+                    <p className="text-destructive text-xs">{field.state.meta.errors.join(", ")}</p>
                   )}
                 </div>
               )}
@@ -167,10 +150,7 @@ export function RegisterForm() {
                 )}
               </form.Field>
 
-              <form.Field
-                name="lastName"
-                validators={{ onChange: registerSchema.shape.lastName }}
-              >
+              <form.Field name="lastName" validators={{ onChange: registerSchema.shape.lastName }}>
                 {(field) => (
                   <div className="space-y-1.5">
                     <Label htmlFor={field.name}>Last name</Label>
@@ -194,10 +174,7 @@ export function RegisterForm() {
             </div>
 
             {/* Email */}
-            <form.Field
-              name="email"
-              validators={{ onChange: registerSchema.shape.email }}
-            >
+            <form.Field name="email" validators={{ onChange: registerSchema.shape.email }}>
               {(field) => (
                 <div className="space-y-1.5">
                   <Label htmlFor={field.name}>Email</Label>
@@ -212,19 +189,14 @@ export function RegisterForm() {
                     value={field.state.value}
                   />
                   {field.state.meta.errors.length > 0 && (
-                    <p className="text-destructive text-xs">
-                      {field.state.meta.errors.join(", ")}
-                    </p>
+                    <p className="text-destructive text-xs">{field.state.meta.errors.join(", ")}</p>
                   )}
                 </div>
               )}
             </form.Field>
 
             {/* IC Number */}
-            <form.Field
-              name="icNumber"
-              validators={{ onChange: registerSchema.shape.icNumber }}
-            >
+            <form.Field name="icNumber" validators={{ onChange: registerSchema.shape.icNumber }}>
               {(field) => (
                 <div className="space-y-1.5">
                   <Label htmlFor={field.name}>IC Number</Label>
@@ -238,9 +210,7 @@ export function RegisterForm() {
                     value={field.state.value}
                   />
                   {field.state.meta.errors.length > 0 && (
-                    <p className="text-destructive text-xs">
-                      {field.state.meta.errors.join(", ")}
-                    </p>
+                    <p className="text-destructive text-xs">{field.state.meta.errors.join(", ")}</p>
                   )}
                 </div>
               )}
@@ -248,10 +218,7 @@ export function RegisterForm() {
 
             {/* Gender + Date of Birth */}
             <div className="grid grid-cols-2 gap-3">
-              <form.Field
-                name="gender"
-                validators={{ onChange: registerSchema.shape.gender }}
-              >
+              <form.Field name="gender" validators={{ onChange: registerSchema.shape.gender }}>
                 {(field) => (
                   <div className="space-y-1.5">
                     <Label htmlFor={field.name}>Gender</Label>
@@ -261,11 +228,7 @@ export function RegisterForm() {
                       id={field.name}
                       name={field.name}
                       onBlur={field.handleBlur}
-                      onChange={(e) =>
-                        field.handleChange(
-                          e.target.value as "M" | "F" | "O" | "N"
-                        )
-                      }
+                      onChange={(e) => field.handleChange(e.target.value as "M" | "F" | "O" | "N")}
                       value={field.state.value}
                     >
                       <option disabled value="">
@@ -312,10 +275,7 @@ export function RegisterForm() {
             </div>
 
             {/* Password */}
-            <form.Field
-              name="password"
-              validators={{ onChange: registerSchema.shape.password }}
-            >
+            <form.Field name="password" validators={{ onChange: registerSchema.shape.password }}>
               {(field) => (
                 <div className="space-y-1.5">
                   <Label htmlFor={field.name}>Password</Label>
@@ -332,24 +292,16 @@ export function RegisterForm() {
                       value={field.state.value}
                     />
                     <button
-                      aria-label={
-                        showPassword ? "Hide password" : "Show password"
-                      }
+                      aria-label={showPassword ? "Hide password" : "Show password"}
                       className="absolute top-1/2 right-2.5 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                       onClick={() => setShowPassword((v) => !v)}
                       type="button"
                     >
-                      {showPassword ? (
-                        <EyeOff className="size-4" />
-                      ) : (
-                        <Eye className="size-4" />
-                      )}
+                      {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                     </button>
                   </div>
                   {field.state.meta.errors.length > 0 && (
-                    <p className="text-destructive text-xs">
-                      {field.state.meta.errors.join(", ")}
-                    </p>
+                    <p className="text-destructive text-xs">{field.state.meta.errors.join(", ")}</p>
                   )}
                 </div>
               )}
@@ -388,9 +340,7 @@ export function RegisterForm() {
                       value={field.state.value}
                     />
                     <button
-                      aria-label={
-                        showConfirmPassword ? "Hide password" : "Show password"
-                      }
+                      aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                       className="absolute top-1/2 right-2.5 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                       onClick={() => setShowConfirmPassword((v) => !v)}
                       type="button"
@@ -403,9 +353,7 @@ export function RegisterForm() {
                     </button>
                   </div>
                   {field.state.meta.errors.length > 0 && (
-                    <p className="text-destructive text-xs">
-                      {field.state.meta.errors.join(", ")}
-                    </p>
+                    <p className="text-destructive text-xs">{field.state.meta.errors.join(", ")}</p>
                   )}
                 </div>
               )}
@@ -440,15 +388,11 @@ export function RegisterForm() {
               {(state) => (
                 <Button
                   className="w-full"
-                  disabled={
-                    !state.canSubmit || state.isSubmitting || !acceptTerms
-                  }
+                  disabled={!state.canSubmit || state.isSubmitting || !acceptTerms}
                   size="lg"
                   type="submit"
                 >
-                  {state.isSubmitting
-                    ? "Creating account..."
-                    : "Create account"}
+                  {state.isSubmitting ? "Creating account..." : "Create account"}
                 </Button>
               )}
             </form.Subscribe>
@@ -456,10 +400,7 @@ export function RegisterForm() {
 
           <p className="mt-6 text-center text-muted-foreground text-sm">
             Already have an account?{" "}
-            <Link
-              className="font-medium text-primary hover:underline"
-              to="/login"
-            >
+            <Link className="font-medium text-primary hover:underline" to="/login">
               Sign in
             </Link>
           </p>

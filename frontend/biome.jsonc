@@ -1,5 +1,17 @@
 {
+  "root": false,
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
   "files": {
     "ignoreUnknown": true,
     "includes": [
@@ -68,9 +80,5 @@
       }
     }
   ],
-  "extends": [
-    "ultracite/biome/core",
-    "ultracite/biome/react",
-    "ultracite/biome/remix"
-  ]
+  "extends": ["ultracite/biome/react", "ultracite/biome/remix"]
 }

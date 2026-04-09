@@ -49,12 +49,10 @@ function AuthLayout() {
 
         <blockquote className="space-y-1 border-primary-foreground/30 border-l-2 pl-4">
           <p className="text-primary-foreground/90 text-sm italic">
-            "The good physician treats the disease; the great physician treats
-            the patient who has the disease."
+            "The good physician treats the disease; the great physician treats the patient who has
+            the disease."
           </p>
-          <footer className="text-primary-foreground/50 text-xs">
-            William Osler
-          </footer>
+          <footer className="text-primary-foreground/50 text-xs">William Osler</footer>
         </blockquote>
       </div>
 

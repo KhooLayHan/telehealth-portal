@@ -101,8 +101,7 @@ const navItems = [
 
 const statusStyles: Record<string, string> = {
   Scheduled: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-  Completed:
-    "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+  Completed: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
   Cancelled: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
 };
 
@@ -154,12 +153,8 @@ export function Dashboard() {
               {userInitial}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate font-medium text-sm">
-                {user?.firstName ?? "User"}
-              </p>
-              <p className="truncate text-muted-foreground text-xs">
-                {user?.role ?? "Patient"}
-              </p>
+              <p className="truncate font-medium text-sm">{user?.firstName ?? "User"}</p>
+              <p className="truncate text-muted-foreground text-xs">{user?.role ?? "Patient"}</p>
             </div>
           </div>
           <button
@@ -179,10 +174,7 @@ export function Dashboard() {
         <header className="flex h-16 shrink-0 items-center justify-between border-border border-b bg-card px-6">
           <div className="relative w-72">
             <Search className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              className="h-9 pl-9"
-              placeholder="Search patients, appointments..."
-            />
+            <Input className="h-9 pl-9" placeholder="Search patients, appointments..." />
           </div>
           <div className="flex items-center gap-2">
             <Button size="icon" variant="ghost">
@@ -198,9 +190,7 @@ export function Dashboard() {
         <main className="flex-1 overflow-y-auto p-6">
           {/* Page header */}
           <div className="mb-6">
-            <h1 className="font-semibold text-2xl">
-              Good morning, {user?.firstName ?? "User"}
-            </h1>
+            <h1 className="font-semibold text-2xl">Good morning, {user?.firstName ?? "User"}</h1>
             <p className="mt-0.5 text-muted-foreground text-sm">
               Here's what's happening at the clinic today.
             </p>
@@ -220,9 +210,7 @@ export function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <p className="font-bold text-2xl">{stat.value}</p>
-                  <p className="mt-0.5 text-muted-foreground text-xs">
-                    {stat.change}
-                  </p>
+                  <p className="mt-0.5 text-muted-foreground text-xs">{stat.change}</p>
                 </CardContent>
               </Card>
             ))}
@@ -233,9 +221,7 @@ export function Dashboard() {
             <div className="flex items-center justify-between border-border border-b px-6 py-4">
               <div>
                 <h2 className="font-semibold">Recent Appointments</h2>
-                <p className="mt-0.5 text-muted-foreground text-xs">
-                  Today's appointment schedule
-                </p>
+                <p className="mt-0.5 text-muted-foreground text-xs">Today's appointment schedule</p>
               </div>
               <Button size="sm" variant="outline">
                 View all
@@ -251,12 +237,8 @@ export function Dashboard() {
                     <th className="px-6 py-3 text-left font-medium text-muted-foreground">
                       Doctor
                     </th>
-                    <th className="px-6 py-3 text-left font-medium text-muted-foreground">
-                      Time
-                    </th>
-                    <th className="px-6 py-3 text-left font-medium text-muted-foreground">
-                      Type
-                    </th>
+                    <th className="px-6 py-3 text-left font-medium text-muted-foreground">Time</th>
+                    <th className="px-6 py-3 text-left font-medium text-muted-foreground">Type</th>
                     <th className="px-6 py-3 text-left font-medium text-muted-foreground">
                       Status
                     </th>
@@ -269,17 +251,11 @@ export function Dashboard() {
                       key={appt.id}
                     >
                       <td className="px-6 py-3 font-medium">{appt.patient}</td>
-                      <td className="px-6 py-3 text-muted-foreground">
-                        {appt.doctor}
-                      </td>
-                      <td className="px-6 py-3 text-muted-foreground">
-                        {appt.time}
-                      </td>
+                      <td className="px-6 py-3 text-muted-foreground">{appt.doctor}</td>
+                      <td className="px-6 py-3 text-muted-foreground">{appt.time}</td>
                       <td className="px-6 py-3">
                         <span className="inline-flex items-center gap-1.5 text-muted-foreground">
-                          {appt.type === "Video" && (
-                            <Activity className="size-3.5" />
-                          )}
+                          {appt.type === "Video" && <Activity className="size-3.5" />}
                           {appt.type}
                         </span>
                       </td>
