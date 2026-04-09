@@ -35,7 +35,7 @@ jobs:
         run: dotnet restore backend/src/TeleHealth.Api/TeleHealth.Api.csproj --locked-mode
  
       - name: Build
-        run: dotnet build backend/TeleHealth.slnx --no-restore
+        run: dotnet build TeleHealth.slnx --no-restore
  
       - name: Restore local .NET tools
         run: dotnet tool restore
