@@ -13,6 +13,7 @@ using TeleHealth.Api.Common;
 using TeleHealth.Api.Common.Extensions;
 using TeleHealth.Api.Common.Security;
 using TeleHealth.Api.Domain.Entities;
+using TeleHealth.Api.Features.Appointments.Book;
 using TeleHealth.Api.Features.Patients.GetProfile;
 using TeleHealth.Api.Features.Patients.UpdateMedicalRecord;
 using TeleHealth.Api.Features.Users.Create;
@@ -92,6 +93,7 @@ builder.Services.AddScoped<RegisterPatientHandler>();
 builder.Services.AddScoped<CreateUserHandler>();
 builder.Services.AddScoped<GetProfileHandler>();
 builder.Services.AddScoped<UpdateMedicalRecordHandler>();
+builder.Services.AddScoped<BookAppointmentHandler>();
 
 builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonS3>();
@@ -131,6 +133,7 @@ api.MapRegisterPatientEndpoint();
 api.MapCreateUserEndpoint();
 api.MapGetProfileEndpoint();
 api.MapUpdateMedicalRecordEndpoint();
+api.MapBookAppointmentEndpoint();
 
 app.UseSerilogRequestLogging();
 

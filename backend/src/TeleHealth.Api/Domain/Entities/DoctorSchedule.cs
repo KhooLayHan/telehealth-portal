@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
 
@@ -8,7 +9,7 @@ public sealed class DoctorSchedule
     public long Id { get; init; }
     public Guid PublicId { get; init; }
     public required long DoctorId { get; init; }
-    public required int StatusId { get; init; }
+    public required int StatusId { get; set; }
     public required LocalDate Date { get; set; }
     public required LocalTime StartTime { get; set; }
     public required LocalTime EndTime { get; set; }
@@ -18,4 +19,5 @@ public sealed class DoctorSchedule
     public Doctor Doctor { get; } = null!;
     public ScheduleStatus ScheduleStatus { get; } = null!;
     public Appointment Appointment { get; } = null!;
+    public uint RowVersion { get; set; }
 }

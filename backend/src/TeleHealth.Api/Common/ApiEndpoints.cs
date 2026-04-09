@@ -34,4 +34,13 @@ public static class ApiEndpoints
 
         public const string Create = Base;
     }
+
+    public static class Appointments
+    {
+        private const string Base = "appointments";
+
+        public const string Book = Base;
+
+        public const string GetById = $"{Base}/{{id:guid}}";
+    }
 }
