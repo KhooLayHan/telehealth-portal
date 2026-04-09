@@ -34,6 +34,11 @@ public static class BookAppointmentEndpoint
             .WithName("BookAppointment")
             .WithTags("Appointments")
             .RequireAuthorization("PatientOnly")
+            .Produces(StatusCodes.Status201Created)
+            .ProducesProblem(StatusCodes.Status403Forbidden)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status409Conflict)
+            .ProducesValidationProblem(StatusCodes.Status422UnprocessableEntity)
             .AddEndpointFilter<ValidationFilter<BookAppointmentCommand>>();
 
         return app;

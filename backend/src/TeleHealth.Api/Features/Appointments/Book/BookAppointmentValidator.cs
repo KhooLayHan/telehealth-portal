@@ -22,8 +22,9 @@ public class BookAppointmentValidator : AbstractValidator<BookAppointmentCommand
                 symptom
                     .RuleFor(s => s.Name)
                     .NotEmpty()
+                    .WithMessage("Each symptom must have a name.")
                     .MaximumLength(100)
-                    .WithMessage("Each symptom must have a name.");
+                    .WithMessage("Symptom name cannot exceed 100 characters.");
 
                 symptom
                     .RuleFor(s => s.Severity)

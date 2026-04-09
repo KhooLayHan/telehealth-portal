@@ -80,17 +80,7 @@ public sealed class BookAppointmentHandler(
         schedule.UpdatedAt = SystemClock.Instance.GetCurrentInstant();
 
         db.Appointments.Add(appointment);
-
-        await publishEndpoint.Publish(
-            new AppointmentBookedEvent(
-                publicId,
-                patient.PublicId,
-                schedule.PublicId,
-                SystemClock.Instance.GetCurrentInstant()
-            ),
-            ct
-        );
-
+        
         try
         {
             await db.SaveChangesAsync(ct);
@@ -107,6 +97,16 @@ public sealed class BookAppointmentHandler(
 
         await transaction.CommitAsync(ct);
 
+        await publishEndpoint.Publish(
+            new AppointmentBookedEvent(
+                publicId,
+                patient.PublicId,
+                schedule.PublicId,
+                SystemClock.Instance.GetCurrentInstant()
+            ),
+            ct
+        );
+        
         Log.Information(
             "Successfully booked Appointment {PublicId} for Patient {PatientPublicId}.",
             publicId,
