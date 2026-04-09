@@ -18,7 +18,10 @@ public sealed class RegisterPatientHandler(
     IPublishEndpoint publishEndpoint
 )
 {
-    public async Task<Guid> HandleAsync(RegisterPatientCommand cmd, CancellationToken ct)
+    public async Task<RegisterPatientResult> HandleAsync(
+        RegisterPatientCommand cmd,
+        CancellationToken ct
+    )
     {
         Log.Information("Attempting to register new patient.");
 
@@ -97,6 +100,8 @@ public sealed class RegisterPatientHandler(
 
         Log.Information("Successfully registered Patient {PublicId}", patient.PublicId);
 
-        return publicId;
+        return new RegisterPatientResult(publicId, patientPublicId);
     }
 }
+
+public sealed record RegisterPatientResult(Guid UserPublicId, Guid PatientPublicId);
