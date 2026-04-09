@@ -8,7 +8,7 @@
     "restore": "dotnet restore ../TeleHealth.slnx --locked-mode",
     "check": "dotnet csharpier check .",
     "format": "dotnet csharpier format .",
-    "test": "dotnet test tests/TeleHealth.UnitTests",
+    "test": "dotnet test --solution ../TeleHealth.slnx",
     "test:all": "dotnet test --solution ../TeleHealth.slnx"
   }
 }
