@@ -9,22 +9,22 @@ export default defineConfig({
       baseUrl: {
         getBaseUrlFromSpecification: true,
       },
-      indexFiles: false,
       biome: true,
       clean: true,
       client: "react-query",
       httpClient: "fetch",
+      indexFiles: false,
       mode: "tags-split",
-      namingConvention: "camelCase",
-      operationSchemas: "api/schemas",
+      namingConvention: "PascalCase",
       override: {
         mutator: {
-          path: "api/ofetch-mutator.ts",
+          path: "ofetch-mutator.ts",
           name: "ofetchMutator",
         },
       },
-      target: "api/generated",
-      workspace: "src",
+      schemas: "src/api/model",
+      target: "generated",
+      workspace: "src/api",
     },
   },
 });
