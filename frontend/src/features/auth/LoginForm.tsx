@@ -7,13 +7,7 @@ import { useLoginUser } from "@/api/generated/authentication/authentication";
 import { getMyProfile } from "@/api/generated/patients/patients";
 import type { ApiError } from "@/api/ofetch-mutator";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -55,9 +49,7 @@ export function LoginForm() {
         };
 
         if (!profile?.userPublicId) {
-          setGlobalError(
-            "Signed in, but could not load your profile. Please try again."
-          );
+          setGlobalError("Signed in, but could not load your profile. Please try again.");
           return;
         }
 
@@ -75,9 +67,7 @@ export function LoginForm() {
         if (apiError.status === 401) {
           setGlobalError("Invalid email or password.");
         } else {
-          setGlobalError(
-            apiError.data?.title || "An unexpected error occurred."
-          );
+          setGlobalError(apiError.data?.title || "An unexpected error occurred.");
         }
       }
     },
@@ -118,10 +108,7 @@ export function LoginForm() {
             ) : null}
 
             {/* Email */}
-            <form.Field
-              name="email"
-              validators={{ onChange: loginSchema.shape.email }}
-            >
+            <form.Field name="email" validators={{ onChange: loginSchema.shape.email }}>
               {(field) => (
                 <div className="space-y-1.5">
                   <Label htmlFor={field.name}>Email</Label>
@@ -136,19 +123,14 @@ export function LoginForm() {
                     value={field.state.value}
                   />
                   {field.state.meta.errors.length > 0 && (
-                    <p className="text-destructive text-xs">
-                      {field.state.meta.errors.join(", ")}
-                    </p>
+                    <p className="text-destructive text-xs">{field.state.meta.errors.join(", ")}</p>
                   )}
                 </div>
               )}
             </form.Field>
 
             {/* Password */}
-            <form.Field
-              name="password"
-              validators={{ onChange: loginSchema.shape.password }}
-            >
+            <form.Field name="password" validators={{ onChange: loginSchema.shape.password }}>
               {(field) => (
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
@@ -175,24 +157,16 @@ export function LoginForm() {
                       value={field.state.value}
                     />
                     <button
-                      aria-label={
-                        showPassword ? "Hide password" : "Show password"
-                      }
+                      aria-label={showPassword ? "Hide password" : "Show password"}
                       className="absolute top-1/2 right-2.5 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                       onClick={() => setShowPassword((v) => !v)}
                       type="button"
                     >
-                      {showPassword ? (
-                        <EyeOff className="size-4" />
-                      ) : (
-                        <Eye className="size-4" />
-                      )}
+                      {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                     </button>
                   </div>
                   {field.state.meta.errors.length > 0 && (
-                    <p className="text-destructive text-xs">
-                      {field.state.meta.errors.join(", ")}
-                    </p>
+                    <p className="text-destructive text-xs">{field.state.meta.errors.join(", ")}</p>
                   )}
                 </div>
               )}
@@ -243,10 +217,7 @@ export function LoginForm() {
           {/* Register link */}
           <p className="text-center text-muted-foreground text-sm">
             Don't have an account?{" "}
-            <Link
-              className="font-medium text-primary hover:underline"
-              to="/register"
-            >
+            <Link className="font-medium text-primary hover:underline" to="/register">
               Create an account
             </Link>
           </p>
