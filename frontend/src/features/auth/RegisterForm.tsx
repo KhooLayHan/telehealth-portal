@@ -362,8 +362,12 @@ export function RegisterForm() {
                 onChangeListenTo: ["password"],
                 onChange: ({ value, fieldApi }) => {
                   const password = fieldApi.form.getFieldValue("password");
-                  if (!value) return "Please confirm your password.";
-                  if (value !== password) return "Passwords do not match.";
+                  if (!value) {
+                    return "Please confirm your password.";
+                  }
+                  if (value !== password) {
+                    return "Passwords do not match.";
+                  }
                   return undefined;
                 },
               }}

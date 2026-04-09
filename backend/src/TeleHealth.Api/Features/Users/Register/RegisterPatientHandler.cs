@@ -71,7 +71,9 @@ public sealed class RegisterPatientHandler(
                 ),
                 "uq_users_email_active" => new ConflictException("Email is already registered."),
                 "uq_users_ic_active" => new ConflictException("IC Number is already registered."),
-                "uq_users_slug_active" => new ConflictException("Username is already registered."),
+                "uq_users_slug_active" => new ConflictException(
+                    "A user with these details already exists."
+                ),
                 _ => new ConflictException("A user with these details already exists."),
             };
         }

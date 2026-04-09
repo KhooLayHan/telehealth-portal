@@ -1,6 +1,7 @@
 using Facet.Extensions;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
+using Serilog;
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Features.Patients.GetProfile;
 using TeleHealth.Api.Infrastructure.Persistence;
@@ -15,6 +16,8 @@ public sealed class UpdateMedicalRecordHandler(ApplicationDbContext db)
         CancellationToken ct
     )
     {
+        Log.Information("Attempting to update patient's {PublicId} medical record.", userPublicId);
+
         var patient = await db
             .Patients.Include(p => p.User)
             .FirstOrDefaultAsync(p => p.User.PublicId == userPublicId, ct);
@@ -29,10 +32,12 @@ public sealed class UpdateMedicalRecordHandler(ApplicationDbContext db)
 
         await db.SaveChangesAsync(ct);
 
+        Log.Information("Updating Patient {PublicId} was successful.", patient.PublicId);
+
         return await db
             .Patients.AsNoTracking()
             .Where(p => p.User.PublicId == userPublicId)
-            .SelectFacet<Patient, PatientProfileDto>()
+            .Select(PatientProfileDto.Projection)
             .FirstOrDefaultAsync(ct);
     }
 }
