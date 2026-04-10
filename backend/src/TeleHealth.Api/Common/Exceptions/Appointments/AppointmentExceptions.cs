@@ -60,7 +60,7 @@ public sealed class AppointmentTimeConflictException : ConflictException
         ) { }
 }
 
-public sealed class ScheduleExpiredException : Base.ConflictException
+public sealed class ScheduleExpiredException : ConflictException
 {
     public ScheduleExpiredException(DateTimeOffset expiredDate)
         : base(
@@ -71,7 +71,7 @@ public sealed class ScheduleExpiredException : Base.ConflictException
         ) { }
 }
 
-public sealed class AppointmentAlreadyCompletedException : Base.ConflictException
+public sealed class AppointmentAlreadyCompletedException : ConflictException
 {
     public AppointmentAlreadyCompletedException(string appointmentId)
         : base(
@@ -82,7 +82,7 @@ public sealed class AppointmentAlreadyCompletedException : Base.ConflictExceptio
         ) { }
 }
 
-public sealed class AppointmentAlreadyCancelledException : Base.ConflictException
+public sealed class AppointmentAlreadyCancelledException : ConflictException
 {
     public AppointmentAlreadyCancelledException(string appointmentId)
         : base(
@@ -93,7 +93,7 @@ public sealed class AppointmentAlreadyCancelledException : Base.ConflictExceptio
         ) { }
 }
 
-public sealed class ConcurrentBookingException : Base.ConflictException
+public sealed class ConcurrentBookingException : ConflictException
 {
     public ConcurrentBookingException()
         : base(
