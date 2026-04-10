@@ -29,14 +29,21 @@ internal sealed class ProblemExceptionHandler(IProblemDetailsService problemDeta
             Title = problemException.Title,
             Type = problemException.ErrorCode,
             Status = problemException.StatusCode,
-            Detail = isDevelopment
-                ? problemException.Message
-                : problemException.Detail ?? "An unexpected error occurred.",
+            Detail = isDevelopment ? problemException.Message : null,
         };
 
-        if (isDevelopment && problemException.Detail is not null)
+        if (!isDevelopment)
         {
-            problemDetails.Extensions["devDetail"] = problemException.Detail;
+            var logger = httpContext.RequestServices.GetRequiredService<
+                ILogger<ProblemExceptionHandler>
+            >();
+            logger.LogWarning(
+                "ProblemException: ErrorCode={ErrorCode}, Title={Title}, Message={Message}, Path={Path}",
+                problemException.ErrorCode,
+                problemException.Title,
+                problemException.Message,
+                httpContext.Request.Path
+            );
         }
 
         return await problemDetailsService.TryWriteAsync(

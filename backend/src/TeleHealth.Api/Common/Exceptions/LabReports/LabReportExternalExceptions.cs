@@ -10,8 +10,7 @@ public sealed class S3UploadFailedException : ProblemException
             LabReportErrorCodes.S3UploadFailed,
             StatusCodes.Status502BadGateway,
             "S3 Upload Failed",
-            "Failed to upload file to storage.",
-            key is null ? reason : $"Key: {key}. {reason}"
+            "Failed to upload file to storage."
         ) { }
 }
 
@@ -22,7 +21,6 @@ public sealed class PdfProcessingFailedException : ProblemException
             LabReportErrorCodes.PdfProcessingFailed,
             StatusCodes.Status422UnprocessableEntity,
             "PDF Processing Failed",
-            $"Failed to process PDF file '{fileName}'.",
-            reason
+            "Failed to process the uploaded PDF file."
         ) { }
 }

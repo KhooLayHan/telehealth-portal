@@ -29,8 +29,7 @@ public sealed class TokenInvalidException : UnauthorizedException
         : base(
             AuthErrorCodes.TokenInvalid,
             "Invalid Token",
-            "The provided authentication token is invalid.",
-            reason
+            "The provided authentication token is invalid."
         ) { }
 }
 
@@ -60,8 +59,7 @@ public sealed class InsufficientPermissionsException : ForbiddenException
         : base(
             AuthErrorCodes.InsufficientPermissions,
             "Insufficient Permissions",
-            "You do not have permission to perform this action.",
-            $"Required role: {requiredRole}"
+            "You do not have permission to perform this action."
         ) { }
 }
 
@@ -71,8 +69,7 @@ public sealed class ResourceAccessDeniedException : ForbiddenException
         : base(
             AuthErrorCodes.ResourceAccessDenied,
             "Access Denied",
-            "You do not have access to this resource.",
-            $"Access denied to {resource} with ID: {resourceId}"
+            "You do not have access to this resource."
         ) { }
 }
 
@@ -82,7 +79,6 @@ public sealed class ActionNotAllowedException : ForbiddenException
         : base(
             AuthErrorCodes.ActionNotAllowed,
             "Action Not Allowed",
-            $"The action '{action}' cannot be performed.",
-            reason
+            $"The action '{action}' cannot be performed."
         ) { }
 }

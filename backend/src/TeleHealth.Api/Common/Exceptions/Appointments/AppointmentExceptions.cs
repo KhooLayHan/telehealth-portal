@@ -9,8 +9,7 @@ public sealed class AppointmentNotFoundException : NotFoundException
         : base(
             AppointmentErrorCodes.NotFound,
             "Appointment Not Found",
-            "The requested appointment was not found.",
-            $"Appointment {appointmentId} not found"
+            $"Appointment '{appointmentId}' was not found."
         ) { }
 }
 
@@ -20,8 +19,7 @@ public sealed class DoctorScheduleNotFoundException : NotFoundException
         : base(
             AppointmentErrorCodes.ScheduleNotFound,
             "Schedule Not Found",
-            "The requested schedule was not found.",
-            $"Schedule {scheduleId} not found"
+            $"Schedule '{scheduleId}' was not found."
         ) { }
 }
 
@@ -31,69 +29,61 @@ public sealed class ScheduleSlotNotFoundException : NotFoundException
         : base(
             AppointmentErrorCodes.ScheduleSlotNotFound,
             "Schedule Slot Not Found",
-            "The requested schedule slot was not found.",
-            $"Schedule slot {slotId} not found"
+            $"Schedule slot '{slotId}' was not found."
         ) { }
 }
 
-public sealed class ScheduleSlotUnavailableException : ConflictException
+public sealed class ScheduleSlotUnavailableException : Base.ConflictException
 {
     public ScheduleSlotUnavailableException(string? scheduleId = null)
         : base(
             AppointmentErrorCodes.ScheduleUnavailable,
             "Schedule Slot Unavailable",
-            "This schedule slot is no longer available.",
-            scheduleId is null ? null : $"Schedule {scheduleId} is already booked"
+            "This schedule slot is no longer available."
         ) { }
 }
 
-public sealed class AppointmentTimeConflictException : ConflictException
+public sealed class AppointmentTimeConflictException : Base.ConflictException
 {
     public AppointmentTimeConflictException(string? existingAppointmentId = null)
         : base(
             AppointmentErrorCodes.TimeConflict,
             "Appointment Time Conflict",
-            "You already have an appointment at this time.",
-            existingAppointmentId is null
-                ? null
-                : $"Conflicts with appointment {existingAppointmentId}"
+            "You already have an appointment at this time."
         ) { }
 }
 
-public sealed class ScheduleExpiredException : ConflictException
+public sealed class ScheduleExpiredException : Base.ConflictException
 {
     public ScheduleExpiredException(DateTimeOffset expiredDate)
         : base(
             AppointmentErrorCodes.ScheduleExpired,
             "Schedule Expired",
-            "This schedule slot has expired.",
-            $"Slot expired on {expiredDate:yyyy-MM-dd HH:mm}"
+            "This schedule slot has expired."
         ) { }
 }
 
-public sealed class AppointmentAlreadyCompletedException : ConflictException
+public sealed class AppointmentAlreadyCompletedException : Base.ConflictException
 {
     public AppointmentAlreadyCompletedException(string appointmentId)
         : base(
             AppointmentErrorCodes.AlreadyCompleted,
             "Appointment Already Completed",
-            "This appointment has already been completed.",
-            $"Appointment {appointmentId} is already marked as completed"
+            "This appointment has already been completed."
         ) { }
 }
 
-public sealed class AppointmentAlreadyCancelledException : ConflictException
+public sealed class AppointmentAlreadyCancelledException : Base.ConflictException
 {
     public AppointmentAlreadyCancelledException(string appointmentId)
         : base(
             AppointmentErrorCodes.AlreadyCancelled,
             "Appointment Already Cancelled",
-            "This appointment has already been cancelled.",
-            $"Appointment {appointmentId} is already cancelled"
+            "This appointment has already been cancelled."
         ) { }
 }
 
-public sealed class ConcurrentBookingException : ConflictException
+public sealed class ConcurrentBookingException : Base.ConflictException
 {
     public ConcurrentBookingException()
         : base(
@@ -109,8 +99,7 @@ public sealed class InvalidAppointmentTimeException : ValidationException
         : base(
             AppointmentErrorCodes.InvalidTime,
             "Invalid Appointment Time",
-            $"The selected appointment time is invalid: {reason}",
-            reason
+            "The selected appointment time is invalid."
         ) { }
 }
 
@@ -130,8 +119,7 @@ public sealed class TooShortNoticeException : ValidationException
         : base(
             AppointmentErrorCodes.TooShortNotice,
             "Insufficient Notice",
-            "This appointment requires more advance notice.",
-            $"Appointments must be booked at least {requiredNotice.TotalHours} hours in advance"
+            "This appointment requires more advance notice."
         ) { }
 }
 
@@ -141,8 +129,7 @@ public sealed class InvalidRescheduleException : ValidationException
         : base(
             AppointmentErrorCodes.InvalidReschedule,
             "Cannot Reschedule",
-            "This appointment cannot be rescheduled.",
-            reason
+            "This appointment cannot be rescheduled."
         ) { }
 }
 
@@ -152,8 +139,7 @@ public sealed class DoctorNotAvailableException : ValidationException
         : base(
             AppointmentErrorCodes.DoctorNotAvailable,
             "Doctor Not Available",
-            $"Dr. {doctorName} is not available on {date:yyyy-MM-dd}.",
-            $"Doctor is on leave or has no available slots on {date:yyyy-MM-dd}"
+            "The selected doctor is not available at that time."
         ) { }
 }
 

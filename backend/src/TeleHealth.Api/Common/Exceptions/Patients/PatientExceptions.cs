@@ -9,8 +9,7 @@ public sealed class PatientNotFoundException : NotFoundException
         : base(
             PatientErrorCodes.NotFound,
             "Patient Not Found",
-            $"Patient '{identifier}' was not found.",
-            $"No patient exists with identifier: {identifier}"
+            $"Patient '{identifier}' was not found."
         ) { }
 }
 
@@ -20,8 +19,7 @@ public sealed class MedicalRecordNotFoundException : NotFoundException
         : base(
             PatientErrorCodes.MedicalRecordNotFound,
             "Medical Record Not Found",
-            "The medical record was not found.",
-            $"No medical record found for patient: {patientId}"
+            $"Medical record not found for patient: {patientId}"
         ) { }
 }
 
@@ -31,8 +29,7 @@ public sealed class PatientAlreadyRegisteredException : Base.ConflictException
         : base(
             PatientErrorCodes.AlreadyRegistered,
             "Patient Already Registered",
-            "This patient is already registered in the system.",
-            $"Patient with identifier '{identifier}' already exists"
+            $"Patient '{identifier}' is already registered."
         ) { }
 }
 
@@ -42,8 +39,7 @@ public sealed class InvalidMedicalDataException : ValidationException
         : base(
             PatientErrorCodes.InvalidMedicalData,
             "Invalid Medical Data",
-            $"Invalid medical data provided for field '{field}'.",
-            reason
+            $"Invalid data for field '{field}': {reason}"
         ) { }
 }
 

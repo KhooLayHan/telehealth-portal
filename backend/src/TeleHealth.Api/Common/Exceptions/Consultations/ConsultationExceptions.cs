@@ -9,8 +9,7 @@ public sealed class ConsultationNotFoundException : NotFoundException
         : base(
             ConsultationErrorCodes.NotFound,
             "Consultation Not Found",
-            "The requested consultation was not found.",
-            $"Consultation {consultationId} not found"
+            $"Consultation '{consultationId}' was not found."
         ) { }
 }
 
@@ -20,8 +19,7 @@ public sealed class ConsultationNoteNotFoundException : NotFoundException
         : base(
             ConsultationErrorCodes.NoteNotFound,
             "Consultation Note Not Found",
-            "The requested consultation note was not found.",
-            $"Note {noteId} not found"
+            $"Consultation note was not found."
         ) { }
 }
 
@@ -31,19 +29,17 @@ public sealed class PrescriptionNotFoundException : NotFoundException
         : base(
             ConsultationErrorCodes.PrescriptionNotFound,
             "Prescription Not Found",
-            "The requested prescription was not found.",
-            $"Prescription {prescriptionId} not found"
+            "Prescription was not found."
         ) { }
 }
 
-public sealed class ConsultationAlreadyExistsException : ConflictException
+public sealed class ConsultationAlreadyExistsException : Base.ConflictException
 {
     public ConsultationAlreadyExistsException(string appointmentId)
         : base(
             ConsultationErrorCodes.AlreadyExists,
             "Consultation Already Exists",
-            "A consultation already exists for this appointment.",
-            $"Consultation for appointment {appointmentId} already exists"
+            "A consultation already exists for this appointment."
         ) { }
 }
 
@@ -63,8 +59,7 @@ public sealed class InvalidPrescriptionDataException : ValidationException
         : base(
             ConsultationErrorCodes.InvalidPrescription,
             "Invalid Prescription Data",
-            $"Invalid prescription data in field '{field}'.",
-            reason
+            "Invalid prescription data was provided."
         ) { }
 }
 
@@ -84,7 +79,6 @@ public sealed class PatientNotCheckedInException : ValidationException
         : base(
             ConsultationErrorCodes.PatientNotCheckedIn,
             "Patient Not Checked In",
-            "The patient must be checked in before starting a consultation.",
-            $"Patient for appointment {appointmentId} has not checked in"
+            "The patient must be checked in before starting a consultation."
         ) { }
 }

@@ -9,8 +9,7 @@ public sealed class LabReportNotFoundException : NotFoundException
         : base(
             LabReportErrorCodes.NotFound,
             "Lab Report Not Found",
-            "The requested lab report was not found.",
-            $"Lab report {reportId} not found"
+            $"Lab report '{reportId}' was not found."
         ) { }
 }
 
@@ -20,8 +19,7 @@ public sealed class BiomarkerNotFoundException : NotFoundException
         : base(
             LabReportErrorCodes.BiomarkerNotFound,
             "Biomarker Not Found",
-            "The requested biomarker was not found.",
-            $"Biomarker '{biomarkerName}' not found in report"
+            "The requested biomarker was not found."
         ) { }
 }
 
@@ -31,8 +29,7 @@ public sealed class DuplicateLabReportException : Base.ConflictException
         : base(
             LabReportErrorCodes.DuplicateReport,
             "Duplicate Lab Report",
-            "A lab report of this type already exists for this patient.",
-            $"Duplicate {reportType} report for patient {patientId}"
+            "A lab report of this type already exists for this patient."
         ) { }
 }
 
@@ -42,8 +39,7 @@ public sealed class InvalidBiomarkerDataException : ValidationException
         : base(
             LabReportErrorCodes.InvalidBiomarkerData,
             "Invalid Biomarker Data",
-            $"Invalid data for biomarker '{biomarker}'.",
-            reason
+            "Invalid biomarker data was provided."
         ) { }
 }
 
@@ -53,7 +49,6 @@ public sealed class InvalidPdfFormatException : ValidationException
         : base(
             LabReportErrorCodes.InvalidPdfFormat,
             "Invalid PDF Format",
-            "The uploaded PDF file format is invalid.",
-            reason
+            "The uploaded PDF file format is invalid."
         ) { }
 }

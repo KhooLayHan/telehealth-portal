@@ -9,8 +9,7 @@ public sealed class DoctorNotFoundException : NotFoundException
         : base(
             DoctorErrorCodes.NotFound,
             "Doctor Not Found",
-            $"Doctor '{identifier}' was not found.",
-            $"No doctor exists with identifier: {identifier}"
+            $"Doctor '{identifier}' was not found."
         ) { }
 }
 
@@ -20,8 +19,7 @@ public sealed class QualificationNotFoundException : NotFoundException
         : base(
             DoctorErrorCodes.QualificationNotFound,
             "Qualification Not Found",
-            "The requested qualification was not found.",
-            $"Qualification {qualificationId} not found"
+            $"Qualification '{qualificationId}' was not found."
         ) { }
 }
 
@@ -31,19 +29,17 @@ public sealed class InvalidScheduleException : ValidationException
         : base(
             DoctorErrorCodes.InvalidSchedule,
             "Invalid Schedule",
-            "The provided schedule is invalid.",
-            reason
+            "The provided schedule is invalid."
         ) { }
 }
 
-public sealed class OverlappingScheduleException : ConflictException
+public sealed class OverlappingScheduleException : Base.ConflictException
 {
     public OverlappingScheduleException(DateTimeOffset startTime, DateTimeOffset endTime)
         : base(
             DoctorErrorCodes.OverlappingSchedule,
             "Overlapping Schedule",
-            "This schedule overlaps with an existing schedule.",
-            $"Overlaps with schedule from {startTime:HH:mm} to {endTime:HH:mm}"
+            "This schedule overlaps with an existing schedule."
         ) { }
 }
 
