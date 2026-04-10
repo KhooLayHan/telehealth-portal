@@ -45,14 +45,16 @@ public sealed class TokenService(IConfiguration configuration) : ITokenService
 
         var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
+        var isDevelopment = configuration["Environment"] == "Development";
+
         httpContext.Response.Cookies.Append(
             "X-Access-Token",
             tokenString,
             new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.None,
+                Secure = !isDevelopment,
+                SameSite = isDevelopment ? SameSiteMode.Lax : SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddMinutes(expiryMinutes),
             }
         );

@@ -164,22 +164,14 @@ export function Dashboard() {
           {visibleNavItems.map((item) => (
             <Link
               to={item.href}
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left font-medium text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              activeProps={{
+                className: "bg-primary text-primary-foreground hover:bg-primary",
+              }}
               key={item.label}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left font-medium text-sm transition-colors hover:bg-muted"
-              activeProps={{ className: "bg-primary text-primary-foreground hover:bg-primary" }}
             >
-              <button
-                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left font-medium text-sm transition-colors ${
-                  item.active
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`}
-                key={item.label}
-                type="button"
-              >
-                <item.icon className="size-4 shrink-0" />
-                {item.label}
-              </button>
+              <item.icon className="size-4 shrink-0" />
+              {item.label}
             </Link>
           ))}
         </nav>

@@ -31,10 +31,8 @@ export default defineConfig({
   server: {
     fs: {
       allow: [
-        // Include project root and parent directories
         searchForWorkspaceRoot(process.cwd()),
-        // Explicitly allow the Bun store path
-        '/Users/vincent-sequoia/Projects/APU/DDAC/telehealth-portal/node_modules/.bun',
+        path.resolve(dirname, "node_modules/.bun"),
       ],
     },
   },
