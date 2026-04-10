@@ -1,5 +1,5 @@
+using Microsoft.AspNetCore.Http.HttpResults;
 using TeleHealth.Api.Common;
-using TeleHealth.Api.Features.Users.Create;
 
 namespace TeleHealth.Api.Features.Users.Create;
 
@@ -16,11 +16,13 @@ public static class CreateUserEndpoint
                 ) =>
                 {
                     var result = await handler.HandleAsync(command, token);
-                    return Results.Ok(result);
+                    return TypedResults.Ok(result);
                 }
             )
             .WithName("CreateUser")
             .WithTags("Users")
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status409Conflict)
             .AddEndpointFilter<ValidationFilter<CreateUserCommand>>();
     }
 }

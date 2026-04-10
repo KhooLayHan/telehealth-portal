@@ -1,7 +1,11 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Http.HttpResults;
 using TeleHealth.Api.Common;
+using TeleHealth.Api.Common.Exceptions.Auth;
 
 namespace TeleHealth.Api.Features.Appointments.Book;
+
+public sealed record BookAppointmentResponse(Guid AppointmentPublicId);
 
 public static class BookAppointmentEndpoint
 {
@@ -9,40 +13,36 @@ public static class BookAppointmentEndpoint
     {
         app.MapPost(
                 ApiEndpoints.Appointments.Book,
-                async (
+                async Task<Created<BookAppointmentResponse>> (
                     BookAppointmentCommand command,
                     BookAppointmentHandler handler,
                     ClaimsPrincipal user,
                     CancellationToken token
                 ) =>
                 {
-                    var nameIdentifier = user.FindFirstValue(ClaimTypes.NameIdentifier);
-                    if (!Guid.TryParse(nameIdentifier, out var userPublicId))
+                    var claimValue = user.FindFirstValue(ClaimTypes.NameIdentifier);
+                    if (!Guid.TryParse(claimValue, out var publicId))
                     {
-                        return Results.Unauthorized();
+                        throw new TokenInvalidException();
                     }
 
-                    var result = await handler.HandleAsync(userPublicId, command, token);
+                    var result = await handler.HandleAsync(publicId, command, token);
 
-                    return result is null
-                        ? Results.NotFound()
-                        : Results.Created(
-                            ApiEndpoints.Appointments.GetById.Replace(
-                                "{id:guid}",
-                                result.AppointmentPublicId.ToString()
-                            ),
-                            new { result.AppointmentPublicId }
-                        );
+                    return TypedResults.Created(
+                        ApiEndpoints.Appointments.GetById.Replace(
+                            "{id:guid}",
+                            result.AppointmentPublicId.ToString()
+                        ),
+                        new BookAppointmentResponse(result.AppointmentPublicId)
+                    );
                 }
             )
             .WithName("BookAppointment")
             .WithTags("Appointments")
             .RequireAuthorization("PatientOnly")
-            .Produces(StatusCodes.Status201Created)
-            .ProducesProblem(StatusCodes.Status403Forbidden)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status409Conflict)
-            .ProducesValidationProblem(StatusCodes.Status422UnprocessableEntity)
+            .ProducesProblem(StatusCodes.Status422UnprocessableEntity)
             .AddEndpointFilter<ValidationFilter<BookAppointmentCommand>>();
 
         return app;

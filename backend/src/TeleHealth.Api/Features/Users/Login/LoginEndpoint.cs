@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http.HttpResults;
 using TeleHealth.Api.Common;
 
 namespace TeleHealth.Api.Features.Users.Login;
@@ -15,15 +16,14 @@ public static class LoginEndpoint
                     CancellationToken token
                 ) =>
                 {
-                    var success = await handler.HandleAsync(command, httpContext, token);
+                    await handler.HandleAsync(command, httpContext, token);
 
-                    return success
-                        ? Results.Ok(new { Message = "Login successful" })
-                        : Results.Unauthorized();
+                    return TypedResults.Ok(new { Message = "Login successful" });
                 }
             )
             .WithName("LoginUser")
             .WithTags("Authentication")
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
             .AddEndpointFilter<ValidationFilter<LoginCommand>>();
     }
 }

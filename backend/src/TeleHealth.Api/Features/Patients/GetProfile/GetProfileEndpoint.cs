@@ -1,5 +1,7 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Http.HttpResults;
 using TeleHealth.Api.Common;
+using TeleHealth.Api.Common.Exceptions.Auth;
 using TeleHealth.Api.Common.Security;
 
 namespace TeleHealth.Api.Features.Patients.GetProfile;
@@ -11,21 +13,26 @@ public static class GetProfileEndpoint
         group
             .MapGet(
                 $"{ApiEndpoints.Patients.Me}",
-                async (ClaimsPrincipal user, GetProfileHandler handler, CancellationToken ct) =>
+                async Task<Ok<PatientProfileDto>> (
+                    ClaimsPrincipal user,
+                    GetProfileHandler handler,
+                    CancellationToken ct
+                ) =>
                 {
-                    var publicIdString = user.FindFirstValue(ClaimTypes.NameIdentifier);
-                    if (!Guid.TryParse(publicIdString, out var publicId))
-                        return Results.Unauthorized();
+                    var claimValue = user.FindFirstValue(ClaimTypes.NameIdentifier);
+                    if (!Guid.TryParse(claimValue, out var publicId))
+                    {
+                        throw new TokenInvalidException();
+                    }
 
                     var profile = await handler.HandleAsync(publicId, ct);
 
-                    return profile is not null ? Results.Ok(profile) : Results.NotFound();
+                    return TypedResults.Ok(profile);
                 }
             )
             .WithName("GetMyProfile")
             .WithTags("Patients")
             .RequireAuthorization(AuthConstants.PatientPolicy)
-            .Produces<PatientProfileDto>()
             .ProducesProblem(StatusCodes.Status404NotFound);
     }
 }

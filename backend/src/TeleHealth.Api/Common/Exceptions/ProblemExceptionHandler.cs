@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 
 namespace TeleHealth.Api.Common.Exceptions;
 
@@ -29,8 +29,19 @@ internal sealed class ProblemExceptionHandler(IProblemDetailsService problemDeta
             Title = problemException.Title,
             Type = problemException.ErrorCode,
             Status = problemException.StatusCode,
-            Detail = isDevelopment ? problemException.Message : "An unexpected error occurred.",
+            Detail = isDevelopment ? problemException.Message : null,
         };
+
+        if (!isDevelopment)
+        {
+            Log.Warning(
+                "ProblemException: ErrorCode={ErrorCode}, Title={Title}, Message={Message}, Path={Path}",
+                problemException.ErrorCode,
+                problemException.Title,
+                problemException.Message,
+                httpContext.Request.Path
+            );
+        }
 
         return await problemDetailsService.TryWriteAsync(
             new ProblemDetailsContext
