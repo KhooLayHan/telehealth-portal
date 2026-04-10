@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/store/useAuthStore";
 import { AdminDashboard } from "./roles/AdminDashboard";
 import { DoctorDashboard } from "./roles/DoctorDashboard";
+import { LabTechDashboard } from "./roles/LabTechnicianDashboard";
 import { PatientDashboard } from "./roles/PatientDashboard";
 import { ReceptionistDashboard } from "./roles/ReceptionistDashboard";
 
@@ -85,6 +86,8 @@ export function Dashboard() {
         return <DoctorDashboard />;
       case "admin":
         return <AdminDashboard />;
+      case "lab-tech":
+        return <LabTechDashboard />;
       default:
         return <div>Invalid Role Detected</div>;
     }
