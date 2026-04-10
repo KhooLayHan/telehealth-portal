@@ -4,7 +4,6 @@ import { Eye, EyeOff, Heart } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
 import { useLoginUser } from "@/api/generated/authentication/authentication";
-import { getMyProfile } from "@/api/generated/patients/patients";
 import { getMe } from "@/api/generated/users/users";
 import type { ApiError } from "@/api/ofetch-mutator";
 import { Button } from "@/components/ui/button";
