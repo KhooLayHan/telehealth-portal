@@ -1,4 +1,4 @@
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   Activity,
   Bell,
@@ -6,7 +6,6 @@ import {
   FileText,
   Heart,
   LayoutDashboard,
-  Link,
   LogOut,
   Search,
   Settings,
