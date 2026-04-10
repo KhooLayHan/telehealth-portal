@@ -29,8 +29,15 @@ internal sealed class ProblemExceptionHandler(IProblemDetailsService problemDeta
             Title = problemException.Title,
             Type = problemException.ErrorCode,
             Status = problemException.StatusCode,
-            Detail = isDevelopment ? problemException.Message : "An unexpected error occurred.",
+            Detail = isDevelopment
+                ? problemException.Message
+                : problemException.Detail ?? "An unexpected error occurred.",
         };
+
+        if (isDevelopment && problemException.Detail is not null)
+        {
+            problemDetails.Extensions["devDetail"] = problemException.Detail;
+        }
 
         return await problemDetailsService.TryWriteAsync(
             new ProblemDetailsContext

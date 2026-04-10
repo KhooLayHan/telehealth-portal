@@ -5,17 +5,20 @@ public abstract class ProblemException : Exception
     public int StatusCode { get; }
     public string ErrorCode { get; }
     public string Title { get; }
+    public string? Detail { get; }
 
     protected ProblemException(
-        string message,
+        string errorCode,
         int statusCode,
         string title,
-        string? errorCode = null
+        string message,
+        string? detail = null
     )
         : base(message)
     {
+        ErrorCode = errorCode;
         StatusCode = statusCode;
         Title = title;
-        ErrorCode = errorCode ?? GetType().Name;
+        Detail = detail;
     }
 }
