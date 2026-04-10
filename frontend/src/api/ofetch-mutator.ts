@@ -1,4 +1,3 @@
-// 1. Define the ASP.NET ProblemDetails standard shape
 export interface ProblemDetails {
   detail?: string;
   instance?: string;
@@ -12,7 +11,7 @@ export interface ProblemDetails {
 
 class ApiError extends Error {
   status: number;
-  data: ProblemDetails; // 2. Tell TS that 'data' is ProblemDetails!
+  data: ProblemDetails;
 
   constructor(status: number, data: unknown) {
     super(`API error: ${status}`);

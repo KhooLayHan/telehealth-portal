@@ -6,6 +6,7 @@ import {
   FileText,
   Heart,
   LayoutDashboard,
+  Link,
   LogOut,
   Search,
   Settings,
@@ -91,12 +92,37 @@ const recentAppointments = [
 ];
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Dashboard", active: true },
-  { icon: Calendar, label: "Appointments", active: false },
-  { icon: Users, label: "Patients", active: false },
-  { icon: Stethoscope, label: "Doctors", active: false },
-  { icon: FileText, label: "Lab Reports", active: false },
-  { icon: Settings, label: "Settings", active: false },
+  {
+    icon: LayoutDashboard,
+    label: "Dashboard",
+    href: "/dashboard",
+    allowedRoles: ["admin", "doctor", "patient", "receptionist", "lab-tech"],
+  },
+  {
+    icon: Calendar,
+    label: "Appointments",
+    href: "/appointments",
+    allowedRoles: ["admin", "doctor", "patient", "receptionist"],
+  },
+  {
+    icon: Users,
+    label: "Patients List",
+    href: "/patients",
+    allowedRoles: ["admin", "doctor", "receptionist"],
+  },
+  {
+    icon: Stethoscope,
+    label: "Doctor Schedules",
+    href: "/schedules",
+    allowedRoles: ["admin", "receptionist"],
+  },
+  {
+    icon: FileText,
+    label: "Lab Reports",
+    href: "/lab-reports",
+    allowedRoles: ["admin", "doctor", "lab-tech", "patient"],
+  },
+  { icon: Settings, label: "System Settings", href: "/settings", allowedRoles: ["admin"] },
 ];
 
 const statusStyles: Record<string, string> = {
@@ -110,6 +136,11 @@ const statusStyles: Record<string, string> = {
 export function Dashboard() {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
+
+  // Filter the sidebar based on the current user's role!
+  const visibleNavItems = navItems.filter((item) =>
+    item.allowedRoles.includes(user?.role?.toLowerCase() || ""),
+  );
 
   const handleLogout = () => {
     logout();
@@ -130,19 +161,26 @@ export function Dashboard() {
 
         {/* Navigation */}
         <nav className="flex-1 space-y-0.5 overflow-y-auto p-3">
-          {navItems.map((item) => (
-            <button
-              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left font-medium text-sm transition-colors ${
-                item.active
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              }`}
+          {visibleNavItems.map((item) => (
+            <Link
+              to={item.href}
               key={item.label}
-              type="button"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left font-medium text-sm transition-colors hover:bg-muted"
+              activeProps={{ className: "bg-primary text-primary-foreground hover:bg-primary" }}
             >
-              <item.icon className="size-4 shrink-0" />
-              {item.label}
-            </button>
+              <button
+                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left font-medium text-sm transition-colors ${
+                  item.active
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
+                key={item.label}
+                type="button"
+              >
+                <item.icon className="size-4 shrink-0" />
+                {item.label}
+              </button>
+            </Link>
           ))}
         </nav>
 
@@ -167,8 +205,6 @@ export function Dashboard() {
           </button>
         </div>
       </aside>
-
-      {/* ── Main area ── */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Top bar */}
         <header className="flex h-16 shrink-0 items-center justify-between border-border border-b bg-card px-6">
@@ -274,6 +310,7 @@ export function Dashboard() {
           </div>
         </main>
       </div>
+      ;
     </div>
   );
 }
