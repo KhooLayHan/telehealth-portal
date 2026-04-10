@@ -28,28 +28,22 @@ public sealed class UserProfileNotFoundException : NotFoundException
 
 public sealed class DuplicateUsernameException : ConflictException
 {
-    public DuplicateUsernameException(string username)
+    public DuplicateUsernameException()
         : base(
             UserErrorCodes.DuplicateUsername,
             "Username Already Taken",
             "The chosen username is already in use."
-        )
-    {
-        Log.Warning("Duplicate username registration attempt. Username: {Username}", username);
-    }
+        ) { }
 }
 
 public sealed class DuplicateEmailException : ConflictException
 {
-    public DuplicateEmailException(string email)
+    public DuplicateEmailException()
         : base(
             UserErrorCodes.DuplicateEmail,
             "Email Already Registered",
             "An account with this email address already exists."
-        )
-    {
-        Log.Warning("Duplicate email registration attempt. Email: {Email}", email);
-    }
+        ) { }
 }
 
 public sealed class DuplicateIcNumberException : ConflictException
@@ -59,10 +53,7 @@ public sealed class DuplicateIcNumberException : ConflictException
             UserErrorCodes.DuplicateIcNumber,
             "IC Number Already Registered",
             "An account with this IC number already exists."
-        )
-    {
-        Log.Warning("Duplicate IC number registration attempt detected.");
-    }
+        ) { }
 }
 
 public sealed class UserAlreadyExistsException : ConflictException

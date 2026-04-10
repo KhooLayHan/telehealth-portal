@@ -13,17 +13,14 @@ public static class UpdateMedicalRecordEndpoint
         group
             .MapPut(
                 $"{ApiEndpoints.Patients.MedicalRecord}",
-                async Task<Results<Ok<PatientProfileDto>, UnauthorizedHttpResult>> (
+                async Task<Ok<PatientProfileDto>> (
                     ClaimsPrincipal user,
                     UpdateMedicalRecordCommand cmd,
                     UpdateMedicalRecordHandler handler,
                     CancellationToken ct
                 ) =>
                 {
-                    var publicIdString = user.FindFirstValue(ClaimTypes.NameIdentifier);
-                    if (!Guid.TryParse(publicIdString, out var publicId))
-                        return TypedResults.Unauthorized();
-
+                    var publicId = Guid.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
                     var updatedProfile = await handler.HandleAsync(publicId, cmd, ct);
 
                     return TypedResults.Ok(updatedProfile);
@@ -32,7 +29,7 @@ public static class UpdateMedicalRecordEndpoint
             .WithName("UpdateMedicalInfo")
             .WithTags("Patients")
             .RequireAuthorization(AuthConstants.PatientPolicy)
-            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status422UnprocessableEntity)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .AddEndpointFilter<ValidationFilter<UpdateMedicalRecordCommand>>();
     }

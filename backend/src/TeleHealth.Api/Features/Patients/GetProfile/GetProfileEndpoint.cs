@@ -12,16 +12,14 @@ public static class GetProfileEndpoint
         group
             .MapGet(
                 $"{ApiEndpoints.Patients.Me}",
-                async Task<Results<Ok<PatientProfileDto>, UnauthorizedHttpResult>> (
+                async Task<Ok<PatientProfileDto>> (
                     ClaimsPrincipal user,
                     GetProfileHandler handler,
                     CancellationToken ct
                 ) =>
                 {
-                    var publicIdString = user.FindFirstValue(ClaimTypes.NameIdentifier);
-                    if (!Guid.TryParse(publicIdString, out var publicId))
-                        return TypedResults.Unauthorized();
-
+                    // If this throws, it's a config bug — let it surface as 500
+                    var publicId = Guid.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
                     var profile = await handler.HandleAsync(publicId, ct);
 
                     return TypedResults.Ok(profile);
@@ -30,7 +28,6 @@ public static class GetProfileEndpoint
             .WithName("GetMyProfile")
             .WithTags("Patients")
             .RequireAuthorization(AuthConstants.PatientPolicy)
-            .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status404NotFound);
     }
 }

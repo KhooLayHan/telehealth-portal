@@ -12,17 +12,18 @@ public static class BookAppointmentEndpoint
     {
         app.MapPost(
                 ApiEndpoints.Appointments.Book,
-                async Task<Results<Created<BookAppointmentResponse>, UnauthorizedHttpResult>> (
+                async Task<Created<BookAppointmentResponse>> (
                     BookAppointmentCommand command,
                     BookAppointmentHandler handler,
                     ClaimsPrincipal user,
                     CancellationToken token
                 ) =>
                 {
-                    var nameIdentifier = user.FindFirstValue(ClaimTypes.NameIdentifier);
-                    if (!Guid.TryParse(nameIdentifier, out var userPublicId))
+                    var claimValue = user.FindFirstValue(ClaimTypes.NameIdentifier);
+                    if (!Guid.TryParse(claimValue, out var userPublicId))
                     {
-                        return TypedResults.Unauthorized();
+                        // Handle invalid GUID (e.g., return BadRequest, throw, etc.)
+                        throw new ArgumentException("Invalid user ID.");
                     }
 
                     var result = await handler.HandleAsync(userPublicId, command, token);
@@ -39,10 +40,9 @@ public static class BookAppointmentEndpoint
             .WithName("BookAppointment")
             .WithTags("Appointments")
             .RequireAuthorization("PatientOnly")
-            .ProducesProblem(StatusCodes.Status401Unauthorized)
-            .ProducesProblem(StatusCodes.Status403Forbidden)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status409Conflict)
+            .ProducesProblem(StatusCodes.Status422UnprocessableEntity)
             .AddEndpointFilter<ValidationFilter<BookAppointmentCommand>>();
 
         return app;

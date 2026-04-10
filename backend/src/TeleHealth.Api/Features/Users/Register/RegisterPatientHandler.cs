@@ -72,12 +72,8 @@ public sealed class RegisterPatientHandler(
 
             throw pg.ConstraintName switch
             {
-                "uq_users_username_active" => new DuplicateUsernameException(
-                    "Username is already registered."
-                ),
-                "uq_users_email_active" => new DuplicateEmailException(
-                    "Email is already registered."
-                ),
+                "uq_users_username_active" => new DuplicateUsernameException(),
+                "uq_users_email_active" => new DuplicateEmailException(),
                 "uq_users_ic_active" => new DuplicateIcNumberException(),
                 "uq_users_slug_active" => new UserAlreadyExistsException(),
                 _ => new UserAlreadyExistsException(),

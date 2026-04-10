@@ -28,8 +28,8 @@ public class CreateUserHandler(
 
         if (existingUser is not null)
         {
-            Log.Warning("Duplicate email registration attempt. Email: {Email}", command.Email);
-            throw new DuplicateEmailException(command.Email);
+            Log.Warning("Duplicate email registration attempt.");
+            throw new DuplicateEmailException();
         }
 
         var publicId = Guid.NewGuid();
