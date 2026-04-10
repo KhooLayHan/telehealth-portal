@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using TeleHealth.Api.Common.Exceptions.Auth;
 using TeleHealth.Api.Common.Security;
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Infrastructure.Persistence;
@@ -13,7 +14,7 @@ public sealed class LoginHandler(
     ITokenService tokenService
 )
 {
-    public async Task<bool> HandleAsync(
+    public async Task HandleAsync(
         LoginCommand command,
         HttpContext httpContext,
         CancellationToken ct
@@ -27,13 +28,15 @@ public sealed class LoginHandler(
 
         if (user is null)
         {
-            return false;
+            Log.Warning("Login failed — account not found.");
+            throw new InvalidCredentialsException();
         }
 
         var result = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, command.Password);
         if (result == PasswordVerificationResult.Failed)
         {
-            return false;
+            Log.Warning("Login failed — invalid password.");
+            throw new InvalidCredentialsException();
         }
 
         await tokenService.GenerateTokenAsync(user, httpContext, ct);
@@ -42,7 +45,5 @@ public sealed class LoginHandler(
             "User with Public ID {PublicId} has successfully logged in.",
             user.PublicId
         );
-
-        return true;
     }
 }

@@ -2,8 +2,9 @@ using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
+using Serilog;
 using Slugify;
-using TeleHealth.Api.Common.Exceptions;
+using TeleHealth.Api.Common.Exceptions.Users;
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Infrastructure.Persistence;
 using TeleHealth.Contracts;
@@ -27,7 +28,8 @@ public class CreateUserHandler(
 
         if (existingUser is not null)
         {
-            throw new ConflictException("User with this email already exists.");
+            Log.Warning("Duplicate email registration attempt. Email: {Email}", command.Email);
+            throw new DuplicateEmailException(command.Email);
         }
 
         var publicId = Guid.NewGuid();

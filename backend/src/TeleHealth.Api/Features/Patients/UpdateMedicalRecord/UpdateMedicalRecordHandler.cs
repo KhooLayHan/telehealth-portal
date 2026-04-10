@@ -2,6 +2,7 @@ using Facet.Extensions;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
 using Serilog;
+using TeleHealth.Api.Common.Exceptions.Patients;
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Features.Patients.GetProfile;
 using TeleHealth.Api.Infrastructure.Persistence;
@@ -10,7 +11,7 @@ namespace TeleHealth.Api.Features.Patients.UpdateMedicalRecord;
 
 public sealed class UpdateMedicalRecordHandler(ApplicationDbContext db)
 {
-    public async Task<PatientProfileDto?> HandleAsync(
+    public async Task<PatientProfileDto> HandleAsync(
         Guid userPublicId,
         UpdateMedicalRecordCommand cmd,
         CancellationToken ct
@@ -23,7 +24,10 @@ public sealed class UpdateMedicalRecordHandler(ApplicationDbContext db)
             .FirstOrDefaultAsync(p => p.User.PublicId == userPublicId, ct);
 
         if (patient is null)
-            return null;
+        {
+            Log.Warning("Patient not found. PatientId: {PatientId}", userPublicId);
+            throw new PatientNotFoundException();
+        }
 
         patient.BloodGroup = cmd.BloodGroup;
         patient.EmergencyContact = cmd.EmergencyContact;
@@ -35,9 +39,10 @@ public sealed class UpdateMedicalRecordHandler(ApplicationDbContext db)
         Log.Information("Updating Patient {PublicId} was successful.", patient.PublicId);
 
         return await db
-            .Patients.AsNoTracking()
-            .Where(p => p.User.PublicId == userPublicId)
-            .Select(PatientProfileDto.Projection)
-            .FirstOrDefaultAsync(ct);
+                .Patients.AsNoTracking()
+                .Where(p => p.User.PublicId == userPublicId)
+                .Select(PatientProfileDto.Projection)
+                .FirstOrDefaultAsync(ct)
+            ?? throw new PatientNotFoundException();
     }
 }

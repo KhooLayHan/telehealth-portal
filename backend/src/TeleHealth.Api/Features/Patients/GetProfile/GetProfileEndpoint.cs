@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Http.HttpResults;
 using TeleHealth.Api.Common;
 using TeleHealth.Api.Common.Security;
 
@@ -11,21 +12,25 @@ public static class GetProfileEndpoint
         group
             .MapGet(
                 $"{ApiEndpoints.Patients.Me}",
-                async (ClaimsPrincipal user, GetProfileHandler handler, CancellationToken ct) =>
+                async Task<Results<Ok<PatientProfileDto>, UnauthorizedHttpResult>> (
+                    ClaimsPrincipal user,
+                    GetProfileHandler handler,
+                    CancellationToken ct
+                ) =>
                 {
                     var publicIdString = user.FindFirstValue(ClaimTypes.NameIdentifier);
                     if (!Guid.TryParse(publicIdString, out var publicId))
-                        return Results.Unauthorized();
+                        return TypedResults.Unauthorized();
 
                     var profile = await handler.HandleAsync(publicId, ct);
 
-                    return profile is not null ? Results.Ok(profile) : Results.NotFound();
+                    return TypedResults.Ok(profile);
                 }
             )
             .WithName("GetMyProfile")
             .WithTags("Patients")
             .RequireAuthorization(AuthConstants.PatientPolicy)
-            .Produces<PatientProfileDto>()
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status404NotFound);
     }
 }

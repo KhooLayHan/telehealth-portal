@@ -1,21 +1,17 @@
 using Serilog;
 using TeleHealth.Api.Common.Exceptions.Base;
 using TeleHealth.Api.Common.Exceptions.ErrorCodes;
-using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace TeleHealth.Api.Common.Exceptions.Patients;
 
 public sealed class PatientNotFoundException : NotFoundException
 {
-    public PatientNotFoundException(Guid patientId)
+    public PatientNotFoundException()
         : base(
             PatientErrorCodes.NotFound,
             "Patient Not Found",
             "The requested patient could not be found."
-        )
-    {
-        Log.Warning("Patient not found. PatientId: {PatientId}", patientId);
-    }
+        ) { }
 }
 
 public sealed class MedicalRecordNotFoundException : NotFoundException
@@ -46,11 +42,11 @@ public sealed class PatientAlreadyRegisteredException : ConflictException
 
 public sealed class InvalidMedicalDataException : ValidationException
 {
-    public InvalidMedicalDataException(string field, string reason)
+    public InvalidMedicalDataException()
         : base(
             PatientErrorCodes.InvalidMedicalData,
             "Invalid Medical Data",
-            $"Invalid data for field '{field}': {reason}"
+            "Invalid medical data was provided."
         ) { }
 }
 

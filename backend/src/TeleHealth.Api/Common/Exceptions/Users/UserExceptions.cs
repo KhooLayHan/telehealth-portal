@@ -1,7 +1,6 @@
 using Serilog;
 using TeleHealth.Api.Common.Exceptions.Base;
 using TeleHealth.Api.Common.Exceptions.ErrorCodes;
-using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace TeleHealth.Api.Common.Exceptions.Users;
 
@@ -66,7 +65,7 @@ public sealed class DuplicateIcNumberException : ConflictException
     }
 }
 
-public sealed class UserAlreadyExistsException : Base.ConflictException
+public sealed class UserAlreadyExistsException : ConflictException
 {
     public UserAlreadyExistsException()
         : base(
@@ -79,11 +78,7 @@ public sealed class UserAlreadyExistsException : Base.ConflictException
 public sealed class InvalidUserDataException : ValidationException
 {
     public InvalidUserDataException(string field, string reason)
-        : base(
-            UserErrorCodes.InvalidData,
-            "Invalid User Data",
-            $"The value provided for '{field}' is invalid."
-        )
+        : base(UserErrorCodes.InvalidData, "Invalid User Data", "The value provided is invalid.")
     {
         Log.Debug("Invalid user data. Field: {Field}, Reason: {Reason}", field, reason);
     }
@@ -91,7 +86,7 @@ public sealed class InvalidUserDataException : ValidationException
 
 public sealed class WeakPasswordException : ValidationException
 {
-    public WeakPasswordException(string reason)
+    public WeakPasswordException()
         : base(
             UserErrorCodes.WeakPassword,
             "Weak Password",
@@ -101,7 +96,7 @@ public sealed class WeakPasswordException : ValidationException
 
 public sealed class InvalidEmailFormatException : ValidationException
 {
-    public InvalidEmailFormatException(string email)
+    public InvalidEmailFormatException()
         : base(
             UserErrorCodes.InvalidEmailFormat,
             "Invalid Email Format",

@@ -3,44 +3,59 @@ using TeleHealth.Api.Common.Exceptions.ErrorCodes;
 
 namespace TeleHealth.Api.Common.Exceptions.Appointments;
 
-public sealed class AppointmentNotFoundException(string appointmentId)
-    : NotFoundException(
-        AppointmentErrorCodes.NotFound,
-        "Appointment Not Found",
-        $"Appointment '{appointmentId}' was not found."
-    );
+public sealed class AppointmentNotFoundException : NotFoundException
+{
+    public AppointmentNotFoundException(string appointmentId)
+        : base(
+            AppointmentErrorCodes.NotFound,
+            "Appointment Not Found",
+            "The requested appointment could not be found."
+        ) { }
+}
 
-public sealed class DoctorScheduleNotFoundException(string scheduleId)
-    : NotFoundException(
-        AppointmentErrorCodes.ScheduleNotFound,
-        "Schedule Not Found",
-        $"Schedule '{scheduleId}' was not found."
-    );
+public sealed class DoctorScheduleNotFoundException : NotFoundException
+{
+    public DoctorScheduleNotFoundException(string scheduleId)
+        : base(
+            AppointmentErrorCodes.ScheduleNotFound,
+            "Schedule Not Found",
+            "The requested schedule could not be found."
+        ) { }
+}
 
-public sealed class ScheduleSlotNotFoundException(string slotId)
-    : NotFoundException(
-        AppointmentErrorCodes.ScheduleSlotNotFound,
-        "Schedule Slot Not Found",
-        $"Schedule slot '{slotId}' was not found."
-    );
+public sealed class ScheduleSlotNotFoundException : NotFoundException
+{
+    public ScheduleSlotNotFoundException(string slotId)
+        : base(
+            AppointmentErrorCodes.ScheduleSlotNotFound,
+            "Schedule Slot Not Found",
+            "The requested schedule slot could not be found."
+        ) { }
+}
 
-public sealed class ScheduleSlotUnavailableException(string? scheduleId = null)
-    : ConflictException(
-        AppointmentErrorCodes.ScheduleUnavailable,
-        "Schedule Slot Unavailable",
-        $"This schedule slot '{scheduleId}' is no longer available."
-    );
+public sealed class ScheduleSlotUnavailableException : ConflictException
+{
+    public ScheduleSlotUnavailableException()
+        : base(
+            AppointmentErrorCodes.ScheduleUnavailable,
+            "Schedule Slot Unavailable",
+            "This schedule slot is no longer available."
+        ) { }
+}
 
-public sealed class AppointmentTimeConflictException(string? existingAppointmentId = null)
-    : ConflictException(
-        AppointmentErrorCodes.TimeConflict,
-        "Appointment Time Conflict",
-        $"You already have an appointment '{existingAppointmentId}' at this time."
-    ) { }
+public sealed class AppointmentTimeConflictException : ConflictException
+{
+    public AppointmentTimeConflictException()
+        : base(
+            AppointmentErrorCodes.TimeConflict,
+            "Appointment Time Conflict",
+            "You already have an appointment at this time."
+        ) { }
+}
 
 public sealed class ScheduleExpiredException : ConflictException
 {
-    public ScheduleExpiredException(DateTimeOffset expiredDate)
+    public ScheduleExpiredException()
         : base(
             AppointmentErrorCodes.ScheduleExpired,
             "Schedule Expired",
@@ -50,7 +65,7 @@ public sealed class ScheduleExpiredException : ConflictException
 
 public sealed class AppointmentAlreadyCompletedException : ConflictException
 {
-    public AppointmentAlreadyCompletedException(string appointmentId)
+    public AppointmentAlreadyCompletedException()
         : base(
             AppointmentErrorCodes.AlreadyCompleted,
             "Appointment Already Completed",
@@ -60,7 +75,7 @@ public sealed class AppointmentAlreadyCompletedException : ConflictException
 
 public sealed class AppointmentAlreadyCancelledException : ConflictException
 {
-    public AppointmentAlreadyCancelledException(string appointmentId)
+    public AppointmentAlreadyCancelledException()
         : base(
             AppointmentErrorCodes.AlreadyCancelled,
             "Appointment Already Cancelled",
@@ -68,16 +83,19 @@ public sealed class AppointmentAlreadyCancelledException : ConflictException
         ) { }
 }
 
-public sealed class ConcurrentBookingException()
-    : ConflictException(
-        AppointmentErrorCodes.ConcurrentModification,
-        "Concurrent Booking Detected",
-        "Another user booked this slot simultaneously. Please try again."
-    );
+public sealed class ConcurrentBookingException : ConflictException
+{
+    public ConcurrentBookingException()
+        : base(
+            AppointmentErrorCodes.ConcurrentModification,
+            "Concurrent Booking Detected",
+            "Another user booked this slot simultaneously. Please try again."
+        ) { }
+}
 
 public sealed class InvalidAppointmentTimeException : ValidationException
 {
-    public InvalidAppointmentTimeException(string reason)
+    public InvalidAppointmentTimeException()
         : base(
             AppointmentErrorCodes.InvalidTime,
             "Invalid Appointment Time",
@@ -97,7 +115,7 @@ public sealed class PastAppointmentException : ValidationException
 
 public sealed class TooShortNoticeException : ValidationException
 {
-    public TooShortNoticeException(TimeSpan requiredNotice)
+    public TooShortNoticeException()
         : base(
             AppointmentErrorCodes.TooShortNotice,
             "Insufficient Notice",
@@ -107,7 +125,7 @@ public sealed class TooShortNoticeException : ValidationException
 
 public sealed class InvalidRescheduleException : ValidationException
 {
-    public InvalidRescheduleException(string reason)
+    public InvalidRescheduleException()
         : base(
             AppointmentErrorCodes.InvalidReschedule,
             "Cannot Reschedule",
@@ -117,7 +135,7 @@ public sealed class InvalidRescheduleException : ValidationException
 
 public sealed class DoctorNotAvailableException : ValidationException
 {
-    public DoctorNotAvailableException(string doctorName, DateTimeOffset date)
+    public DoctorNotAvailableException()
         : base(
             AppointmentErrorCodes.DoctorNotAvailable,
             "Doctor Not Available",

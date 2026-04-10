@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Http.HttpResults;
 using TeleHealth.Api.Common;
 using TeleHealth.Api.Common.Security;
 using TeleHealth.Api.Features.Patients.GetProfile;
@@ -12,7 +13,7 @@ public static class UpdateMedicalRecordEndpoint
         group
             .MapPut(
                 $"{ApiEndpoints.Patients.MedicalRecord}",
-                async (
+                async Task<Results<Ok<PatientProfileDto>, UnauthorizedHttpResult>> (
                     ClaimsPrincipal user,
                     UpdateMedicalRecordCommand cmd,
                     UpdateMedicalRecordHandler handler,
@@ -21,20 +22,18 @@ public static class UpdateMedicalRecordEndpoint
                 {
                     var publicIdString = user.FindFirstValue(ClaimTypes.NameIdentifier);
                     if (!Guid.TryParse(publicIdString, out var publicId))
-                        return Results.Unauthorized();
+                        return TypedResults.Unauthorized();
 
                     var updatedProfile = await handler.HandleAsync(publicId, cmd, ct);
 
-                    return updatedProfile is not null
-                        ? Results.Ok(updatedProfile)
-                        : Results.NotFound("Patient profile not found.");
+                    return TypedResults.Ok(updatedProfile);
                 }
             )
             .WithName("UpdateMedicalInfo")
             .WithTags("Patients")
             .RequireAuthorization(AuthConstants.PatientPolicy)
-            .AddEndpointFilter<ValidationFilter<UpdateMedicalRecordCommand>>()
-            .Produces<PatientProfileDto>()
-            .ProducesProblem(StatusCodes.Status404NotFound);
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .AddEndpointFilter<ValidationFilter<UpdateMedicalRecordCommand>>();
     }
 }

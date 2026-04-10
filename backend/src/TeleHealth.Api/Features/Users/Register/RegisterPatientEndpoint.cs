@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http.HttpResults;
 using TeleHealth.Api.Common;
 
 namespace TeleHealth.Api.Features.Users.Register;
@@ -16,7 +17,7 @@ public static class RegisterPatientEndpoint
                 {
                     var result = await handler.HandleAsync(command, token);
 
-                    return Results.Created(
+                    return TypedResults.Created(
                         $"{ApiEndpoints.Patients.GetById.Replace("{id:guid}", result.PatientPublicId.ToString())}",
                         new { result.UserPublicId, result.PatientPublicId }
                     );
@@ -24,6 +25,8 @@ public static class RegisterPatientEndpoint
             )
             .WithName("RegisterPatient")
             .WithTags("Authentication")
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status409Conflict)
             .AddEndpointFilter<ValidationFilter<RegisterPatientCommand>>();
 
         return app;

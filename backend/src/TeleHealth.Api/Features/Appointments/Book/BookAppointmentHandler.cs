@@ -4,7 +4,8 @@ using NodaTime;
 using Npgsql;
 using Serilog;
 using Slugify;
-using TeleHealth.Api.Common.Exceptions;
+using TeleHealth.Api.Common.Exceptions.Appointments;
+using TeleHealth.Api.Common.Exceptions.Patients;
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Infrastructure.Persistence;
 using TeleHealth.Contracts;
@@ -16,7 +17,7 @@ public sealed class BookAppointmentHandler(
     IPublishEndpoint publishEndpoint
 )
 {
-    public async Task<BookAppointmentResult?> HandleAsync(
+    public async Task<BookAppointmentResult> HandleAsync(
         Guid userPublicId,
         BookAppointmentCommand cmd,
         CancellationToken ct
@@ -46,7 +47,10 @@ public sealed class BookAppointmentHandler(
             .FirstOrDefaultAsync(p => p.User.PublicId == userPublicId, ct);
 
         if (patient is null)
-            return null;
+        {
+            Log.Warning("Patient not found. PatientId: {PatientId}", userPublicId);
+            throw new PatientNotFoundException();
+        }
 
         await using var transaction = await db.Database.BeginTransactionAsync(ct);
 
@@ -59,13 +63,13 @@ public sealed class BookAppointmentHandler(
             if (schedule is null)
             {
                 await transaction.RollbackAsync(ct);
-                return null;
+                throw new DoctorScheduleNotFoundException(cmd.SchedulePublicId.ToString());
             }
 
             if (schedule.StatusId != availableScheduleStatus.Id)
             {
                 await transaction.RollbackAsync(ct);
-                throw new ConflictException("This schedule slot is no longer available.");
+                throw new ScheduleSlotUnavailableException();
             }
 
             SlugHelper slugHelper = new();
@@ -106,7 +110,7 @@ public sealed class BookAppointmentHandler(
             catch (DbUpdateConcurrencyException)
             {
                 await transaction.RollbackAsync(ct);
-                throw new ConflictException("This schedule slot is no longer available.");
+                throw new ScheduleSlotUnavailableException();
             }
             catch (DbUpdateException ex)
                 when (ex.InnerException is PostgresException pg
@@ -115,7 +119,7 @@ public sealed class BookAppointmentHandler(
                 )
             {
                 await transaction.RollbackAsync(ct);
-                throw new ConflictException("This schedule slot has already been booked.");
+                throw new ConcurrentBookingException();
             }
 
             await transaction.CommitAsync(ct);
@@ -127,10 +131,6 @@ public sealed class BookAppointmentHandler(
             );
 
             return new BookAppointmentResult(publicId);
-        }
-        catch (ConflictException)
-        {
-            throw;
         }
         catch
         {

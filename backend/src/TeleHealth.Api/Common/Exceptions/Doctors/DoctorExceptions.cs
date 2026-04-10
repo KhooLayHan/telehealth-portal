@@ -9,7 +9,7 @@ public sealed class DoctorNotFoundException : NotFoundException
         : base(
             DoctorErrorCodes.NotFound,
             "Doctor Not Found",
-            $"Doctor '{identifier}' was not found."
+            "The requested doctor could not be found."
         ) { }
 }
 
@@ -19,7 +19,7 @@ public sealed class QualificationNotFoundException : NotFoundException
         : base(
             DoctorErrorCodes.QualificationNotFound,
             "Qualification Not Found",
-            $"Qualification '{qualificationId}' was not found."
+            "The requested qualification could not be found."
         ) { }
 }
 
@@ -33,7 +33,7 @@ public sealed class InvalidScheduleException : ValidationException
         ) { }
 }
 
-public sealed class OverlappingScheduleException : Base.ConflictException
+public sealed class OverlappingScheduleException : ConflictException
 {
     public OverlappingScheduleException(DateTimeOffset startTime, DateTimeOffset endTime)
         : base(

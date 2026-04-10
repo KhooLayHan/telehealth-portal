@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http.HttpResults;
 using TeleHealth.Api.Common;
 using TeleHealth.Api.Common.Security;
 
@@ -26,6 +27,9 @@ public static class CreateLabReportEndpoint
             .WithName("CreateLabReport")
             .WithTags("LabReports")
             .RequireAuthorization(AuthConstants.LabTechPolicy)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status403Forbidden)
             .AddEndpointFilter<ValidationFilter<CreateLabReportCommand>>();
     }
 }
