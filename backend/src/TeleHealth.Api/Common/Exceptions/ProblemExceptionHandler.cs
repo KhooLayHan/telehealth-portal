@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 
 namespace TeleHealth.Api.Common.Exceptions;
 
@@ -34,10 +34,7 @@ internal sealed class ProblemExceptionHandler(IProblemDetailsService problemDeta
 
         if (!isDevelopment)
         {
-            var logger = httpContext.RequestServices.GetRequiredService<
-                ILogger<ProblemExceptionHandler>
-            >();
-            logger.LogWarning(
+            Log.Warning(
                 "ProblemException: ErrorCode={ErrorCode}, Title={Title}, Message={Message}, Path={Path}",
                 problemException.ErrorCode,
                 problemException.Title,
