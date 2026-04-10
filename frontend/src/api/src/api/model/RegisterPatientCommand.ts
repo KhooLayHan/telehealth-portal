@@ -7,16 +7,16 @@
 import type { LocalDate } from "./LocalDate";
 
 export interface RegisterPatientCommand {
-  dateOfBirth: LocalDate;
+  username: string;
   email: string;
+  password: string;
   firstName: string;
+  lastName: string;
+  icNumber: string;
   /**
    * @minLength 1
    * @maxLength 1
    */
   gender: string;
-  icNumber: string;
-  lastName: string;
-  password: string;
-  username: string;
+  dateOfBirth: LocalDate;
 }

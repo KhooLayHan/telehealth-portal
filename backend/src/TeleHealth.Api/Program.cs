@@ -17,6 +17,7 @@ using TeleHealth.Api.Features.Appointments.Book;
 using TeleHealth.Api.Features.Patients.GetProfile;
 using TeleHealth.Api.Features.Patients.UpdateMedicalRecord;
 using TeleHealth.Api.Features.Users.Create;
+using TeleHealth.Api.Features.Users.GetMe;
 using TeleHealth.Api.Features.Users.Login;
 using TeleHealth.Api.Features.Users.Register;
 using TeleHealth.Api.Infrastructure.Aws;
@@ -134,6 +135,7 @@ api.MapCreateUserEndpoint();
 api.MapGetProfileEndpoint();
 api.MapUpdateMedicalRecordEndpoint();
 api.MapBookAppointmentEndpoint();
+api.MapGetMeEndpoint();
 
 app.UseSerilogRequestLogging();
 

@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react-swc";
-import { defineConfig } from "vite";
+import { defineConfig, searchForWorkspaceRoot } from "vite";
 
 const dirname =
   typeof import.meta.dirname !== "undefined"
@@ -26,6 +26,14 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(dirname, "./src"),
+    },
+  },
+  server: {
+    fs: {
+      allow: [
+        searchForWorkspaceRoot(process.cwd()),
+        path.resolve(dirname, "node_modules/.bun"),
+      ],
     },
   },
 });

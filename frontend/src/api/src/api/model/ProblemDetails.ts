@@ -7,16 +7,16 @@
 
 export interface ProblemDetails {
   /** @nullable */
-  detail?: string | null;
+  type?: string | null;
   /** @nullable */
-  instance?: string | null;
+  title?: string | null;
   /**
    * @nullable
    * @pattern ^-?(?:0|[1-9]\d*)$
    */
   status?: number | string | null;
   /** @nullable */
-  title?: string | null;
+  detail?: string | null;
   /** @nullable */
-  type?: string | null;
+  instance?: string | null;
 }

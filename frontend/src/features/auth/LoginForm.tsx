@@ -4,7 +4,7 @@ import { Eye, EyeOff, Heart } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
 import { useLoginUser } from "@/api/generated/authentication/authentication";
-import { getMyProfile } from "@/api/generated/patients/patients";
+import { getMe } from "@/api/generated/users/users";
 import type { ApiError } from "@/api/ofetch-mutator";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +16,16 @@ const loginSchema = z.object({
   email: z.email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
+
+const ROLE_PRIORITY = ["admin", "doctor", "receptionist", "lab-tech", "patient"] as const;
+
+/**
+ * Given an array of role slugs from the API, returns the single highest-priority
+ * role for display and routing purposes (e.g. sidebar label, default redirect).
+ */
+function pickPrimaryRole(roles: string[]): string {
+  return ROLE_PRIORITY.find((r) => roles.includes(r)) ?? roles[0] ?? "patient";
+}
 
 export function LoginForm() {
   const navigate = useNavigate();
@@ -38,26 +48,27 @@ export function LoginForm() {
       try {
         await loginMutation.mutateAsync({ data: value });
 
-        const profileResponse = await getMyProfile();
+        const profileResponse = await getMe();
 
-        const profile = profileResponse.data as {
-          userPublicId: string;
+        const profile = profileResponse.data as unknown as {
+          publicId: string;
+          email: string;
           firstName: string;
           lastName: string;
-          email: string;
-          role: string;
+          roles: string[];
         };
 
-        if (!profile?.userPublicId) {
-          setGlobalError("Signed in, but could not load your profile. Please try again.");
-          return;
-        }
+        // if (!profile?.userPublicId) {
+        //   setGlobalError("Signed in, but could not load your profile. Please try again.");
+        //   return;
+        // }
 
         setAuth({
-          publicId: profile.userPublicId,
+          publicId: profile.publicId,
           email: profile.email,
           firstName: profile.firstName,
-          role: profile.role,
+          role: pickPrimaryRole(profile.roles),
+          // roles: profile.roles,
         });
 
         navigate({ to: "/dashboard" });
