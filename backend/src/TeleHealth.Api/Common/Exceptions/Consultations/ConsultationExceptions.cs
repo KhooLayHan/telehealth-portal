@@ -36,7 +36,7 @@ public sealed class PrescriptionNotFoundException : NotFoundException
         ) { }
 }
 
-public sealed class ConsultationAlreadyExistsException : Base.ConflictException
+public sealed class ConsultationAlreadyExistsException : ConflictException
 {
     public ConsultationAlreadyExistsException(string appointmentId)
         : base(

@@ -25,7 +25,7 @@ public sealed class UserProfileNotFoundException : NotFoundException
         ) { }
 }
 
-public sealed class DuplicateUsernameException : Base.ConflictException
+public sealed class DuplicateUsernameException : ConflictException
 {
     public DuplicateUsernameException(string username)
         : base(
@@ -36,7 +36,7 @@ public sealed class DuplicateUsernameException : Base.ConflictException
         ) { }
 }
 
-public sealed class DuplicateEmailException : Base.ConflictException
+public sealed class DuplicateEmailException : ConflictException
 {
     public DuplicateEmailException(string email)
         : base(
@@ -47,7 +47,7 @@ public sealed class DuplicateEmailException : Base.ConflictException
         ) { }
 }
 
-public sealed class DuplicateIcNumberException : Base.ConflictException
+public sealed class DuplicateIcNumberException : ConflictException
 {
     public DuplicateIcNumberException(string icNumber)
         : base(
@@ -58,7 +58,7 @@ public sealed class DuplicateIcNumberException : Base.ConflictException
         ) { }
 }
 
-public sealed class UserAlreadyExistsException : Base.ConflictException
+public sealed class UserAlreadyExistsException : ConflictException
 {
     public UserAlreadyExistsException()
         : base(

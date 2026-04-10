@@ -36,7 +36,7 @@ public sealed class ScheduleSlotNotFoundException : NotFoundException
         ) { }
 }
 
-public sealed class ScheduleSlotUnavailableException : Base.ConflictException
+public sealed class ScheduleSlotUnavailableException : ConflictException
 {
     public ScheduleSlotUnavailableException(string? scheduleId = null)
         : base(
@@ -47,7 +47,7 @@ public sealed class ScheduleSlotUnavailableException : Base.ConflictException
         ) { }
 }
 
-public sealed class AppointmentTimeConflictException : Base.ConflictException
+public sealed class AppointmentTimeConflictException : ConflictException
 {
     public AppointmentTimeConflictException(string? existingAppointmentId = null)
         : base(

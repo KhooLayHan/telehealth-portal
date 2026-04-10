@@ -36,7 +36,7 @@ public sealed class InvalidScheduleException : ValidationException
         ) { }
 }
 
-public sealed class OverlappingScheduleException : Base.ConflictException
+public sealed class OverlappingScheduleException : ConflictException
 {
     public OverlappingScheduleException(DateTimeOffset startTime, DateTimeOffset endTime)
         : base(
