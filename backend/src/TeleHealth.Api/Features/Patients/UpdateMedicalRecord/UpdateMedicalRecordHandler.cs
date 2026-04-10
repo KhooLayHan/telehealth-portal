@@ -38,11 +38,8 @@ public sealed class UpdateMedicalRecordHandler(ApplicationDbContext db)
 
         Log.Information("Updating Patient {PublicId} was successful.", patient.PublicId);
 
-        return await db
-                .Patients.AsNoTracking()
-                .Where(p => p.User.PublicId == userPublicId)
-                .Select(PatientProfileDto.Projection)
-                .FirstOrDefaultAsync(ct)
-            ?? throw new PatientNotFoundException();
+        // Reload to ensure fresh data with all navigations
+        await db.Entry(patient).ReloadAsync(ct);
+        return PatientProfileDto.Projection.Compile()(patient);
     }
 }

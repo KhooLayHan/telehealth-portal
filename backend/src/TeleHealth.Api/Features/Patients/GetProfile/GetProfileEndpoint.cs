@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http.HttpResults;
 using TeleHealth.Api.Common;
+using TeleHealth.Api.Common.Exceptions.Auth;
 using TeleHealth.Api.Common.Security;
 
 namespace TeleHealth.Api.Features.Patients.GetProfile;
@@ -21,7 +22,7 @@ public static class GetProfileEndpoint
                     var claimValue = user.FindFirstValue(ClaimTypes.NameIdentifier);
                     if (!Guid.TryParse(claimValue, out var publicId))
                     {
-                        throw new ArgumentException("Invalid user ID.");
+                        throw new TokenInvalidException();
                     }
 
                     var profile = await handler.HandleAsync(publicId, ct);

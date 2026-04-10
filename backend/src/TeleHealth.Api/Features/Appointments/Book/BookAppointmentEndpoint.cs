@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http.HttpResults;
 using TeleHealth.Api.Common;
+using TeleHealth.Api.Common.Exceptions.Auth;
 
 namespace TeleHealth.Api.Features.Appointments.Book;
 
@@ -22,7 +23,7 @@ public static class BookAppointmentEndpoint
                     var claimValue = user.FindFirstValue(ClaimTypes.NameIdentifier);
                     if (!Guid.TryParse(claimValue, out var publicId))
                     {
-                        throw new ArgumentException("Invalid user ID.");
+                        throw new TokenInvalidException();
                     }
 
                     var result = await handler.HandleAsync(publicId, command, token);
