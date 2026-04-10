@@ -1,36 +1,47 @@
+using Serilog;
 using TeleHealth.Api.Common.Exceptions.Base;
 using TeleHealth.Api.Common.Exceptions.ErrorCodes;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace TeleHealth.Api.Common.Exceptions.Patients;
 
 public sealed class PatientNotFoundException : NotFoundException
 {
-    public PatientNotFoundException(string identifier)
+    public PatientNotFoundException(Guid patientId)
         : base(
             PatientErrorCodes.NotFound,
             "Patient Not Found",
-            $"Patient '{identifier}' was not found."
-        ) { }
+            "The requested patient could not be found."
+        )
+    {
+        Log.Warning("Patient not found. PatientId: {PatientId}", patientId);
+    }
 }
 
 public sealed class MedicalRecordNotFoundException : NotFoundException
 {
-    public MedicalRecordNotFoundException(string patientId)
+    public MedicalRecordNotFoundException(Guid patientId)
         : base(
             PatientErrorCodes.MedicalRecordNotFound,
             "Medical Record Not Found",
-            $"Medical record not found for patient: {patientId}"
-        ) { }
+            "No medical record was found for this patient."
+        )
+    {
+        Log.Warning("Medical record not found. PatientId: {PatientId}", patientId);
+    }
 }
 
-public sealed class PatientAlreadyRegisteredException : Base.ConflictException
+public sealed class PatientAlreadyRegisteredException : ConflictException
 {
-    public PatientAlreadyRegisteredException(string identifier)
+    public PatientAlreadyRegisteredException()
         : base(
             PatientErrorCodes.AlreadyRegistered,
             "Patient Already Registered",
-            $"Patient '{identifier}' is already registered."
-        ) { }
+            "A patient with these details is already registered."
+        )
+    {
+        Log.Warning("Duplicate patient registration attempt detected.");
+    }
 }
 
 public sealed class InvalidMedicalDataException : ValidationException

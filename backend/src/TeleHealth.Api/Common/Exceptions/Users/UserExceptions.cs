@@ -1,52 +1,69 @@
+using Serilog;
 using TeleHealth.Api.Common.Exceptions.Base;
 using TeleHealth.Api.Common.Exceptions.ErrorCodes;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace TeleHealth.Api.Common.Exceptions.Users;
 
 public sealed class UserNotFoundException : NotFoundException
 {
-    public UserNotFoundException(string identifier)
-        : base(UserErrorCodes.NotFound, "User Not Found", $"User '{identifier}' was not found.") { }
+    public UserNotFoundException(Guid userId)
+        : base(UserErrorCodes.NotFound, "User Not Found", "The requested user could not be found.")
+    {
+        Log.Warning("User not found. UserId: {UserId}", userId);
+    }
 }
 
 public sealed class UserProfileNotFoundException : NotFoundException
 {
-    public UserProfileNotFoundException(string userId)
+    public UserProfileNotFoundException(Guid userId)
         : base(
             UserErrorCodes.ProfileNotFound,
             "User Profile Not Found",
-            $"User profile not found for user: {userId}"
-        ) { }
+            "The requested user profile could not be found."
+        )
+    {
+        Log.Warning("User profile not found. UserId: {UserId}", userId);
+    }
 }
 
-public sealed class DuplicateUsernameException : Base.ConflictException
+public sealed class DuplicateUsernameException : ConflictException
 {
     public DuplicateUsernameException(string username)
         : base(
             UserErrorCodes.DuplicateUsername,
             "Username Already Taken",
-            $"Username '{username}' is already registered."
-        ) { }
+            "The chosen username is already in use."
+        )
+    {
+        Log.Warning("Duplicate username registration attempt. Username: {Username}", username);
+    }
 }
 
-public sealed class DuplicateEmailException : Base.ConflictException
+public sealed class DuplicateEmailException : ConflictException
 {
     public DuplicateEmailException(string email)
         : base(
             UserErrorCodes.DuplicateEmail,
             "Email Already Registered",
-            $"Email '{email}' is already registered."
-        ) { }
+            "An account with this email address already exists."
+        )
+    {
+        Log.Warning("Duplicate email registration attempt. Email: {Email}", email);
+    }
 }
 
-public sealed class DuplicateIcNumberException : Base.ConflictException
+public sealed class DuplicateIcNumberException : ConflictException
 {
-    public DuplicateIcNumberException(string icNumber)
+    public DuplicateIcNumberException()
         : base(
             UserErrorCodes.DuplicateIcNumber,
             "IC Number Already Registered",
-            $"IC Number '{icNumber}' is already registered."
-        ) { }
+            "An account with this IC number already exists."
+        )
+    {
+        Log.Warning("Duplicate IC number registration attempt detected.");
+    }
 }
 
 public sealed class UserAlreadyExistsException : Base.ConflictException
@@ -65,8 +82,11 @@ public sealed class InvalidUserDataException : ValidationException
         : base(
             UserErrorCodes.InvalidData,
             "Invalid User Data",
-            $"Invalid data provided for field '{field}': {reason}"
-        ) { }
+            $"The value provided for '{field}' is invalid."
+        )
+    {
+        Log.Debug("Invalid user data. Field: {Field}, Reason: {Reason}", field, reason);
+    }
 }
 
 public sealed class WeakPasswordException : ValidationException
