@@ -33,7 +33,7 @@ public static class GetProfileEndpoint
             )
             .WithName("GetMyProfile")
             .WithTags("Patients")
-            .RequireAuthorization()
+            .RequireAuthorization(AuthConstants.PatientPolicy)
             .ProducesProblem(StatusCodes.Status404NotFound);
     }
 }
