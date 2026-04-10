@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Serilog;
 using TeleHealth.Api.Common;
 using TeleHealth.Api.Common.Exceptions.Auth;
 using TeleHealth.Api.Common.Security;
@@ -32,11 +33,7 @@ public static class GetProfileEndpoint
             )
             .WithName("GetMyProfile")
             .WithTags("Patients")
-            .RequireAuthorization(AuthConstants.PatientPolicy)
-            .RequireAuthorization(AuthConstants.ReceptionistPolicy)
-            // .RequireAuthorization(AuthConstants.PatientPolicy)
-            // .RequireAuthorization(AuthConstants.PatientPolicy)
-            // .RequireAuthorization(AuthConstants.PatientPolicy)
+            .RequireAuthorization()
             .ProducesProblem(StatusCodes.Status404NotFound);
     }
 }

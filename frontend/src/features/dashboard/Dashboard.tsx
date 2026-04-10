@@ -138,8 +138,9 @@ export function Dashboard() {
   const { user, logout } = useAuthStore();
 
   // Filter the sidebar based on the current user's role!
+  const normalizedRole = user?.role?.toLowerCase();
   const visibleNavItems = navItems.filter((item) =>
-    item.allowedRoles.includes(user?.role?.toLowerCase() || ""),
+    item.allowedRoles.includes(normalizedRole ?? ""),
   );
 
   const handleLogout = () => {
