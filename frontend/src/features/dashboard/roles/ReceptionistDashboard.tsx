@@ -1,4 +1,4 @@
-import { Calendar, Clock, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function ReceptionistDashboard() {
