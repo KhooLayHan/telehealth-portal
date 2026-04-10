@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react-swc";
-import { defineConfig } from "vite";
+import { defineConfig, searchForWorkspaceRoot } from "vite";
 
 const dirname =
   typeof import.meta.dirname !== "undefined"
@@ -26,6 +26,16 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(dirname, "./src"),
+    },
+  },
+  server: {
+    fs: {
+      allow: [
+        // Include project root and parent directories
+        searchForWorkspaceRoot(process.cwd()),
+        // Explicitly allow the Bun store path
+        '/Users/vincent-sequoia/Projects/APU/DDAC/telehealth-portal/node_modules/.bun',
+      ],
     },
   },
 });
