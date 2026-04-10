@@ -20,13 +20,12 @@ public static class BookAppointmentEndpoint
                 ) =>
                 {
                     var claimValue = user.FindFirstValue(ClaimTypes.NameIdentifier);
-                    if (!Guid.TryParse(claimValue, out var userPublicId))
+                    if (!Guid.TryParse(claimValue, out var publicId))
                     {
-                        // Handle invalid GUID (e.g., return BadRequest, throw, etc.)
                         throw new ArgumentException("Invalid user ID.");
                     }
 
-                    var result = await handler.HandleAsync(userPublicId, command, token);
+                    var result = await handler.HandleAsync(publicId, command, token);
 
                     return TypedResults.Created(
                         ApiEndpoints.Appointments.GetById.Replace(

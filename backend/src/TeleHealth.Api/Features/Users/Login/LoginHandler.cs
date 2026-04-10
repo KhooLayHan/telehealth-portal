@@ -28,14 +28,14 @@ public sealed class LoginHandler(
 
         if (user is null)
         {
-            Log.Warning("Login failed — account not found.");
+            Log.Warning("Login failed.");
             throw new InvalidCredentialsException();
         }
 
         var result = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, command.Password);
         if (result == PasswordVerificationResult.Failed)
         {
-            Log.Warning("Login failed — invalid password.");
+            Log.Warning("Login failed.");
             throw new InvalidCredentialsException();
         }
 

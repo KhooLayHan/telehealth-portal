@@ -20,7 +20,12 @@ public static class UpdateMedicalRecordEndpoint
                     CancellationToken ct
                 ) =>
                 {
-                    var publicId = Guid.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
+                    var claimValue = user.FindFirstValue(ClaimTypes.NameIdentifier);
+                    if (!Guid.TryParse(claimValue, out var publicId))
+                    {
+                        throw new ArgumentException("Invalid user ID.");
+                    }
+
                     var updatedProfile = await handler.HandleAsync(publicId, cmd, ct);
 
                     return TypedResults.Ok(updatedProfile);

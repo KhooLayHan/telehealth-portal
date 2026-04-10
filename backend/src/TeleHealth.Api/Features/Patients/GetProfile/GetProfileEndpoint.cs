@@ -18,8 +18,12 @@ public static class GetProfileEndpoint
                     CancellationToken ct
                 ) =>
                 {
-                    // If this throws, it's a config bug — let it surface as 500
-                    var publicId = Guid.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
+                    var claimValue = user.FindFirstValue(ClaimTypes.NameIdentifier);
+                    if (!Guid.TryParse(claimValue, out var publicId))
+                    {
+                        throw new ArgumentException("Invalid user ID.");
+                    }
+
                     var profile = await handler.HandleAsync(publicId, ct);
 
                     return TypedResults.Ok(profile);
