@@ -8,7 +8,7 @@ import type { Allergy } from "./Allergy";
 import type { EmergencyContact } from "./EmergencyContact";
 
 export interface UpdateMedicalRecordCommand {
-  allergies: Allergy[];
   bloodGroup: string;
   emergencyContact: null | EmergencyContact;
+  allergies: Allergy[];
 }

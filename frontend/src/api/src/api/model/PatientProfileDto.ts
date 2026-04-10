@@ -8,15 +8,15 @@ import type { Allergy } from "./Allergy";
 import type { EmergencyContact } from "./EmergencyContact";
 
 export interface PatientProfileDto {
-  /** @nullable */
-  allergies: Allergy[] | null;
-  /** @nullable */
-  bloodGroup: string | null;
-  email: string;
-  emergencyContact: null | EmergencyContact;
+  userPublicId: string;
+  patientPublicId: string;
   firstName: string;
   lastName: string;
-  patientPublicId: string;
+  email: string;
   role: string;
-  userPublicId: string;
+  /** @nullable */
+  bloodGroup: string | null;
+  emergencyContact: null | EmergencyContact;
+  /** @nullable */
+  allergies: Allergy[] | null;
 }

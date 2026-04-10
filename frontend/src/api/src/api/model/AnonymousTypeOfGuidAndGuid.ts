@@ -5,8 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface Allergy {
-  allergen: string;
-  severity: string;
-  reaction: string;
+export interface AnonymousTypeOfGuidAndGuid {
+  userPublicId: string;
+  patientPublicId: string;
 }

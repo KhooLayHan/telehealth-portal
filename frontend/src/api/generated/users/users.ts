@@ -4,107 +4,116 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import { useMutation } from "@tanstack/react-query";
+import {
+  useMutation
+} from '@tanstack/react-query';
 import type {
   MutationFunction,
   QueryClient,
   UseMutationOptions,
-  UseMutationResult,
-} from "@tanstack/react-query";
+  UseMutationResult
+} from '@tanstack/react-query';
 
-import type { CreateUserCommand } from "../../src/api/model/CreateUserCommand";
+import type {
+  CreateUserCommand
+} from '../../src/api/model/CreateUserCommand';
 
-import { ofetchMutator } from "../../ofetch-mutator";
+import type {
+  ProblemDetails
+} from '../../src/api/model/ProblemDetails';
+
+import { ofetchMutator } from '../../ofetch-mutator';
+
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-export type createUserResponse200 = {
-  data: void;
-  status: 200;
-};
 
-export type createUserResponseSuccess = createUserResponse200 & {
+
+export type createUserResponse200 = {
+  data: string
+  status: 200
+}
+
+export type createUserResponse400 = {
+  data: ProblemDetails
+  status: 400
+}
+
+export type createUserResponse409 = {
+  data: ProblemDetails
+  status: 409
+}
+
+export type createUserResponseSuccess = (createUserResponse200) & {
+  headers: Headers;
+};
+export type createUserResponseError = (createUserResponse400 | createUserResponse409) & {
   headers: Headers;
 };
 
-export type createUserResponse = createUserResponseSuccess;
+export type createUserResponse = (createUserResponseSuccess | createUserResponseError)
 
 export const getCreateUserUrl = () => {
-  return `http://localhost:5144/api/v1/patients`;
-};
 
-export const createUser = async (
-  createUserCommand: CreateUserCommand,
-  options?: RequestInit
-): Promise<createUserResponse> => {
-  return ofetchMutator<createUserResponse>(getCreateUserUrl(), {
+
+
+
+  return `http://localhost:5144/api/v1/patients`
+}
+
+export const createUser = async (createUserCommand: CreateUserCommand, options?: RequestInit): Promise<createUserResponse> => {
+
+  return ofetchMutator<createUserResponse>(getCreateUserUrl(),
+  {
     ...options,
-    method: "POST",
-    headers: { "Content-Type": "application/json", ...options?.headers },
-    body: JSON.stringify(createUserCommand),
-  });
-};
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      createUserCommand,)
+  }
+);}
 
-export const getCreateUserMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof createUser>>,
-    TError,
-    { data: CreateUserCommand },
-    TContext
-  >;
-  request?: SecondParameter<typeof ofetchMutator>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof createUser>>,
-  TError,
-  { data: CreateUserCommand },
-  TContext
-> => {
-  const mutationKey = ["createUser"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof createUser>>,
-    { data: CreateUserCommand }
-  > = (props) => {
-    const { data } = props ?? {};
 
-    return createUser(data, requestOptions);
-  };
 
-  return { mutationFn, ...mutationOptions };
-};
+export const getCreateUserMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createUser>>, TError,{data: CreateUserCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof createUser>>, TError,{data: CreateUserCommand}, TContext> => {
 
-export type CreateUserMutationResult = NonNullable<
-  Awaited<ReturnType<typeof createUser>>
->;
-export type CreateUserMutationBody = CreateUserCommand;
-export type CreateUserMutationError = unknown;
+const mutationKey = ['createUser'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
 
-export const useCreateUser = <TError = unknown, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof createUser>>,
-      TError,
-      { data: CreateUserCommand },
-      TContext
-    >;
-    request?: SecondParameter<typeof ofetchMutator>;
-  },
-  queryClient?: QueryClient
-): UseMutationResult<
-  Awaited<ReturnType<typeof createUser>>,
-  TError,
-  { data: CreateUserCommand },
-  TContext
-> => {
-  return useMutation(getCreateUserMutationOptions(options), queryClient);
-};
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createUser>>, {data: CreateUserCommand}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createUser(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateUserMutationResult = NonNullable<Awaited<ReturnType<typeof createUser>>>
+    export type CreateUserMutationBody = CreateUserCommand
+    export type CreateUserMutationError = ProblemDetails
+
+    export const useCreateUser = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createUser>>, TError,{data: CreateUserCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createUser>>,
+        TError,
+        {data: CreateUserCommand},
+        TContext
+      > => {
+      return useMutation(getCreateUserMutationOptions(options), queryClient);
+    }

@@ -4,199 +4,211 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import { useMutation } from "@tanstack/react-query";
+import {
+  useMutation
+} from '@tanstack/react-query';
 import type {
   MutationFunction,
   QueryClient,
   UseMutationOptions,
-  UseMutationResult,
-} from "@tanstack/react-query";
+  UseMutationResult
+} from '@tanstack/react-query';
 
-import type { LoginCommand } from "../../src/api/model/LoginCommand";
+import type {
+  AnonymousTypeOfGuidAndGuid
+} from '../../src/api/model/AnonymousTypeOfGuidAndGuid';
 
-import type { RegisterPatientCommand } from "../../src/api/model/RegisterPatientCommand";
+import type {
+  AnonymousTypeOfstring
+} from '../../src/api/model/AnonymousTypeOfstring';
 
-import { ofetchMutator } from "../../ofetch-mutator";
+import type {
+  LoginCommand
+} from '../../src/api/model/LoginCommand';
+
+import type {
+  ProblemDetails
+} from '../../src/api/model/ProblemDetails';
+
+import type {
+  RegisterPatientCommand
+} from '../../src/api/model/RegisterPatientCommand';
+
+import { ofetchMutator } from '../../ofetch-mutator';
+
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-export type loginUserResponse200 = {
-  data: void;
-  status: 200;
-};
 
-export type loginUserResponseSuccess = loginUserResponse200 & {
+
+export type loginUserResponse200 = {
+  data: AnonymousTypeOfstring
+  status: 200
+}
+
+export type loginUserResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type loginUserResponseSuccess = (loginUserResponse200) & {
+  headers: Headers;
+};
+export type loginUserResponseError = (loginUserResponse401) & {
   headers: Headers;
 };
 
-export type loginUserResponse = loginUserResponseSuccess;
+export type loginUserResponse = (loginUserResponseSuccess | loginUserResponseError)
 
 export const getLoginUserUrl = () => {
-  return `http://localhost:5144/api/v1/auth/login`;
-};
 
-export const loginUser = async (
-  loginCommand: LoginCommand,
-  options?: RequestInit
-): Promise<loginUserResponse> => {
-  return ofetchMutator<loginUserResponse>(getLoginUserUrl(), {
+
+
+
+  return `http://localhost:5144/api/v1/auth/login`
+}
+
+export const loginUser = async (loginCommand: LoginCommand, options?: RequestInit): Promise<loginUserResponse> => {
+
+  return ofetchMutator<loginUserResponse>(getLoginUserUrl(),
+  {
     ...options,
-    method: "POST",
-    headers: { "Content-Type": "application/json", ...options?.headers },
-    body: JSON.stringify(loginCommand),
-  });
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      loginCommand,)
+  }
+);}
+
+
+
+
+export const getLoginUserMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof loginUser>>, TError,{data: LoginCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof loginUser>>, TError,{data: LoginCommand}, TContext> => {
+
+const mutationKey = ['loginUser'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof loginUser>>, {data: LoginCommand}> = (props) => {
+          const {data} = props ?? {};
+
+          return  loginUser(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LoginUserMutationResult = NonNullable<Awaited<ReturnType<typeof loginUser>>>
+    export type LoginUserMutationBody = LoginCommand
+    export type LoginUserMutationError = ProblemDetails
+
+    export const useLoginUser = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof loginUser>>, TError,{data: LoginCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof loginUser>>,
+        TError,
+        {data: LoginCommand},
+        TContext
+      > => {
+      return useMutation(getLoginUserMutationOptions(options), queryClient);
+    }
+    export type registerPatientResponse201 = {
+  data: AnonymousTypeOfGuidAndGuid
+  status: 201
+}
+
+export type registerPatientResponse400 = {
+  data: ProblemDetails
+  status: 400
+}
+
+export type registerPatientResponse409 = {
+  data: ProblemDetails
+  status: 409
+}
+
+export type registerPatientResponseSuccess = (registerPatientResponse201) & {
+  headers: Headers;
 };
-
-export const getLoginUserMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof loginUser>>,
-    TError,
-    { data: LoginCommand },
-    TContext
-  >;
-  request?: SecondParameter<typeof ofetchMutator>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof loginUser>>,
-  TError,
-  { data: LoginCommand },
-  TContext
-> => {
-  const mutationKey = ["loginUser"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof loginUser>>,
-    { data: LoginCommand }
-  > = (props) => {
-    const { data } = props ?? {};
-
-    return loginUser(data, requestOptions);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type LoginUserMutationResult = NonNullable<
-  Awaited<ReturnType<typeof loginUser>>
->;
-export type LoginUserMutationBody = LoginCommand;
-export type LoginUserMutationError = unknown;
-
-export const useLoginUser = <TError = unknown, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof loginUser>>,
-      TError,
-      { data: LoginCommand },
-      TContext
-    >;
-    request?: SecondParameter<typeof ofetchMutator>;
-  },
-  queryClient?: QueryClient
-): UseMutationResult<
-  Awaited<ReturnType<typeof loginUser>>,
-  TError,
-  { data: LoginCommand },
-  TContext
-> => {
-  return useMutation(getLoginUserMutationOptions(options), queryClient);
-};
-export type registerPatientResponse200 = {
-  data: void;
-  status: 200;
-};
-
-export type registerPatientResponseSuccess = registerPatientResponse200 & {
+export type registerPatientResponseError = (registerPatientResponse400 | registerPatientResponse409) & {
   headers: Headers;
 };
 
-export type registerPatientResponse = registerPatientResponseSuccess;
+export type registerPatientResponse = (registerPatientResponseSuccess | registerPatientResponseError)
 
 export const getRegisterPatientUrl = () => {
-  return `http://localhost:5144/api/v1/auth/signup-patient`;
-};
 
-export const registerPatient = async (
-  registerPatientCommand: RegisterPatientCommand,
-  options?: RequestInit
-): Promise<registerPatientResponse> => {
-  return ofetchMutator<registerPatientResponse>(getRegisterPatientUrl(), {
+
+
+
+  return `http://localhost:5144/api/v1/auth/signup-patient`
+}
+
+export const registerPatient = async (registerPatientCommand: RegisterPatientCommand, options?: RequestInit): Promise<registerPatientResponse> => {
+
+  return ofetchMutator<registerPatientResponse>(getRegisterPatientUrl(),
+  {
     ...options,
-    method: "POST",
-    headers: { "Content-Type": "application/json", ...options?.headers },
-    body: JSON.stringify(registerPatientCommand),
-  });
-};
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      registerPatientCommand,)
+  }
+);}
 
-export const getRegisterPatientMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof registerPatient>>,
-    TError,
-    { data: RegisterPatientCommand },
-    TContext
-  >;
-  request?: SecondParameter<typeof ofetchMutator>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof registerPatient>>,
-  TError,
-  { data: RegisterPatientCommand },
-  TContext
-> => {
-  const mutationKey = ["registerPatient"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof registerPatient>>,
-    { data: RegisterPatientCommand }
-  > = (props) => {
-    const { data } = props ?? {};
 
-    return registerPatient(data, requestOptions);
-  };
 
-  return { mutationFn, ...mutationOptions };
-};
+export const getRegisterPatientMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerPatient>>, TError,{data: RegisterPatientCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof registerPatient>>, TError,{data: RegisterPatientCommand}, TContext> => {
 
-export type RegisterPatientMutationResult = NonNullable<
-  Awaited<ReturnType<typeof registerPatient>>
->;
-export type RegisterPatientMutationBody = RegisterPatientCommand;
-export type RegisterPatientMutationError = unknown;
+const mutationKey = ['registerPatient'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
 
-export const useRegisterPatient = <TError = unknown, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof registerPatient>>,
-      TError,
-      { data: RegisterPatientCommand },
-      TContext
-    >;
-    request?: SecondParameter<typeof ofetchMutator>;
-  },
-  queryClient?: QueryClient
-): UseMutationResult<
-  Awaited<ReturnType<typeof registerPatient>>,
-  TError,
-  { data: RegisterPatientCommand },
-  TContext
-> => {
-  return useMutation(getRegisterPatientMutationOptions(options), queryClient);
-};
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof registerPatient>>, {data: RegisterPatientCommand}> = (props) => {
+          const {data} = props ?? {};
+
+          return  registerPatient(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RegisterPatientMutationResult = NonNullable<Awaited<ReturnType<typeof registerPatient>>>
+    export type RegisterPatientMutationBody = RegisterPatientCommand
+    export type RegisterPatientMutationError = ProblemDetails
+
+    export const useRegisterPatient = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerPatient>>, TError,{data: RegisterPatientCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof registerPatient>>,
+        TError,
+        {data: RegisterPatientCommand},
+        TContext
+      > => {
+      return useMutation(getRegisterPatientMutationOptions(options), queryClient);
+    }

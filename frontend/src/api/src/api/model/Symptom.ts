@@ -5,8 +5,8 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface Allergy {
-  allergen: string;
+export interface Symptom {
+  name: string;
   severity: string;
-  reaction: string;
+  duration: string;
 }

@@ -7,13 +7,13 @@
 import type { LocalDate } from "./LocalDate";
 
 export interface CreateUserCommand {
-  dateOfBirth: LocalDate;
-  email: string;
-  firstName: string;
-  gender: string;
-  icNumber: string;
-  lastName: string;
-  password: string;
-  phone: string;
   username: string;
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  gender: string;
+  dateOfBirth: LocalDate;
+  phone: string;
+  icNumber: string;
 }

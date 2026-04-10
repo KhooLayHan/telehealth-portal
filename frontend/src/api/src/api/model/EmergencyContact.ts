@@ -7,6 +7,6 @@
 
 export interface EmergencyContact {
   name: string;
-  phone: string;
   relationship: string;
+  phone: string;
 }
