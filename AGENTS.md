@@ -174,6 +174,59 @@ public async Task TestName()
 - Prefer simple conditionals over nested ternary operators
 - Group related code together and separate concerns
 
+## PII & Sensitive Data Handling
+
+This is a healthcare application. All code must comply with general GDPR and general health data privacy standards (HIPAA). Treat the following as PII/PHI that must never appear in logs, exception messages, or API responses:
+
+**Always PII — never log or expose:**
+- Email addresses
+- IC numbers  — also PHI under health data regulations
+- Full names in combination with any other identifier
+- Phone numbers
+- Dates of birth combined with any other identifier
+- Passwords or password hashes (any form)
+
+**Internal identifiers — safe to log:**
+- `PublicId` (GUIDs assigned by the system) — these are safe because they carry no real-world identity meaning on their own
+- `Slug` values
+- Appointment/schedule/record IDs
+
+### Logging Rules
+
+```csharp
+// NEVER — logs PII directly
+Log.Warning("Login failed for user: {Email}", command.Email);
+Log.Warning("Duplicate IC detected: {IcNumber}", cmd.IcNumber);
+Log.Information("Patient {Name} not found", patientName);
+ 
+// CORRECT — log intent and internal IDs only
+Log.Warning("Login failed — account not found.");
+Log.Warning("Duplicate IC number registration attempt detected.");
+Log.Warning("Patient not found. PatientId: {PatientId}", patient.PublicId);
+```
+
+For auth failures specifically, **both** "user not found" and "wrong password" must log the same generic message with no email attached. Distinguishing them in logs is an enumeration risk.
+
+### API Response Rules
+
+Exception `detail` fields are surfaced in ProblemDetails responses. Never include PII there:
+
+```csharp
+// NEVER — PII in API response detail
+throw new ConflictException($"Email '{email}' is already registered.");
+throw new NotFoundException($"Patient '{patientId}' was not found.");
+ 
+// CORRECT — generic client detail, identifier in server log only
+Log.Warning("Duplicate email registration attempt. Email: {Email}", email);
+throw new DuplicateEmailException(); // detail: "An account with this email already exists."
+```
+
+### IC Numbers — Extra Caution
+
+IC numbers are PHI. Do not log them under any circumstances, including for debugging duplicate-registration attempts. Trace those events via the audit log only. If you need to reference an IC-related event in application logs, log only that the event occurred — never the value.
+ 
+---
+
 ## Security & Performance
 
 - Add `rel="noopener"` on `target="_blank"` links

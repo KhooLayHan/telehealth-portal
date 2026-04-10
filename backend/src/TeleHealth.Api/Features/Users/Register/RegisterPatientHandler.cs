@@ -1,3 +1,4 @@
+using Amazon.CloudWatchLogs.Model;
 using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -6,9 +7,11 @@ using Npgsql;
 using Serilog;
 using Slugify;
 using TeleHealth.Api.Common.Exceptions;
+using TeleHealth.Api.Common.Exceptions.Users;
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Infrastructure.Persistence;
 using TeleHealth.Contracts;
+using InvalidOperationException = System.InvalidOperationException;
 
 namespace TeleHealth.Api.Features.Users.Register;
 
@@ -69,15 +72,19 @@ public sealed class RegisterPatientHandler(
 
             throw pg.ConstraintName switch
             {
-                "uq_users_username_active" => new ConflictException(
+                "uq_users_username_active" => new DuplicateUsernameException(
                     "Username is already registered."
                 ),
-                "uq_users_email_active" => new ConflictException("Email is already registered."),
-                "uq_users_ic_active" => new ConflictException("IC Number is already registered."),
+                "uq_users_email_active" => new DuplicateEmailException(
+                    "Email is already registered."
+                ),
+                "uq_users_ic_active" => new DuplicateIcNumberException(
+                    "IC Number is already registered."
+                ),
                 "uq_users_slug_active" => new ConflictException(
                     "A user with these details already exists."
                 ),
-                _ => new ConflictException("A user with these details already exists."),
+                _ => new UserAlreadyExistsException("A user with these details already exists."),
             };
         }
 
