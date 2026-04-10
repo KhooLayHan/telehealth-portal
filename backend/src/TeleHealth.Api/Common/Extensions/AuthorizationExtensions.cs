@@ -9,7 +9,7 @@ public static class AuthorizationExtensions
         services.AddAuthorization(options =>
         {
             options.AddPolicy(
-                AuthConstants.PatientPolicy,
+                AuthConstants.ReceptionistPolicy,
                 policy => policy.RequireRole("receptionist")
             );
             options.AddPolicy(AuthConstants.AdminPolicy, policy => policy.RequireRole("admin"));

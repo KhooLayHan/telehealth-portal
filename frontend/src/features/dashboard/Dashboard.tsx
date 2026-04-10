@@ -1,6 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
-  Activity,
   Bell,
   Calendar,
   FileText,
