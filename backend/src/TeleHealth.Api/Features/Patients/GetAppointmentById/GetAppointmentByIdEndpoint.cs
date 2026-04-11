@@ -1,22 +1,24 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Serilog;
 using TeleHealth.Api.Common;
 using TeleHealth.Api.Common.Exceptions.Auth;
+using TeleHealth.Api.Common.Models;
 using TeleHealth.Api.Common.Security;
+using TeleHealth.Api.Features.Patients.GetAllAppointments;
 
-namespace TeleHealth.Api.Features.Patients.GetProfile;
+namespace TeleHealth.Api.Features.Patients.GetAppointmentById;
 
-public static class GetProfileEndpoint
+public static class GetAppointmentByIdEndpoint
 {
-    public static void MapGetProfileEndpoint(this RouteGroupBuilder group)
+    public static void MapGetAppointmentByIdEndpoint(this RouteGroupBuilder group)
     {
         group
             .MapGet(
-                $"{ApiEndpoints.Patients.GetProfile}",
-                async Task<Ok<PatientProfileDto>> (
+                $"{ApiEndpoints.Patients.GetAppointmentById}",
+                async Task<Ok<AppointmentDto>> (
+                    Guid id,
                     ClaimsPrincipal user,
-                    GetProfileHandler handler,
+                    GetAppointmentByIdHandler handler,
                     CancellationToken ct
                 ) =>
                 {
@@ -26,14 +28,14 @@ public static class GetProfileEndpoint
                         throw new TokenInvalidException();
                     }
 
-                    var profile = await handler.HandleAsync(publicId, ct);
-
-                    return TypedResults.Ok(profile);
+                    var appointments = await handler.HandleAsync(publicId, id, ct);
+                    return TypedResults.Ok(appointments);
                 }
             )
-            .WithName("GetMyProfile")
+            .WithName("GetAppointmentById")
             .WithTags("Patients")
             .RequireAuthorization(AuthConstants.PatientPolicy)
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status404NotFound);
     }
 }

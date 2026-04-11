@@ -13,7 +13,7 @@ public static class UpdateMedicalRecordEndpoint
     {
         group
             .MapPut(
-                $"{ApiEndpoints.Patients.MedicalRecord}",
+                $"{ApiEndpoints.Patients.UpdateMedicalRecord}",
                 async Task<Ok<PatientProfileDto>> (
                     ClaimsPrincipal user,
                     UpdateMedicalRecordCommand cmd,

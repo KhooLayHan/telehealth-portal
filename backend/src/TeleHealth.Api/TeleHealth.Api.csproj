@@ -13,6 +13,7 @@
     <PackageReference Include="Facet" />
     <PackageReference Include="Facet.Extensions" />
     <PackageReference Include="Facet.Extensions.EFCore" />
+    <PackageReference Include="Facet.Mapping" />
 
     <PackageReference Include="FluentValidation" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
