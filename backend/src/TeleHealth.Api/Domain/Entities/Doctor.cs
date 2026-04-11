@@ -7,7 +7,7 @@ public sealed class Doctor
     public long Id { get; init; }
     public Guid PublicId { get; init; }
     public required string Slug { get; init; }
-    public required long UserId { get; init; }
+    public required long UserId { get; set; }
     public required int DepartmentId { get; init; }
     public required string LicenseNumber { get; set; }
     public required string Specialization { get; set; }
