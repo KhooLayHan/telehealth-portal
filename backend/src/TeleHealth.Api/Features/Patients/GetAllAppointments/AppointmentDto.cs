@@ -25,12 +25,12 @@ public class AppointmentMappingConfig : IFacetMapConfiguration<Appointment, Appo
 {
     public static void Map(Appointment source, AppointmentDto target)
     {
-        target.DoctorName = $"{source.User.FirstName} {source.User.LastName}";
+        target.DoctorName = $"{source.Doctor.User.FirstName} {source.Doctor.User.LastName}";
         target.Specialization = source.Doctor.Specialization;
         target.Status = source.AppointmentStatus.Name;
-        target.StatusColorCode = source.AppointmentStatus.ColorCode!;
+        target.StatusColorCode = source.AppointmentStatus.ColorCode ?? String.Empty;
         target.Date = source.DoctorSchedule.Date;
-        target.StartTime = source.DoctorSchedule.EndTime;
-        target.EndTime = source.DoctorSchedule.StartTime;
+        target.StartTime = source.DoctorSchedule.StartTime;
+        target.EndTime = source.DoctorSchedule.EndTime;
     }
 }
