@@ -1,19 +1,28 @@
 using Amazon.S3;
+
 using FluentValidation;
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
+
 using NodaTime;
 using NodaTime.Serialization.SystemTextJson;
+
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+
 using Scalar.AspNetCore;
+
 using Serilog;
+
 using TeleHealth.Api.Common;
 using TeleHealth.Api.Common.Extensions;
 using TeleHealth.Api.Common.Security;
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Features.Appointments.Book;
+using TeleHealth.Api.Features.Appointments.GetAllAppointments;
+using TeleHealth.Api.Features.Appointments.GetAppointmentsById;
 using TeleHealth.Api.Features.Patients.GetAllAppointments;
 using TeleHealth.Api.Features.Patients.GetAppointmentById;
 using TeleHealth.Api.Features.Patients.GetProfile;
@@ -98,7 +107,9 @@ builder.Services.AddScoped<GetProfileHandler>();
 builder.Services.AddScoped<UpdateMedicalRecordHandler>();
 builder.Services.AddScoped<BookAppointmentHandler>();
 builder.Services.AddScoped<GetAllAppointmentsHandler>();
+builder.Services.AddScoped<GetAllAppointmentsForReceptionistHandler>();
 builder.Services.AddScoped<GetAppointmentByIdHandler>();
+builder.Services.AddScoped<ReceptionistGetAppointmentByIdHandler>();
 
 builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonS3>();
@@ -142,6 +153,8 @@ api.MapBookAppointmentEndpoint();
 api.MapGetMeEndpoint();
 api.MapGetAllAppointmentsEndpoint();
 api.MapGetAppointmentByIdEndpoint();
+api.MapGetAllAppointmentsForReceptionistEndpoint();
+api.MapGetAppointmentByIdForReceptionistEndpoint();
 
 app.UseSerilogRequestLogging();
 
