@@ -12,28 +12,43 @@ public sealed class GetAppointmentByIdHandler(ApplicationDbContext db)
 {
     public async Task<AppointmentDto> HandleAsync(
         Guid userPublicId,
-        Guid appointmentPublicId,
+        string idOrSlug,
         CancellationToken ct
     )
     {
-        var appointment = await db
+        var appointmentBySlug = await db
             .Appointments.AsNoTracking()
-            .Where(a =>
-                a.Patient.User.PublicId == userPublicId && a.PublicId == appointmentPublicId
-            )
+            .Where(a => a.Patient.User.PublicId == userPublicId && a.Slug == idOrSlug)
             .SelectFacet<Appointment, AppointmentDto>()
             .FirstOrDefaultAsync(ct);
 
-        if (appointment is null)
+        if (appointmentBySlug is not null)
         {
-            Log.Warning(
-                "Appointment not found. AppointmentId: {AppointmentId}",
-                appointmentPublicId
-            );
-            throw new AppointmentNotFoundException();
+            Log.Information("Appointment found by slug. Slug: {Slug}", idOrSlug);
+            return appointmentBySlug;
         }
 
-        Log.Information("Appointment found. AppointmentId: {@AppointmentId}", appointmentPublicId);
-        return appointment;
+        if (Guid.TryParse(idOrSlug, out var appointmentPublicId))
+        {
+            var appointmentById = await db
+                .Appointments.AsNoTracking()
+                .Where(a =>
+                    a.Patient.User.PublicId == userPublicId && a.PublicId == appointmentPublicId
+                )
+                .SelectFacet<Appointment, AppointmentDto>()
+                .FirstOrDefaultAsync(ct);
+
+            if (appointmentById is not null)
+            {
+                Log.Information(
+                    "Appointment found. AppointmentId: {@AppointmentId}",
+                    appointmentPublicId
+                );
+                return appointmentById;
+            }
+        }
+
+        Log.Warning("Appointment not found. AppointmentId: {AppointmentId}", appointmentPublicId);
+        throw new AppointmentNotFoundException();
     }
 }

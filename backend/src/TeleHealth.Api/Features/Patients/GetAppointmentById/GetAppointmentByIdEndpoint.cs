@@ -14,9 +14,9 @@ public static class GetAppointmentByIdEndpoint
     {
         group
             .MapGet(
-                $"{ApiEndpoints.Patients.GetAppointmentById}",
+                $"{ApiEndpoints.Patients.GetAppointmentByIdOrSlug}",
                 async Task<Ok<AppointmentDto>> (
-                    Guid id,
+                    string idOrSlug,
                     ClaimsPrincipal user,
                     GetAppointmentByIdHandler handler,
                     CancellationToken ct
@@ -28,11 +28,11 @@ public static class GetAppointmentByIdEndpoint
                         throw new TokenInvalidException();
                     }
 
-                    var appointments = await handler.HandleAsync(publicId, id, ct);
+                    var appointments = await handler.HandleAsync(publicId, idOrSlug, ct);
                     return TypedResults.Ok(appointments);
                 }
             )
-            .WithName("GetAppointmentById")
+            .WithName(nameof(ApiEndpoints.Patients.GetAppointmentByIdOrSlug))
             .WithTags("Patients")
             .RequireAuthorization(AuthConstants.PatientPolicy)
             .ProducesProblem(StatusCodes.Status401Unauthorized)

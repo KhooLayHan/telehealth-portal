@@ -53,22 +53,22 @@ public sealed class GetAllAppointmentsHandler(ApplicationDbContext db)
         {
             var pattern = $"%{query.Search}%";
             q = q.Where(a =>
-                EF.Functions.ILike(a.Doctor.User.FirstName + " " + a.Doctor.User.LastName, pattern)
+                EF.Functions.ILike($"{a.Doctor.User.FirstName} {a.Doctor.User.LastName}", pattern)
                 || EF.Functions.ILike(a.VisitReason, pattern)
             );
         }
 
-        q =
-            query.SortOrder?.ToLowerInvariant() == "desc"
-                ? q.OrderByDescending(a => a.DoctorSchedule.Date)
-                    .ThenByDescending(a => a.DoctorSchedule.StartTime)
-                : q.OrderBy(a => a.DoctorSchedule.Date).ThenBy(a => a.DoctorSchedule.StartTime);
+        q = query.SortOrder?.ToLowerInvariant() switch
+        {
+            "desc" => q.OrderByDescending(a => a.DoctorSchedule.Date)
+                .ThenByDescending(a => a.DoctorSchedule.StartTime),
+            _ => q.OrderBy(a => a.DoctorSchedule.Date).ThenBy(a => a.DoctorSchedule.StartTime),
+        };
 
         var totalCount = await q.CountAsync(ct);
 
         var items = await q.Skip((page - 1) * pageSize)
             .Take(pageSize)
-            // .Select(AppointmentDto.Projection)
             .SelectFacet<Appointment, AppointmentDto>()
             .ToListAsync(ct);
 

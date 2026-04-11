@@ -20,7 +20,9 @@ public static class ApiEndpoints
 
         public const string GetAllAppointments = $"{GetProfile}/appointments";
 
-        public const string GetAppointmentById = $"{GetProfile}/appointments/{{id:guid}}";
+        public const string GetAppointmentByIdOrSlug = $"{GetProfile}/appointments/{{idOrSlug}}";
+
+        public const string GetAppointmentBySlug = $"{GetProfile}/appointments/{{slug}}";
 
         public const string GetById = $"{Base}/{{id:guid}}";
     }
