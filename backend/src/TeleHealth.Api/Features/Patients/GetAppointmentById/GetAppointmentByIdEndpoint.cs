@@ -33,7 +33,7 @@ public static class GetAppointmentByIdEndpoint
                 }
             )
             .WithName(nameof(ApiEndpoints.Patients.GetAppointmentByIdOrSlug))
-            .WithTags("Patients")
+            .WithTags(nameof(ApiEndpoints.Patients))
             .RequireAuthorization(AuthConstants.PatientPolicy)
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status404NotFound);

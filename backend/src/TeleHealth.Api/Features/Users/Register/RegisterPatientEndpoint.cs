@@ -23,8 +23,8 @@ public static class RegisterPatientEndpoint
                     );
                 }
             )
-            .WithName("RegisterPatient")
-            .WithTags("Authentication")
+            .WithName(nameof(ApiEndpoints.Auth.SignUpPatient))
+            .WithTags(nameof(ApiEndpoints.Auth))
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status409Conflict)
             .AddEndpointFilter<ValidationFilter<RegisterPatientCommand>>();

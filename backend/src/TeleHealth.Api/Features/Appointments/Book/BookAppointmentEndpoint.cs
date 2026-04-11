@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Http.HttpResults;
 using TeleHealth.Api.Common;
 using TeleHealth.Api.Common.Exceptions.Auth;
+using TeleHealth.Api.Common.Security;
 
 namespace TeleHealth.Api.Features.Appointments.Book;
 
@@ -37,9 +38,9 @@ public static class BookAppointmentEndpoint
                     );
                 }
             )
-            .WithName("BookAppointment")
-            .WithTags("Appointments")
-            .RequireAuthorization("PatientOnly")
+            .WithName(nameof(ApiEndpoints.Appointments.Create))
+            .WithTags(nameof(ApiEndpoints.Appointments))
+            .RequireAuthorization(AuthConstants.PatientPolicy)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status409Conflict)
             .ProducesProblem(StatusCodes.Status422UnprocessableEntity)

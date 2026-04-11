@@ -47,7 +47,7 @@ public static class ApiEndpoints
     {
         private const string Base = "appointments";
 
-        public const string Book = Base;
+        public const string Create = Base;
 
         public const string GetById = $"{Base}/{{id:guid}}";
     }

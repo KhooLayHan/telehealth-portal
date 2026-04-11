@@ -32,8 +32,8 @@ public static class UpdateMedicalRecordEndpoint
                     return TypedResults.Ok(updatedProfile);
                 }
             )
-            .WithName("UpdateMedicalInfo")
-            .WithTags("Patients")
+            .WithName(nameof(ApiEndpoints.Patients.UpdateMedicalRecord))
+            .WithTags(nameof(ApiEndpoints.Patients))
             .RequireAuthorization(AuthConstants.PatientPolicy)
             .ProducesProblem(StatusCodes.Status422UnprocessableEntity)
             .ProducesProblem(StatusCodes.Status404NotFound)
