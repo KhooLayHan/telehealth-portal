@@ -74,26 +74,36 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 
 builder.Services.AddDbContext<ApplicationDbContext>(
     (serviceProvider, options) =>
+    {
         options
             .UseNpgsql(
                 builder.Configuration.GetConnectionString("Database"),
                 o => o.SetPostgresVersion(18, 0).UseNodaTime()
             )
-            .UseSnakeCaseNamingConvention()
-            .UseSeeding(
-                (ctx, _) =>
-                {
-                    var seeder = serviceProvider.GetRequiredService<DatabaseSeeder>();
-                    seeder.SeedAsync((ApplicationDbContext)ctx).GetAwaiter().GetResult();
-                }
-            )
-            .UseAsyncSeeding(
-                async (ctx, _, ct) =>
-                {
-                    var seeder = serviceProvider.GetRequiredService<DatabaseSeeder>();
-                    await seeder.SeedAsync((ApplicationDbContext)ctx, ct);
-                }
-            )
+            .UseSnakeCaseNamingConvention();
+
+        if (
+            builder.Environment.IsDevelopment()
+            || builder.Configuration.GetValue<bool>("Seed:EnableOnStartup")
+        )
+        {
+            options
+                .UseSeeding(
+                    (ctx, _) =>
+                    {
+                        var seeder = serviceProvider.GetRequiredService<DatabaseSeeder>();
+                        seeder.SeedAsync((ApplicationDbContext)ctx).GetAwaiter().GetResult();
+                    }
+                )
+                .UseAsyncSeeding(
+                    async (ctx, _, ct) =>
+                    {
+                        var seeder = serviceProvider.GetRequiredService<DatabaseSeeder>();
+                        await seeder.SeedAsync((ApplicationDbContext)ctx, ct);
+                    }
+                );
+        }
+    }
 );
 
 builder.Services.AddJwtAuthentication(builder.Configuration);

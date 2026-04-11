@@ -4,6 +4,8 @@ using Microsoft.Extensions.Configuration;
 using NodaTime;
 using Serilog;
 using Slugify;
+using TeleHealth.Api.Common.Exceptions;
+using TeleHealth.Api.Common.Exceptions.Seeding;
 using TeleHealth.Api.Domain.Entities;
 
 namespace TeleHealth.Api.Infrastructure.Persistence.Seeding;
@@ -135,12 +137,12 @@ public sealed class DatabaseSeeder(
                 consultations.Count
             );
         }
-        catch (Exception ex)
+        catch (SeedingException ex)
         {
             await transaction.RollbackAsync(ct);
-            Log.Error(
-                ex,
-                "Seeding failed and was rolled back. The database is clean — next run will retry."
+            throw new SeedingException(
+                "Seeding failed and was rolled back. The database is clean; next run will retry.",
+                ex
             );
         }
     }
