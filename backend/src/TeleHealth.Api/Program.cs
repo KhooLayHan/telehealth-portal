@@ -24,6 +24,7 @@ using TeleHealth.Api.Features.Users.Login;
 using TeleHealth.Api.Features.Users.Register;
 using TeleHealth.Api.Infrastructure.Aws;
 using TeleHealth.Api.Infrastructure.Persistence;
+using TeleHealth.Api.Infrastructure.Persistence.Seeding;
 
 Log.Information("Starting TeleHealth API Boot Sequence...");
 
@@ -78,6 +79,20 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
             o => o.SetPostgresVersion(18, 0).UseNodaTime()
         )
         .UseSnakeCaseNamingConvention()
+        .UseSeeding(
+            (ctx, _) =>
+            {
+                var seeder = serviceProvider.GetRequiredService<DatabaseSeeder>();
+                seeder.SeedAsync((ApplicationDbContext)ctx).GetAwaiter().GetResult();
+            }
+        )
+        .UseAsyncSeeding(
+            async (ctx, _, ct) =>
+            {
+                var seeder = serviceProvider.GetRequiredService<DatabaseSeeder>();
+                await seeder.SeedAsync((ApplicationDbContext)ctx, ct);
+            }
+        )
 );
 
 builder.Services.AddJwtAuthentication(builder.Configuration);
