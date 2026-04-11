@@ -17,7 +17,7 @@ public static class RescheduleAppointmentEndpoint
             .MapPut(
                 $"{ApiEndpoints.Patients.UpdateAppointmentBySlug}",
                 async (
-                    [FromRoute] Guid id,
+                    [FromRoute] string slug,
                     ClaimsPrincipal user,
                     RescheduleAppointmentCommand cmd,
                     RescheduleAppointmentHandler handler,
@@ -30,7 +30,7 @@ public static class RescheduleAppointmentEndpoint
                         throw new TokenInvalidException();
                     }
 
-                    await handler.HandleAsync(publicId, id, cmd, ct);
+                    await handler.HandleAsync(publicId, slug, cmd, ct);
                     return TypedResults.NoContent();
                 }
             )

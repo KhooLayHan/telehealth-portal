@@ -2,6 +2,7 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
 using Serilog;
+using TeleHealth.Api.Common.Constants;
 using TeleHealth.Api.Common.Exceptions.Appointments;
 using TeleHealth.Api.Infrastructure.Persistence;
 using TeleHealth.Contracts;
@@ -15,7 +16,7 @@ public sealed class RescheduleAppointmentHandler(
 {
     public async Task HandleAsync(
         Guid userPublicId,
-        Guid appointmentPublicId,
+        string slug,
         RescheduleAppointmentCommand cmd,
         CancellationToken ct
     )
@@ -25,21 +26,21 @@ public sealed class RescheduleAppointmentHandler(
                 .ThenInclude(p => p.User)
             .Include(a => a.DoctorSchedule)
             .FirstOrDefaultAsync(
-                a => a.PublicId == appointmentPublicId && a.Patient.User.PublicId == userPublicId,
+                a => a.Slug == slug && a.Patient.User.PublicId == userPublicId,
                 ct
             );
 
         if (appointment is null)
         {
             Log.Warning(
-                "User ID {UserPublicId} with Appointment ID {AppointmentPublicId} was not found.",
+                "User ID {UserPublicId} with Appointment Slug {Slug} was not found.",
                 userPublicId,
-                appointmentPublicId
+                slug
             );
             throw new AppointmentNotFoundException();
         }
 
-        if (appointment.StatusId != 1)
+        if (appointment.StatusId != StatusId.Appointment.Booked)
             throw new InvalidRescheduleException();
 
         var oldSchedule = appointment.DoctorSchedule;
@@ -58,11 +59,11 @@ public sealed class RescheduleAppointmentHandler(
             throw new DoctorScheduleNotFoundException();
         }
 
-        if (newSchedule.StatusId != 1)
+        if (newSchedule.StatusId != StatusId.Schedule.Available)
             throw new ScheduleSlotUnavailableException();
 
-        oldSchedule.StatusId = 1;
-        newSchedule.StatusId = 2;
+        oldSchedule.StatusId = StatusId.Schedule.Available;
+        newSchedule.StatusId = StatusId.Schedule.Booked;
         appointment.ScheduleId = newSchedule.Id;
 
         var rescheduledEvent = new AppointmentRescheduledEvent(
