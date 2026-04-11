@@ -13,7 +13,7 @@ public static class BookAppointmentEndpoint
     public static IEndpointRouteBuilder MapBookAppointmentEndpoint(this RouteGroupBuilder app)
     {
         app.MapPost(
-                ApiEndpoints.Appointments.Book,
+                ApiEndpoints.Appointments.Create,
                 async Task<Created<BookAppointmentResponse>> (
                     BookAppointmentCommand command,
                     BookAppointmentHandler handler,
