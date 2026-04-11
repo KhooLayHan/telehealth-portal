@@ -83,6 +83,26 @@ public sealed class AppointmentAlreadyCancelledException : ConflictException
         ) { }
 }
 
+public sealed class AppointmentAlreadyTerminatedException : ConflictException
+{
+    public AppointmentAlreadyTerminatedException(string statusName)
+        : base(
+            AppointmentErrorCodes.AlreadyTerminated,
+            "Appointment Already Terminated",
+            $"This appointment cannot be modified because it is already '{statusName}'."
+        ) { }
+}
+
+public sealed class AppointmentInProgressException : ConflictException
+{
+    public AppointmentInProgressException()
+        : base(
+            AppointmentErrorCodes.InProgress,
+            "Appointment In Progress",
+            "This appointment is currently in progress and cannot be self-cancelled. Please contact the clinic."
+        ) { }
+}
+
 public sealed class ConcurrentBookingException : ConflictException
 {
     public ConcurrentBookingException()

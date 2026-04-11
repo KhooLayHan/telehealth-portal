@@ -28,6 +28,8 @@ public static class ApiEndpoints
             $"{GetProfile}/appointments/{{slug}}/reschedule";
 
         public const string DeleteAppointmentBySlug = $"{GetProfile}/appointments/{{slug}}";
+
+        public const string GetById = $"{Base}/{{id:guid}}";
     }
 
     public static class Auth

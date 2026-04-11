@@ -25,6 +25,7 @@ public sealed class CancelAppointmentHandler(
             .Appointments.Include(a => a.Patient)
                 .ThenInclude(p => p.User)
             .Include(a => a.DoctorSchedule)
+            .Include(a => a.AppointmentStatus)
             .FirstOrDefaultAsync(
                 a => a.Slug == slug && a.Patient.User.PublicId == userPublicId,
                 ct
@@ -40,12 +41,21 @@ public sealed class CancelAppointmentHandler(
             throw new AppointmentNotFoundException();
         }
 
-        // Business Rule: Cannot cancel if already completed or cancelled
-        if (appointment.StatusId == StatusId.Appointment.Completed)
-            throw new AppointmentAlreadyCompletedException();
+        if (appointment.StatusId == StatusId.Appointment.InProgress)
+        {
+            Log.Warning(
+                "User ID {UserPublicId} with Appointment Slug {Slug} was not found.",
+                userPublicId,
+                slug
+            );
+            throw new AppointmentInProgressException();
+        }
 
-        if (appointment.StatusId == StatusId.Appointment.Cancelled)
-            throw new AppointmentAlreadyCancelledException();
+        if (appointment.AppointmentStatus.IsTerminal)
+        {
+            Log.Warning("Appointment ID {AppointmentId} was terminated", appointment.PublicId);
+            throw new AppointmentAlreadyTerminatedException(appointment.AppointmentStatus.Name);
+        }
 
         appointment.StatusId = StatusId.Appointment.Cancelled;
         appointment.CancellationReason = cmd.CancellationReason;
@@ -60,9 +70,9 @@ public sealed class CancelAppointmentHandler(
             Reason: cmd.CancellationReason,
             OccurredAt: SystemClock.Instance.GetCurrentInstant()
         );
-        await publishEndpoint.Publish(cancelledEvent, ct);
 
         await db.SaveChangesAsync(ct);
+        await publishEndpoint.Publish(cancelledEvent, ct);
 
         Log.Information(
             "Cancelled Appointment {PublicId} for Patient {PatientId}. Schedule Slot {ScheduleId} is now Available.",
