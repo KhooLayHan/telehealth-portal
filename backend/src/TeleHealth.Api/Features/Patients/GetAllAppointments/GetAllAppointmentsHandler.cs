@@ -62,7 +62,7 @@ public sealed class GetAllAppointmentsHandler(ApplicationDbContext db)
         {
             var pattern = $"%{query.Search}%";
             q = q.Where(a =>
-                EF.Functions.ILike($"{a.Doctor.User.FirstName} {a.Doctor.User.LastName}", pattern)
+                EF.Functions.ILike(a.Doctor.User.FirstName + " " + a.Doctor.User.LastName, pattern)
                 || EF.Functions.ILike(a.VisitReason, pattern)
             );
         }
