@@ -200,7 +200,11 @@ internal static class SeedFakers
     // Schedules
     // ─────────────────────────────────────────────
 
-    internal static List<DoctorSchedule> BuildDoctorSchedules(List<Doctor> doctors, LocalDate today)
+    internal static List<DoctorSchedule> BuildDoctorSchedules(
+        List<Doctor> doctors,
+        LocalDate today,
+        int availableStatusId
+    )
     {
         var slots = new (LocalTime Start, LocalTime End)[]
         {
@@ -223,7 +227,7 @@ internal static class SeedFakers
                         {
                             PublicId = Guid.NewGuid(),
                             DoctorId = doctor.Id,
-                            StatusId = StatusId.Schedule.Available,
+                            StatusId = availableStatusId,
                             Date = today.PlusDays(offset),
                             StartTime = slot.Start,
                             EndTime = slot.End,
@@ -235,91 +239,144 @@ internal static class SeedFakers
 
     // ─────────────────────────────────────────────
     // Appointments
+    //
+    // Returns the new appointments AND the DoctorSchedule entities whose
+    // StatusId was mutated, so the caller can mark them modified before saving.
     // ─────────────────────────────────────────────
 
-    internal static List<Appointment> BuildAppointments(
+    internal static (
+        List<Appointment> Appointments,
+        List<DoctorSchedule> TouchedSchedules
+    ) BuildAppointments(
         Faker faker,
         List<Doctor> doctors,
         List<Patient> patients,
         List<DoctorSchedule> schedules,
-        User createdByUser
+        User createdByUser,
+        Dictionary<string, AppointmentStatus> appointmentStatuses,
+        Dictionary<string, ScheduleStatus> scheduleStatuses
     )
     {
         var now = SystemClock.Instance.GetCurrentInstant();
         var today = now.InUtc().Date;
 
+        var bookedStatusId = scheduleStatuses["booked"].Id;
+        var completedAppointmentStatusId = appointmentStatuses["completed"].Id;
+        var bookedAppointmentStatusId = appointmentStatuses["booked"].Id;
+        var cancelledAppointmentStatusId = appointmentStatuses["cancelled"].Id;
+
+        var appointments = new List<Appointment>();
+        var touchedSchedules = new List<DoctorSchedule>();
+
+        static Appointment MakeAppointment(
+            Guid publicId,
+            long patientId,
+            long doctorId,
+            long scheduleId,
+            int statusId,
+            long createdById,
+            string visitReason,
+            NodaTime.Instant? checkIn = null,
+            string? cancellationReason = null
+        ) =>
+            new()
+            {
+                PublicId = publicId,
+                Slug = $"apt-{publicId.ToString()[..8]}",
+                PatientId = patientId,
+                DoctorId = doctorId,
+                ScheduleId = scheduleId,
+                StatusId = statusId,
+                CreatedByUserId = createdById,
+                VisitReason = visitReason,
+                CheckInDateTime = checkIn,
+                CancellationReason = cancellationReason,
+            };
+
+        // Completed (past)
         var pastSchedules = schedules.Where(s => s.Date < today).Take(6).ToList();
 
+        foreach (var schedule in pastSchedules)
+        {
+            var publicId = Guid.NewGuid();
+            appointments.Add(
+                MakeAppointment(
+                    publicId,
+                    faker.PickRandom(patients).Id,
+                    doctors.First(d => d.Id == schedule.DoctorId).Id,
+                    schedule.Id,
+                    completedAppointmentStatusId,
+                    createdByUser.Id,
+                    faker.PickRandom(
+                        "Routine checkup",
+                        "Follow-up visit",
+                        "Chest pain",
+                        "Fever and cough",
+                        "Skin rash"
+                    ),
+                    checkIn: now.Minus(NodaTime.Duration.FromDays(faker.Random.Int(1, 3)))
+                )
+            );
+
+            // Sync: completed slot was booked before it ran
+            schedule.StatusId = bookedStatusId;
+            touchedSchedules.Add(schedule);
+        }
+
+        // Upcoming (booked)
         var upcomingSchedules = schedules.Where(s => s.Date > today).Take(4).ToList();
 
+        foreach (var schedule in upcomingSchedules)
+        {
+            var publicId = Guid.NewGuid();
+            appointments.Add(
+                MakeAppointment(
+                    publicId,
+                    faker.PickRandom(patients).Id,
+                    doctors.First(d => d.Id == schedule.DoctorId).Id,
+                    schedule.Id,
+                    bookedAppointmentStatusId,
+                    createdByUser.Id,
+                    faker.PickRandom(
+                        "Annual health screening",
+                        "Blood pressure review",
+                        "Diabetes follow-up",
+                        "Vaccination"
+                    )
+                )
+            );
+
+            schedule.StatusId = bookedStatusId;
+            touchedSchedules.Add(schedule);
+        }
+
+        // Cancelled
         var cancelledSchedule = schedules
             .Where(s => s.Date >= today)
             .Skip(upcomingSchedules.Count)
             .FirstOrDefault();
 
-        var completed = pastSchedules.Select(schedule =>
+        if (cancelledSchedule is not null)
         {
             var publicId = Guid.NewGuid();
-            return new Appointment
-            {
-                PublicId = publicId,
-                Slug = $"apt-{publicId.ToString()[..8]}",
-                PatientId = faker.PickRandom(patients).Id,
-                DoctorId = doctors.First(d => d.Id == schedule.DoctorId).Id,
-                ScheduleId = schedule.Id,
-                StatusId = StatusId.Appointment.Completed,
-                CreatedByUserId = createdByUser.Id,
-                VisitReason = faker.PickRandom(
-                    "Routine checkup",
-                    "Follow-up visit",
-                    "Chest pain",
-                    "Fever and cough",
-                    "Skin rash"
-                ),
-                CheckInDateTime = now.Minus(Duration.FromDays(faker.Random.Int(1, 3))),
-            };
-        });
+            appointments.Add(
+                MakeAppointment(
+                    publicId,
+                    faker.PickRandom(patients).Id,
+                    doctors.First(d => d.Id == cancelledSchedule.DoctorId).Id,
+                    cancelledSchedule.Id,
+                    cancelledAppointmentStatusId,
+                    createdByUser.Id,
+                    "General consultation",
+                    cancellationReason: "Patient requested cancellation"
+                )
+            );
 
-        var upcoming = upcomingSchedules.Select(schedule =>
-        {
-            var publicId = Guid.NewGuid();
-            return new Appointment
-            {
-                PublicId = publicId,
-                Slug = $"apt-{publicId.ToString()[..8]}",
-                PatientId = faker.PickRandom(patients).Id,
-                DoctorId = doctors.First(d => d.Id == schedule.DoctorId).Id,
-                ScheduleId = schedule.Id,
-                StatusId = StatusId.Appointment.Booked,
-                CreatedByUserId = createdByUser.Id,
-                VisitReason = faker.PickRandom(
-                    "Annual health screening",
-                    "Blood pressure review",
-                    "Diabetes follow-up",
-                    "Vaccination"
-                ),
-            };
-        });
+            // Cancelled appointment: the slot reverts to available — no status change needed
+            // (schedule already seeded as available, so we deliberately skip touching it here)
+        }
 
-        var cancelled = cancelledSchedule is null
-            ? []
-            : new[]
-            {
-                new Appointment
-                {
-                    PublicId = Guid.NewGuid(),
-                    Slug = $"apt-{Guid.NewGuid().ToString()[..8]}",
-                    PatientId = faker.PickRandom(patients).Id,
-                    DoctorId = doctors.First(d => d.Id == cancelledSchedule.DoctorId).Id,
-                    ScheduleId = cancelledSchedule.Id,
-                    StatusId = StatusId.Appointment.Cancelled,
-                    CreatedByUserId = createdByUser.Id,
-                    VisitReason = "General consultation",
-                    CancellationReason = "Patient requested cancellation",
-                },
-            };
-
-        return [.. completed, .. upcoming, .. cancelled];
+        return (appointments, touchedSchedules);
     }
 
     // ─────────────────────────────────────────────
