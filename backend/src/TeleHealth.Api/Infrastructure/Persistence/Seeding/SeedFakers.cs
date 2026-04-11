@@ -141,7 +141,7 @@ internal static class SeedFakers
                     .RuleFor(u => u.PublicId, publicId)
                     .RuleFor(u => u.Slug, slugHelper.GenerateSlug($"pt-{shortId}"))
                     .RuleFor(u => u.Email, $"patient{i}@test.com")
-                    .RuleFor(u => u.Username, (_, u) => u.Username)
+                    .RuleFor(u => u.Username, (_, u) => u.Email)
                     .RuleFor(u => u.FirstName, f => f.Name.FirstName())
                     .RuleFor(u => u.LastName, f => f.Name.LastName())
                     .RuleFor(u => u.Gender, f => f.PickRandom('M', 'F'))
