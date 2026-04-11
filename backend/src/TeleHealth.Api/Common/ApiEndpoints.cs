@@ -12,9 +12,13 @@ public static class ApiEndpoints
 
         public const string Create = Base;
 
-        public const string Me = $"{Base}/me";
+        private const string Me = $"{Base}/me";
 
-        public const string MedicalRecord = $"{Me}/medical-record";
+        public const string GetProfile = Me;
+
+        public const string UpdateMedicalRecord = $"{GetProfile}/medical-record";
+
+        public const string GetAllAppointments = $"{GetProfile}/appointments";
 
         public const string GetById = $"{Base}/{{id:guid}}";
     }

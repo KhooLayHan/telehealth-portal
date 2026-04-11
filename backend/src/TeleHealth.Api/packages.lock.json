@@ -109,6 +109,12 @@
           "Microsoft.EntityFrameworkCore": "10.0.0"
         }
       },
+      "Facet.Mapping": {
+        "type": "Direct",
+        "requested": "[6.0.1, )",
+        "resolved": "6.0.1",
+        "contentHash": "Wcfk7PSr3GG9F8/s0QsXeVrvT7EIaMAA6r4X+zbMk/uFEZKbCmB7cJePdrc4EvcHfQhqwAiGqhkXJsOVjGDjRg=="
+      },
       "FluentValidation": {
         "type": "Direct",
         "requested": "[12.1.1, )",
