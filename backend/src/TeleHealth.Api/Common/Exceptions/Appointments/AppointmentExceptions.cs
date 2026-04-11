@@ -5,7 +5,7 @@ namespace TeleHealth.Api.Common.Exceptions.Appointments;
 
 public sealed class AppointmentNotFoundException : NotFoundException
 {
-    public AppointmentNotFoundException(string appointmentId)
+    public AppointmentNotFoundException()
         : base(
             AppointmentErrorCodes.NotFound,
             "Appointment Not Found",

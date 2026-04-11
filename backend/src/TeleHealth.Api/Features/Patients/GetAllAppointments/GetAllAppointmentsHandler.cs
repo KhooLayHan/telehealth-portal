@@ -1,6 +1,8 @@
+using Facet.Extensions;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
 using TeleHealth.Api.Common.Models;
+using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Infrastructure.Persistence;
 
 namespace TeleHealth.Api.Features.Patients.GetAllAppointments;
@@ -65,7 +67,8 @@ public sealed class GetAllAppointmentsHandler(ApplicationDbContext db)
 
         var items = await q.Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .Select(AppointmentDto.Projection)
+            // .Select(AppointmentDto.Projection)
+            .SelectFacet<Appointment, AppointmentDto>()
             .ToListAsync(ct);
 
         return new PagedResult<AppointmentDto>(items, totalCount, page, pageSize);
