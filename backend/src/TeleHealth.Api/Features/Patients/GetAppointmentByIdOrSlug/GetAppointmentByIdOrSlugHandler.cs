@@ -6,9 +6,9 @@ using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Features.Patients.GetAllAppointments;
 using TeleHealth.Api.Infrastructure.Persistence;
 
-namespace TeleHealth.Api.Features.Patients.GetAppointmentById;
+namespace TeleHealth.Api.Features.Patients.GetAppointmentByIdOrSlug;
 
-public sealed class GetAppointmentByIdHandler(ApplicationDbContext db)
+public sealed class GetAppointmentByIdOrSlugHandler(ApplicationDbContext db)
 {
     public async Task<AppointmentDto> HandleAsync(
         Guid userPublicId,

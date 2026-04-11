@@ -2,15 +2,14 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Http.HttpResults;
 using TeleHealth.Api.Common;
 using TeleHealth.Api.Common.Exceptions.Auth;
-using TeleHealth.Api.Common.Models;
 using TeleHealth.Api.Common.Security;
 using TeleHealth.Api.Features.Patients.GetAllAppointments;
 
-namespace TeleHealth.Api.Features.Patients.GetAppointmentById;
+namespace TeleHealth.Api.Features.Patients.GetAppointmentByIdOrSlug;
 
-public static class GetAppointmentByIdEndpoint
+public static class GetAppointmentByIdOrSlugEndpoint
 {
-    public static void MapGetAppointmentByIdEndpoint(this RouteGroupBuilder group)
+    public static void MapGetAppointmentByIdOrSlugEndpoint(this RouteGroupBuilder group)
     {
         group
             .MapGet(
@@ -18,7 +17,7 @@ public static class GetAppointmentByIdEndpoint
                 async Task<Ok<AppointmentDto>> (
                     string idOrSlug,
                     ClaimsPrincipal user,
-                    GetAppointmentByIdHandler handler,
+                    GetAppointmentByIdOrSlugHandler idOrSlugHandler,
                     CancellationToken ct
                 ) =>
                 {
@@ -28,7 +27,7 @@ public static class GetAppointmentByIdEndpoint
                         throw new TokenInvalidException();
                     }
 
-                    var appointments = await handler.HandleAsync(publicId, idOrSlug, ct);
+                    var appointments = await idOrSlugHandler.HandleAsync(publicId, idOrSlug, ct);
                     return TypedResults.Ok(appointments);
                 }
             )
