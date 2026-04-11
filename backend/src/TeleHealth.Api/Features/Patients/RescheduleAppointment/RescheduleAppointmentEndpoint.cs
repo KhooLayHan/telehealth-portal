@@ -39,6 +39,7 @@ public static class RescheduleAppointmentEndpoint
             .RequireAuthorization(AuthConstants.PatientPolicy)
             .ProducesProblem(StatusCodes.Status422UnprocessableEntity)
             .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status409Conflict)
             .AddEndpointFilter<ValidationFilter<RescheduleAppointmentCommand>>();
     }
 }
