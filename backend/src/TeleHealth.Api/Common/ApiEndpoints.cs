@@ -27,6 +27,8 @@ public static class ApiEndpoints
         public const string UpdateAppointmentBySlug =
             $"{GetProfile}/appointments/{{slug}}/reschedule";
 
+        public const string DeleteAppointmentBySlug = $"{GetProfile}/appointments/{{slug}}";
+
         public const string GetById = $"{Base}/{{id:guid}}";
     }
 

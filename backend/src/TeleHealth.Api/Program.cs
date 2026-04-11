@@ -12,6 +12,7 @@ using TeleHealth.Api.Common.Extensions;
 using TeleHealth.Api.Common.Security;
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Features.Appointments.Book;
+using TeleHealth.Api.Features.Patients.CancelAppointment;
 using TeleHealth.Api.Features.Patients.GetAllAppointments;
 using TeleHealth.Api.Features.Patients.GetAppointmentByIdOrSlug;
 using TeleHealth.Api.Features.Patients.GetProfile;
@@ -99,6 +100,7 @@ builder.Services.AddScoped<BookAppointmentHandler>();
 builder.Services.AddScoped<GetAllAppointmentsHandler>();
 builder.Services.AddScoped<GetAppointmentByIdOrSlugHandler>();
 builder.Services.AddScoped<RescheduleAppointmentHandler>();
+builder.Services.AddScoped<CancelAppointmentHandler>();
 
 builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonS3>();
@@ -143,6 +145,7 @@ api.MapGetMeEndpoint();
 api.MapGetAllAppointmentsEndpoint();
 api.MapGetAppointmentByIdOrSlugEndpoint();
 api.MapRescheduleAppointmentEndpoint();
+api.MapCancelAppointmentEndpoint();
 
 app.UseSerilogRequestLogging();
 
