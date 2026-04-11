@@ -57,6 +57,7 @@ internal static class SeedFakers
                 var publicId = Guid.NewGuid();
                 var firstName = faker.Name.FirstName();
                 var lastName = faker.Name.LastName();
+                var username = $"dr.{firstName.ToLowerInvariant()}.{lastName.ToLowerInvariant()}";
                 var shortId = publicId.ToString()[..8];
 
                 var user = new Faker<User>("en")
@@ -69,7 +70,7 @@ internal static class SeedFakers
                         u => u.Email,
                         $"dr.{firstName.ToLowerInvariant()}-{lastName.ToLowerInvariant()}@telehealth.com"
                     )
-                    .RuleFor(u => u.Username, (_, u) => u.Username)
+                    .RuleFor(u => u.Username, username)
                     .RuleFor(u => u.FirstName, firstName)
                     .RuleFor(u => u.LastName, lastName)
                     .RuleFor(u => u.Gender, f => f.PickRandom('M', 'F'))
