@@ -1,5 +1,3 @@
-using NodaTime;
-
 namespace TeleHealth.Api.Features.Patients.GetAllAppointments;
 
 public sealed record GetAllAppointmentsQuery(
@@ -7,8 +5,8 @@ public sealed record GetAllAppointmentsQuery(
     string? Status,
     string? Search,
     Guid? DoctorId,
-    LocalDate? From,
-    LocalDate? To,
+    string? From,
+    string? To,
     int Page = 1,
     int PageSize = 10,
     string? SortOrder = "asc"
