@@ -1,6 +1,7 @@
 using Facet.Extensions;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
+using Serilog;
 using TeleHealth.Api.Common.Models;
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Infrastructure.Persistence;
@@ -71,6 +72,7 @@ public sealed class GetAllAppointmentsHandler(ApplicationDbContext db)
             .SelectFacet<Appointment, AppointmentDto>()
             .ToListAsync(ct);
 
+        Log.Information("All appointments found.");
         return new PagedResult<AppointmentDto>(items, totalCount, page, pageSize);
     }
 }
