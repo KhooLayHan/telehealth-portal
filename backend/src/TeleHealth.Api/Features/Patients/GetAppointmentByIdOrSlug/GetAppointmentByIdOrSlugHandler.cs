@@ -28,7 +28,8 @@ public sealed class GetAppointmentByIdOrSlugHandler(ApplicationDbContext db)
             return appointmentBySlug;
         }
 
-        if (Guid.TryParse(idOrSlug, out var appointmentPublicId))
+        var parsedAsGuid = Guid.TryParse(idOrSlug, out var appointmentPublicId);
+        if (parsedAsGuid)
         {
             var appointmentById = await db
                 .Appointments.AsNoTracking()
@@ -48,7 +49,11 @@ public sealed class GetAppointmentByIdOrSlugHandler(ApplicationDbContext db)
             }
         }
 
-        Log.Warning("Appointment not found. AppointmentId: {AppointmentId}", appointmentPublicId);
+        Log.Warning(
+            "Appointment not found. LookupKey: {LookupKey}, AppointmentId: {AppointmentId}",
+            idOrSlug,
+            parsedAsGuid ? appointmentPublicId : (Guid?)null
+        );
         throw new AppointmentNotFoundException();
     }
 }

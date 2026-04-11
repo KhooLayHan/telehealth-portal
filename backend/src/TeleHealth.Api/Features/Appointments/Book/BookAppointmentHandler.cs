@@ -63,7 +63,7 @@ public sealed class BookAppointmentHandler(
             if (schedule is null)
             {
                 await transaction.RollbackAsync(ct);
-                throw new DoctorScheduleNotFoundException(cmd.SchedulePublicId.ToString());
+                throw new DoctorScheduleNotFoundException();
             }
 
             if (schedule.StatusId != availableScheduleStatus.Id)
