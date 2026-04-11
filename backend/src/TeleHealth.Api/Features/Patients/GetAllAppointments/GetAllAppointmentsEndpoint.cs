@@ -31,8 +31,8 @@ public static class GetAllAppointmentsEndpoint
                     return TypedResults.Ok(appointments);
                 }
             )
-            .WithName("GetMyAppointments")
-            .WithTags("Patients")
+            .WithName(nameof(ApiEndpoints.Patients.GetAllAppointments))
+            .WithTags(nameof(ApiEndpoints.Patients))
             .RequireAuthorization(AuthConstants.PatientPolicy)
             .ProducesProblem(StatusCodes.Status401Unauthorized);
     }

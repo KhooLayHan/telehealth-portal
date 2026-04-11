@@ -1,7 +1,6 @@
 using Amazon.S3;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
 using NodaTime.Serialization.SystemTextJson;
@@ -9,14 +8,14 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Scalar.AspNetCore;
 using Serilog;
-using TeleHealth.Api.Common;
 using TeleHealth.Api.Common.Extensions;
 using TeleHealth.Api.Common.Security;
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Features.Appointments.Book;
 using TeleHealth.Api.Features.Patients.GetAllAppointments;
-using TeleHealth.Api.Features.Patients.GetAppointmentById;
+using TeleHealth.Api.Features.Patients.GetAppointmentByIdOrSlug;
 using TeleHealth.Api.Features.Patients.GetProfile;
+using TeleHealth.Api.Features.Patients.RescheduleAppointment;
 using TeleHealth.Api.Features.Patients.UpdateMedicalRecord;
 using TeleHealth.Api.Features.Users.Create;
 using TeleHealth.Api.Features.Users.GetMe;
@@ -98,7 +97,8 @@ builder.Services.AddScoped<GetProfileHandler>();
 builder.Services.AddScoped<UpdateMedicalRecordHandler>();
 builder.Services.AddScoped<BookAppointmentHandler>();
 builder.Services.AddScoped<GetAllAppointmentsHandler>();
-builder.Services.AddScoped<GetAppointmentByIdHandler>();
+builder.Services.AddScoped<GetAppointmentByIdOrSlugHandler>();
+builder.Services.AddScoped<RescheduleAppointmentHandler>();
 
 builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonS3>();
@@ -141,7 +141,8 @@ api.MapUpdateMedicalRecordEndpoint();
 api.MapBookAppointmentEndpoint();
 api.MapGetMeEndpoint();
 api.MapGetAllAppointmentsEndpoint();
-api.MapGetAppointmentByIdEndpoint();
+api.MapGetAppointmentByIdOrSlugEndpoint();
+api.MapRescheduleAppointmentEndpoint();
 
 app.UseSerilogRequestLogging();
 
