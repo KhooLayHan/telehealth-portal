@@ -15,7 +15,7 @@ public sealed class AppointmentNotFoundException : NotFoundException
 
 public sealed class DoctorScheduleNotFoundException : NotFoundException
 {
-    public DoctorScheduleNotFoundException(string scheduleId)
+    public DoctorScheduleNotFoundException()
         : base(
             AppointmentErrorCodes.ScheduleNotFound,
             "Schedule Not Found",
