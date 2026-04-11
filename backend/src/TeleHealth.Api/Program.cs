@@ -72,6 +72,8 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
 });
 
+builder.Services.AddScoped<DatabaseSeeder>();
+
 builder.Services.AddDbContext<ApplicationDbContext>(
     (serviceProvider, options) =>
     {
