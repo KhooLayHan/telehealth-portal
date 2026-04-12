@@ -1,5 +1,3 @@
-// src/features/appointments/PatientAppointmentsList.tsx
-
 import {
   createColumnHelper,
   flexRender,
@@ -9,12 +7,10 @@ import {
 import { Calendar, ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import { useState } from "react";
 
-// Import your generated Orval hook and DTO!
-// (Adjust path based on your exact Orval output)
 import { useGetAllAppointments } from "@/api/generated/patients/patients";
 import type { AppointmentDto } from "@/api/model/AppointmentDto";
+
 import { Button } from "@/components/ui/button";
-// shadcn/ui components
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -26,24 +22,30 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// 1. Define the Columns using TanStack Table's Column Helper
+type AppointmentView = "upcoming" | "past";
+
+const PAGE_SIZE = 5;
+
 const columnHelper = createColumnHelper<AppointmentDto>();
 
 const columns = [
   columnHelper.accessor("doctorName", {
     header: "Doctor",
-    cell: (info) => (
-      <div className="flex items-center gap-3">
-        {/* Simple Tailwind Avatar */}
-        <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold text-xs">
-          {info.getValue().charAt(4)} {/* Grabs the first initial after "Dr. " */}
+    cell: (info) => {
+      const name = info.getValue();
+      const initial = name.split(" ").at(-1)?.charAt(0) ?? "?";
+      return (
+        <div className="flex items-center gap-3">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold text-xs">
+            {initial}
+          </div>
+          <div>
+            <div className="font-medium text-sm">{name}</div>
+            <div className="text-xs text-muted-foreground">{info.row.original.specialization}</div>
+          </div>
         </div>
-        <div>
-          <div className="font-medium text-sm">{info.getValue()}</div>
-          <div className="text-xs text-muted-foreground">{info.row.original.specialization}</div>
-        </div>
-      </div>
-    ),
+      );
+    },
   }),
   columnHelper.accessor("date", {
     header: "Date",
@@ -66,10 +68,11 @@ const columns = [
   columnHelper.accessor("status", {
     header: "Status",
     cell: (info) => (
-      // Custom pill badge using dynamic inline styles for the DB color code
       <span
         className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold text-white shadow-sm"
-        style={{ backgroundColor: info.row.original.statusColorCode || "#6B7280" }}
+        style={{
+          backgroundColor: info.row.original.statusColorCode ?? "#6B7280",
+        }}
       >
         {info.getValue()}
       </span>
@@ -88,12 +91,12 @@ const columns = [
   }),
 ];
 
-export function PatientAppointmentsList() {
-  // Local state for pagination and filtering
-  const [page, setPage] = useState(1);
-  const [view, setView] = useState<"upcoming" | "past">("upcoming");
+const columnCount = columns.length;
 
-  // 2. Fetch the data from ASP.NET via Orval!
+export function PatientAppointmentsList() {
+  const [page, setPage] = useState(1);
+  const [view, setView] = useState<AppointmentView>("upcoming");
+
   const {
     data: pagedResult,
     isLoading,
@@ -101,10 +104,14 @@ export function PatientAppointmentsList() {
   } = useGetAllAppointments({
     view,
     page,
-    pageSize: 5, // Keep it small to easily test pagination
+    pageSize: PAGE_SIZE,
   });
 
-  // 3. Initialize TanStack Table
+  const handleViewChange = (v: string) => {
+    setView(v as AppointmentView);
+    setPage(1);
+  };
+
   const table = useReactTable({
     data: pagedResult?.items ?? [],
     columns,
@@ -119,15 +126,7 @@ export function PatientAppointmentsList() {
           <CardDescription>View and manage your clinical visits.</CardDescription>
         </div>
 
-        {/* shadcn Tabs for Filtering */}
-        <Tabs
-          value={view}
-          onValueChange={(v) => {
-            setView(v as any);
-            setPage(1);
-          }}
-          className="w-[200px]"
-        >
+        <Tabs value={view} onValueChange={handleViewChange} className="w-50">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
             <TabsTrigger value="past">Past</TabsTrigger>
@@ -142,7 +141,6 @@ export function PatientAppointmentsList() {
           </div>
         ) : (
           <div className="space-y-4">
-            {/* shadcn Table Component */}
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
@@ -161,11 +159,11 @@ export function PatientAppointmentsList() {
                 <TableBody>
                   {isLoading ? (
                     <TableRow>
-                      <TableCell colSpan={columns.length} className="h-24 text-center">
+                      <TableCell colSpan={columnCount} className="h-24 text-center">
                         Loading appointments...
                       </TableCell>
                     </TableRow>
-                  ) : table.getRowModel().rows?.length ? (
+                  ) : table.getRowModel().rows.length > 0 ? (
                     table.getRowModel().rows.map((row) => (
                       <TableRow key={row.id}>
                         {row.getVisibleCells().map((cell) => (
@@ -178,7 +176,7 @@ export function PatientAppointmentsList() {
                   ) : (
                     <TableRow>
                       <TableCell
-                        colSpan={columns.length}
+                        colSpan={columnCount}
                         className="h-24 text-center text-muted-foreground"
                       >
                         No {view} appointments found.
@@ -189,11 +187,14 @@ export function PatientAppointmentsList() {
               </Table>
             </div>
 
-            {/* Pagination Controls */}
             <div className="flex items-center justify-between px-2">
-              <div className="text-sm text-muted-foreground">
-                Showing page {pagedResult?.page || 1} of {pagedResult?.totalPages || 1}
-              </div>
+              {pagedResult ? (
+                <div className="text-sm text-muted-foreground">
+                  Showing page {pagedResult.page} of {pagedResult.totalPages}
+                </div>
+              ) : (
+                <div />
+              )}
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
