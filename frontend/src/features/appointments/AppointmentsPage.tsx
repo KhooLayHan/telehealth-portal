@@ -137,7 +137,6 @@ export function AppointmentsPage() {
         {/* Page content */}
         <main className="flex-1 overflow-y-auto p-6">
           <div className="mb-6">
-            <Breadcrumb>
               <Breadcrumb>
                 <BreadcrumbList>
                   <BreadcrumbItem>
@@ -148,7 +147,6 @@ export function AppointmentsPage() {
                     <BreadcrumbPage>Appointments</BreadcrumbPage>
                   </BreadcrumbItem>
                 </BreadcrumbList>
-              </Breadcrumb>
             </Breadcrumb>
             <p className="mt-0.5 text-muted-foreground text-sm">
               View and manage all scheduled appointments in one place
