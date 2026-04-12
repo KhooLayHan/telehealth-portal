@@ -58,5 +58,7 @@
   "[csharp]": {
     "editor.defaultFormatter": "csharpier.csharpier-vscode",
     "editor.formatOnSave": true
-  }
+  },
+  "zenMode.hideLineNumbers": false,
+  "editor.lineNumbers": "relative"
 }

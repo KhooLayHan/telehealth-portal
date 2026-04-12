@@ -10,7 +10,10 @@
     "format": "bun run --cwd frontend fix && bun run --cwd backend format",
     "test": "bun run --cwd frontend test && bun run --cwd backend test",
     "lefthook": "lefthook install",
-    "fix": "ultracite fix"
+    "fix": "ultracite fix",
+    "docker:up": "docker compose -f docker/docker-compose.yml --env-file .env up -d",
+    "docker:build": "docker compose -f docker/docker-compose.yml --env-file .env up --build",
+    "docker:down": "docker compose -f docker/docker-compose.yml --env-file .env down -v"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.5",
