@@ -3,7 +3,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { Eye, EyeOff, Heart } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
-import { useLoginUser } from "@/api/generated/authentication/authentication";
+import { useLogin } from "@/api/generated/auth/auth";
 import { getMe } from "@/api/generated/users/users";
 import type { ApiError } from "@/api/ofetch-mutator";
 import { Button } from "@/components/ui/button";
@@ -35,7 +35,7 @@ export function LoginForm() {
   const [globalError, setGlobalError] = useState<string | null>(null);
 
   // TanStack Query Mutation
-  const loginMutation = useLoginUser();
+  const loginMutation = useLogin();
 
   const form = useForm({
     defaultValues: {

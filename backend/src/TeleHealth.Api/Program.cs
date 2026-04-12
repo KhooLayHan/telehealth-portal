@@ -62,6 +62,12 @@ builder.Services.AddOpenApi(options =>
                 schema.Format = "date";
             }
 
+            if (context.JsonTypeInfo.Type == typeof(LocalTime))
+            {
+                schema.Type = Microsoft.OpenApi.JsonSchemaType.String;
+                schema.Format = "time";
+            }
+
             return Task.CompletedTask;
         }
     );
