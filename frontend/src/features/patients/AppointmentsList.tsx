@@ -32,7 +32,7 @@ const columns = [
   columnHelper.accessor("doctorName", {
     header: "Doctor",
     cell: (info) => {
-      const name = info.getValue();
+      const name = info.getValue() ?? "Unknown";
       const initial = name.split(" ").at(-1)?.charAt(0) ?? "?";
       return (
         <div className="flex items-center gap-3">
@@ -82,7 +82,7 @@ const columns = [
     header: "Reason",
     cell: (info) => (
       <span
-        className="truncate max-w-[150px] inline-block text-sm text-muted-foreground"
+        className="truncate max-w-37.5 inline-block text-sm text-muted-foreground"
         title={info.getValue()}
       >
         {info.getValue()}
@@ -98,14 +98,16 @@ export function PatientAppointmentsList() {
   const [view, setView] = useState<AppointmentView>("upcoming");
 
   const {
-    data: pagedResult,
+    data: response,
     isLoading,
     isError,
   } = useGetAllAppointments({
-    view,
-    page,
-    pageSize: PAGE_SIZE,
+    View: view,
+    Page: page,
+    PageSize: PAGE_SIZE,
   });
+
+  const pagedResult = response?.status === 200 ? response.data : undefined;
 
   const handleViewChange = (v: string) => {
     setView(v as AppointmentView);
