@@ -3,7 +3,6 @@ using Amazon.S3;
 using FluentValidation;
 
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
 
 using NodaTime;
@@ -24,8 +23,9 @@ using TeleHealth.Api.Features.Appointments.Book;
 using TeleHealth.Api.Features.Appointments.GetAllAppointments;
 using TeleHealth.Api.Features.Appointments.GetAppointmentsById;
 using TeleHealth.Api.Features.Patients.GetAllAppointments;
-using TeleHealth.Api.Features.Patients.GetAppointmentById;
+using TeleHealth.Api.Features.Patients.GetAppointmentByIdOrSlug;
 using TeleHealth.Api.Features.Patients.GetProfile;
+using TeleHealth.Api.Features.Patients.RescheduleAppointment;
 using TeleHealth.Api.Features.Patients.UpdateMedicalRecord;
 using TeleHealth.Api.Features.Users.Create;
 using TeleHealth.Api.Features.Users.GetMe;
@@ -33,6 +33,7 @@ using TeleHealth.Api.Features.Users.Login;
 using TeleHealth.Api.Features.Users.Register;
 using TeleHealth.Api.Infrastructure.Aws;
 using TeleHealth.Api.Infrastructure.Persistence;
+using TeleHealth.Api.Infrastructure.Persistence.Seeding;
 
 Log.Information("Starting TeleHealth API Boot Sequence...");
 
@@ -80,13 +81,40 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
 });
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options
-        .UseNpgsql(
-            builder.Configuration.GetConnectionString("Database"),
-            o => o.SetPostgresVersion(18, 0).UseNodaTime()
+builder.Services.AddScoped<DatabaseSeeder>();
+
+builder.Services.AddDbContext<ApplicationDbContext>(
+    (serviceProvider, options) =>
+    {
+        options
+            .UseNpgsql(
+                builder.Configuration.GetConnectionString("Database"),
+                o => o.SetPostgresVersion(18, 0).UseNodaTime()
+            )
+            .UseSnakeCaseNamingConvention();
+
+        if (
+            builder.Environment.IsDevelopment()
+            || builder.Configuration.GetValue<bool>("Seed:EnableOnStartup")
         )
-        .UseSnakeCaseNamingConvention()
+        {
+            options
+                .UseSeeding(
+                    (ctx, _) =>
+                    {
+                        var seeder = serviceProvider.GetRequiredService<DatabaseSeeder>();
+                        seeder.SeedAsync((ApplicationDbContext)ctx).GetAwaiter().GetResult();
+                    }
+                )
+                .UseAsyncSeeding(
+                    async (ctx, _, ct) =>
+                    {
+                        var seeder = serviceProvider.GetRequiredService<DatabaseSeeder>();
+                        await seeder.SeedAsync((ApplicationDbContext)ctx, ct);
+                    }
+                );
+        }
+    }
 );
 
 builder.Services.AddJwtAuthentication(builder.Configuration);

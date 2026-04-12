@@ -9,8 +9,8 @@ public sealed class Appointment
     public required string Slug { get; init; }
     public required long PatientId { get; init; }
     public required long DoctorId { get; init; }
-    public required long ScheduleId { get; init; }
-    public required int StatusId { get; init; }
+    public required long ScheduleId { get; set; }
+    public required int StatusId { get; set; }
     public required long CreatedByUserId { get; init; }
     public required string VisitReason { get; set; }
     public List<Symptom>? Symptoms { get; set; }

@@ -1,23 +1,26 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using TeleHealth.Api.Common;
 using TeleHealth.Api.Common.Exceptions.Auth;
 using TeleHealth.Api.Common.Security;
 using TeleHealth.Api.Features.Patients.GetProfile;
+using TeleHealth.Api.Features.Patients.UpdateMedicalRecord;
 
-namespace TeleHealth.Api.Features.Patients.UpdateMedicalRecord;
+namespace TeleHealth.Api.Features.Patients.RescheduleAppointment;
 
-public static class UpdateMedicalRecordEndpoint
+public static class RescheduleAppointmentEndpoint
 {
-    public static void MapUpdateMedicalRecordEndpoint(this RouteGroupBuilder group)
+    public static void MapRescheduleAppointmentEndpoint(this RouteGroupBuilder group)
     {
         group
             .MapPut(
-                $"{ApiEndpoints.Patients.UpdateMedicalRecord}",
-                async Task<Ok<PatientProfileDto>> (
+                $"{ApiEndpoints.Patients.UpdateAppointmentBySlug}",
+                async (
+                    [FromRoute] string slug,
                     ClaimsPrincipal user,
-                    UpdateMedicalRecordCommand cmd,
-                    UpdateMedicalRecordHandler handler,
+                    RescheduleAppointmentCommand cmd,
+                    RescheduleAppointmentHandler handler,
                     CancellationToken ct
                 ) =>
                 {
@@ -27,16 +30,16 @@ public static class UpdateMedicalRecordEndpoint
                         throw new TokenInvalidException();
                     }
 
-                    var updatedProfile = await handler.HandleAsync(publicId, cmd, ct);
-
-                    return TypedResults.Ok(updatedProfile);
+                    await handler.HandleAsync(publicId, slug, cmd, ct);
+                    return TypedResults.NoContent();
                 }
             )
-            .WithName(nameof(ApiEndpoints.Patients.UpdateMedicalRecord))
+            .WithName(nameof(ApiEndpoints.Patients.UpdateAppointmentBySlug))
             .WithTags(nameof(ApiEndpoints.Patients))
             .RequireAuthorization(AuthConstants.PatientPolicy)
             .ProducesProblem(StatusCodes.Status422UnprocessableEntity)
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .AddEndpointFilter<ValidationFilter<UpdateMedicalRecordCommand>>();
+            .ProducesProblem(StatusCodes.Status409Conflict)
+            .AddEndpointFilter<ValidationFilter<RescheduleAppointmentCommand>>();
     }
 }

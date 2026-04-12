@@ -21,8 +21,8 @@ public static class LoginEndpoint
                     return TypedResults.Ok(new { Message = "Login successful" });
                 }
             )
-            .WithName("LoginUser")
-            .WithTags("Authentication")
+            .WithName(nameof(ApiEndpoints.Auth.Login))
+            .WithTags(nameof(ApiEndpoints.Auth))
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .AddEndpointFilter<ValidationFilter<LoginCommand>>();
     }

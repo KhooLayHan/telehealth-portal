@@ -5,8 +5,8 @@ public sealed record GetAllAppointmentsQuery(
     string? Status,
     string? Search,
     Guid? DoctorId,
-    DateOnly? From,
-    DateOnly? To,
+    string? From,
+    string? To,
     int Page = 1,
     int PageSize = 10,
     string? SortOrder = "asc"

@@ -15,7 +15,7 @@ public sealed class AppointmentNotFoundException : NotFoundException
 
 public sealed class DoctorScheduleNotFoundException : NotFoundException
 {
-    public DoctorScheduleNotFoundException(string scheduleId)
+    public DoctorScheduleNotFoundException()
         : base(
             AppointmentErrorCodes.ScheduleNotFound,
             "Schedule Not Found",
@@ -80,6 +80,26 @@ public sealed class AppointmentAlreadyCancelledException : ConflictException
             AppointmentErrorCodes.AlreadyCancelled,
             "Appointment Already Cancelled",
             "This appointment has already been cancelled."
+        ) { }
+}
+
+public sealed class AppointmentAlreadyTerminatedException : ConflictException
+{
+    public AppointmentAlreadyTerminatedException(string statusName)
+        : base(
+            AppointmentErrorCodes.AlreadyTerminated,
+            "Appointment Already Terminated",
+            $"This appointment cannot be modified because it is already '{statusName}'."
+        ) { }
+}
+
+public sealed class AppointmentInProgressException : ConflictException
+{
+    public AppointmentInProgressException()
+        : base(
+            AppointmentErrorCodes.InProgress,
+            "Appointment In Progress",
+            "This appointment is currently in progress and cannot be self-cancelled. Please contact the clinic."
         ) { }
 }
 

@@ -8,6 +8,8 @@ public static class AppointmentErrorCodes
     public const string ScheduleUnavailable = "Appointment.ScheduleUnavailable";
     public const string TimeConflict = "Appointment.TimeConflict";
     public const string ScheduleExpired = "Appointment.ScheduleExpired";
+    public const string InProgress = "Appointment.InProgress";
+    public const string AlreadyTerminated = "Appointment.AlreadyTerminated";
     public const string AlreadyCompleted = "Appointment.AlreadyCompleted";
     public const string AlreadyCancelled = "Appointment.AlreadyCancelled";
     public const string ConcurrentModification = "Appointment.ConcurrentModification";

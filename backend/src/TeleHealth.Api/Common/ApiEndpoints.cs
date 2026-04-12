@@ -20,7 +20,14 @@ public static class ApiEndpoints
 
         public const string GetAllAppointments = $"{GetProfile}/appointments";
 
-        public const string GetAppointmentById = $"{GetProfile}/appointments/{{id:guid}}";
+        public const string GetAppointmentByIdOrSlug = $"{GetProfile}/appointments/{{idOrSlug}}";
+
+        public const string GetAppointmentBySlug = $"{GetProfile}/appointments/{{slug}}";
+
+        public const string UpdateAppointmentBySlug =
+            $"{GetProfile}/appointments/{{slug}}/reschedule";
+
+        public const string DeleteAppointmentBySlug = $"{GetProfile}/appointments/{{slug}}";
 
         public const string GetById = $"{Base}/{{id:guid}}";
     }
@@ -45,7 +52,7 @@ public static class ApiEndpoints
     {
         private const string Base = "appointments";
 
-        public const string Book = Base;
+        public const string Create = Base;
 
         public const string GetById = $"{Base}/{{id:guid}}";
 
