@@ -9,7 +9,7 @@ export default defineConfig({
       baseUrl: {
         getBaseUrlFromSpecification: true,
       },
-      // biome: true,
+      biome: true,
       clean: true,
       client: "react-query",
       httpClient: "fetch",
