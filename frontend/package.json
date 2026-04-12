@@ -64,6 +64,7 @@
     "@vitest/browser-playwright": "^4.1.2",
     "@vitest/coverage-v8": "^4.1.2",
     "@vitest/ui": "4.0.18",
+    "ajv": "^8",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.26",
@@ -79,8 +80,5 @@
     "vite": "^8.0.3",
     "vitest": "^4.1.2",
     "vitest-browser-react": "^2.1.0"
-  },
-  "overrides": {
-    "vite": "^8.0.0-beta.13"
   }
 }

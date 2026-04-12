@@ -5,4 +5,6 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type LocalDate = string;
+export interface CancelAppointmentCommand {
+  cancellationReason: string;
+}
