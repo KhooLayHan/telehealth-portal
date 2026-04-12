@@ -5,4 +5,4 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface LocalTime {}
+export type LocalTime = {};

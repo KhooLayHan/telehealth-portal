@@ -9,7 +9,7 @@ export default defineConfig({
       baseUrl: {
         getBaseUrlFromSpecification: true,
       },
-      biome: true,
+      // biome: true,
       clean: true,
       client: "react-query",
       httpClient: "fetch",
@@ -24,7 +24,7 @@ export default defineConfig({
       },
       schemas: "model",
       target: "generated",
-      workspace: "src/api",
+      workspace: "src/api"
     },
   },
 });
