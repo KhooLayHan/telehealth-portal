@@ -22,7 +22,7 @@ public static class GetAllAppointmentsForReceptionistEndpoint
                     return TypedResults.Ok(appointments);
                 }
             )
-            .WithName("GetAllAppointments")
+            .WithName("GetAllAppointmentsForReceptionist")
             .WithTags("Appointments")
             .RequireAuthorization(AuthConstants.ReceptionistPolicy)
             .ProducesProblem(StatusCodes.Status401Unauthorized);
