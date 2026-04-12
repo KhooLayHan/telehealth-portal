@@ -1,7 +1,5 @@
 using System.Text.Json;
-
 using Microsoft.EntityFrameworkCore;
-
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Infrastructure.Persistence;
 
@@ -16,20 +14,25 @@ public sealed class ReceptionistGetAppointmentByIdHandler(ApplicationDbContext d
 
     public async Task<ReceptionistAppointmentDetailDto?> HandleAsync(Guid id, CancellationToken ct)
     {
-        var appointment = await db.Appointments
-            .AsNoTracking()
-            .Include(a => a.Patient).ThenInclude(p => p.User)
-            .Include(a => a.Doctor).ThenInclude(d => d.User)
+        var appointment = await db
+            .Appointments.AsNoTracking()
+            .Include(a => a.Patient)
+                .ThenInclude(p => p.User)
+            .Include(a => a.Doctor)
+                .ThenInclude(d => d.User)
             .Include(a => a.DoctorSchedule)
             .Include(a => a.AppointmentStatus)
             .Where(a => a.PublicId == id)
             .FirstOrDefaultAsync(ct);
 
-        if (appointment is null) return null;
+        if (appointment is null)
+            return null;
 
         // Read symptoms directly from the JSONB column to avoid EF Core naming convention mismatch
-        var symptomsJson = await db.Database
-            .SqlQuery<string>($"SELECT symptoms::text AS \"Value\" FROM appointments WHERE public_id = {id}")
+        var symptomsJson = await db
+            .Database.SqlQuery<string>(
+                $"SELECT symptoms::text AS \"Value\" FROM appointments WHERE public_id = {id}"
+            )
             .FirstOrDefaultAsync(ct);
 
         var symptoms = symptomsJson is null
@@ -42,7 +45,8 @@ public sealed class ReceptionistGetAppointmentByIdHandler(ApplicationDbContext d
             Slug = appointment.Slug,
             VisitReason = appointment.VisitReason,
             CancellationReason = appointment.CancellationReason,
-            PatientName = $"{appointment.Patient.User.FirstName} {appointment.Patient.User.LastName}",
+            PatientName =
+                $"{appointment.Patient.User.FirstName} {appointment.Patient.User.LastName}",
             DoctorName = $"{appointment.Doctor.User.FirstName} {appointment.Doctor.User.LastName}",
             Specialization = appointment.Doctor.Specialization,
             Date = appointment.DoctorSchedule.Date,

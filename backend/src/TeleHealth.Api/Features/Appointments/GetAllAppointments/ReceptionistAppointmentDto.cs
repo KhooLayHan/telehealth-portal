@@ -1,8 +1,6 @@
 using Facet;
 using Facet.Mapping;
-
 using NodaTime;
-
 using TeleHealth.Api.Domain.Entities;
 
 namespace TeleHealth.Api.Features.Appointments.GetAllAppointments;
@@ -24,7 +22,8 @@ public partial record ReceptionistAppointmentDto
     public LocalTime EndTime { get; set; }
 }
 
-public class ReceptionistAppointmentMappingConfig : IFacetMapConfiguration<Appointment, ReceptionistAppointmentDto>
+public class ReceptionistAppointmentMappingConfig
+    : IFacetMapConfiguration<Appointment, ReceptionistAppointmentDto>
 {
     public static void Map(Appointment source, ReceptionistAppointmentDto target)
     {
