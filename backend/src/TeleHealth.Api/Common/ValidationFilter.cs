@@ -10,28 +10,31 @@ public class ValidationFilter<T> : IEndpointFilter
         EndpointFilterDelegate next
     )
     {
-        // 1. Find the validator from the DI container
         var validator = context.HttpContext.RequestServices.GetService<IValidator<T>>();
 
-        if (validator is not null)
+        if (validator is null)
         {
-            // 2. Find the Command payload in the incoming request
-            var entity = context.Arguments.OfType<T>().FirstOrDefault();
-
-            if (entity is not null)
-            {
-                // 3. Run FluentValidation
-                var validationResult = await validator.ValidateAsync(entity);
-
-                if (!validationResult.IsValid)
-                {
-                    // 4. If it fails, instantly return a 400 Bad Request with standardized JSON errors
-                    return Results.ValidationProblem(validationResult.ToDictionary());
-                }
-            }
+            return await next(context);
         }
 
-        // 5. If valid, let the request proceed to your Handler
-        return await next(context);
+        var entity = context.Arguments.OfType<T>().FirstOrDefault();
+
+        if (entity is null)
+        {
+            return await next(context);
+        }
+
+        var validationResult = await validator.ValidateAsync(entity);
+
+        return !validationResult.IsValid
+            ? Results.Problem(
+                statusCode: StatusCodes.Status422UnprocessableEntity,
+                title: "Validation failed.",
+                extensions: new Dictionary<string, object?>
+                {
+                    ["errors"] = validationResult.ToDictionary(),
+                }
+            )
+            : await next(context);
     }
 }

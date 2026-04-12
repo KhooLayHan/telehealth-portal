@@ -2,23 +2,22 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Http.HttpResults;
 using TeleHealth.Api.Common;
 using TeleHealth.Api.Common.Exceptions.Auth;
-using TeleHealth.Api.Common.Models;
 using TeleHealth.Api.Common.Security;
 using TeleHealth.Api.Features.Patients.GetAllAppointments;
 
-namespace TeleHealth.Api.Features.Patients.GetAppointmentById;
+namespace TeleHealth.Api.Features.Patients.GetAppointmentByIdOrSlug;
 
-public static class GetAppointmentByIdEndpoint
+public static class GetAppointmentByIdOrSlugEndpoint
 {
-    public static void MapGetAppointmentByIdEndpoint(this RouteGroupBuilder group)
+    public static void MapGetAppointmentByIdOrSlugEndpoint(this RouteGroupBuilder group)
     {
         group
             .MapGet(
-                $"{ApiEndpoints.Patients.GetAppointmentById}",
+                $"{ApiEndpoints.Patients.GetAppointmentByIdOrSlug}",
                 async Task<Ok<AppointmentDto>> (
-                    Guid id,
+                    string idOrSlug,
                     ClaimsPrincipal user,
-                    GetAppointmentByIdHandler handler,
+                    GetAppointmentByIdOrSlugHandler idOrSlugHandler,
                     CancellationToken ct
                 ) =>
                 {
@@ -28,12 +27,12 @@ public static class GetAppointmentByIdEndpoint
                         throw new TokenInvalidException();
                     }
 
-                    var appointments = await handler.HandleAsync(publicId, id, ct);
+                    var appointments = await idOrSlugHandler.HandleAsync(publicId, idOrSlug, ct);
                     return TypedResults.Ok(appointments);
                 }
             )
-            .WithName("GetAppointmentById")
-            .WithTags("Patients")
+            .WithName(nameof(ApiEndpoints.Patients.GetAppointmentByIdOrSlug))
+            .WithTags(nameof(ApiEndpoints.Patients))
             .RequireAuthorization(AuthConstants.PatientPolicy)
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status404NotFound);
