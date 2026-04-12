@@ -1,20 +1,16 @@
-using Facet.Extensions;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
-using Serilog;
 using TeleHealth.Api.Common.Models;
-using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Infrastructure.Persistence;
 
-namespace TeleHealth.Api.Features.Patients.GetAllAppointments;
+namespace TeleHealth.Api.Features.Appointments.GetAllAppointments;
 
-public sealed class GetAllAppointmentsHandler(ApplicationDbContext db)
+public sealed class GetAllAppointmentsForReceptionistHandler(ApplicationDbContext db)
 {
     private const int MaxPageSize = 50;
 
-    public async Task<PagedResult<AppointmentDto>> HandleAsync(
-        Guid userPublicId,
-        GetAllAppointmentsQuery query,
+    public async Task<PagedResult<ReceptionistAppointmentDto>> HandleAsync(
+        GetAllAppointmentsForReceptionistQuery query,
         CancellationToken ct
     )
     {
@@ -22,7 +18,8 @@ public sealed class GetAllAppointmentsHandler(ApplicationDbContext db)
         var pageSize = Math.Clamp(query.PageSize, 1, MaxPageSize);
         var now = SystemClock.Instance.GetCurrentInstant().InUtc();
 
-        var q = db.Appointments.AsNoTracking().Where(a => a.Patient.User.PublicId == userPublicId);
+        // No patient filter — returns ALL appointments
+        var q = db.Appointments.AsNoTracking();
 
         q = query.View?.ToLowerInvariant() switch
         {
@@ -54,29 +51,40 @@ public sealed class GetAllAppointmentsHandler(ApplicationDbContext db)
             var pattern = $"%{query.Search}%";
             q = q.Where(a =>
                 EF.Functions.ILike(a.Doctor.User.FirstName + " " + a.Doctor.User.LastName, pattern)
+                || EF.Functions.ILike(
+                    a.Patient.User.FirstName + " " + a.Patient.User.LastName,
+                    pattern
+                )
                 || EF.Functions.ILike(a.VisitReason, pattern)
             );
         }
 
-        q = query.SortOrder?.ToLowerInvariant() switch
-        {
-            "desc" => q.OrderByDescending(a => a.DoctorSchedule.Date)
-                .ThenByDescending(a => a.DoctorSchedule.StartTime),
-            _ => q.OrderBy(a => a.DoctorSchedule.Date).ThenBy(a => a.DoctorSchedule.StartTime),
-        };
+        q =
+            query.SortOrder?.ToLowerInvariant() == "desc"
+                ? q.OrderByDescending(a => a.DoctorSchedule.Date)
+                    .ThenByDescending(a => a.DoctorSchedule.StartTime)
+                : q.OrderBy(a => a.DoctorSchedule.Date).ThenBy(a => a.DoctorSchedule.StartTime);
 
         var totalCount = await q.CountAsync(ct);
 
         var items = await q.Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .SelectFacet<Appointment, AppointmentDto>()
+            .Select(a => new ReceptionistAppointmentDto
+            {
+                PublicId = a.PublicId,
+                Slug = a.Slug,
+                VisitReason = a.VisitReason,
+                PatientName = a.Patient.User.FirstName + " " + a.Patient.User.LastName,
+                DoctorName = a.Doctor.User.FirstName + " " + a.Doctor.User.LastName,
+                Specialization = a.Doctor.Specialization,
+                Status = a.AppointmentStatus.Name,
+                StatusColorCode = a.AppointmentStatus.ColorCode ?? string.Empty,
+                Date = a.DoctorSchedule.Date,
+                StartTime = a.DoctorSchedule.StartTime,
+                EndTime = a.DoctorSchedule.EndTime,
+            })
             .ToListAsync(ct);
 
-        Log.Information(
-            "Retrieved {TotalCount} appointments for user {UserPublicId}",
-            totalCount,
-            userPublicId
-        );
-        return new PagedResult<AppointmentDto>(items, totalCount, page, pageSize);
+        return new PagedResult<ReceptionistAppointmentDto>(items, totalCount, page, pageSize);
     }
 }

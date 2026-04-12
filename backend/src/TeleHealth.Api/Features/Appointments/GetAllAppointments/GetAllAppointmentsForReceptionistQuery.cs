@@ -1,6 +1,6 @@
-namespace TeleHealth.Api.Features.Patients.GetAllAppointments;
+namespace TeleHealth.Api.Features.Appointments.GetAllAppointments;
 
-public sealed record GetAllAppointmentsQuery(
+public sealed record GetAllAppointmentsForReceptionistQuery(
     string? View,
     string? Status,
     string? Search,
