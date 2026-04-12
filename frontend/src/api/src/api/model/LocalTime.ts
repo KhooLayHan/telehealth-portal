@@ -5,4 +5,5 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface LocalTime {}
+// biome-ignore lint/complexity/noBannedTypes: generated type — NodaTime LocalTime is serialized as a string token
+export type LocalTime = {};
