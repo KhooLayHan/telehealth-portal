@@ -16,23 +16,23 @@ import type {
 
 import type {
   AnonymousTypeOfGuidAndGuid
-} from '../../src/api/model/AnonymousTypeOfGuidAndGuid';
+} from '../../model/AnonymousTypeOfGuidAndGuid';
 
 import type {
   AnonymousTypeOfstring
-} from '../../src/api/model/AnonymousTypeOfstring';
+} from '../../model/AnonymousTypeOfstring';
 
 import type {
   LoginCommand
-} from '../../src/api/model/LoginCommand';
+} from '../../model/LoginCommand';
 
 import type {
   ProblemDetails
-} from '../../src/api/model/ProblemDetails';
+} from '../../model/ProblemDetails';
 
 import type {
   RegisterPatientCommand
-} from '../../src/api/model/RegisterPatientCommand';
+} from '../../model/RegisterPatientCommand';
 
 import { ofetchMutator } from '../../ofetch-mutator';
 

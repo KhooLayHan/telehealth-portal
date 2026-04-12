@@ -16,15 +16,15 @@ import type {
 
 import type {
   BookAppointmentCommand
-} from '../../src/api/model/BookAppointmentCommand';
+} from '../../model/BookAppointmentCommand';
 
 import type {
   BookAppointmentResponse
-} from '../../src/api/model/BookAppointmentResponse';
+} from '../../model/BookAppointmentResponse';
 
 import type {
   ProblemDetails
-} from '../../src/api/model/ProblemDetails';
+} from '../../model/ProblemDetails';
 
 import { ofetchMutator } from '../../ofetch-mutator';
 

@@ -8,7 +8,7 @@ import { Calendar, ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import { useState } from "react";
 
 import { useGetAllAppointments } from "@/api/generated/patients/patients";
-import type { AppointmentDto } from "@/api/model";
+import type { AppointmentDto } from "@/api/model/AppointmentDto";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

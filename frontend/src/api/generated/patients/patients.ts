@@ -25,35 +25,35 @@ import type {
 
 import type {
   AppointmentDto
-} from '../../src/api/model/AppointmentDto';
+} from '../../model/AppointmentDto';
 
 import type {
   CancelAppointmentCommand
-} from '../../src/api/model/CancelAppointmentCommand';
+} from '../../model/CancelAppointmentCommand';
 
 import type {
   GetAllAppointmentsParams
-} from '../../src/api/model/GetAllAppointmentsParams';
+} from '../../model/GetAllAppointmentsParams';
 
 import type {
   PagedResultOfAppointmentDto
-} from '../../src/api/model/PagedResultOfAppointmentDto';
+} from '../../model/PagedResultOfAppointmentDto';
 
 import type {
   PatientProfileDto
-} from '../../src/api/model/PatientProfileDto';
+} from '../../model/PatientProfileDto';
 
 import type {
   ProblemDetails
-} from '../../src/api/model/ProblemDetails';
+} from '../../model/ProblemDetails';
 
 import type {
   RescheduleAppointmentCommand
-} from '../../src/api/model/RescheduleAppointmentCommand';
+} from '../../model/RescheduleAppointmentCommand';
 
 import type {
   UpdateMedicalRecordCommand
-} from '../../src/api/model/UpdateMedicalRecordCommand';
+} from '../../model/UpdateMedicalRecordCommand';
 
 import { ofetchMutator } from '../../ofetch-mutator';
 
