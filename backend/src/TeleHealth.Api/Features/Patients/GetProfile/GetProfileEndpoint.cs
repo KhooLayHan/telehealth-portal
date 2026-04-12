@@ -31,8 +31,8 @@ public static class GetProfileEndpoint
                     return TypedResults.Ok(profile);
                 }
             )
-            .WithName("GetMyProfile")
-            .WithTags("Patients")
+            .WithName(nameof(ApiEndpoints.Patients.GetProfile))
+            .WithTags(nameof(ApiEndpoints.Patients))
             .RequireAuthorization(AuthConstants.PatientPolicy)
             .ProducesProblem(StatusCodes.Status404NotFound);
     }
