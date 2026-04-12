@@ -10,7 +10,6 @@ import {
   Stethoscope,
   Users,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -19,6 +18,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/useAuthStore";
 import { ReceptionistApptDetailsPage } from "./roles/ReceptionistAppointmentDetails";
 
@@ -124,7 +124,9 @@ export function AppointmentDetailsPage() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate font-medium text-sm">{user?.firstName ?? "User"}</p>
-              <p className="truncate text-muted-foreground text-xs">{user?.role ?? "Receptionist"}</p>
+              <p className="truncate text-muted-foreground text-xs">
+                {user?.role ?? "Receptionist"}
+              </p>
             </div>
           </div>
           <button

@@ -1,8 +1,25 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Bell, Calendar, FileText, Heart, LayoutDashboard, LogOut, Settings, Stethoscope, Users } from "lucide-react";
+import {
+  Bell,
+  Calendar,
+  FileText,
+  Heart,
+  LayoutDashboard,
+  LogOut,
+  Settings,
+  Stethoscope,
+  Users,
+} from "lucide-react";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/useAuthStore";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { ReceptionistApptPage } from "./roles/ReceptionistAppointment";
 
 const navItems = [
@@ -106,7 +123,9 @@ export function AppointmentsPage() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate font-medium text-sm">{user?.firstName ?? "User"}</p>
-              <p className="truncate text-muted-foreground text-xs">{user?.role ?? "Receptionist"}</p>
+              <p className="truncate text-muted-foreground text-xs">
+                {user?.role ?? "Receptionist"}
+              </p>
             </div>
           </div>
           <button
@@ -137,16 +156,16 @@ export function AppointmentsPage() {
         {/* Page content */}
         <main className="flex-1 overflow-y-auto p-6">
           <div className="mb-6">
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink render={<Link to="/dashboard" />}>Dashboard</BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>Appointments</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink render={<Link to="/dashboard" />}>Dashboard</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Appointments</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
             </Breadcrumb>
             <p className="mt-0.5 text-muted-foreground text-sm">
               View and manage all scheduled appointments in one place
