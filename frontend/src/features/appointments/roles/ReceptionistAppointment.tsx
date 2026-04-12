@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
 import { useGetAllAppointments } from "@/api/generated/appointments/appointments";
 import { Separator } from "@/components/ui/separator";
-import { DataTable } from "../components/DataTable";
 import { columns } from "../components/Columns";
+import { DataTable } from "../components/DataTable";
 
 const ACCENT = "#0d9488";
 
