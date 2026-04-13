@@ -4,6 +4,7 @@ import { useId } from "react";
 import { z } from "zod";
 
 import { useGetProfile, useUpdateMedicalRecord } from "@/api/generated/patients/patients";
+import type { Allergy } from "@/api/model/Allergy";
 import type { PatientProfileDto } from "@/api/model/PatientProfileDto";
 
 import { Button } from "@/components/ui/button";
@@ -12,36 +13,78 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
-// Severity values match the backend/DB lowercase convention
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
 const SEVERITY_OPTIONS = ["mild", "moderate", "severe"] as const;
 type Severity = (typeof SEVERITY_OPTIONS)[number];
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function generateId(): string {
+  // crypto.randomUUID() is available in all modern browsers and Node 19+
+  return crypto.randomUUID();
+}
+
+// Decorate backend allergies with a stable client-side ID for React keying.
+// The `id` field is stripped before the payload reaches the API.
+type AllergyFormItem = Allergy & { id: string };
+
+function toFormAllergies(allergies: Allergy[] | null | undefined): AllergyFormItem[] {
+  return (allergies ?? []).map((a) => ({ ...a, id: generateId() }));
+}
+
+// ---------------------------------------------------------------------------
+// Schema
+// ---------------------------------------------------------------------------
+
+// The emergency contact sub-schema validates only the *non-null* branch.
+// When the value is null (no contact provided) the whole field is valid.
+const emergencyContactSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  relationship: z.string().min(1, "Relationship is required"),
+  phone: z.string().min(1, "Phone is required"),
+});
+
+const allergyItemSchema = z.object({
+  // `id` is client-only — present in form state, stripped on submit
+  id: z.string(),
+  allergen: z.string().min(1, "Allergen required"),
+  severity: z.enum(SEVERITY_OPTIONS, { error: "Select severity" }),
+  reaction: z.string().min(1, "Reaction required"),
+});
 
 const medicalInfoSchema = z.object({
   bloodGroup: z
     .string()
     .regex(/^(A|B|AB|O)[+-]$/, "Must be A+, O-, etc.")
     .or(z.literal("")),
-  emergencyContact: z
-    .object({
-      name: z.string().min(1, "Name is required"),
-      relationship: z.string().min(1, "Relationship is required"),
-      phone: z.string().min(1, "Phone is required"),
-    })
-    .nullable(),
-  allergies: z
-    .array(
-      z.object({
-        allergen: z.string().min(1, "Allergen required"),
-        severity: z.enum(SEVERITY_OPTIONS, {
-          error: "Select severity",
-        }),
-        reaction: z.string().min(1, "Reaction required"),
-      }),
-    )
-    .default([]),
+  // null = no contact provided — valid. Non-null = all three fields required.
+  emergencyContact: emergencyContactSchema.nullable(),
+  allergies: z.array(allergyItemSchema).default([]),
 });
 
 type MedicalInfoFormValues = z.infer<typeof medicalInfoSchema>;
+
+// ---------------------------------------------------------------------------
+// Normalisation helpers
+// ---------------------------------------------------------------------------
+
+// Treat a blank object (the initial form state before the user types anything)
+// the same as null so canSubmit stays true for patients with no contact.
+function normalizeEmergencyContact(
+  raw: MedicalInfoFormValues["emergencyContact"],
+): Allergy extends never ? never : ReturnType<typeof emergencyContactSchema.parse> | null {
+  if (!raw || (!raw.name && !raw.relationship && !raw.phone)) return null;
+  return raw as ReturnType<typeof emergencyContactSchema.parse>;
+}
+
+// ---------------------------------------------------------------------------
+// Inner form (only rendered after data loads)
+// ---------------------------------------------------------------------------
 
 type ProfileFormInnerProps = {
   profile: PatientProfileDto;
@@ -51,44 +94,27 @@ function ProfileFormInner({ profile }: ProfileFormInnerProps) {
   const updateMutation = useUpdateMedicalRecord();
   const bloodGroupId = useId();
 
-  const form = useForm<
-    MedicalInfoFormValues,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined
-  >({
+  const form = useForm<MedicalInfoFormValues>({
     defaultValues: {
       bloodGroup: profile.bloodGroup ?? "",
-      emergencyContact: profile.emergencyContact ?? { name: "", relationship: "", phone: "" },
-      allergies: profile.allergies ?? [],
+      // Default to null — an untouched blank contact must not block submission
+      emergencyContact: profile.emergencyContact ?? null,
+      allergies: toFormAllergies(profile.allergies),
     },
     validators: {
-      onchange: medicalInfoSchema,
+      onChange: medicalInfoSchema,
     },
     onSubmit: async ({ value }) => {
-      // Strip emergency contact if the name field is empty
-      const emergencyContact = value.emergencyContact?.name ? value.emergencyContact : null;
+      // Strip the client-only `id` field before sending to the API
+      const allergies: Allergy[] = value.allergies.map(({ id: _id, ...rest }) => rest);
 
-      try {
-        await updateMutation.mutateAsync({
-          data: {
-            bloodGroup: value.bloodGroup,
-            emergencyContact,
-            allergies: value.allergies,
-          },
-        });
-      } catch (_error) {
-        // Error state is tracked by updateMutation.isError
-        // Optionally show toast notification here
-      }
+      await updateMutation.mutateAsync({
+        data: {
+          bloodGroup: value.bloodGroup,
+          emergencyContact: normalizeEmergencyContact(value.emergencyContact),
+          allergies,
+        },
+      });
     },
   });
 
@@ -101,7 +127,7 @@ function ProfileFormInner({ profile }: ProfileFormInnerProps) {
       }}
       className="space-y-6"
     >
-      {/* Personal Information — read only */}
+      {/* ── Personal Information — read only ── */}
       <Card className="shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
@@ -131,7 +157,7 @@ function ProfileFormInner({ profile }: ProfileFormInnerProps) {
         </CardContent>
       </Card>
 
-      {/* Medical Profile — editable */}
+      {/* ── Medical Profile — editable ── */}
       <Card className="shadow-sm border-primary/20">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
@@ -174,64 +200,99 @@ function ProfileFormInner({ profile }: ProfileFormInnerProps) {
 
           <Separator />
 
-          {/* Emergency Contact */}
-          <div className="space-y-3">
-            <h3 className="font-semibold text-sm">Emergency Contact</h3>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <form.Field name="emergencyContact.name">
-                {(field) => (
-                  <div className="space-y-1.5">
-                    <Label htmlFor={`${field.name}-input`} className="text-xs">
-                      Full Name
-                    </Label>
-                    <Input
-                      id={`${field.name}-input`}
-                      value={field.state.value ?? ""}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      placeholder="Jane Doe"
-                    />
+          {/* Emergency Contact
+					    The field value is null (no contact) or a filled object.
+					    When null: show an "Add" button. When non-null: show fields + Remove. */}
+          <form.Field name="emergencyContact">
+            {(field) => (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-sm">Emergency Contact</h3>
+                  {field.state.value === null ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => field.handleChange({ name: "", relationship: "", phone: "" })}
+                    >
+                      <Plus className="mr-1 size-3" /> Add Contact
+                    </Button>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:bg-destructive/10"
+                      onClick={() => field.handleChange(null)}
+                    >
+                      <Trash2 className="mr-1 size-3" /> Remove
+                    </Button>
+                  )}
+                </div>
+
+                {field.state.value === null ? (
+                  <p className="text-sm text-muted-foreground italic">
+                    No emergency contact on record.
+                  </p>
+                ) : (
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <form.Field name="emergencyContact.name">
+                      {(subField) => (
+                        <div className="space-y-1.5">
+                          <Label htmlFor={`${subField.name}-input`} className="text-xs">
+                            Full Name
+                          </Label>
+                          <Input
+                            id={`${subField.name}-input`}
+                            value={subField.state.value ?? ""}
+                            onBlur={subField.handleBlur}
+                            onChange={(e) => subField.handleChange(e.target.value)}
+                            placeholder="Jane Doe"
+                          />
+                        </div>
+                      )}
+                    </form.Field>
+                    <form.Field name="emergencyContact.relationship">
+                      {(subField) => (
+                        <div className="space-y-1.5">
+                          <Label htmlFor={`${subField.name}-input`} className="text-xs">
+                            Relationship
+                          </Label>
+                          <Input
+                            id={`${subField.name}-input`}
+                            value={subField.state.value ?? ""}
+                            onBlur={subField.handleBlur}
+                            onChange={(e) => subField.handleChange(e.target.value)}
+                            placeholder="Spouse"
+                          />
+                        </div>
+                      )}
+                    </form.Field>
+                    <form.Field name="emergencyContact.phone">
+                      {(subField) => (
+                        <div className="space-y-1.5">
+                          <Label htmlFor={`${subField.name}-input`} className="text-xs">
+                            Phone Number
+                          </Label>
+                          <Input
+                            id={`${subField.name}-input`}
+                            value={subField.state.value ?? ""}
+                            onBlur={subField.handleBlur}
+                            onChange={(e) => subField.handleChange(e.target.value)}
+                            placeholder="+60123456789"
+                          />
+                        </div>
+                      )}
+                    </form.Field>
                   </div>
                 )}
-              </form.Field>
-              <form.Field name="emergencyContact.relationship">
-                {(field) => (
-                  <div className="space-y-1.5">
-                    <Label htmlFor={`${field.name}-input`} className="text-xs">
-                      Relationship
-                    </Label>
-                    <Input
-                      id={`${field.name}-input`}
-                      value={field.state.value ?? ""}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      placeholder="Spouse"
-                    />
-                  </div>
-                )}
-              </form.Field>
-              <form.Field name="emergencyContact.phone">
-                {(field) => (
-                  <div className="space-y-1.5">
-                    <Label htmlFor={`${field.name}-input`} className="text-xs">
-                      Phone Number
-                    </Label>
-                    <Input
-                      id={`${field.name}-input`}
-                      value={field.state.value ?? ""}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      placeholder="+60123456789"
-                    />
-                  </div>
-                )}
-              </form.Field>
-            </div>
-          </div>
+              </div>
+            )}
+          </form.Field>
 
           <Separator />
 
-          {/* Allergies — single Field subscription for both the button and the list */}
+          {/* Allergies — keyed by stable client-side ID, not index */}
           <div className="space-y-3">
             <form.Field name="allergies">
               {(field) => (
@@ -243,7 +304,12 @@ function ProfileFormInner({ profile }: ProfileFormInnerProps) {
                       variant="outline"
                       size="sm"
                       onClick={() =>
-                        field.pushValue({ allergen: "", severity: "mild", reaction: "" })
+                        field.pushValue({
+                          id: generateId(),
+                          allergen: "",
+                          severity: "mild",
+                          reaction: "",
+                        })
                       }
                     >
                       <Plus className="mr-1 size-3" /> Add Allergy
@@ -254,14 +320,10 @@ function ProfileFormInner({ profile }: ProfileFormInnerProps) {
                     {field.state.value.length === 0 ? (
                       <p className="text-sm text-muted-foreground italic">No allergies recorded.</p>
                     ) : (
-                      field.state.value.map((_, i) => (
-                        // Index key is acceptable here: TanStack Form tracks field
-                        // state by name path, not by React key
+                      field.state.value.map((allergy, i) => (
+                        // Keyed by stable UUID — survives removal of earlier items
                         <div
-                          key={`allergy-${
-                            // biome-ignore lint/suspicious/noArrayIndexKey: no stable ID available
-                            i
-                          }`}
+                          key={allergy.id}
                           className="flex items-start gap-2 bg-muted/30 p-3 rounded-lg border border-border"
                         >
                           <div className="grid flex-1 gap-3 sm:grid-cols-3">
@@ -362,10 +424,13 @@ function ProfileFormInner({ profile }: ProfileFormInnerProps) {
   );
 }
 
+// ---------------------------------------------------------------------------
+// Public export — handles loading / error states
+// ---------------------------------------------------------------------------
+
 export function PatientMedicalProfileForm() {
   const { data: response, isLoading, isError } = useGetProfile();
 
-  // Narrow the discriminated union — status 200 carries PatientProfileDto
   const profile = response?.status === 200 ? response.data : undefined;
 
   if (isLoading) {
