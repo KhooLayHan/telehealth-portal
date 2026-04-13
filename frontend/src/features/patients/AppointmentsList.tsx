@@ -109,8 +109,12 @@ export function PatientAppointmentsList() {
 
   const pagedResult = response?.status === 200 ? response.data : undefined;
 
+  const isAppointmentView = (value: string): value is AppointmentView =>
+    value === "upcoming" || value === "past";
+
   const handleViewChange = (v: string) => {
-    setView(v as AppointmentView);
+    if (!isAppointmentView(v)) return;
+    setView(v);
     setPage(1);
   };
 
