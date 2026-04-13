@@ -43,15 +43,28 @@ const medicalInfoSchema = z.object({
 
 type MedicalInfoFormValues = z.infer<typeof medicalInfoSchema>;
 
-interface ProfileFormInnerProps {
+type ProfileFormInnerProps = {
   profile: PatientProfileDto;
-}
+};
 
 function ProfileFormInner({ profile }: ProfileFormInnerProps) {
   const updateMutation = useUpdateMedicalRecord();
   const bloodGroupId = useId();
 
-  const form = useForm<MedicalInfoFormValues>({
+  const form = useForm<
+    MedicalInfoFormValues,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined
+  >({
     defaultValues: {
       bloodGroup: profile.bloodGroup ?? "",
       emergencyContact: profile.emergencyContact ?? { name: "", relationship: "", phone: "" },
