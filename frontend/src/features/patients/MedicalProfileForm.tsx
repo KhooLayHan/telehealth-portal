@@ -25,24 +25,35 @@ type Severity = (typeof SEVERITY_OPTIONS)[number];
 // ---------------------------------------------------------------------------
 
 function generateId(): string {
-  // crypto.randomUUID() is available in all modern browsers and Node 19+
   return crypto.randomUUID();
 }
 
-// Decorate backend allergies with a stable client-side ID for React keying.
-// The `id` field is stripped before the payload reaches the API.
-type AllergyFormItem = Allergy & { id: string };
+// Stable client-side ID for React keying. Explicit shape avoids the
+// TS2322 that arises from spreading Allergy (severity: string) directly into
+// a type that expects severity: "mild" | "moderate" | "severe".
+type AllergyFormItem = {
+  id: string;
+  allergen: string;
+  severity: Severity;
+  reaction: string;
+};
 
 function toFormAllergies(allergies: Allergy[] | null | undefined): AllergyFormItem[] {
-  return (allergies ?? []).map((a) => ({ ...a, id: generateId() }));
+  return (allergies ?? []).map((a) => ({
+    id: generateId(),
+    allergen: a.allergen,
+    reaction: a.reaction,
+    // severity from the API is typed `string`; guard before narrowing
+    severity: (SEVERITY_OPTIONS as readonly string[]).includes(a.severity)
+      ? (a.severity as Severity)
+      : "mild",
+  }));
 }
 
 // ---------------------------------------------------------------------------
 // Schema
 // ---------------------------------------------------------------------------
 
-// The emergency contact sub-schema validates only the *non-null* branch.
-// When the value is null (no contact provided) the whole field is valid.
 const emergencyContactSchema = z.object({
   name: z.string().min(1, "Name is required"),
   relationship: z.string().min(1, "Relationship is required"),
@@ -50,9 +61,11 @@ const emergencyContactSchema = z.object({
 });
 
 const allergyItemSchema = z.object({
-  // `id` is client-only — present in form state, stripped on submit
-  id: z.string(),
+  id: z.string(), // client-only — stripped on submit
   allergen: z.string().min(1, "Allergen required"),
+  // No .default([]) here — .default() makes Zod's INPUT type mark the field
+  // as optional (allergies?: ...) which conflicts with MedicalInfoFormValues.
+  // The empty-array default lives in useForm defaultValues instead.
   severity: z.enum(SEVERITY_OPTIONS, { error: "Select severity" }),
   reaction: z.string().min(1, "Reaction required"),
 });
@@ -62,9 +75,8 @@ const medicalInfoSchema = z.object({
     .string()
     .regex(/^(A|B|AB|O)[+-]$/, "Must be A+, O-, etc.")
     .or(z.literal("")),
-  // null = no contact provided — valid. Non-null = all three fields required.
   emergencyContact: emergencyContactSchema.nullable(),
-  allergies: z.array(allergyItemSchema).default([]),
+  allergies: z.array(allergyItemSchema),
 });
 
 type MedicalInfoFormValues = z.infer<typeof medicalInfoSchema>;
@@ -73,13 +85,11 @@ type MedicalInfoFormValues = z.infer<typeof medicalInfoSchema>;
 // Normalisation helpers
 // ---------------------------------------------------------------------------
 
-// Treat a blank object (the initial form state before the user types anything)
-// the same as null so canSubmit stays true for patients with no contact.
 function normalizeEmergencyContact(
   raw: MedicalInfoFormValues["emergencyContact"],
-): Allergy extends never ? never : ReturnType<typeof emergencyContactSchema.parse> | null {
+): { name: string; relationship: string; phone: string } | null {
   if (!raw || (!raw.name && !raw.relationship && !raw.phone)) return null;
-  return raw as ReturnType<typeof emergencyContactSchema.parse>;
+  return raw;
 }
 
 // ---------------------------------------------------------------------------
@@ -101,28 +111,24 @@ function ProfileFormInner({ profile }: ProfileFormInnerProps) {
     allergies: toFormAllergies(profile.allergies),
   };
 
-  const form = useForm;
-  defaultValues, validators;
-  :
-  onChange: medicalInfoSchema,
-  ,
-    onSubmit: async (
-  value;
-  ) =>
-  {
-    // Strip the client-only `id` field before sending to the API
-    const allergies: Allergy[] = value.allergies.map(({ id: _id, ...rest }) => rest);
+  const form = useForm({
+    defaultValues,
+    validators: {
+      onChange: medicalInfoSchema,
+    },
+    onSubmit: async ({ value }) => {
+      // Strip the client-only `id` field before sending to the API
+      const allergies: Allergy[] = value.allergies.map(({ id: _id, ...rest }) => rest);
 
-    await updateMutation.mutateAsync({
+      await updateMutation.mutateAsync({
         data: {
           bloodGroup: value.bloodGroup,
           emergencyContact: normalizeEmergencyContact(value.emergencyContact),
           allergies,
         },
       });
-  }
-  ,
-  )
+    },
+  });
 
   return (
     <form
@@ -207,8 +213,8 @@ function ProfileFormInner({ profile }: ProfileFormInnerProps) {
           <Separator />
 
           {/* Emergency Contact
-					    The field value is null (no contact) or a filled object.
-					    When null: show an "Add" button. When non-null: show fields + Remove. */}
+					    null  → "Add Contact" prompt (valid, no validation runs)
+					    object → three required fields + "Remove" button */}
           <form.Field name="emergencyContact">
             {(field) => (
               <div className="space-y-3">
@@ -250,11 +256,21 @@ function ProfileFormInner({ profile }: ProfileFormInnerProps) {
                           </Label>
                           <Input
                             id={`${subField.name}-input`}
+                            aria-describedby={
+                              subField.state.meta.errors.length > 0
+                                ? `${subField.name}-error`
+                                : undefined
+                            }
                             value={subField.state.value ?? ""}
                             onBlur={subField.handleBlur}
                             onChange={(e) => subField.handleChange(e.target.value)}
                             placeholder="Jane Doe"
                           />
+                          {subField.state.meta.errors.length > 0 && (
+                            <p id={`${subField.name}-error`} className="text-xs text-destructive">
+                              {subField.state.meta.errors[0]?.message}
+                            </p>
+                          )}
                         </div>
                       )}
                     </form.Field>
@@ -266,11 +282,21 @@ function ProfileFormInner({ profile }: ProfileFormInnerProps) {
                           </Label>
                           <Input
                             id={`${subField.name}-input`}
+                            aria-describedby={
+                              subField.state.meta.errors.length > 0
+                                ? `${subField.name}-error`
+                                : undefined
+                            }
                             value={subField.state.value ?? ""}
                             onBlur={subField.handleBlur}
                             onChange={(e) => subField.handleChange(e.target.value)}
                             placeholder="Spouse"
                           />
+                          {subField.state.meta.errors.length > 0 && (
+                            <p id={`${subField.name}-error`} className="text-xs text-destructive">
+                              {subField.state.meta.errors[0]?.message}
+                            </p>
+                          )}
                         </div>
                       )}
                     </form.Field>
@@ -282,11 +308,21 @@ function ProfileFormInner({ profile }: ProfileFormInnerProps) {
                           </Label>
                           <Input
                             id={`${subField.name}-input`}
+                            aria-describedby={
+                              subField.state.meta.errors.length > 0
+                                ? `${subField.name}-error`
+                                : undefined
+                            }
                             value={subField.state.value ?? ""}
                             onBlur={subField.handleBlur}
                             onChange={(e) => subField.handleChange(e.target.value)}
                             placeholder="+60123456789"
                           />
+                          {subField.state.meta.errors.length > 0 && (
+                            <p id={`${subField.name}-error`} className="text-xs text-destructive">
+                              {subField.state.meta.errors[0]?.message}
+                            </p>
+                          )}
                         </div>
                       )}
                     </form.Field>
@@ -298,7 +334,7 @@ function ProfileFormInner({ profile }: ProfileFormInnerProps) {
 
           <Separator />
 
-          {/* Allergies — keyed by stable client-side ID, not index */}
+          {/* Allergies — keyed by stable client-side UUID, not array index */}
           <div className="space-y-3">
             <form.Field name="allergies">
               {(field) => (
@@ -327,7 +363,6 @@ function ProfileFormInner({ profile }: ProfileFormInnerProps) {
                       <p className="text-sm text-muted-foreground italic">No allergies recorded.</p>
                     ) : (
                       field.state.value.map((allergy, i) => (
-                        // Keyed by stable UUID — survives removal of earlier items
                         <div
                           key={allergy.id}
                           className="flex items-start gap-2 bg-muted/30 p-3 rounded-lg border border-border"
@@ -341,11 +376,24 @@ function ProfileFormInner({ profile }: ProfileFormInnerProps) {
                                   </Label>
                                   <Input
                                     id={`${subField.name}-input`}
+                                    aria-describedby={
+                                      subField.state.meta.errors.length > 0
+                                        ? `${subField.name}-error`
+                                        : undefined
+                                    }
                                     value={subField.state.value}
                                     onBlur={subField.handleBlur}
                                     onChange={(e) => subField.handleChange(e.target.value)}
                                     placeholder="Peanuts"
                                   />
+                                  {subField.state.meta.errors.length > 0 && (
+                                    <p
+                                      id={`${subField.name}-error`}
+                                      className="text-xs text-destructive"
+                                    >
+                                      {subField.state.meta.errors[0]?.message}
+                                    </p>
+                                  )}
                                 </div>
                               )}
                             </form.Field>
@@ -357,6 +405,11 @@ function ProfileFormInner({ profile }: ProfileFormInnerProps) {
                                   </Label>
                                   <select
                                     id={`${subField.name}-input`}
+                                    aria-describedby={
+                                      subField.state.meta.errors.length > 0
+                                        ? `${subField.name}-error`
+                                        : undefined
+                                    }
                                     value={subField.state.value}
                                     onBlur={subField.handleBlur}
                                     onChange={(e) =>
@@ -370,6 +423,14 @@ function ProfileFormInner({ profile }: ProfileFormInnerProps) {
                                       </option>
                                     ))}
                                   </select>
+                                  {subField.state.meta.errors.length > 0 && (
+                                    <p
+                                      id={`${subField.name}-error`}
+                                      className="text-xs text-destructive"
+                                    >
+                                      {subField.state.meta.errors[0]?.message}
+                                    </p>
+                                  )}
                                 </div>
                               )}
                             </form.Field>
@@ -381,11 +442,24 @@ function ProfileFormInner({ profile }: ProfileFormInnerProps) {
                                   </Label>
                                   <Input
                                     id={`${subField.name}-input`}
+                                    aria-describedby={
+                                      subField.state.meta.errors.length > 0
+                                        ? `${subField.name}-error`
+                                        : undefined
+                                    }
                                     value={subField.state.value}
                                     onBlur={subField.handleBlur}
                                     onChange={(e) => subField.handleChange(e.target.value)}
                                     placeholder="Hives, difficulty breathing"
                                   />
+                                  {subField.state.meta.errors.length > 0 && (
+                                    <p
+                                      id={`${subField.name}-error`}
+                                      className="text-xs text-destructive"
+                                    >
+                                      {subField.state.meta.errors[0]?.message}
+                                    </p>
+                                  )}
                                 </div>
                               )}
                             </form.Field>
