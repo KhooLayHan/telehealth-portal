@@ -23,8 +23,9 @@ const columnCount = appointmentsColumns.length;
 export function AppointmentsTable({ data, isLoading, view }: AppointmentsTableProps) {
   const table = useReactTable({
     data,
-    getRowId: (row) =>
-      row.publicId ?? `${row.date ?? ""}-${row.startTime ?? ""}-${row.doctorName ?? ""}`,
+    getRowId: (row, index) =>
+      row.publicId ??
+      `${row.date ?? "unknown-date"}-${row.startTime ?? "unknown-time"}-${row.doctorName ?? "unknown-doctor"}-${index}`,
     columns: appointmentsColumns,
     getCoreRowModel: getCoreRowModel(),
   });
