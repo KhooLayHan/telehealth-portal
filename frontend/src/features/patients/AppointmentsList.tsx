@@ -116,6 +116,8 @@ export function PatientAppointmentsList() {
 
   const table = useReactTable({
     data: pagedResult?.items ?? [],
+    getRowId: (row) =>
+      row.publicId ?? `${row.date ?? ""}-${row.startTime ?? ""}-${row.doctorName ?? ""}`,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
@@ -138,7 +140,11 @@ export function PatientAppointmentsList() {
 
       <CardContent>
         {isError ? (
-          <div className="p-4 text-sm text-destructive-foreground bg-destructive/10 rounded-md">
+          <div
+            role="alert"
+            aria-live="polite"
+            className="p-4 text-sm text-destructive-foreground bg-destructive/10 rounded-md"
+          >
             Failed to load appointments. Please try again.
           </div>
         ) : (
@@ -192,7 +198,7 @@ export function PatientAppointmentsList() {
             <div className="flex items-center justify-between px-2">
               {pagedResult ? (
                 <div className="text-sm text-muted-foreground">
-                  Showing page {pagedResult.page} of {pagedResult.totalPages}
+                  Showing page {pagedResult.page} of {pagedResult.totalPages ?? 1}
                 </div>
               ) : (
                 <div />

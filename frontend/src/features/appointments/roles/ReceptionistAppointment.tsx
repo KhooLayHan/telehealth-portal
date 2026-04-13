@@ -9,8 +9,8 @@ import {
 import { motion } from "framer-motion";
 import { Eye, Pencil, Search } from "lucide-react";
 import { useState } from "react";
-import { useGetAllAppointments } from "@/api/generated/appointments/appointments";
-import type { ReceptionistAppointmentDto } from "@/api/src/api/model/ReceptionistAppointmentDto";
+import { useGetAllAppointmentsForReceptionist } from "@/api/generated/appointments/appointments";
+import type { ReceptionistAppointmentDto } from "@/api/model/ReceptionistAppointmentDto";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
@@ -195,7 +195,7 @@ function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValu
 }
 
 export function ReceptionistApptPage() {
-  const { data, isLoading, isError } = useGetAllAppointments();
+  const { data, isLoading, isError } = useGetAllAppointmentsForReceptionist();
 
   const appointments = data?.status === 200 ? data.data.items : [];
   const totalCount = data?.status === 200 ? data.data.totalCount : 0;
