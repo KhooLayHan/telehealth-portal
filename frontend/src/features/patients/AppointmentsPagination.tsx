@@ -22,7 +22,7 @@ export function AppointmentsPagination({
   onNextPage,
 }: AppointmentsPaginationProps) {
   return (
-    <div className="flex items-center justify-between px-2">
+    <nav aria-label="Appointments pagination" className="flex items-center justify-between px-2">
       <div className="text-sm text-muted-foreground">
         Showing page {currentPage} of {totalPages ?? 1}
       </div>
@@ -44,6 +44,6 @@ export function AppointmentsPagination({
           Next <ChevronRight className="size-4 ml-1" />
         </Button>
       </div>
-    </div>
+    </nav>
   );
 }

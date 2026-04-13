@@ -17,7 +17,6 @@ const SEVERITY_OPTIONS = ["mild", "moderate", "severe"] as const;
 type Severity = (typeof SEVERITY_OPTIONS)[number];
 
 const medicalInfoSchema = z.object({
-  // bloodGroup is string (required by UpdateMedicalRecordCommand) — empty string = not set
   bloodGroup: z
     .string()
     .regex(/^(A|B|AB|O)[+-]$/, "Must be A+, O-, etc.")
@@ -34,7 +33,7 @@ const medicalInfoSchema = z.object({
       z.object({
         allergen: z.string().min(1, "Allergen required"),
         severity: z.enum(SEVERITY_OPTIONS, {
-          errorMap: () => ({ message: "Select severity" }),
+          error: "Select severity",
         }),
         reaction: z.string().min(1, "Reaction required"),
       }),
@@ -58,17 +57,25 @@ function ProfileFormInner({ profile }: ProfileFormInnerProps) {
       emergencyContact: profile.emergencyContact ?? { name: "", relationship: "", phone: "" },
       allergies: profile.allergies ?? [],
     },
+    validators: {
+      onchange: medicalInfoSchema,
+    },
     onSubmit: async ({ value }) => {
       // Strip emergency contact if the name field is empty
       const emergencyContact = value.emergencyContact?.name ? value.emergencyContact : null;
 
-      await updateMutation.mutateAsync({
-        data: {
-          bloodGroup: value.bloodGroup,
-          emergencyContact,
-          allergies: value.allergies,
-        },
-      });
+      try {
+        await updateMutation.mutateAsync({
+          data: {
+            bloodGroup: value.bloodGroup,
+            emergencyContact,
+            allergies: value.allergies,
+          },
+        });
+      } catch (_error) {
+        // Error state is tracked by updateMutation.isError
+        // Optionally show toast notification here
+      }
     },
   });
 
@@ -146,7 +153,7 @@ function ProfileFormInner({ profile }: ProfileFormInnerProps) {
                   <option value="AB-">AB-</option>
                 </select>
                 {field.state.meta.errors.length > 0 && (
-                  <p className="text-xs text-destructive">{field.state.meta.errors[0]}</p>
+                  <p className="text-xs text-destructive">{field.state.meta.errors[0]?.message}</p>
                 )}
               </div>
             )}

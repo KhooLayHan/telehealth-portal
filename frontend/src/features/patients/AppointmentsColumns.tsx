@@ -18,7 +18,9 @@ export const appointmentsColumns = [
           </div>
           <div>
             <div className="font-medium text-sm">{name}</div>
-            <div className="text-xs text-muted-foreground">{info.row.original.specialization}</div>
+            <div className="text-xs text-muted-foreground">
+              {info.row.original.specialization ?? "General practice"}
+            </div>
           </div>
         </div>
       );
