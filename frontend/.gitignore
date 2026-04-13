@@ -27,3 +27,6 @@ dist-ssr
 storybook-static
 
 coverage/**
+
+!/api/generated/**/*
+!/api/model/**/*
