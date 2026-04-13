@@ -5,8 +5,6 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface Symptom {
-  name: string;
-  severity: string;
-  duration: string;
+export interface RescheduleAppointmentCommand {
+  newSchedulePublicId: string;
 }

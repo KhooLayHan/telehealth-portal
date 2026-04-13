@@ -5,5 +5,8 @@
  * OpenAPI spec version: 1.0.0
  */
 
-// biome-ignore lint/complexity/noBannedTypes: generated file
-export type LocalTime = {};
+export interface Symptom {
+  name?: string;
+  severity?: string;
+  duration?: string;
+}

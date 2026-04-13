@@ -22,9 +22,9 @@ export default defineConfig({
           name: "ofetchMutator",
         },
       },
-      schemas: "src/api/model",
+      schemas: "model",
       target: "generated",
-      workspace: "src/api",
+      workspace: "src/api"
     },
   },
 });

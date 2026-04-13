@@ -3,7 +3,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { Eye, EyeOff, Heart } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
-import { useRegisterPatient } from "@/api/generated/authentication/authentication";
+import { useSignUpPatient } from "@/api/generated/auth/auth";
 import type { ApiError } from "@/api/ofetch-mutator";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,7 +32,7 @@ export function RegisterForm() {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [globalError, setGlobalError] = useState<string | null>(null);
 
-  const registerMutation = useRegisterPatient();
+  const registerMutation = useSignUpPatient();
 
   const form = useForm({
     defaultValues: {

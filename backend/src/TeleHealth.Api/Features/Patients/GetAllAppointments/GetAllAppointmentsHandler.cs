@@ -1,6 +1,7 @@
 using Facet.Extensions;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
+using NodaTime.Text;
 using Serilog;
 using TeleHealth.Api.Common.Models;
 using TeleHealth.Api.Domain.Entities;
@@ -18,6 +19,14 @@ public sealed class GetAllAppointmentsHandler(ApplicationDbContext db)
         CancellationToken ct
     )
     {
+        var from = query.From is not null
+            ? LocalDatePattern.Iso.Parse(query.From).GetValueOrThrow()
+            : (LocalDate?)null;
+
+        var to = query.To is not null
+            ? LocalDatePattern.Iso.Parse(query.To).GetValueOrThrow()
+            : (LocalDate?)null;
+
         var page = Math.Max(query.Page, 1);
         var pageSize = Math.Clamp(query.PageSize, 1, MaxPageSize);
         var now = SystemClock.Instance.GetCurrentInstant().InUtc();
@@ -44,10 +53,10 @@ public sealed class GetAllAppointmentsHandler(ApplicationDbContext db)
             q = q.Where(a => a.Doctor.PublicId == query.DoctorId);
 
         if (query.From is not null)
-            q = q.Where(a => a.DoctorSchedule.Date >= LocalDate.FromDateOnly(query.From.Value));
+            q = q.Where(a => a.DoctorSchedule.Date >= from);
 
         if (query.To is not null)
-            q = q.Where(a => a.DoctorSchedule.Date <= LocalDate.FromDateOnly(query.To.Value));
+            q = q.Where(a => a.DoctorSchedule.Date <= to);
 
         if (!string.IsNullOrWhiteSpace(query.Search))
         {

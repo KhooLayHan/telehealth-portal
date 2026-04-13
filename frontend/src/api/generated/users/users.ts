@@ -25,11 +25,11 @@ import type {
 
 import type {
   CreateUserCommand
-} from '../../src/api/model/CreateUserCommand';
+} from '../../model/CreateUserCommand';
 
 import type {
   ProblemDetails
-} from '../../src/api/model/ProblemDetails';
+} from '../../model/ProblemDetails';
 
 import { ofetchMutator } from '../../ofetch-mutator';
 

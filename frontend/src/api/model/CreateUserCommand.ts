@@ -4,19 +4,16 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { LocalDate } from "./LocalDate";
+import type { LocalDate } from './LocalDate';
 
-export interface RegisterPatientCommand {
+export interface CreateUserCommand {
   username: string;
   email: string;
   password: string;
   firstName: string;
   lastName: string;
-  icNumber: string;
-  /**
-   * @minLength 1
-   * @maxLength 1
-   */
   gender: string;
   dateOfBirth: LocalDate;
+  phone: string;
+  icNumber: string;
 }

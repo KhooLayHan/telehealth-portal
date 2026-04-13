@@ -4,10 +4,9 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { Allergy } from "./Allergy";
-import type { LocalDate } from "./LocalDate";
-import type { LocalTime } from "./LocalTime";
-import type { Symptom } from "./Symptom";
+import type { LocalDate } from './LocalDate';
+import type { LocalTime } from './LocalTime';
+import type { Symptom } from './Symptom';
 
 export interface ReceptionistAppointmentDetailDto {
   publicId?: string;
@@ -16,10 +15,6 @@ export interface ReceptionistAppointmentDetailDto {
   /** @nullable */
   cancellationReason?: string | null;
   patientName?: string;
-  /** @nullable */
-  bloodGroup?: string | null;
-  /** @nullable */
-  allergies?: Allergy[] | null;
   doctorName?: string;
   specialization?: string;
   date?: LocalDate;
