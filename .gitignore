@@ -39,5 +39,5 @@ test-results/
 # IDEA-specific
 *.idea
 
-!frontend/src/api/generated/
-!frontend/src/api/model
+frontend/src/api/generated/
+frontend/src/api/model
