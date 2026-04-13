@@ -136,7 +136,7 @@ export function ReceptionistApptDetailsPage() {
       {/* RIGHT — Doctor & Schedule */}
       <motion.div variants={card} className="h-full">
         <Card className="relative overflow-hidden h-full">
-          <div className="absolute top-0 inset-x-0 h-[3px] bg-border" />
+          <div className="absolute top-0 inset-x-0 h-0.75 bg-border" />
 
           <CardContent className="pt-7 pb-6 px-6 flex flex-col gap-6">
             {/* Doctor identity */}
