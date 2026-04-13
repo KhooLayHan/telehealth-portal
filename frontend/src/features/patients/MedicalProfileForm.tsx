@@ -94,29 +94,35 @@ function ProfileFormInner({ profile }: ProfileFormInnerProps) {
   const updateMutation = useUpdateMedicalRecord();
   const bloodGroupId = useId();
 
-  const form = useForm<MedicalInfoFormValues>({
-    defaultValues: {
-      bloodGroup: profile.bloodGroup ?? "",
-      // Default to null — an untouched blank contact must not block submission
-      emergencyContact: profile.emergencyContact ?? null,
-      allergies: toFormAllergies(profile.allergies),
-    },
-    validators: {
-      onChange: medicalInfoSchema,
-    },
-    onSubmit: async ({ value }) => {
-      // Strip the client-only `id` field before sending to the API
-      const allergies: Allergy[] = value.allergies.map(({ id: _id, ...rest }) => rest);
+  const defaultValues: MedicalInfoFormValues = {
+    bloodGroup: profile.bloodGroup ?? "",
+    // Default to null — an untouched blank contact must not block submission
+    emergencyContact: profile.emergencyContact ?? null,
+    allergies: toFormAllergies(profile.allergies),
+  };
 
-      await updateMutation.mutateAsync({
+  const form = useForm;
+  defaultValues, validators;
+  :
+  onChange: medicalInfoSchema,
+  ,
+    onSubmit: async (
+  value;
+  ) =>
+  {
+    // Strip the client-only `id` field before sending to the API
+    const allergies: Allergy[] = value.allergies.map(({ id: _id, ...rest }) => rest);
+
+    await updateMutation.mutateAsync({
         data: {
           bloodGroup: value.bloodGroup,
           emergencyContact: normalizeEmergencyContact(value.emergencyContact),
           allergies,
         },
       });
-    },
-  });
+  }
+  ,
+  )
 
   return (
     <form

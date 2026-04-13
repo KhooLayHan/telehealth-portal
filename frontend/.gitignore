@@ -28,5 +28,5 @@ storybook-static
 
 coverage/**
 
-frontend/src/api/generated/
-frontend/src/api/model
+!frontend/src/api/generated/
+!frontend/src/api/model
