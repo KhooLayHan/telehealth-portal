@@ -24,6 +24,14 @@ import type {
 } from '../../model/DoctorListDto';
 
 import type {
+  DoctorScheduleResponse
+} from '../../model/DoctorScheduleResponse';
+
+import type {
+  GetDoctorScheduleParams
+} from '../../model/GetDoctorScheduleParams';
+
+import type {
   ProblemDetails
 } from '../../model/ProblemDetails';
 
@@ -136,6 +144,131 @@ export function useGetAll<TData = Awaited<ReturnType<typeof getAll>>, TError = P
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetAllQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export type getDoctorScheduleResponse200 = {
+  data: DoctorScheduleResponse
+  status: 200
+}
+
+export type getDoctorScheduleResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type getDoctorScheduleResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type getDoctorScheduleResponseSuccess = (getDoctorScheduleResponse200) & {
+  headers: Headers;
+};
+export type getDoctorScheduleResponseError = (getDoctorScheduleResponse401 | getDoctorScheduleResponse404) & {
+  headers: Headers;
+};
+
+export type getDoctorScheduleResponse = (getDoctorScheduleResponseSuccess | getDoctorScheduleResponseError)
+
+export const getGetDoctorScheduleUrl = (params?: GetDoctorScheduleParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `http://localhost:5144/api/v1/doctors/me/schedule?${stringifiedParams}` : `http://localhost:5144/api/v1/doctors/me/schedule`
+}
+
+export const getDoctorSchedule = async (params?: GetDoctorScheduleParams, options?: RequestInit): Promise<getDoctorScheduleResponse> => {
+
+  return ofetchMutator<getDoctorScheduleResponse>(getGetDoctorScheduleUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetDoctorScheduleQueryKey = (params?: GetDoctorScheduleParams,) => {
+    return [
+    `http://localhost:5144/api/v1/doctors/me/schedule`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetDoctorScheduleQueryOptions = <TData = Awaited<ReturnType<typeof getDoctorSchedule>>, TError = ProblemDetails>(params?: GetDoctorScheduleParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDoctorSchedule>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetDoctorScheduleQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDoctorSchedule>>> = ({ signal }) => getDoctorSchedule(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getDoctorSchedule>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetDoctorScheduleQueryResult = NonNullable<Awaited<ReturnType<typeof getDoctorSchedule>>>
+export type GetDoctorScheduleQueryError = ProblemDetails
+
+
+export function useGetDoctorSchedule<TData = Awaited<ReturnType<typeof getDoctorSchedule>>, TError = ProblemDetails>(
+ params: undefined |  GetDoctorScheduleParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDoctorSchedule>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getDoctorSchedule>>,
+          TError,
+          Awaited<ReturnType<typeof getDoctorSchedule>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetDoctorSchedule<TData = Awaited<ReturnType<typeof getDoctorSchedule>>, TError = ProblemDetails>(
+ params?: GetDoctorScheduleParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDoctorSchedule>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getDoctorSchedule>>,
+          TError,
+          Awaited<ReturnType<typeof getDoctorSchedule>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetDoctorSchedule<TData = Awaited<ReturnType<typeof getDoctorSchedule>>, TError = ProblemDetails>(
+ params?: GetDoctorScheduleParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDoctorSchedule>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetDoctorSchedule<TData = Awaited<ReturnType<typeof getDoctorSchedule>>, TError = ProblemDetails>(
+ params?: GetDoctorScheduleParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDoctorSchedule>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetDoctorScheduleQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
