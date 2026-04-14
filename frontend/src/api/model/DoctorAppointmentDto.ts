@@ -6,22 +6,15 @@
  */
 import type { LocalDate } from "./LocalDate";
 import type { LocalTime } from "./LocalTime";
-import type { Symptom } from "./Symptom";
 
-export interface ReceptionistAppointmentDetailDto {
+export interface DoctorAppointmentDto {
   publicId?: string;
   slug?: string;
-  visitReason?: string;
-  /** @nullable */
-  cancellationReason?: string | null;
   patientName?: string;
-  doctorName?: string;
-  specialization?: string;
+  visitReason?: string;
+  status?: string;
+  statusColorCode?: string;
   date?: LocalDate;
   startTime?: LocalTime;
   endTime?: LocalTime;
-  status?: string;
-  statusColorCode?: string;
-  /** @nullable */
-  symptoms?: Symptom[] | null;
 }

@@ -58,4 +58,11 @@ public static class ApiEndpoints
 
         public const string GetAllAppointments = Base;
     }
+
+    public static class Doctor
+    {
+        private const string Base = "doctor";
+
+        public const string GetSchedule = $"{Base}/me/schedule";
+    }
 }

@@ -1,8 +1,16 @@
 import { ClipboardPlus, Clock, Stethoscope, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DoctorScheduleTable } from "./DoctorScheduleTable";
+import { formatLocalTime, UseDoctorSchedule } from "./UseDoctorSchedule";
 
 export function DoctorDashboard() {
+  const { schedule, isLoading, page, setPage, search, setSearch, pageSize } = UseDoctorSchedule();
+
+  const totalCount = Number(schedule?.totalCount ?? 0);
+  const pendingCount = Number(schedule?.pendingCount ?? 0);
+  const nextTime = formatLocalTime(schedule?.nextAppointmentTime ?? undefined);
+
   return (
     <div className="space-y-6">
       {/* Doctor Stats */}
@@ -15,7 +23,13 @@ export function DoctorDashboard() {
             <Users className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <p className="font-bold text-2xl">12</p>
+            <p className="font-bold text-2xl">
+              {isLoading ? (
+                <span className="inline-block h-8 w-8 animate-pulse rounded bg-muted" />
+              ) : (
+                totalCount
+              )}
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -26,7 +40,13 @@ export function DoctorDashboard() {
             <ClipboardPlus className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <p className="font-bold text-2xl">3</p>
+            <p className="font-bold text-2xl">
+              {isLoading ? (
+                <span className="inline-block h-8 w-8 animate-pulse rounded bg-muted" />
+              ) : (
+                pendingCount
+              )}
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -37,12 +57,18 @@ export function DoctorDashboard() {
             <Clock className="size-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <p className="font-bold text-xl">10:30 AM</p>
+            <p className="font-bold text-xl">
+              {isLoading ? (
+                <span className="inline-block h-7 w-20 animate-pulse rounded bg-muted" />
+              ) : (
+                nextTime
+              )}
+            </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* The Daily Schedule Table */}
+      {/* Daily Schedule Table */}
       <div className="overflow-hidden rounded-xl border border-border bg-card">
         <div className="flex items-center justify-between border-border border-b px-6 py-4">
           <div>
@@ -56,11 +82,16 @@ export function DoctorDashboard() {
           </Button>
         </div>
         <div className="p-6">
-          <div className="flex h-40 items-center justify-center rounded-md border border-dashed border-border bg-muted/50">
-            <p className="text-muted-foreground text-sm">
-              Wey Gen: Insert TanStack Table for Today's Appointments here
-            </p>
-          </div>
+          <DoctorScheduleTable
+            items={schedule?.items ?? []}
+            totalCount={totalCount}
+            page={page}
+            pageSize={pageSize}
+            search={search}
+            isLoading={isLoading}
+            onPageChange={setPage}
+            onSearchChange={setSearch}
+          />
         </div>
       </div>
     </div>

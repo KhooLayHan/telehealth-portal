@@ -51,6 +51,36 @@ Per-feature breakdown for Doctor:
 - Add consultation notes → one file (form + single mutation)
 - Mark appointment complete → inline button action inside appointments component
 
+## Feature Summary (when user says "list down what we did")
+
+When the user asks to list down what was done, always present it in this exact format:
+
+### Feature: [Feature Name] — [Layer: Backend / Frontend / Both]
+
+**What this feature does**
+One or two sentences explaining the purpose in plain language.
+
+**Files Added**
+Table with columns: `#`, `Path` (as clickable markdown link), `Purpose` (one line, plain English)
+
+**Files Modified**
+Table with columns: `#`, `Path` (as clickable markdown link), `What changed` (one line)
+
+**Commands Run**
+Code block with each command, a short comment, and a ✅/❌ result
+
+**API Endpoint Produced** *(backend features only)*
+Show the route, all query params with types and defaults, and auth requirement
+
+**Next Steps**
+Numbered list of what comes next, in order
+
+Rules:
+- All file paths must be clickable markdown links relative to repo root
+- Keep each table cell to one line — no paragraphs inside tables
+- Plain English only — no jargon the user hasn't seen before
+- Always include the commands section even if only format/check was run
+
 ## Important notes
 
 - `bun run check` is strict — Biome/Ultracite will fail on import order, unused vars, code style violations, and formatting drift. Always fix errors before moving on.
