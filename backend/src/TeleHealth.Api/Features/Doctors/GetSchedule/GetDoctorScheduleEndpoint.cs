@@ -4,7 +4,7 @@ using TeleHealth.Api.Common;
 using TeleHealth.Api.Common.Exceptions.Auth;
 using TeleHealth.Api.Common.Security;
 
-namespace TeleHealth.Api.Features.Doctor.GetSchedule;
+namespace TeleHealth.Api.Features.Doctors.GetSchedule;
 
 public static class GetDoctorScheduleEndpoint
 {

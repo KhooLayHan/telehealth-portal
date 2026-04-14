@@ -1,4 +1,4 @@
-namespace TeleHealth.Api.Features.Doctor.GetSchedule;
+namespace TeleHealth.Api.Features.Doctors.GetSchedule;
 
 public sealed record GetDoctorScheduleQuery(
     DateOnly? Date,

@@ -1,4 +1,3 @@
-// Features/Doctors/GetDoctors/DoctorListDto.cs
 using Facet;
 using Facet.Mapping;
 using TeleHealth.Api.Domain.Entities;
