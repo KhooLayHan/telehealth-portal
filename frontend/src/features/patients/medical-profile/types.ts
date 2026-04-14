@@ -1,7 +1,33 @@
+import type { FieldApi } from "@tanstack/react-form";
 import { z } from "zod";
+import type { PatientProfileDto } from "@/api/model/PatientProfileDto";
+import type { MedicalProfileFormApi } from "./UseMedicalProfile";
 
 export const SEVERITY_OPTIONS = ["mild", "moderate", "severe"] as const;
+export const BLOOD_GROUP_OPTIONS = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"] as const;
+
 export type Severity = (typeof SEVERITY_OPTIONS)[number];
+
+export type AllergiesManagerProps = {
+  form: MedicalProfileFormApi;
+};
+
+export type ProfileFormInnerProps = {
+  profile: PatientProfileDto;
+};
+
+export type EmergencyContactFormProps = {
+  form: MedicalProfileFormApi;
+};
+
+export type BloodGroupSelectProps = {
+  field: FieldApi<MedicalInfoFormValues, "bloodGroup">;
+  id: string;
+};
+
+export type PersonalInfoCardProps = {
+  profile: PatientProfileDto;
+};
 
 export type AllergyFormItem = {
   id: string;

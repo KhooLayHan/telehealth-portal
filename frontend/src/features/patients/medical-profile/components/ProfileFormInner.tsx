@@ -4,28 +4,22 @@ import { useId } from "react";
 
 import { useUpdateMedicalRecord } from "@/api/generated/patients/patients";
 import type { Allergy } from "@/api/model/Allergy";
-import type { PatientProfileDto } from "@/api/model/PatientProfileDto";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-
-import { PersonalInfoCard } from "./components/PersonalInfoCard";
-import { generateId, normalizeEmergencyContact, toFormAllergies } from "./helpers";
+import { generateId, normalizeEmergencyContact, toFormAllergies } from "../helpers";
 import {
+  BLOOD_GROUP_OPTIONS,
   type MedicalInfoFormValues,
   medicalInfoSchema,
+  type ProfileFormInnerProps,
   SEVERITY_OPTIONS,
   type Severity,
-} from "./types";
-
-const BLOOD_GROUP_OPTIONS = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
-
-type ProfileFormInnerProps = {
-  profile: PatientProfileDto;
-};
+} from "../types";
+import { PersonalInfoCard } from "./PersonalInfoCard";
 
 export function ProfileFormInner({ profile }: ProfileFormInnerProps) {
   const updateMutation = useUpdateMedicalRecord();

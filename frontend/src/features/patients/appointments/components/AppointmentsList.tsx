@@ -1,9 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
+import { useAppointments } from "../UseAppointments";
 import { AppointmentsPagination } from "./AppointmentsPagination";
 import { AppointmentsTable } from "./AppointmentsTable";
-import { useAppointments } from "./UseAppointments";
 
 export function PatientAppointmentsList() {
   const {

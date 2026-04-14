@@ -1,12 +1,8 @@
 import { User } from "lucide-react";
-import type { PatientProfileDto } from "@/api/model/PatientProfileDto";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-type PersonalInfoCardProps = {
-  profile: PatientProfileDto;
-};
+import type { PersonalInfoCardProps } from "../types";
 
 export function PersonalInfoCard({ profile }: PersonalInfoCardProps) {
   return (
