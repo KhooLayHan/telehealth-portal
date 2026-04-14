@@ -1,7 +1,9 @@
 using Facet.Extensions;
 using Microsoft.EntityFrameworkCore;
 using NodaTime.Text;
+using Serilog;
 using TeleHealth.Api.Common.Constants;
+using TeleHealth.Api.Common.Exceptions.Schedules;
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Infrastructure.Persistence;
 
@@ -17,7 +19,8 @@ public sealed class GetAllAvailableSchedulesHandler(ApplicationDbContext db)
         var parseResult = LocalDatePattern.Iso.Parse(query.Date);
         if (!parseResult.Success)
         {
-            throw new ArgumentException("Invalid date format. Use YYYY-MM-DD.");
+            Log.Warning("Invalid date format. Use YYYY-MM-DD.");
+            throw new InvalidateDateException();
         }
 
         var targetDate = parseResult.Value;
