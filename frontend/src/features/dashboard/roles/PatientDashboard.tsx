@@ -105,7 +105,7 @@ export function PatientDashboard() {
         ))}
       </div>
       {/* Recent appointments table */}
-      {/* <div className="overflow-hidden rounded-xl border border-border bg-card">
+      <div className="overflow-hidden rounded-xl border border-border bg-card">
         <div className="flex items-center justify-between border-border border-b px-6 py-4">
           <div>
             <h2 className="font-semibold">Recent Appointments</h2>
@@ -153,7 +153,7 @@ export function PatientDashboard() {
             </tbody>
           </table>
         </div>
-      </div> */}
+      </div>
       <PatientAppointmentsList />
       <PatientMedicalProfileForm />
     </div>
