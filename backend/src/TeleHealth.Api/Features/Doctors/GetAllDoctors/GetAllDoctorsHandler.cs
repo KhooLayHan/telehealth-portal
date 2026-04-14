@@ -1,6 +1,4 @@
-using Facet.Extensions;
 using Microsoft.EntityFrameworkCore;
-using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Infrastructure.Persistence;
 
 namespace TeleHealth.Api.Features.Doctors.GetAllDoctors;
@@ -12,7 +10,7 @@ public sealed class GetAllDoctorsHandler(ApplicationDbContext db)
         return await db
             .Doctors.AsNoTracking()
             .OrderBy(d => d.Id)
-            .SelectFacet<Doctor, DoctorListDto>()
+            .Select(DoctorListDto.Projection)
             .ToListAsync(ct);
     }
 }

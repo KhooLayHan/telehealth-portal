@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using Facet;
 using TeleHealth.Api.Domain.Entities;
 
 namespace TeleHealth.Api.Features.Patients.GetProfile;
