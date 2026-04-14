@@ -42,5 +42,3 @@ test-results/
 # Claude Code (personal local config — not for shared repo)
 .claude/
 
-frontend/src/api/generated/
-frontend/src/api/model
