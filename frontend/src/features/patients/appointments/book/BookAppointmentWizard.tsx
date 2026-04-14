@@ -1,6 +1,5 @@
-// src/features/appointments/BookAppointmentWizard.tsx
-
 import { useForm } from "@tanstack/react-form";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import {
   Calendar as CalendarIcon,
@@ -11,6 +10,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
+import { $fetch } from "ofetch";
 import { useState } from "react";
 import { z } from "zod";
 
@@ -21,56 +21,104 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-// FIX: Severity options as a const to avoid duplication between schema and JSX
+// ---------------------------------------------------------------------------
+// Constants & schema
+// ---------------------------------------------------------------------------
+
 const SEVERITY_OPTIONS = ["Mild", "Moderate", "Severe"] as const;
 type Severity = (typeof SEVERITY_OPTIONS)[number];
+
+// FIX (symptom validation): Extracted as a top-level const so each sub-field
+// can reference `symptomItemSchema.shape.<field>` directly as a validator,
+// instead of duplicating inline schemas or passing `undefined`.
+const symptomItemSchema = z.object({
+  // Client-only stable key — stripped before the API call
+  _id: z.string(),
+  name: z.string().min(1, "Symptom name required").max(100, "Max 100 characters"),
+  severity: z.enum(SEVERITY_OPTIONS, { error: "Select severity" }),
+  duration: z.string().min(1, "Duration required (e.g., '3 days')").max(100, "Max 100 characters"),
+});
 
 const bookingSchema = z.object({
   schedulePublicId: z.string().min(1, "Please select a time slot."),
   visitReason: z.string().min(5, "Please provide a reason (min 5 characters).").max(500),
-  symptoms: z
-    .array(
-      z.object({
-        // FIX: Added a client-side `_id` for stable React keys (not sent to API)
-        _id: z.string(),
-        name: z.string().min(1, "Symptom name required"),
-        severity: z.enum(SEVERITY_OPTIONS, {
-          error: "Select severity",
-        }),
-        duration: z.string().min(1, "Duration required (e.g., '3 days')"),
-      }),
-    )
-    .default([]),
+  // Re-uses the extracted schema so both the array-level and field-level
+  // validators are always in sync with the backend BookAppointmentValidator.
+  symptoms: z.array(symptomItemSchema).default([]),
 });
 
 type BookingFormValues = z.infer<typeof bookingSchema>;
-
-// FIX: Separated step navigation (1|2) from success state (boolean).
-// Step 3 was really a different screen, not a booking step.
 type WizardStep = 1 | 2;
 
-// --- DUMMY DATA FOR UI TESTING ---
-const DUMMY_SCHEDULES = [
-  { id: "01hgw-morning", time: "09:00 AM" },
-  { id: "01hgw-mid", time: "10:30 AM" },
-  { id: "01hgw-afternoon", time: "02:00 PM" },
-];
+// ---------------------------------------------------------------------------
+// Schedule API
+// ---------------------------------------------------------------------------
+
+// Shape returned by GET /api/v1/schedules/available.
+// `publicId` is the UUID that goes directly into BookAppointmentCommand.schedulePublicId.
+// TODO: generate this type via orval once the schedule endpoint is spec-documented.
+interface AvailableScheduleDto {
+  publicId: string;
+  startTime: string; // "HH:mm" — formatted server-side for display
+  endTime: string;
+}
+
+// FIX (real slot IDs): Fetches genuine schedule rows from the database.
+// The returned `publicId` values are real UUIDv7s that satisfy the backend's
+// `FirstOrDefaultAsync(s => s.PublicId == cmd.SchedulePublicId)` lookup,
+// replacing the placeholder strings that previously caused a 404.
+const fetchAvailableSchedules = (
+  date: string,
+  doctorPublicId: string | undefined,
+): Promise<AvailableScheduleDto[]> =>
+  $fetch<AvailableScheduleDto[]>(
+    // NOTE: update this path to match ApiEndpoints.Schedules.Available
+    // once the schedule endpoint is registered on the router.
+    "http://localhost:5144/api/v1/schedules/available",
+    {
+      query: {
+        date,
+        ...(doctorPublicId ? { doctorPublicId } : {}),
+      },
+    },
+  );
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 
 export function BookAppointmentWizard() {
   const navigate = useNavigate();
   const [step, setStep] = useState<WizardStep>(1);
-  // FIX: Success is a separate boolean, not a third "step"
   const [isSuccess, setIsSuccess] = useState(false);
-  // FIX: Booking error surfaced to the user instead of console.error
   const [bookingError, setBookingError] = useState<string | null>(null);
 
   const today = new Date();
   const minDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-  const [selectedDate, setSelectedDate] = useState("");
-  const [selectedDoctorId, setSelectedDoctorId] = useState("");
 
-  // FIX: Correct hook name from generated file
+  // FIX (real slot IDs): `selectedDoctorId` now holds a doctor public-ID UUID
+  // (or empty string for "any doctor"). When either input changes the stale
+  // `schedulePublicId` is cleared so the user cannot submit a slot that no
+  // longer belongs to the new doctor/date combination.
+  // TODO: populate this select from GET /api/v1/doctors once that endpoint exists.
+  const [selectedDoctorId, setSelectedDoctorId] = useState("");
+  const [selectedDate, setSelectedDate] = useState("");
+
   const bookMutation = useCreate();
+
+  // FIX (real slot IDs): Query is enabled only when a date is chosen.
+  // React Query re-fetches automatically whenever selectedDate or
+  // selectedDoctorId changes, so the slot grid always reflects current
+  // availability rather than stale dummy values.
+  const {
+    data: availableSchedules = [],
+    isLoading: isLoadingSchedules,
+    isError: isSchedulesError,
+  } = useQuery({
+    queryKey: ["schedules", "available", selectedDate, selectedDoctorId || null],
+    queryFn: () => fetchAvailableSchedules(selectedDate, selectedDoctorId || undefined),
+    enabled: !!selectedDate,
+  });
 
   const defaultValues: BookingFormValues = {
     schedulePublicId: "",
@@ -127,15 +175,12 @@ export function BookAppointmentWizard() {
 
   return (
     <div className="max-w-2xl mx-auto py-8">
-      {/* Progress Bar — now only reflects real steps 1 and 2 */}
       <div className="mb-8 flex items-center justify-between">
         <div className={`flex-1 h-2 rounded-full ${step >= 1 ? "bg-primary" : "bg-muted"}`} />
         <div className="mx-4 text-sm font-medium text-muted-foreground">Step {step} of 2</div>
         <div className={`flex-1 h-2 rounded-full ${step >= 2 ? "bg-primary" : "bg-muted"}`} />
       </div>
 
-      {/* FIX: Single <form> wrapping the whole wizard so both steps
-          are inside one form. Navigation between steps does not submit. */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -154,18 +199,29 @@ export function BookAppointmentWizard() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid gap-4 sm:grid-cols-2">
-                  {/* FIX: Added `id` + `htmlFor` pairing on all labels and selects */}
                   <div className="space-y-2">
                     <Label htmlFor="doctor-select">Select Doctor</Label>
+                    {/* TODO: replace options with data from GET /api/v1/doctors */}
                     <select
                       id="doctor-select"
                       className="h-10 w-full rounded-md border border-input bg-transparent px-3 py-1 shadow-sm"
                       value={selectedDoctorId}
-                      onChange={(e) => setSelectedDoctorId(e.target.value)}
+                      onChange={(e) => {
+                        setSelectedDoctorId(e.target.value);
+                        // FIX (real slot IDs): A doctor change means the
+                        // current slot belongs to a different availability
+                        // set — clear it so the old publicId is never submitted.
+                        form.setFieldValue("schedulePublicId", "");
+                      }}
                     >
                       <option value="">Any Available Doctor</option>
-                      <option value="dr-sarah">Dr. Sarah Chen (Cardiology)</option>
-                      <option value="dr-ahmad">Dr. Ahmad Razak (General)</option>
+                      {/* Values must be doctor public-ID UUIDs once the lookup API is wired */}
+                      <option value="01930000-0000-7000-0000-000000000001">
+                        Dr. Sarah Chen (Cardiology)
+                      </option>
+                      <option value="01930000-0000-7000-0000-000000000002">
+                        Dr. Ahmad Razak (General)
+                      </option>
                     </select>
                   </div>
                   <div className="space-y-2">
@@ -177,7 +233,12 @@ export function BookAppointmentWizard() {
                         type="date"
                         className="pl-9"
                         value={selectedDate}
-                        onChange={(e) => setSelectedDate(e.target.value)}
+                        onChange={(e) => {
+                          setSelectedDate(e.target.value);
+                          // FIX (real slot IDs): Date change invalidates
+                          // the previously selected slot — clear it.
+                          form.setFieldValue("schedulePublicId", "");
+                        }}
                         min={minDate}
                       />
                     </div>
@@ -196,30 +257,51 @@ export function BookAppointmentWizard() {
                       aria-labelledby="time-slots-label"
                     >
                       <legend id="time-slots-label">Available Time Slots</legend>
+
                       {!selectedDate ? (
                         <p className="text-sm text-muted-foreground italic">
                           Please select a date first.
                         </p>
+                      ) : isLoadingSchedules ? (
+                        <p className="text-sm text-muted-foreground italic">
+                          Loading available slots…
+                        </p>
+                      ) : isSchedulesError ? (
+                        <p className="text-sm text-destructive" role="alert">
+                          Could not load available slots. Please try again.
+                        </p>
+                      ) : availableSchedules.length === 0 ? (
+                        <p className="text-sm text-muted-foreground italic">
+                          No slots available for this date. Try another day.
+                        </p>
                       ) : (
+                        // FIX (real slot IDs): Each button's onClick now passes
+                        // slot.publicId — a real database UUID — into the form
+                        // field, so the value submitted matches what the backend
+                        // expects in BookAppointmentCommand.SchedulePublicId.
                         <div className="grid grid-cols-3 gap-3">
-                          {DUMMY_SCHEDULES.map((slot) => (
+                          {availableSchedules.map((slot) => (
                             <button
-                              key={slot.id}
+                              key={slot.publicId}
                               type="button"
-                              aria-pressed={field.state.value === slot.id}
-                              onClick={() => field.handleChange(slot.id)}
+                              aria-pressed={field.state.value === slot.publicId}
+                              onClick={() => field.handleChange(slot.publicId)}
                               className={`flex flex-col items-center justify-center rounded-md border p-3 transition-all ${
-                                field.state.value === slot.id
+                                field.state.value === slot.publicId
                                   ? "border-primary bg-primary/10 text-primary ring-1 ring-primary"
                                   : "border-border hover:border-primary/50 hover:bg-muted/50"
                               }`}
                             >
                               <Clock className="mb-1 size-4" />
-                              <span className="text-sm font-medium">{slot.time}</span>
+                              <span className="text-sm font-medium">{slot.startTime}</span>
+                              <span className="text-xs text-muted-foreground">
+                                – {slot.endTime}
+                              </span>
                             </button>
                           ))}
                         </div>
                       )}
+
                       {field.state.meta.errors.length > 0 && (
                         <p className="text-xs text-destructive">
                           {field.state.meta.errors[0]?.message}
@@ -230,10 +312,8 @@ export function BookAppointmentWizard() {
                 </form.Field>
 
                 <div className="flex justify-end pt-6">
-                  {/* FIX: Subscribe only to the specific value we need */}
                   <form.Subscribe selector={(state) => state.values.schedulePublicId}>
                     {(scheduleId) => (
-                      // FIX: type="button" prevents accidental form submission
                       <Button type="button" onClick={() => setStep(2)} disabled={!scheduleId}>
                         Next Step <ChevronRight className="ml-2 size-4" />
                       </Button>
@@ -299,7 +379,6 @@ export function BookAppointmentWizard() {
                           size="sm"
                           onClick={() =>
                             field.pushValue({
-                              // FIX: Stable unique key, not array index
                               _id: crypto.randomUUID(),
                               name: "",
                               severity: "Mild",
@@ -317,13 +396,22 @@ export function BookAppointmentWizard() {
                     {(field) => (
                       <div className="space-y-3">
                         {field.state.value.map((symptom, i) => (
-                          // FIX: Use the stable `_id` instead of array index `i`
                           <div
                             key={symptom._id}
                             className="flex items-start gap-2 bg-muted/30 p-3 rounded-lg border border-border"
                           >
                             <div className="grid flex-1 gap-3 sm:grid-cols-3">
-                              <form.Field name={`symptoms[${i}].name`}>
+                              {/* FIX (symptom validation): each sub-field now
+                                  has a validator referencing symptomItemSchema.shape,
+                                  so incomplete rows are caught client-side before
+                                  the backend's BookAppointmentValidator rejects them.
+                                  Errors render inline below each input. */}
+                              <form.Field
+                                name={`symptoms[${i}].name`}
+                                validators={{
+                                  onChange: symptomItemSchema.shape.name,
+                                }}
+                              >
                                 {(subField) => (
                                   <div className="space-y-1">
                                     <Label
@@ -338,11 +426,26 @@ export function BookAppointmentWizard() {
                                       onBlur={subField.handleBlur}
                                       onChange={(e) => subField.handleChange(e.target.value)}
                                       placeholder="Fever"
+                                      aria-invalid={subField.state.meta.errors.length > 0}
                                     />
+                                    {subField.state.meta.errors.length > 0 && (
+                                      <p className="text-xs text-destructive">
+                                        {subField.state.meta.errors[0]?.message}
+                                      </p>
+                                    )}
                                   </div>
                                 )}
                               </form.Field>
-                              <form.Field name={`symptoms[${i}].severity`}>
+
+                              {/* Severity is a closed enum — invalid values are
+                                  prevented by the select itself, but the
+                                  validator still blocks programmatic bad data. */}
+                              <form.Field
+                                name={`symptoms[${i}].severity`}
+                                validators={{
+                                  onChange: symptomItemSchema.shape.severity,
+                                }}
+                              >
                                 {(subField) => (
                                   <div className="space-y-1">
                                     <Label
@@ -351,7 +454,6 @@ export function BookAppointmentWizard() {
                                     >
                                       Severity
                                     </Label>
-                                    {/* FIX: No `as any` — cast to Severity which matches the schema enum */}
                                     <select
                                       id={`symptom-severity-${symptom._id}`}
                                       value={subField.state.value}
@@ -367,10 +469,21 @@ export function BookAppointmentWizard() {
                                         </option>
                                       ))}
                                     </select>
+                                    {subField.state.meta.errors.length > 0 && (
+                                      <p className="text-xs text-destructive">
+                                        {subField.state.meta.errors[0]?.message}
+                                      </p>
+                                    )}
                                   </div>
                                 )}
                               </form.Field>
-                              <form.Field name={`symptoms[${i}].duration`}>
+
+                              <form.Field
+                                name={`symptoms[${i}].duration`}
+                                validators={{
+                                  onChange: symptomItemSchema.shape.duration,
+                                }}
+                              >
                                 {(subField) => (
                                   <div className="space-y-1">
                                     <Label
@@ -385,7 +498,13 @@ export function BookAppointmentWizard() {
                                       onBlur={subField.handleBlur}
                                       onChange={(e) => subField.handleChange(e.target.value)}
                                       placeholder="2 days"
+                                      aria-invalid={subField.state.meta.errors.length > 0}
                                     />
+                                    {subField.state.meta.errors.length > 0 && (
+                                      <p className="text-xs text-destructive">
+                                        {subField.state.meta.errors[0]?.message}
+                                      </p>
+                                    )}
                                   </div>
                                 )}
                               </form.Field>
@@ -407,7 +526,6 @@ export function BookAppointmentWizard() {
                   </form.Field>
                 </div>
 
-                {/* FIX: Surface API errors to the user */}
                 {bookingError && (
                   <p className="text-sm text-destructive" role="alert">
                     {bookingError}
@@ -419,7 +537,6 @@ export function BookAppointmentWizard() {
                     <ChevronLeft className="mr-2 size-4" /> Back
                   </Button>
 
-                  {/* FIX: Subscribe only to `canSubmit` and `isSubmitting`, not entire state */}
                   <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
                     {([canSubmit, isSubmitting]) => (
                       <Button type="submit" disabled={!canSubmit || bookMutation.isPending}>
