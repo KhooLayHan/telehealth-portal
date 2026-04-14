@@ -64,6 +64,8 @@ export function BookAppointmentWizard() {
   // FIX: Booking error surfaced to the user instead of console.error
   const [bookingError, setBookingError] = useState<string | null>(null);
 
+  const today = new Date();
+  const minDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedDoctorId, setSelectedDoctorId] = useState("");
 
@@ -176,7 +178,7 @@ export function BookAppointmentWizard() {
                         className="pl-9"
                         value={selectedDate}
                         onChange={(e) => setSelectedDate(e.target.value)}
-                        min={new Date().toISOString().split("T")[0]}
+                        min={minDate}
                       />
                     </div>
                   </div>
@@ -189,12 +191,11 @@ export function BookAppointmentWizard() {
                   }}
                 >
                   {(field) => (
-                    <div
+                    <fieldset
                       className="space-y-3 pt-4 border-t border-border"
-                      role="group"
                       aria-labelledby="time-slots-label"
                     >
-                      <Label id="time-slots-label">Available Time Slots</Label>
+                      <legend id="time-slots-label">Available Time Slots</legend>
                       {!selectedDate ? (
                         <p className="text-sm text-muted-foreground italic">
                           Please select a date first.
@@ -224,7 +225,7 @@ export function BookAppointmentWizard() {
                           {field.state.meta.errors[0]?.message}
                         </p>
                       )}
-                    </div>
+                    </fieldset>
                   )}
                 </form.Field>
 

@@ -14,7 +14,10 @@ internal sealed class ProblemExceptionHandler(IProblemDetailsService problemDeta
     )
     {
         // Cold starts and slow queries causes the endpoint to run slowly for the first time...
-        if (exception is OperationCanceledException)
+        if (
+            exception is OperationCanceledException
+            && httpContext.RequestAborted.IsCancellationRequested
+        )
         {
             Log.Information(
                 "Request was cancelled by the client: {Path}",
