@@ -13,6 +13,17 @@ internal sealed class ProblemExceptionHandler(IProblemDetailsService problemDeta
         CancellationToken cancellationToken
     )
     {
+        // Cold starts and slow queries causes the endpoint to run slowly for the first time...
+        if (exception is OperationCanceledException)
+        {
+            Log.Information(
+                "Request was cancelled by the client: {Path}",
+                httpContext.Request.Path
+            );
+            httpContext.Response.StatusCode = 499; // Client Closed Request
+            return true;
+        }
+
         if (exception is not ProblemException problemException)
         {
             return false;
