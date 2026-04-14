@@ -30,6 +30,27 @@ Apply all coding standards and formatting checks for this project whenever writi
 - **After finishing any file** — run the relevant format command immediately
 - **Before every commit** — both format + check must be clean; never commit with lint/format errors
 
+## Feature Structure
+
+When building a new feature, choose the right structure upfront:
+
+- **One file** when: single API call, no pagination/filters/tabs, under ~150 lines total
+- **Split hook + component** when: has pagination, filters, tabs, or multiple pieces of state
+  - Hook file: `UseXxx.tsx` — logic only, no JSX, returns data + handlers
+  - Component file: `XxxComponent.tsx` — JSX only, calls the hook, no API logic
+
+File naming and placement:
+- Hook files: `UseXxx.tsx` (capital U — matches project convention)
+- Role-specific views: `features/appointments/roles/DoctorXxx.tsx`
+- Role dashboard entry points: `features/dashboard/roles/DoctorDashboard.tsx`
+- Never put API calls directly in a component — always go through `@/api/generated/`
+
+Per-feature breakdown for Doctor:
+- View appointments → hook + component (has pagination/filters)
+- View patient info → one file (single fetch, simple display)
+- Add consultation notes → one file (form + single mutation)
+- Mark appointment complete → inline button action inside appointments component
+
 ## Important notes
 
 - `bun run check` is strict — Biome/Ultracite will fail on import order, unused vars, code style violations, and formatting drift. Always fix errors before moving on.
