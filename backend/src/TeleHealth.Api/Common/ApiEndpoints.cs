@@ -64,6 +64,8 @@ public static class ApiEndpoints
 
         public const string Create = Base;
 
+        public const string GetSchedule = $"{Base}/me/schedule";
+
         public const string GetByIdOrSlug = $"{Base}/{{idOrSlug}}";
 
         public const string GetAll = Base;

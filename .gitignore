@@ -39,5 +39,6 @@ test-results/
 # IDEA-specific
 *.idea
 
-frontend/src/api/generated/
-frontend/src/api/model
+# Claude Code (personal local config — not for shared repo)
+.claude/
+

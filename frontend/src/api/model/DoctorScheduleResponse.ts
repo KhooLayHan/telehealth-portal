@@ -4,12 +4,16 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { AppointmentDto } from "./AppointmentDto";
+import type { DoctorAppointmentDto } from "./DoctorAppointmentDto";
+import type { LocalTime } from "./LocalTime";
 
-export interface PagedResultOfAppointmentDto {
-  items: AppointmentDto[];
+export interface DoctorScheduleResponse {
+  items: DoctorAppointmentDto[];
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   totalCount: number | string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  pendingCount: number | string;
+  nextAppointmentTime: null | LocalTime;
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   page: number | string;
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
