@@ -15,6 +15,7 @@ using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Features.Appointments.Book;
 using TeleHealth.Api.Features.Appointments.GetAllAppointments;
 using TeleHealth.Api.Features.Appointments.GetAppointmentsById;
+using TeleHealth.Api.Features.Doctor.GetSchedule;
 using TeleHealth.Api.Features.Patients.CancelAppointment;
 using TeleHealth.Api.Features.Patients.GetAllAppointments;
 using TeleHealth.Api.Features.Patients.GetAppointmentByIdOrSlug;
@@ -140,6 +141,7 @@ builder.Services.AddScoped<ReceptionistGetAppointmentByIdHandler>();
 builder.Services.AddScoped<GetAppointmentByIdOrSlugHandler>();
 builder.Services.AddScoped<RescheduleAppointmentHandler>();
 builder.Services.AddScoped<CancelAppointmentHandler>();
+builder.Services.AddScoped<GetDoctorScheduleHandler>();
 
 builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonS3>();
@@ -187,6 +189,7 @@ api.MapGetAppointmentByIdForReceptionistEndpoint();
 api.MapGetAppointmentByIdOrSlugEndpoint();
 api.MapRescheduleAppointmentEndpoint();
 api.MapCancelAppointmentEndpoint();
+api.MapGetDoctorScheduleEndpoint();
 
 app.UseSerilogRequestLogging();
 
