@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { PatientProfileDto } from "@/api/model/PatientProfileDto";
-import type { MedicalProfileFormApi } from "./UseMedicalProfile";
+import type { MedicalProfileFormApi } from "./components/UseMedicalProfile";
 
 export const SEVERITY_OPTIONS = ["mild", "moderate", "severe"] as const;
 export const BLOOD_GROUP_OPTIONS = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"] as const;

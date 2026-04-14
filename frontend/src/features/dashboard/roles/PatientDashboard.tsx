@@ -1,6 +1,8 @@
 import { Activity, Calendar, FileText, Stethoscope, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PatientAppointmentsList } from "@/features/patients/appointments/AppointmentsList";
+import { PatientMedicalProfileForm } from "@/features/patients/medical-profile/MedicalProfileForm";
 
 // --- Static scaffold data ---
 
@@ -103,7 +105,7 @@ export function PatientDashboard() {
         ))}
       </div>
       {/* Recent appointments table */}
-      <div className="overflow-hidden rounded-xl border border-border bg-card">
+      {/* <div className="overflow-hidden rounded-xl border border-border bg-card">
         <div className="flex items-center justify-between border-border border-b px-6 py-4">
           <div>
             <h2 className="font-semibold">Recent Appointments</h2>
@@ -151,7 +153,9 @@ export function PatientDashboard() {
             </tbody>
           </table>
         </div>
-      </div>
+      </div> */}
+      <PatientAppointmentsList />
+      <PatientMedicalProfileForm />
     </div>
   );
 }

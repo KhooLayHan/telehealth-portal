@@ -6,11 +6,10 @@ import type { PatientProfileDto } from "@/api/model/PatientProfileDto";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { BLOOD_GROUP_OPTIONS, medicalInfoSchema } from "../types";
-import { useMedicalProfile } from "../UseMedicalProfile";
 import { AllergiesManager } from "./AllergiesManager";
-
 import { EmergencyContactForm } from "./EmergencyContactForm";
 import { PersonalInfoCard } from "./PersonalInfoCard";
+import { useMedicalProfile } from "./UseMedicalProfile";
 
 export function ProfileFormInner({ profile }: { profile: PatientProfileDto }) {
   const { form, updateMutation } = useMedicalProfile(profile);

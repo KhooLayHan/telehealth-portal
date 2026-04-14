@@ -1,5 +1,5 @@
 import { useGetProfile } from "@/api/generated/patients/patients";
-import { ProfileFormInner } from "./ProfileFormInner";
+import { ProfileFormInner } from "./components/ProfileFormInner";
 
 export function PatientMedicalProfileForm() {
   const { data: response, isLoading, isError } = useGetProfile();

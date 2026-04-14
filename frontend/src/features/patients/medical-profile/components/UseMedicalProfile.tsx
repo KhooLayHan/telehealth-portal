@@ -3,8 +3,8 @@ import { useForm } from "@tanstack/react-form";
 import { useUpdateMedicalRecord } from "@/api/generated/patients/patients";
 import type { Allergy } from "@/api/model/Allergy";
 import type { PatientProfileDto } from "@/api/model/PatientProfileDto";
-import { normalizeEmergencyContact, toFormAllergies } from "./helpers";
-import { type MedicalInfoFormValues, medicalInfoSchema } from "./types";
+import { normalizeEmergencyContact, toFormAllergies } from "../helpers";
+import { type MedicalInfoFormValues, medicalInfoSchema } from "../types";
 
 export function useMedicalProfile(profile: PatientProfileDto) {
   const updateMutation = useUpdateMedicalRecord();
