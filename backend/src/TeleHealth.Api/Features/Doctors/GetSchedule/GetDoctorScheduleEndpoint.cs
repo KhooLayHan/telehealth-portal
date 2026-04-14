@@ -29,7 +29,7 @@ public static class GetDoctorScheduleEndpoint
                 }
             )
             .WithName("GetDoctorSchedule")
-            .WithTags("Doctor")
+            .WithTags(nameof(ApiEndpoints.Doctors))
             .RequireAuthorization(AuthConstants.DoctorPolicy)
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status404NotFound);

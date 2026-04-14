@@ -74,7 +74,7 @@ export const getGetDoctorScheduleUrl = (params?: GetDoctorScheduleParams,) => {
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `http://localhost:5144/api/v1/doctor/me/schedule?${stringifiedParams}` : `http://localhost:5144/api/v1/doctor/me/schedule`
+  return stringifiedParams.length > 0 ? `http://localhost:5144/api/v1/doctors/me/schedule?${stringifiedParams}` : `http://localhost:5144/api/v1/doctors/me/schedule`
 }
 
 export const getDoctorSchedule = async (params?: GetDoctorScheduleParams, options?: RequestInit): Promise<getDoctorScheduleResponse> => {
@@ -94,7 +94,7 @@ export const getDoctorSchedule = async (params?: GetDoctorScheduleParams, option
 
 export const getGetDoctorScheduleQueryKey = (params?: GetDoctorScheduleParams,) => {
     return [
-    `http://localhost:5144/api/v1/doctor/me/schedule`, ...(params ? [params] : [])
+    `http://localhost:5144/api/v1/doctors/me/schedule`, ...(params ? [params] : [])
     ] as const;
     }
 
