@@ -1,4 +1,3 @@
-import type { FieldApi } from "@tanstack/react-form";
 import { z } from "zod";
 import type { PatientProfileDto } from "@/api/model/PatientProfileDto";
 import type { MedicalProfileFormApi } from "./UseMedicalProfile";
