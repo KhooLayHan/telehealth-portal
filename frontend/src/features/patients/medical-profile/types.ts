@@ -20,11 +20,6 @@ export type EmergencyContactFormProps = {
   form: MedicalProfileFormApi;
 };
 
-export type BloodGroupSelectProps = {
-  field: FieldApi<MedicalInfoFormValues, "bloodGroup">;
-  id: string;
-};
-
 export type PersonalInfoCardProps = {
   profile: PatientProfileDto;
 };
