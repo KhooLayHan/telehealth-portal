@@ -1,9 +1,13 @@
+// import type { useForm } from "@tanstack/react-form";
+
 import type { useForm } from "@tanstack/react-form";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import type { useRegisterForm } from "../hooks/useRegisterForm";
+import type { RegisterFormData } from "../schemas/registerSchema";
 import { PasswordInput } from "./PasswordInput";
 
-type FormType = ReturnType<typeof useForm<RegisterFormData>>;
+type FormType = ReturnType<typeof useRegisterForm>["form"];
 
 type RegisterAccountSectionProps = {
   form: FormType;
