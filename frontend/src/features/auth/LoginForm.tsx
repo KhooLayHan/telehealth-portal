@@ -1,96 +1,22 @@
-import { useForm } from "@tanstack/react-form";
-import { Link, useNavigate } from "@tanstack/react-router";
-import { Eye, EyeOff, Heart } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { z } from "zod";
-import { useLogin } from "@/api/generated/auth/auth";
-import { getMe } from "@/api/generated/users/users";
-import type { ApiError } from "@/api/ofetch-mutator";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useAuthStore } from "@/store/useAuthStore";
-
-const loginSchema = z.object({
-  email: z.email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-});
-
-const ROLE_PRIORITY = ["admin", "doctor", "receptionist", "lab-tech", "patient"] as const;
-
-/**
- * Given an array of role slugs from the API, returns the single highest-priority
- * role for display and routing purposes (e.g. sidebar label, default redirect).
- */
-function pickPrimaryRole(roles: string[]): string {
-  return ROLE_PRIORITY.find((r) => roles.includes(r)) ?? roles[0] ?? "patient";
-}
+import { BrandingHeader } from "./components/BrandingHeader";
+import { FormError } from "./components/FormError";
+import { LoginEmailField } from "./components/LoginEmailField";
+import { LoginPasswordField } from "./components/LoginPasswordField";
+import { RememberMeCheckbox } from "./components/RememberMeCheckbox";
+import { useLoginForm } from "./hooks/useLoginForm";
+import { loginSchema } from "./schemas/loginSchema";
 
 export function LoginForm() {
-  const navigate = useNavigate();
-  const setAuth = useAuthStore((state) => state.setAuth);
-  const [showPassword, setShowPassword] = useState(false);
+  const { form, globalError } = useLoginForm();
   const [rememberMe, setRememberMe] = useState(false);
-  const [globalError, setGlobalError] = useState<string | null>(null);
-
-  // TanStack Query Mutation
-  const loginMutation = useLogin();
-
-  const form = useForm({
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-    onSubmit: async ({ value }) => {
-      setGlobalError(null);
-
-      try {
-        await loginMutation.mutateAsync({ data: value });
-
-        const profileResponse = await getMe();
-
-        const profile = profileResponse.data as unknown as {
-          publicId: string;
-          email: string;
-          firstName: string;
-          lastName: string;
-          roles: string[];
-        };
-
-        // if (!profile?.userPublicId) {
-        //   setGlobalError("Signed in, but could not load your profile. Please try again.");
-        //   return;
-        // }
-
-        setAuth({
-          publicId: profile.publicId,
-          email: profile.email,
-          firstName: profile.firstName,
-          role: pickPrimaryRole(profile.roles),
-          // roles: profile.roles,
-        });
-
-        navigate({ to: "/dashboard" });
-      } catch (err) {
-        const apiError = err as ApiError;
-
-        if (apiError.status === 401) {
-          setGlobalError("Invalid email or password.");
-        } else {
-          setGlobalError(apiError.data?.title || "An unexpected error occurred.");
-        }
-      }
-    },
-  });
 
   return (
     <div className="space-y-6">
-      {/* Mobile-only branding (hidden on large screens where the left panel shows) */}
-      <div className="flex items-center justify-center gap-2 lg:hidden">
-        <Heart className="size-6 text-primary" />
-        <span className="font-bold text-xl">TeleHealth</span>
-      </div>
+      <BrandingHeader />
 
       <Card className="shadow-sm">
         <CardHeader className="space-y-1">
@@ -107,100 +33,18 @@ export function LoginForm() {
               form.handleSubmit();
             }}
           >
-            {/* Global Error Alert */}
-            {globalError ? (
-              <div
-                aria-live="assertive"
-                className="rounded-md border border-destructive/20 bg-destructive/10 p-3 text-destructive-foreground text-sm"
-                role="alert"
-              >
-                {globalError}
-              </div>
-            ) : null}
+            {globalError && <FormError message={globalError} />}
 
-            {/* Email */}
             <form.Field name="email" validators={{ onChange: loginSchema.shape.email }}>
-              {(field) => (
-                <div className="space-y-1.5">
-                  <Label htmlFor={field.name}>Email</Label>
-                  <Input
-                    aria-invalid={field.state.meta.errors.length > 0}
-                    id={field.name}
-                    name={field.name}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    placeholder="doctor@telehealth.com"
-                    type="email"
-                    value={field.state.value}
-                  />
-                  {field.state.meta.errors.length > 0 && (
-                    <p className="text-destructive text-xs">{field.state.meta.errors.join(", ")}</p>
-                  )}
-                </div>
-              )}
+              {(field) => <LoginEmailField field={field} />}
             </form.Field>
 
-            {/* Password */}
             <form.Field name="password" validators={{ onChange: loginSchema.shape.password }}>
-              {(field) => (
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor={field.name}>Password</Label>
-                    {/* Forgot password — wire up to /forgot-password route later */}
-                    <button
-                      className="text-muted-foreground text-xs hover:text-primary"
-                      tabIndex={-1}
-                      type="button"
-                    >
-                      Forgot password?
-                    </button>
-                  </div>
-                  <div className="relative">
-                    <Input
-                      aria-invalid={field.state.meta.errors.length > 0}
-                      className="pr-9"
-                      id={field.name}
-                      name={field.name}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      placeholder="••••••••"
-                      type={showPassword ? "text" : "password"}
-                      value={field.state.value}
-                    />
-                    <button
-                      aria-label={showPassword ? "Hide password" : "Show password"}
-                      className="absolute top-1/2 right-2.5 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                      onClick={() => setShowPassword((v) => !v)}
-                      type="button"
-                    >
-                      {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                    </button>
-                  </div>
-                  {field.state.meta.errors.length > 0 && (
-                    <p className="text-destructive text-xs">{field.state.meta.errors.join(", ")}</p>
-                  )}
-                </div>
-              )}
+              {(field) => <LoginPasswordField field={field} />}
             </form.Field>
 
-            {/* Remember me */}
-            <div className="flex items-center gap-2">
-              <input
-                checked={rememberMe}
-                className="size-4 rounded border-input accent-primary"
-                id="remember-me"
-                onChange={(e) => setRememberMe(e.target.checked)}
-                type="checkbox"
-              />
-              <label
-                className="cursor-pointer select-none text-muted-foreground text-sm"
-                htmlFor="remember-me"
-              >
-                Remember me for 30 days
-              </label>
-            </div>
+            <RememberMeCheckbox checked={rememberMe} onCheckedChange={setRememberMe} />
 
-            {/* Submit */}
             <form.Subscribe>
               {(state) => (
                 <Button
@@ -215,7 +59,6 @@ export function LoginForm() {
             </form.Subscribe>
           </form>
 
-          {/* Divider */}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-border border-t" />
@@ -225,7 +68,6 @@ export function LoginForm() {
             </div>
           </div>
 
-          {/* Register link */}
           <p className="text-center text-muted-foreground text-sm">
             Don't have an account?{" "}
             <Link className="font-medium text-primary hover:underline" to="/register">
