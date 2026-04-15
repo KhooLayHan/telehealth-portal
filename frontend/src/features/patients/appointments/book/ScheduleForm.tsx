@@ -1,43 +1,33 @@
 // src/features/appointments/book/ScheduleStep.tsx
 
 import { Calendar as CalendarIcon, ChevronRight, Clock } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useGetAll } from "@/api/generated/doctors/doctors";
 import { useGetAllAvailable } from "@/api/generated/schedules/schedules";
 import { Button } from "@/components/ui/button";
 import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { BookingFormInstance } from "./schema";
-import { bookingSchema } from "./schema";
-
-interface ScheduleStepProps {
-  form: BookingFormInstance;
-  onNext: () => void;
-}
-
-// Formats a NodaTime LocalTime string ("HH:mm:ss") to display form ("HH:mm").
-export const formatLocalTime = (t: string): string => t.slice(0, 5);
-
-const today = new Date();
-// Pre-computed once so it doesn't re-run on every render.
-const MIN_DATE = [
-  today.getFullYear(),
-  String(today.getMonth() + 1).padStart(2, "0"),
-  String(today.getDate()).padStart(2, "0"),
-].join("-");
+import type { BookingFormValues, ScheduleStepProps } from "./schema";
+import { bookingSchema, formatLocalTime, getMinDate } from "./schema";
 
 export function ScheduleForm({ form, onNext }: ScheduleStepProps) {
+  const minDate = useMemo(() => getMinDate(), []);
+
   const [selectedDoctorId, setSelectedDoctorId] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
 
-  const { data: doctors = [], isLoading: isLoadingDoctors } = useGetAll();
+  const { data: response, isLoading: isLoadingDoctors } = useGetAll();
+  const doctors = response?.status === 200 && Array.isArray(response.data) ? response.data : [];
 
   const {
     data: availableSchedules = [],
     isLoading: isLoadingSchedules,
     isError: isSchedulesError,
-  } = useGetAllAvailable(selectedDate, selectedDoctorId);
+  } = useGetAllAvailable(
+    { Date: selectedDate, DoctorPublicId: selectedDoctorId || undefined },
+    { query: { enabled: !!selectedDate } },
+  );
 
   return (
     <>
@@ -50,7 +40,6 @@ export function ScheduleForm({ form, onNext }: ScheduleStepProps) {
 
       <CardContent className="space-y-6">
         <div className="grid gap-4 sm:grid-cols-2">
-          {/* Doctor select — populated from GET /api/v1/doctors */}
           <div className="space-y-2">
             <Label htmlFor="doctor-select">Select Doctor</Label>
             <select
@@ -60,14 +49,12 @@ export function ScheduleForm({ form, onNext }: ScheduleStepProps) {
               disabled={isLoadingDoctors}
               onChange={(e) => {
                 setSelectedDoctorId(e.target.value);
-                // Changing the doctor invalidates the current slot — a slot
-                // that belongs to Dr. A cannot be booked under Dr. B.
                 form.setFieldValue("schedulePublicId", "");
               }}
             >
               <option value="">{isLoadingDoctors ? "Loading…" : "Any Available Doctor"}</option>
               {doctors.map((d) => (
-                <option key={d.doctorPublicId} value={d.doctorPublicId}>
+                <option key={d.publicId} value={d.publicId}>
                   Dr. {d.firstName} {d.lastName} — {d.specialization}
                 </option>
               ))}
@@ -84,11 +71,9 @@ export function ScheduleForm({ form, onNext }: ScheduleStepProps) {
                 type="date"
                 className="pl-9"
                 value={selectedDate}
-                min={MIN_DATE}
+                min={minDate}
                 onChange={(e) => {
                   setSelectedDate(e.target.value);
-                  // Changing the date means the previously selected slot no
-                  // longer exists in the new result set — clear it.
                   form.setFieldValue("schedulePublicId", "");
                 }}
               />
@@ -124,7 +109,7 @@ export function ScheduleForm({ form, onNext }: ScheduleStepProps) {
                 </p>
               ) : (
                 <div className="grid grid-cols-3 gap-3">
-                  {availableSchedules.map((slot) => {
+                  {availableSchedules?.map((slot) => {
                     const isSelected = field.state.value === slot.publicId;
                     return (
                       <button
@@ -159,8 +144,10 @@ export function ScheduleForm({ form, onNext }: ScheduleStepProps) {
         </form.Field>
 
         <div className="flex justify-end pt-6">
-          <form.Subscribe selector={(state) => state.values.schedulePublicId}>
-            {(scheduleId) => (
+          <form.Subscribe
+            selector={(state: { values: BookingFormValues }) => state.values.schedulePublicId}
+          >
+            {(scheduleId: string) => (
               <Button type="button" onClick={onNext} disabled={!scheduleId}>
                 Next Step <ChevronRight className="ml-2 size-4" />
               </Button>

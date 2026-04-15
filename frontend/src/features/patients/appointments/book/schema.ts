@@ -1,4 +1,4 @@
-import type { useForm } from "@tanstack/react-form";
+import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
 
 export const SEVERITY_OPTIONS = ["Mild", "Moderate", "Severe"] as const;
@@ -19,6 +19,41 @@ export const bookingSchema = z.object({
 
 export type BookingFormValues = z.infer<typeof bookingSchema>;
 
-export type BookingFormInstance = ReturnType<typeof useForm<BookingFormValues>>;
+export const defaultValues: BookingFormValues = {
+  schedulePublicId: "",
+  visitReason: "",
+  symptoms: [],
+};
+
+const createForm = () =>
+  useForm({
+    defaultValues,
+  });
+
+export type BookingFormInstance = ReturnType<typeof createForm>;
 
 export type WizardStep = 1 | 2;
+
+export type MedicalDetailsStepProps = {
+  form: BookingFormInstance;
+  onBack: () => void;
+  bookingError: string | null;
+  isPending: boolean;
+};
+
+export type ScheduleStepProps = {
+  form: BookingFormInstance;
+  onNext: () => void;
+};
+
+// Formats a NodaTime LocalTime string ("HH:mm:ss") to display form ("HH:mm").
+export const formatLocalTime = (t: string): string => t.slice(0, 5);
+
+export const getMinDate = () => {
+  const today = new Date();
+  return [
+    today.getFullYear(),
+    String(today.getMonth() + 1).padStart(2, "0"),
+    String(today.getDate()).padStart(2, "0"),
+  ].join("-");
+};

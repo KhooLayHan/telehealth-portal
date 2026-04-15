@@ -1,6 +1,6 @@
 import type { WizardStep } from "./schema";
 
-export function ProgressBar(step: WizardStep) {
+export function ProgressBar({ step }: { step: WizardStep }) {
   return (
     <div className="mb-8 flex items-center justify-between">
       <div className={`flex-1 h-2 rounded-full ${step >= 1 ? "bg-primary" : "bg-muted"}`} />

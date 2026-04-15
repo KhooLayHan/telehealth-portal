@@ -9,7 +9,7 @@ import { BookingSuccess } from "./BookingSuccess";
 import { MedicalDetailsForm } from "./MedicalDetailsForm";
 import { ProgressBar } from "./ProgressBar";
 import { ScheduleForm } from "./ScheduleForm";
-import type { BookingFormValues, WizardStep } from "./schema";
+import { defaultValues, type WizardStep } from "./schema";
 
 export function BookAppointmentForm() {
   const [step, setStep] = useState<WizardStep>(1);
@@ -18,18 +18,11 @@ export function BookAppointmentForm() {
 
   const bookMutation = useCreate();
 
-  const defaultValues: BookingFormValues = {
-    schedulePublicId: "",
-    visitReason: "",
-    symptoms: [],
-  };
-
   const form = useForm({
-    defaultValues,
+    defaultValues: defaultValues,
     onSubmit: async ({ value }) => {
       setBookingError(null);
 
-      // Strip the client-only `_id` field before building the API payload.
       const payload: BookAppointmentCommand = {
         schedulePublicId: value.schedulePublicId,
         visitReason: value.visitReason,
@@ -58,12 +51,7 @@ export function BookAppointmentForm() {
 
   return (
     <div className="max-w-2xl mx-auto py-8">
-      {/* Progress bar */}
-      <div className="mb-8 flex items-center justify-between">
-        <div className={`flex-1 h-2 rounded-full ${step >= 1 ? "bg-primary" : "bg-muted"}`} />
-        <div className="mx-4 text-sm font-medium text-muted-foreground">Step {step} of 2</div>
-        <div className={`flex-1 h-2 rounded-full ${step >= 2 ? "bg-primary" : "bg-muted"}`} />
-      </div>
+      <ProgressBar step={step} />
 
       <form
         onSubmit={(e) => {

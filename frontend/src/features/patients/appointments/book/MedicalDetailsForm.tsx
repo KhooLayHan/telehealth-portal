@@ -1,21 +1,10 @@
 import { ChevronLeft, Plus, Trash2 } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { BookingFormInstance, Severity } from "./schema";
+import type { MedicalDetailsStepProps, Severity } from "./schema";
 import { bookingSchema, SEVERITY_OPTIONS, symptomItemSchema } from "./schema";
-
-interface MedicalDetailsStepProps {
-  form: BookingFormInstance;
-  onBack: () => void;
-  bookingError: string | null;
-  isPending: boolean;
-}
-
-// Formats a NodaTime LocalTime string ("HH:mm:ss") to display form ("HH:mm").
-export const formatLocalTime = (t: string): string => t.slice(0, 5);
 
 export function MedicalDetailsForm({
   form,
@@ -59,7 +48,6 @@ export function MedicalDetailsForm({
           )}
         </form.Field>
 
-        {/* Symptoms — dynamic array with per-field validation */}
         <div className="space-y-4 pt-4 border-t border-border">
           <div className="flex items-center justify-between">
             <div>
@@ -69,8 +57,6 @@ export function MedicalDetailsForm({
               </p>
             </div>
 
-            {/* "Add Symptom" button lives in its own Field so pushValue is
-                available without subscribing to the whole array. */}
             <form.Field name="symptoms">
               {(field) => (
                 <Button
@@ -102,9 +88,6 @@ export function MedicalDetailsForm({
                     className="flex items-start gap-2 bg-muted/30 p-3 rounded-lg border border-border"
                   >
                     <div className="grid flex-1 gap-3 sm:grid-cols-3">
-                      {/* Each sub-field validates against symptomItemSchema.shape
-                          so errors surface inline before the form can submit,
-                          matching what BookAppointmentValidator enforces server-side. */}
                       <form.Field
                         name={`symptoms[${i}].name`}
                         validators={{ onChange: symptomItemSchema.shape.name }}
@@ -206,7 +189,6 @@ export function MedicalDetailsForm({
           </form.Field>
         </div>
 
-        {/* API-level booking error */}
         {bookingError && (
           <p className="text-sm text-destructive" role="alert">
             {bookingError}
@@ -218,8 +200,12 @@ export function MedicalDetailsForm({
             <ChevronLeft className="mr-2 size-4" /> Back
           </Button>
 
-          <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting] as const}>
-            {([canSubmit, isSubmitting]) => (
+          <form.Subscribe
+            selector={(state: { canSubmit: boolean; isSubmitting: boolean }) =>
+              [state.canSubmit, state.isSubmitting] as const
+            }
+          >
+            {([canSubmit, isSubmitting]: readonly [boolean, boolean]) => (
               <Button type="submit" disabled={!canSubmit || isPending}>
                 {isSubmitting || isPending ? "Confirming…" : "Confirm Booking"}
               </Button>

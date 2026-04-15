@@ -28,11 +28,7 @@ import { Label } from "@/components/ui/label";
 const SEVERITY_OPTIONS = ["Mild", "Moderate", "Severe"] as const;
 type Severity = (typeof SEVERITY_OPTIONS)[number];
 
-// FIX (symptom validation): Extracted as a top-level const so each sub-field
-// can reference `symptomItemSchema.shape.<field>` directly as a validator,
-// instead of duplicating inline schemas or passing `undefined`.
 const symptomItemSchema = z.object({
-  // Client-only stable key — stripped before the API call
   _id: z.string(),
   name: z.string().min(1, "Symptom name required").max(100, "Max 100 characters"),
   severity: z.enum(SEVERITY_OPTIONS, { error: "Select severity" }),
@@ -42,46 +38,28 @@ const symptomItemSchema = z.object({
 const bookingSchema = z.object({
   schedulePublicId: z.string().min(1, "Please select a time slot."),
   visitReason: z.string().min(5, "Please provide a reason (min 5 characters).").max(500),
-  // Re-uses the extracted schema so both the array-level and field-level
-  // validators are always in sync with the backend BookAppointmentValidator.
   symptoms: z.array(symptomItemSchema).default([]),
 });
 
 type BookingFormValues = z.infer<typeof bookingSchema>;
 type WizardStep = 1 | 2;
 
-// ---------------------------------------------------------------------------
-// Schedule API
-// ---------------------------------------------------------------------------
-
-// Shape returned by GET /api/v1/schedules/available.
-// `publicId` is the UUID that goes directly into BookAppointmentCommand.schedulePublicId.
-// TODO: generate this type via orval once the schedule endpoint is spec-documented.
 interface AvailableScheduleDto {
   publicId: string;
-  startTime: string; // "HH:mm" — formatted server-side for display
+  startTime: string;
   endTime: string;
 }
 
-// FIX (real slot IDs): Fetches genuine schedule rows from the database.
-// The returned `publicId` values are real UUIDv7s that satisfy the backend's
-// `FirstOrDefaultAsync(s => s.PublicId == cmd.SchedulePublicId)` lookup,
-// replacing the placeholder strings that previously caused a 404.
 const fetchAvailableSchedules = (
   date: string,
   doctorPublicId: string | undefined,
 ): Promise<AvailableScheduleDto[]> =>
-  $fetch<AvailableScheduleDto[]>(
-    // NOTE: update this path to match ApiEndpoints.Schedules.Available
-    // once the schedule endpoint is registered on the router.
-    "http://localhost:5144/api/v1/schedules/available",
-    {
-      query: {
-        date,
-        ...(doctorPublicId ? { doctorPublicId } : {}),
-      },
+  $fetch<AvailableScheduleDto[]>("http://localhost:5144/api/v1/schedules/available", {
+    query: {
+      date,
+      ...(doctorPublicId ? { doctorPublicId } : {}),
     },
-  );
+  });
 
 // ---------------------------------------------------------------------------
 // Component
@@ -96,20 +74,12 @@ export function BookAppointmentWizard() {
   const today = new Date();
   const minDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
-  // FIX (real slot IDs): `selectedDoctorId` now holds a doctor public-ID UUID
-  // (or empty string for "any doctor"). When either input changes the stale
-  // `schedulePublicId` is cleared so the user cannot submit a slot that no
-  // longer belongs to the new doctor/date combination.
   // TODO: populate this select from GET /api/v1/doctors once that endpoint exists.
   const [selectedDoctorId, setSelectedDoctorId] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
 
   const bookMutation = useCreate();
 
-  // FIX (real slot IDs): Query is enabled only when a date is chosen.
-  // React Query re-fetches automatically whenever selectedDate or
-  // selectedDoctorId changes, so the slot grid always reflects current
-  // availability rather than stale dummy values.
   const {
     data: availableSchedules = [],
     isLoading: isLoadingSchedules,
@@ -208,14 +178,10 @@ export function BookAppointmentWizard() {
                       value={selectedDoctorId}
                       onChange={(e) => {
                         setSelectedDoctorId(e.target.value);
-                        // FIX (real slot IDs): A doctor change means the
-                        // current slot belongs to a different availability
-                        // set — clear it so the old publicId is never submitted.
                         form.setFieldValue("schedulePublicId", "");
                       }}
                     >
                       <option value="">Any Available Doctor</option>
-                      {/* Values must be doctor public-ID UUIDs once the lookup API is wired */}
                       <option value="01930000-0000-7000-0000-000000000001">
                         Dr. Sarah Chen (Cardiology)
                       </option>
@@ -235,8 +201,6 @@ export function BookAppointmentWizard() {
                         value={selectedDate}
                         onChange={(e) => {
                           setSelectedDate(e.target.value);
-                          // FIX (real slot IDs): Date change invalidates
-                          // the previously selected slot — clear it.
                           form.setFieldValue("schedulePublicId", "");
                         }}
                         min={minDate}
@@ -401,11 +365,6 @@ export function BookAppointmentWizard() {
                             className="flex items-start gap-2 bg-muted/30 p-3 rounded-lg border border-border"
                           >
                             <div className="grid flex-1 gap-3 sm:grid-cols-3">
-                              {/* FIX (symptom validation): each sub-field now
-                                  has a validator referencing symptomItemSchema.shape,
-                                  so incomplete rows are caught client-side before
-                                  the backend's BookAppointmentValidator rejects them.
-                                  Errors render inline below each input. */}
                               <form.Field
                                 name={`symptoms[${i}].name`}
                                 validators={{
@@ -437,9 +396,6 @@ export function BookAppointmentWizard() {
                                 )}
                               </form.Field>
 
-                              {/* Severity is a closed enum — invalid values are
-                                  prevented by the select itself, but the
-                                  validator still blocks programmatic bad data. */}
                               <form.Field
                                 name={`symptoms[${i}].severity`}
                                 validators={{
