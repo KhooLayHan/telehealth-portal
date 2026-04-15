@@ -206,7 +206,7 @@ export function MedicalDetailsForm({
             }
           >
             {([canSubmit, isSubmitting]: readonly [boolean, boolean]) => (
-              <Button type="submit" disabled={!canSubmit || isPending}>
+              <Button type="submit" disabled={!canSubmit || isSubmitting || isPending}>
                 {isSubmitting || isPending ? "Confirming…" : "Confirm Booking"}
               </Button>
             )}

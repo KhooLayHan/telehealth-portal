@@ -9,7 +9,7 @@ import { CardContent, CardDescription, CardHeader, CardTitle } from "@/component
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { BookingFormValues, ScheduleStepProps } from "./schema";
-import { bookingSchema, formatLocalTime, getMinDate } from "./schema";
+import { bookingSchema, formatLocalTime, getMinDate, isValidSlot } from "./schema";
 
 export function ScheduleForm({ form, onNext }: ScheduleStepProps) {
   const minDate = useMemo(() => getMinDate(), []);
@@ -21,13 +21,42 @@ export function ScheduleForm({ form, onNext }: ScheduleStepProps) {
   const doctors = response?.status === 200 && Array.isArray(response.data) ? response.data : [];
 
   const {
-    data: availableSchedules = [],
+    data: schedulesResponse,
     isLoading: isLoadingSchedules,
-    isError: isSchedulesError,
+    isError: isSchedulesRequestError,
   } = useGetAllAvailable(
     { Date: selectedDate, DoctorPublicId: selectedDoctorId || undefined },
     { query: { enabled: !!selectedDate } },
   );
+
+  const isSchedulesError =
+    isSchedulesRequestError ||
+    (schedulesResponse !== undefined && schedulesResponse.status !== 200);
+  const availableSchedules = schedulesResponse?.status === 200 ? schedulesResponse.data : [];
+
+  if (!selectedDate) {
+    return <p className="text-sm text-muted-foreground italic">Please select a date first.</p>;
+  }
+
+  if (isLoadingSchedules) {
+    return <p className="text-sm text-muted-foreground italic">Loading available slots…</p>;
+  }
+
+  if (isSchedulesError) {
+    return (
+      <p className="text-sm text-destructive" role="alert">
+        Could not load available slots. Please try again.
+      </p>
+    );
+  }
+
+  if (availableSchedules.length === 0) {
+    return (
+      <p className="text-sm text-muted-foreground italic">
+        No slots available for this date. Try another day.
+      </p>
+    );
+  }
 
   return (
     <>
@@ -95,46 +124,30 @@ export function ScheduleForm({ form, onNext }: ScheduleStepProps) {
                 Available Time Slots
               </legend>
 
-              {!selectedDate ? (
-                <p className="text-sm text-muted-foreground italic">Please select a date first.</p>
-              ) : isLoadingSchedules ? (
-                <p className="text-sm text-muted-foreground italic">Loading available slots…</p>
-              ) : isSchedulesError ? (
-                <p className="text-sm text-destructive" role="alert">
-                  Could not load available slots. Please try again.
-                </p>
-              ) : availableSchedules.length === 0 ? (
-                <p className="text-sm text-muted-foreground italic">
-                  No slots available for this date. Try another day.
-                </p>
-              ) : (
-                <div className="grid grid-cols-3 gap-3">
-                  {availableSchedules?.map((slot) => {
-                    const isSelected = field.state.value === slot.publicId;
-                    return (
-                      <button
-                        key={slot.publicId}
-                        type="button"
-                        aria-pressed={isSelected}
-                        onClick={() => field.handleChange(slot.publicId)}
-                        className={`flex flex-col items-center justify-center rounded-md border p-3 transition-all ${
-                          isSelected
-                            ? "border-primary bg-primary/10 text-primary ring-1 ring-primary"
-                            : "border-border hover:border-primary/50 hover:bg-muted/50"
-                        }`}
-                      >
-                        <Clock className="mb-1 size-4" />
-                        <span className="text-sm font-medium">
-                          {formatLocalTime(slot.startTime)}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          – {formatLocalTime(slot.endTime)}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+              <div className="grid grid-cols-3 gap-3">
+                {availableSchedules.filter(isValidSlot).map((slot) => {
+                  const isSelected = field.state.value === slot.publicId;
+                  return (
+                    <button
+                      key={slot.publicId}
+                      type="button"
+                      aria-pressed={isSelected}
+                      onClick={() => field.handleChange(slot?.publicId)}
+                      className={`flex flex-col items-center justify-center rounded-md border p-3 transition-all ${
+                        isSelected
+                          ? "border-primary bg-primary/10 text-primary ring-1 ring-primary"
+                          : "border-border hover:border-primary/50 hover:bg-muted/50"
+                      }`}
+                    >
+                      <Clock className="mb-1 size-4" />
+                      <span className="text-sm font-medium">{formatLocalTime(slot.startTime)}</span>
+                      <span className="text-xs text-muted-foreground">
+                        - {formatLocalTime(slot.endTime)}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
 
               {field.state.meta.errors.length > 0 && (
                 <p className="text-xs text-destructive">{field.state.meta.errors[0]?.message}</p>

@@ -57,3 +57,7 @@ export const getMinDate = () => {
     String(today.getDate()).padStart(2, "0"),
   ].join("-");
 };
+
+export function isValidSlot(slot: AvailableScheduleDto): slot is Required<AvailableScheduleDto> {
+  return !!slot.publicId && !!slot.startTime && !!slot.endTime;
+}
