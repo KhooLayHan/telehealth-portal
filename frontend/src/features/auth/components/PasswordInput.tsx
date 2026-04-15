@@ -1,6 +1,7 @@
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
 type PasswordInputProps = {
@@ -51,7 +52,7 @@ export function PasswordInput({
           {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
         </Button>
       </div>
-      {error && <p className="text-destructive text-xs">{error}</p>}
+      <FieldError>{error && <p className="text-destructive text-xs">{error}</p>}</FieldError>
     </div>
   );
 }

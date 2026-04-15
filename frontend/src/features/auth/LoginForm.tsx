@@ -48,7 +48,7 @@ export function LoginForm() {
             <form.Subscribe>
               {(state) => (
                 <Button
-                  className="w-full"
+                  className="w-full cursor-pointer"
                   disabled={!state.canSubmit || state.isSubmitting}
                   size="lg"
                   type="submit"

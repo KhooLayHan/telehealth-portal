@@ -16,7 +16,7 @@ export function RememberMeCheckbox({ checked, onCheckedChange }: RememberMeCheck
         onCheckedChange={(checkedState) => onCheckedChange(checkedState === true)}
       />
       <Label
-        className="cursor-pointer select-none text-muted-foreground text-sm"
+        className="cursor-pointer select-none text-muted-foreground text-sm font-medium"
         htmlFor="remember-me"
       >
         Remember me for 30 days

@@ -1,5 +1,11 @@
-import { Field, FieldLabel } from "@/components/ui/field";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+
+const getErrorMessage = (e: unknown): string => {
+  if (typeof e === "string") return e;
+  if (e && typeof e === "object" && "message" in e) return String(e.message);
+  return String(e);
+};
 
 export function LoginEmailField({
   field,
@@ -16,15 +22,10 @@ export function LoginEmailField({
 }) {
   const errors = field.state.meta.errors;
   const errorMessage =
-    errors.length > 0
-      ? errors
-          .map((e) => (typeof e === "string" ? e : String(e)))
-          .filter(Boolean)
-          .join(", ")
-      : "";
+    errors.length > 0 ? errors.map(getErrorMessage).filter(Boolean).join(", ") : "";
 
   return (
-    <Field>
+    <Field data-invalid={field.state.meta.errors.length > 0}>
       <FieldLabel htmlFor={field.name}>Email</FieldLabel>
       <Input
         aria-invalid={errors.length > 0}
@@ -36,7 +37,9 @@ export function LoginEmailField({
         type="email"
         value={field.state.value}
       />
-      {errorMessage && <p className="text-destructive text-xs">{errorMessage}</p>}
+      <FieldError>
+        {errorMessage && <p className="text-destructive text-xs">{errorMessage}</p>}
+      </FieldError>
     </Field>
   );
 }
