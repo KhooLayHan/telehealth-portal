@@ -1,21 +1,21 @@
+import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
-import type { ChangeEvent } from "react";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 type DatePickerProps = {
   value: string;
   minDate: string;
-  onChange: (date: string) => void;
+  onChange: (date: string | null) => void;
 };
 
 export function DatePicker({ value, minDate, onChange }: DatePickerProps) {
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.value);
-  };
-
   const selectedDate = value ? new Date(value) : undefined;
   const minDateObj = minDate ? new Date(minDate) : undefined;
+
   const handleSelect = (date: Date | undefined) => {
     if (date) {
       const year = date.getFullYear();
@@ -30,17 +30,31 @@ export function DatePicker({ value, minDate, onChange }: DatePickerProps) {
   return (
     <div className="space-y-2">
       <Label htmlFor="date-input">Select Date</Label>
-      <div className="relative">
-        <CalendarIcon className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
-        <Input
-          id="date-input"
-          type="date"
-          className="pl-9"
-          value={value}
-          min={minDate}
-          onChange={handleChange}
+      <Popover>
+        <PopoverTrigger
+          id="date-picker-trigger"
+          render={
+            <Button
+              variant="outline"
+              className={cn(
+                "w-full justify-start text-left font-normal",
+                !value && "text-muted-foreground",
+              )}
+            >
+              <CalendarIcon className="mr-2 size-4" />
+              {value ? format(selectedDate as Date, "PPP") : <span>Pick a date</span>}
+            </Button>
+          }
         />
-      </div>
+        <PopoverContent className="w-auto p-0" align="start">
+          <Calendar
+            mode="single"
+            selected={selectedDate}
+            onSelect={handleSelect}
+            disabled={(date) => (minDateObj ? date < minDateObj : false)}
+          />
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
