@@ -7,7 +7,6 @@ import type { PatientProfileDto } from "@/api/model/PatientProfileDto";
 import type { ApiError } from "@/api/ofetch-mutator";
 import { useAuthStore } from "@/store/useAuthStore";
 import type { LoginFormData } from "../schemas/loginSchema";
-import { pickPrimaryRole } from "../utils/roleUtils";
 
 export function useLoginForm() {
   const navigate = useNavigate();
