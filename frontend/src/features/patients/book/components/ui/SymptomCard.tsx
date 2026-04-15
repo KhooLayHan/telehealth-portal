@@ -19,7 +19,7 @@ export function SymptomCard({ symptom, index, onRemove, children }: SymptomCardP
         variant="ghost"
         size="icon"
         aria-label={`Remove symptom ${symptom.name || index + 1}`}
-        className="text-destructive hover:bg-destructive/10 mt-5"
+        className="text-destructive hover:bg-destructive/10 justify-center justify-items-center"
         onClick={onRemove}
       >
         <Trash2 className="size-4" />
@@ -38,7 +38,7 @@ export function AddSymptomButton({ onClick }: AddSymptomButtonProps) {
       <div className="flex items-center justify-between">
         <div>
           <Label>Symptoms (Optional)</Label>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground pt-1.5">
             Add specific symptoms you are experiencing.
           </p>
         </div>

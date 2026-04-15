@@ -1,5 +1,6 @@
 import type { AvailableScheduleDto } from "@/api/model/AvailableScheduleDto";
 import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import type { BookingFormInstance } from "../../schema";
 import { bookingSchema, isValidSlot } from "../../schema";
@@ -46,24 +47,19 @@ export function ScheduleTimeSlotField({
       validators={{ onChange: bookingSchema.shape.schedulePublicId }}
     >
       {(field) => (
-        <fieldset
-          className="space-y-3 pt-4 border-t border-border"
-          aria-labelledby="time-slots-label"
-        >
-          <legend id="time-slots-label" className="text-sm font-medium leading-none">
-            Available Time Slots
-          </legend>
-
-          <TimeSlotGrid
-            slots={validSlots}
-            selectedId={field.state.value}
-            onSelect={(id) => field.handleChange(id)}
-          />
-
-          {field.state.meta.errors.length > 0 && (
-            <p className="text-xs text-destructive">{field.state.meta.errors[0]?.message}</p>
-          )}
-        </fieldset>
+        <FieldGroup className="space-y-3 pt-4 border-t border-border">
+          <Field data-invalid={field.state.meta.errors.length > 0}>
+            <FieldLabel htmlFor={field.name} id="time-slots-label">
+              Available Time Slots
+            </FieldLabel>
+            <TimeSlotGrid
+              slots={validSlots}
+              selectedId={field.state.value}
+              onSelect={(id) => field.handleChange(id)}
+            />
+            <FieldError>{field.state.meta.errors[0]?.message}</FieldError>
+          </Field>
+        </FieldGroup>
       )}
     </form.Field>
   );

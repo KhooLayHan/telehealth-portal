@@ -8,38 +8,36 @@ type SymptomsArrayFieldProps = {
 
 export function SymptomsArrayField({ form }: SymptomsArrayFieldProps) {
   return (
-    <div className="space-y-4 pt-4 border-t border-border">
-      <form.Field name="symptoms">
-        {(field) => (
-          <>
-            <AddSymptomButton
-              onClick={() =>
-                field.pushValue({
-                  _id: crypto.randomUUID(),
-                  name: "",
-                  severity: "Mild",
-                  duration: "",
-                })
-              }
-            />
+    <form.Field name="symptoms">
+      {(field) => (
+        <>
+          <AddSymptomButton
+            onClick={() =>
+              field.pushValue({
+                _id: crypto.randomUUID(),
+                name: "",
+                severity: "Mild",
+                duration: "",
+              })
+            }
+          />
 
-            <div className="space-y-3">
-              {field.state.value.map((symptom: SymptomItem, i: number) => (
-                <SymptomCard
-                  key={symptom._id}
-                  symptom={symptom}
-                  index={i}
-                  onRemove={() => field.removeValue(i)}
-                >
-                  <SymptomNameField form={form} index={i} symptomId={symptom._id} />
-                  <SymptomSeverityField form={form} index={i} symptomId={symptom._id} />
-                  <SymptomDurationField form={form} index={i} symptomId={symptom._id} />
-                </SymptomCard>
-              ))}
-            </div>
-          </>
-        )}
-      </form.Field>
-    </div>
+          <div className="space-y-3">
+            {field.state.value.map((symptom: SymptomItem, i: number) => (
+              <SymptomCard
+                key={symptom._id}
+                symptom={symptom}
+                index={i}
+                onRemove={() => field.removeValue(i)}
+              >
+                <SymptomNameField form={form} index={i} symptomId={symptom._id} />
+                <SymptomSeverityField form={form} index={i} symptomId={symptom._id} />
+                <SymptomDurationField form={form} index={i} symptomId={symptom._id} />
+              </SymptomCard>
+            ))}
+          </div>
+        </>
+      )}
+    </form.Field>
   );
 }
