@@ -23,6 +23,7 @@
       "!src/stories",
       "src/**",
       "src/features/**/*",
+      "src/features/patients/appointments/book/**",
       "!src/routeTree.gen.ts",
       "!src/stories",
       "!src/api/generated",

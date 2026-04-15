@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useGetDoctorSchedule } from "@/api/generated/doctor/doctor";
+import { useGetDoctorSchedule } from "@/api/generated/doctors/doctors";
 
 const PAGE_SIZE = 10;
 

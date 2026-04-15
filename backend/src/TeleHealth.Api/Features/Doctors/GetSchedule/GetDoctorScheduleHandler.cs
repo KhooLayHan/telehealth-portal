@@ -4,7 +4,7 @@ using TeleHealth.Api.Common.Constants;
 using TeleHealth.Api.Common.Exceptions.Doctors;
 using TeleHealth.Api.Infrastructure.Persistence;
 
-namespace TeleHealth.Api.Features.Doctor.GetSchedule;
+namespace TeleHealth.Api.Features.Doctors.GetSchedule;
 
 public sealed class GetDoctorScheduleHandler(ApplicationDbContext db)
 {

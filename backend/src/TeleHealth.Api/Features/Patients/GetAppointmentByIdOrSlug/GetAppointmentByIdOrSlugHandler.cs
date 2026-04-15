@@ -19,7 +19,7 @@ public sealed class GetAppointmentByIdOrSlugHandler(ApplicationDbContext db)
         var appointmentBySlug = await db
             .Appointments.AsNoTracking()
             .Where(a => a.Patient.User.PublicId == userPublicId && a.Slug == idOrSlug)
-            .SelectFacet<Appointment, AppointmentDto>()
+            .Select(AppointmentDto.Projection)
             .FirstOrDefaultAsync(ct);
 
         if (appointmentBySlug is not null)

@@ -4,7 +4,7 @@ using TeleHealth.Api.Common;
 using TeleHealth.Api.Common.Exceptions.Auth;
 using TeleHealth.Api.Common.Security;
 
-namespace TeleHealth.Api.Features.Doctor.GetSchedule;
+namespace TeleHealth.Api.Features.Doctors.GetSchedule;
 
 public static class GetDoctorScheduleEndpoint
 {
@@ -12,7 +12,7 @@ public static class GetDoctorScheduleEndpoint
     {
         group
             .MapGet(
-                ApiEndpoints.Doctor.GetSchedule,
+                ApiEndpoints.Doctors.GetSchedule,
                 async Task<Ok<DoctorScheduleResponse>> (
                     [AsParameters] GetDoctorScheduleQuery query,
                     ClaimsPrincipal user,
@@ -29,7 +29,7 @@ public static class GetDoctorScheduleEndpoint
                 }
             )
             .WithName("GetDoctorSchedule")
-            .WithTags("Doctor")
+            .WithTags(nameof(ApiEndpoints.Doctors))
             .RequireAuthorization(AuthConstants.DoctorPolicy)
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status404NotFound);

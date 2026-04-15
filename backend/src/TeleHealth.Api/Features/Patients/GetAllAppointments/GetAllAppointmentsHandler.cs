@@ -78,7 +78,7 @@ public sealed class GetAllAppointmentsHandler(ApplicationDbContext db)
 
         var items = await q.Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .SelectFacet<Appointment, AppointmentDto>()
+            .Select(AppointmentDto.Projection)
             .ToListAsync(ct);
 
         Log.Information(

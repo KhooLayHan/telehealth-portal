@@ -6,6 +6,15 @@ public static class ApiEndpoints
     public const int MajorVersion = 1;
     public const int MinorVersion = 0;
 
+    public static class Auth
+    {
+        private const string Base = "auth";
+
+        public const string Login = $"{Base}/login";
+
+        public const string SignUpPatient = $"{Base}/signup-patient";
+    }
+
     public static class Patients
     {
         private const string Base = "patients";
@@ -18,27 +27,17 @@ public static class ApiEndpoints
 
         public const string UpdateMedicalRecord = $"{GetProfile}/medical-record";
 
-        public const string GetAllAppointments = $"{GetProfile}/appointments";
+        private const string AppointmentsBase = $"{GetProfile}/appointments";
 
-        public const string GetAppointmentByIdOrSlug = $"{GetProfile}/appointments/{{idOrSlug}}";
+        public const string GetAllAppointments = AppointmentsBase;
 
-        public const string GetAppointmentBySlug = $"{GetProfile}/appointments/{{slug}}";
+        public const string GetAppointmentByIdOrSlug = $"{AppointmentsBase}/{{idOrSlug}}";
 
-        public const string UpdateAppointmentBySlug =
-            $"{GetProfile}/appointments/{{slug}}/reschedule";
+        public const string UpdateAppointmentBySlug = $"{AppointmentsBase}/{{slug}}/reschedule";
 
-        public const string DeleteAppointmentBySlug = $"{GetProfile}/appointments/{{slug}}";
+        public const string DeleteAppointmentBySlug = $"{AppointmentsBase}/{{slug}}";
 
         public const string GetById = $"{Base}/{{id:guid}}";
-    }
-
-    public static class Auth
-    {
-        private const string Base = "auth";
-
-        public const string Login = $"{Base}/login";
-
-        public const string SignUpPatient = $"{Base}/signup-patient";
     }
 
     public static class LabReports
@@ -59,10 +58,33 @@ public static class ApiEndpoints
         public const string GetAllAppointments = Base;
     }
 
-    public static class Doctor
+    public static class Doctors
     {
-        private const string Base = "doctor";
+        private const string Base = "doctors";
+
+        public const string Create = Base;
 
         public const string GetSchedule = $"{Base}/me/schedule";
+
+        public const string GetByIdOrSlug = $"{Base}/{{idOrSlug}}";
+
+        public const string GetAll = Base;
+    }
+
+    public static class Schedules
+    {
+        private const string Base = "schedules";
+
+        public const string Create = Base;
+
+        public const string GetByIdOrSlug = $"{Base}/{{idOrSlug}}";
+
+        public const string GetAll = Base;
+
+        public const string GetAllAvailable = $"{Base}/available";
+
+        public const string UpdateById = $"{Base}/{{id:guid}}";
+
+        public const string DeleteById = $"{Base}/{{id:guid}}";
     }
 }
