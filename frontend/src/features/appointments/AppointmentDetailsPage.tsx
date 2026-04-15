@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/useAuthStore";
+import { DoctorApptDetailsPage } from "./roles/DoctorAppointmentDetailsPage";
 import { ReceptionistApptDetailsPage } from "./roles/ReceptionistAppointmentDetails";
 
 const navItems = [
@@ -82,7 +83,7 @@ export function AppointmentDetailsPage() {
       case "receptionist":
         return <ReceptionistApptDetailsPage />;
       case "doctor":
-        return "Do something";
+        return <DoctorApptDetailsPage />;
       case "admin":
         return "Do something";
       case "lab-tech":
