@@ -6,19 +6,19 @@
  */
 
 export type GetAllAppointmentsForReceptionistParams = {
-  View?: string;
-  Status?: string;
-  Search?: string;
-  DoctorId?: string;
-  From?: string;
-  To?: string;
-  /**
-   * @pattern ^-?(?:0|[1-9]\d*)$
-   */
-  Page?: number | string;
-  /**
-   * @pattern ^-?(?:0|[1-9]\d*)$
-   */
-  PageSize?: number | string;
-  SortOrder?: string;
+View?: string;
+Status?: string;
+Search?: string;
+DoctorId?: string;
+From?: string;
+To?: string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+Page?: number | string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+PageSize?: number | string;
+SortOrder?: string;
 };

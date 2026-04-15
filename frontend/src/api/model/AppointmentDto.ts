@@ -4,18 +4,18 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { LocalDate } from "./LocalDate";
-import type { LocalTime } from "./LocalTime";
+import type { LocalDate } from './LocalDate';
+import type { LocalTime } from './LocalTime';
 
 export interface AppointmentDto {
-  doctorName?: string;
-  specialization?: string;
-  status?: string;
-  statusColorCode?: string;
-  date?: LocalDate;
-  startTime?: LocalTime;
-  endTime?: LocalTime;
-  publicId?: string;
-  slug?: string;
-  visitReason?: string;
+  doctorName: string;
+  specialization: string;
+  status: string;
+  statusColorCode: string;
+  date: LocalDate;
+  startTime: LocalTime;
+  endTime: LocalTime;
+  publicId: string;
+  slug: string;
+  visitReason: string;
 }

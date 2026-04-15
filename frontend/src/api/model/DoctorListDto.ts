@@ -6,8 +6,8 @@
  */
 
 export interface DoctorListDto {
-  firstName?: string;
-  lastName?: string;
-  publicId?: string;
-  specialization?: string;
+  firstName: string;
+  lastName: string;
+  doctorPublicId: string;
+  specialization: string;
 }

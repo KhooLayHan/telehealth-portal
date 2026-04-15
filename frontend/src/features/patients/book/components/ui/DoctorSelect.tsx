@@ -23,7 +23,7 @@ export function DoctorSelect({ doctors, selectedId, isLoading, onChange }: Docto
     >
       <option value="">{isLoading ? "Loading…" : "Any Available Doctor"}</option>
       {doctors.map((doctor) => (
-        <option key={doctor.publicId} value={doctor.publicId}>
+        <option key={doctor.doctorPublicId} value={doctor.doctorPublicId}>
           Dr. {doctor.firstName} {doctor.lastName} — {doctor.specialization}
         </option>
       ))}
