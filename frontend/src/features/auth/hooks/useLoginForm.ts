@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useLogin } from "@/api/generated/auth/auth";
 import { getMe } from "@/api/generated/users/users";
+import type { PatientProfileDto } from "@/api/model/PatientProfileDto";
 import type { ApiError } from "@/api/ofetch-mutator";
 import { useAuthStore } from "@/store/useAuthStore";
 import type { LoginFormData } from "../schemas/loginSchema";
@@ -26,29 +27,25 @@ export function useLoginForm() {
         await loginMutation.mutateAsync({ data: value });
         const profileResponse = await getMe();
 
-        const profile = profileResponse.data as unknown as {
-          publicId: string;
-          email: string;
-          firstName: string;
-          lastName: string;
-          roles: string[];
-        };
+        const profile = profileResponse.data as unknown as PatientProfileDto;
+        if (!profile) throw new Error("Invalid profile response from getMe");
 
         setAuth({
-          publicId: profile.publicId,
+          publicId: profile.userPublicId,
           email: profile.email,
           firstName: profile.firstName,
-          role: pickPrimaryRole(profile.roles),
+          role: profile.role,
         });
 
         navigate({ to: "/dashboard" });
       } catch (err) {
-        const apiError = err as ApiError;
+        const apiError =
+          typeof err === "object" && err !== null ? (err as Partial<ApiError>) : null;
 
-        if (apiError.status === 401) {
+        if (apiError?.status === 401) {
           setGlobalError("Invalid email or password.");
         } else {
-          setGlobalError(apiError.data?.title || "An unexpected error occurred.");
+          setGlobalError(apiError?.data?.title ?? "An unexpected error occurred.");
         }
       }
     },
