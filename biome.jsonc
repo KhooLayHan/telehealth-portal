@@ -1,5 +1,22 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "files": {
+    "includes": [
+      "!node_modules",
+      "!.next",
+      "!frontend/dist",
+      "!frontend/build",
+      "!frontend/.storybook",
+      "!frontend/src/stories",
+      "frontend/src/**",
+      "frontend/src/features/**/*",
+      "frontend/src/features/patients/appointments/book/**",
+      "!frontend/src/routeTree.gen.ts",
+      "!frontend/src/stories",
+      "!frontend/src/api/generated",
+      "!frontend/src/components/ui/**/*"
+    ]
+  },
   "extends": [
     "ultracite/biome/core",
     "ultracite/biome/react",

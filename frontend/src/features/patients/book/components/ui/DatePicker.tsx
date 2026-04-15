@@ -14,6 +14,19 @@ export function DatePicker({ value, minDate, onChange }: DatePickerProps) {
     onChange(e.target.value);
   };
 
+  const selectedDate = value ? new Date(value) : undefined;
+  const minDateObj = minDate ? new Date(minDate) : undefined;
+  const handleSelect = (date: Date | undefined) => {
+    if (date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      onChange(`${year}-${month}-${day}`);
+    } else {
+      onChange("");
+    }
+  };
+
   return (
     <div className="space-y-2">
       <Label htmlFor="date-input">Select Date</Label>
