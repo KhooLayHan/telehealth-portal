@@ -19,6 +19,27 @@ internal sealed class UnexpectedExceptionHandler(IProblemDetailsService problemD
             return false;
         }
 
+        if (exception is BadHttpRequestException badRequestException)
+        {
+            httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+            var badRequestDetails = new ProblemDetails
+            {
+                Title = "Bad Request",
+                Type = "BadRequest",
+                Detail = badRequestException.Message,
+                Status = StatusCodes.Status400BadRequest,
+            };
+
+            return await problemDetailsService.TryWriteAsync(
+                new ProblemDetailsContext
+                {
+                    HttpContext = httpContext,
+                    ProblemDetails = badRequestDetails,
+                    Exception = exception,
+                }
+            );
+        }
+
         httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
 
         var problemDetails = new ProblemDetails
