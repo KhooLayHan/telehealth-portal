@@ -1,5 +1,4 @@
 import type { DoctorListDto } from "@/api/model/DoctorListDto";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -17,28 +16,25 @@ type DoctorSelectProps = {
 
 export function DoctorSelect({ doctors, selectedId, isLoading, onChange }: DoctorSelectProps) {
   return (
-    <div className="space-y-2">
-      <Label htmlFor="doctor-select">Select Doctor</Label>
-      <Select value={selectedId} onValueChange={onChange} disabled={isLoading}>
-        <SelectTrigger id="doctor-select" className="w-full">
-          <SelectValue placeholder={isLoading ? "Loading…" : "Any Available Doctor"} />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="">Any Available Doctor</SelectItem>
-          {doctors.map((doctor) => {
-            const id = doctor.doctorPublicId ?? "";
-            const firstName = doctor.firstName ?? "";
-            const lastName = doctor.lastName ?? "";
-            const spec = doctor.specialization ?? "";
+    <Select value={selectedId} onValueChange={onChange} disabled={isLoading}>
+      <SelectTrigger id="doctor-select" className="w-full">
+        <SelectValue placeholder={isLoading ? "Loading…" : "Any Available Doctor"} />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="">Any Available Doctor</SelectItem>
+        {doctors.map((doctor) => {
+          const id = doctor.doctorPublicId ?? "";
+          const firstName = doctor.firstName ?? "";
+          const lastName = doctor.lastName ?? "";
+          const spec = doctor.specialization ?? "";
 
-            return (
-              <SelectItem key={id || `doc-${Math.random()}`} value={id}>
-                {id ? `Dr. ${firstName} ${lastName} — ${spec}` : "Unknown Doctor"}
-              </SelectItem>
-            );
-          })}
-        </SelectContent>
-      </Select>
-    </div>
+          return (
+            <SelectItem key={id || `doc-${Math.random()}`} value={id}>
+              {id ? `Dr. ${firstName} ${lastName} — ${spec}` : "Unknown Doctor"}
+            </SelectItem>
+          );
+        })}
+      </SelectContent>
+    </Select>
   );
 }

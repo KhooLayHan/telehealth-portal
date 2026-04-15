@@ -23,8 +23,8 @@ export function ScheduleForm({ form, onNext }: ScheduleStepProps) {
     selectedDoctorId,
   });
 
-  const handleDoctorChange = (id: string) => {
-    setSelectedDoctorId(id);
+  const handleDoctorChange = (id: string | null) => {
+    setSelectedDoctorId(id ?? "");
     form.setFieldValue("schedulePublicId", "");
   };
 

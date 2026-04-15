@@ -1,5 +1,6 @@
-import { format } from "date-fns";
+import { format, isValid, parse } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
+import { useId } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
@@ -9,12 +10,22 @@ import { cn } from "@/lib/utils";
 type DatePickerProps = {
   value: string;
   minDate: string;
-  onChange: (date: string | null) => void;
+  onChange: (date: string) => void;
 };
 
 export function DatePicker({ value, minDate, onChange }: DatePickerProps) {
-  const selectedDate = value ? new Date(value) : undefined;
-  const minDateObj = minDate ? new Date(minDate) : undefined;
+  const triggerId = useId();
+
+  const parseDateOnly = (input: string): Date | undefined => {
+    if (!input) {
+      return undefined;
+    }
+    const parsed = parse(input, "yyyy-MM-dd", new Date());
+    return isValid(parsed) ? parsed : undefined;
+  };
+
+  const selectedDate = parseDateOnly(value);
+  const minDateObj = parseDateOnly(minDate);
 
   const handleSelect = (date: Date | undefined) => {
     if (date) {
@@ -29,10 +40,10 @@ export function DatePicker({ value, minDate, onChange }: DatePickerProps) {
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="date-picker-trigger">Select Date</Label>
+      <Label htmlFor={triggerId}>Select Date</Label>
       <Popover>
         <PopoverTrigger
-          id="date-picker-trigger"
+          id={triggerId}
           render={
             <Button
               variant="outline"
@@ -42,7 +53,7 @@ export function DatePicker({ value, minDate, onChange }: DatePickerProps) {
               )}
             >
               <CalendarIcon className="mr-2 size-4" />
-              {value ? format(selectedDate as Date, "PPP") : <span>Pick a date</span>}
+              {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
             </Button>
           }
         />
