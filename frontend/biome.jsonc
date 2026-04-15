@@ -27,7 +27,8 @@
       "!src/routeTree.gen.ts",
       "!src/stories",
       "!src/api/generated",
-      "!src/components/ui/**/*"
+      "!src/components/ui/**/*",
+      "!src/components/ui/**"
     ]
   },
   "overrides": [
