@@ -20,12 +20,20 @@ export function TermsCheckbox({ checked, onCheckedChange }: TermsCheckboxProps) 
         className="cursor-pointer select-none text-muted-foreground text-sm leading-snug"
         htmlFor="accept-terms"
       >
-        I agree to the{" "}
-        <Button className="h-auto p-0 text-primary hover:underline" type="button" variant="link">
+        I agree to the
+        <Button
+          className="cursor-pointer h-auto p-0 text-primary hover:underline"
+          type="button"
+          variant="link"
+        >
           Terms of Service
-        </Button>{" "}
-        and{" "}
-        <Button className="h-auto p-0 text-primary hover:underline" type="button" variant="link">
+        </Button>
+        and
+        <Button
+          className="cursor-pointer h-auto p-0 text-primary hover:underline"
+          type="button"
+          variant="link"
+        >
           Privacy Policy
         </Button>
       </Label>

@@ -8,11 +8,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyForm = any;
+import type { RegisterFormType } from "../hooks/useRegisterForm";
 
 type RegisterPersonalInfoSectionProps = {
-  form: AnyForm;
+  form: RegisterFormType;
 };
 
 export function RegisterPersonalInfoSection({ form }: RegisterPersonalInfoSectionProps) {
@@ -23,12 +22,7 @@ export function RegisterPersonalInfoSection({ form }: RegisterPersonalInfoSectio
       {/* First Name + Last Name */}
       <div className="grid grid-cols-2 gap-3">
         <form.Field name="firstName">
-          {(field: {
-            name: string;
-            state: { value: string; meta: { errors: unknown[] } };
-            handleBlur: () => void;
-            handleChange: (v: string) => void;
-          }) => (
+          {(field) => (
             <Field data-invalid={field.state.meta.errors.length > 0}>
               <FieldLabel htmlFor={field.name}>First name</FieldLabel>
               <Input
@@ -40,18 +34,13 @@ export function RegisterPersonalInfoSection({ form }: RegisterPersonalInfoSectio
                 placeholder="Jane"
                 value={field.state.value}
               />
-              <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+              <FieldError errors={field.state.meta.errors} />
             </Field>
           )}
         </form.Field>
 
         <form.Field name="lastName">
-          {(field: {
-            name: string;
-            state: { value: string; meta: { errors: unknown[] } };
-            handleBlur: () => void;
-            handleChange: (v: string) => void;
-          }) => (
+          {(field) => (
             <Field data-invalid={field.state.meta.errors.length > 0}>
               <FieldLabel htmlFor={field.name}>Last name</FieldLabel>
               <Input
@@ -63,7 +52,7 @@ export function RegisterPersonalInfoSection({ form }: RegisterPersonalInfoSectio
                 placeholder="Doe"
                 value={field.state.value}
               />
-              <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+              <FieldError errors={field.state.meta.errors} />
             </Field>
           )}
         </form.Field>
@@ -71,12 +60,7 @@ export function RegisterPersonalInfoSection({ form }: RegisterPersonalInfoSectio
 
       {/* IC Number */}
       <form.Field name="icNumber">
-        {(field: {
-          name: string;
-          state: { value: string; meta: { errors: unknown[] } };
-          handleBlur: () => void;
-          handleChange: (v: string) => void;
-        }) => (
+        {(field) => (
           <Field data-invalid={field.state.meta.errors.length > 0}>
             <FieldLabel htmlFor={field.name}>IC Number</FieldLabel>
             <Input
@@ -88,7 +72,7 @@ export function RegisterPersonalInfoSection({ form }: RegisterPersonalInfoSectio
               placeholder="012345678901"
               value={field.state.value}
             />
-            <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+            <FieldError errors={field.state.meta.errors} />
           </Field>
         )}
       </form.Field>
@@ -96,12 +80,7 @@ export function RegisterPersonalInfoSection({ form }: RegisterPersonalInfoSectio
       {/* Date of Birth + Gender */}
       <div className="grid grid-cols-2 gap-3">
         <form.Field name="dateOfBirth">
-          {(field: {
-            name: string;
-            state: { value: string; meta: { errors: unknown[] } };
-            handleBlur: () => void;
-            handleChange: (v: string) => void;
-          }) => (
+          {(field) => (
             <Field data-invalid={field.state.meta.errors.length > 0}>
               <FieldLabel htmlFor={field.name}>Date of birth</FieldLabel>
               <Input
@@ -113,18 +92,13 @@ export function RegisterPersonalInfoSection({ form }: RegisterPersonalInfoSectio
                 type="date"
                 value={field.state.value}
               />
-              <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+              <FieldError errors={field.state.meta.errors} />
             </Field>
           )}
         </form.Field>
 
         <form.Field name="gender">
-          {(field: {
-            name: string;
-            state: { value: string; meta: { errors: unknown[] } };
-            handleBlur: () => void;
-            handleChange: (v: string) => void;
-          }) => (
+          {(field) => (
             <Field data-invalid={field.state.meta.errors.length > 0}>
               <FieldLabel htmlFor={field.name}>Gender</FieldLabel>
               <Select
@@ -141,7 +115,7 @@ export function RegisterPersonalInfoSection({ form }: RegisterPersonalInfoSectio
                   <SelectItem value="N">Prefer not to say</SelectItem>
                 </SelectContent>
               </Select>
-              <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+              <FieldError errors={field.state.meta.errors} />
             </Field>
           )}
         </form.Field>

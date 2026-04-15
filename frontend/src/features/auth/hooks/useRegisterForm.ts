@@ -17,12 +17,12 @@ export function useRegisterForm() {
       firstName: "",
       lastName: "",
       email: "",
-      gender: "" as "M" | "F" | "O" | "N" | "",
+      gender: "" as "M" | "F" | "O" | "N",
       dateOfBirth: "",
       icNumber: "",
       password: "",
       confirmPassword: "",
-    } as RegisterFormData,
+    } satisfies RegisterFormData,
     onSubmit: async ({ value }) => {
       setGlobalError(null);
 
@@ -55,3 +55,5 @@ export function useRegisterForm() {
     isPending: registerMutation.isPending,
   };
 }
+
+export type RegisterFormType = ReturnType<typeof useRegisterForm>["form"];

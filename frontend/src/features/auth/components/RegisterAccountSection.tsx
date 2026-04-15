@@ -1,16 +1,10 @@
-// import type { useForm } from "@tanstack/react-form";
-
-import type { useForm } from "@tanstack/react-form";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import type { useRegisterForm } from "../hooks/useRegisterForm";
-import type { RegisterFormData } from "../schemas/registerSchema";
+import type { RegisterFormType } from "../hooks/useRegisterForm";
 import { PasswordInput } from "./PasswordInput";
 
-type FormType = ReturnType<typeof useRegisterForm>["form"];
-
 type RegisterAccountSectionProps = {
-  form: FormType;
+  form: RegisterFormType;
 };
 
 export function RegisterAccountSection({ form }: RegisterAccountSectionProps) {
@@ -20,12 +14,7 @@ export function RegisterAccountSection({ form }: RegisterAccountSectionProps) {
 
       {/* Username */}
       <form.Field name="username">
-        {(field: {
-          name: string;
-          state: { value: string; meta: { errors: unknown[] } };
-          handleBlur: () => void;
-          handleChange: (v: string) => void;
-        }) => (
+        {(field) => (
           <Field data-invalid={field.state.meta.errors.length > 0}>
             <FieldLabel htmlFor={field.name}>Username</FieldLabel>
             <Input
@@ -37,19 +26,14 @@ export function RegisterAccountSection({ form }: RegisterAccountSectionProps) {
               placeholder="johndoe123"
               value={field.state.value}
             />
-            <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+            <FieldError errors={field.state.meta.errors} />
           </Field>
         )}
       </form.Field>
 
       {/* Email */}
       <form.Field name="email">
-        {(field: {
-          name: string;
-          state: { value: string; meta: { errors: unknown[] } };
-          handleBlur: () => void;
-          handleChange: (v: string) => void;
-        }) => (
+        {(field) => (
           <Field data-invalid={field.state.meta.errors.length > 0}>
             <FieldLabel htmlFor={field.name}>Email</FieldLabel>
             <Input
@@ -62,19 +46,14 @@ export function RegisterAccountSection({ form }: RegisterAccountSectionProps) {
               type="email"
               value={field.state.value}
             />
-            <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+            <FieldError errors={field.state.meta.errors} />
           </Field>
         )}
       </form.Field>
 
       {/* Password */}
       <form.Field name="password">
-        {(field: {
-          name: string;
-          state: { value: string; meta: { errors: unknown[] } };
-          handleBlur: () => void;
-          handleChange: (v: string) => void;
-        }) => (
+        {(field) => (
           <Field data-invalid={field.state.meta.errors.length > 0}>
             <FieldLabel htmlFor={field.name}>Password</FieldLabel>
             <PasswordInput
@@ -87,7 +66,7 @@ export function RegisterAccountSection({ form }: RegisterAccountSectionProps) {
               value={field.state.value}
               error={undefined}
             />
-            <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+            <FieldError errors={field.state.meta.errors} />
           </Field>
         )}
       </form.Field>
@@ -115,12 +94,7 @@ export function RegisterAccountSection({ form }: RegisterAccountSectionProps) {
           },
         }}
       >
-        {(field: {
-          name: string;
-          state: { value: string; meta: { errors: unknown[] } };
-          handleBlur: () => void;
-          handleChange: (v: string) => void;
-        }) => (
+        {(field) => (
           <Field data-invalid={field.state.meta.errors.length > 0}>
             <FieldLabel htmlFor={field.name}>Confirm password</FieldLabel>
             <PasswordInput
@@ -133,7 +107,7 @@ export function RegisterAccountSection({ form }: RegisterAccountSectionProps) {
               value={field.state.value}
               error={undefined}
             />
-            <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+            <FieldError errors={field.state.meta.errors} />
           </Field>
         )}
       </form.Field>

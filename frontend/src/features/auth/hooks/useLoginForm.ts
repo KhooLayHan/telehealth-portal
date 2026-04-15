@@ -18,7 +18,7 @@ export function useLoginForm() {
     defaultValues: {
       email: "",
       password: "",
-    } as LoginFormData,
+    } satisfies LoginFormData,
     onSubmit: async ({ value }) => {
       setGlobalError(null);
 
@@ -56,3 +56,5 @@ export function useLoginForm() {
     isPending: loginMutation.isPending,
   };
 }
+
+export type LoginFormType = ReturnType<typeof useLoginForm>["form"];
