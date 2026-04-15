@@ -1,5 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
+import type { AvailableScheduleDto } from "@/api/model/AvailableScheduleDto";
 
 export const SEVERITY_OPTIONS = ["Mild", "Moderate", "Severe"] as const;
 export type Severity = (typeof SEVERITY_OPTIONS)[number];
