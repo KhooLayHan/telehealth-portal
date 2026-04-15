@@ -37,7 +37,6 @@ export function AppointmentActions({ appointment }: { appointment: AppointmentDt
   const [isCancelOpen, setIsCancelOpen] = useState(false);
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
 
-  const [globalError, setGlobalError] = useState<string | null>(null);
   const [cancelError, setCancelError] = useState<string | null>(null);
   const [rescheduleError, setRescheduleError] = useState<string | null>(null);
 
@@ -54,7 +53,7 @@ export function AppointmentActions({ appointment }: { appointment: AppointmentDt
       }),
     },
     onSubmit: async ({ value }) => {
-      setGlobalError(null);
+      setCancelError(null);
       try {
         await cancelMutation.mutateAsync({
           slug: appointment.slug, // Uses the slug from the row data!
@@ -66,7 +65,7 @@ export function AppointmentActions({ appointment }: { appointment: AppointmentDt
         setIsCancelOpen(false);
       } catch (err) {
         const apiError = err as ApiError;
-        setGlobalError(apiError.data?.detail || "Failed to cancel appointment.");
+        setCancelError(apiError.data?.detail || "Failed to cancel appointment.");
       }
     },
   });
@@ -80,7 +79,7 @@ export function AppointmentActions({ appointment }: { appointment: AppointmentDt
       }),
     },
     onSubmit: async ({ value }) => {
-      setGlobalError(null);
+      setRescheduleError(null);
       try {
         await rescheduleMutation.mutateAsync({
           slug: appointment.slug,
@@ -91,7 +90,7 @@ export function AppointmentActions({ appointment }: { appointment: AppointmentDt
         setIsRescheduleOpen(false);
       } catch (err) {
         const apiError = err as ApiError;
-        setGlobalError(apiError.data?.detail || "Failed to reschedule appointment.");
+        setRescheduleError(apiError.data?.detail || "Failed to reschedule appointment.");
       }
     },
   });
@@ -130,7 +129,16 @@ export function AppointmentActions({ appointment }: { appointment: AppointmentDt
       </DropdownMenu>
 
       {/* 🛑 CANCEL DIALOG */}
-      <Dialog open={isCancelOpen} onOpenChange={setIsCancelOpen}>
+      <Dialog
+        open={isCancelOpen}
+        onOpenChange={(open) => {
+          setIsCancelOpen(open);
+          if (!open) {
+            cancelForm.reset();
+            setCancelError(null);
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-106.25">
           <DialogHeader>
             <DialogTitle>Cancel Appointment</DialogTitle>
@@ -149,9 +157,9 @@ export function AppointmentActions({ appointment }: { appointment: AppointmentDt
             }}
             className="space-y-4 pt-4"
           >
-            {globalError && (
+            {cancelError && (
               <div className="p-3 text-sm text-destructive-foreground bg-destructive/10 rounded-md">
-                {globalError}
+                {cancelError}
               </div>
             )}
 
@@ -197,7 +205,16 @@ export function AppointmentActions({ appointment }: { appointment: AppointmentDt
       </Dialog>
 
       {/* 📅 RESCHEDULE DIALOG */}
-      <Dialog open={isRescheduleOpen} onOpenChange={setIsRescheduleOpen}>
+      <Dialog
+        open={isRescheduleOpen}
+        onOpenChange={(open) => {
+          setIsRescheduleOpen(open);
+          if (!open) {
+            rescheduleForm.reset();
+            setRescheduleError(null);
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-106.25">
           <DialogHeader>
             <DialogTitle>Reschedule Appointment</DialogTitle>
@@ -214,9 +231,9 @@ export function AppointmentActions({ appointment }: { appointment: AppointmentDt
             }}
             className="space-y-4 pt-4"
           >
-            {globalError && (
+            {rescheduleError && (
               <div className="p-3 text-sm text-destructive-foreground bg-destructive/10 rounded-md">
-                {globalError}
+                {rescheduleError}
               </div>
             )}
 
