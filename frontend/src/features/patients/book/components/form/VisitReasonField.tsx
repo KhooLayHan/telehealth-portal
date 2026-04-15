@@ -1,4 +1,6 @@
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import type { BookingFormInstance } from "../../schema";
 import { bookingSchema } from "../../schema";
 
@@ -10,26 +12,23 @@ export function VisitReasonField({ form }: VisitReasonFieldProps) {
   return (
     <form.Field name="visitReason" validators={{ onChange: bookingSchema.shape.visitReason }}>
       {(field) => (
-        <div className="space-y-2">
-          <Label htmlFor={field.name}>
-            Reason for Visit{" "}
+        <Field data-invalid={field.state.meta.errors.length > 0}>
+          <FieldLabel htmlFor={field.name}>
+            Reason for Visit
             <span className="text-destructive" aria-hidden>
               *
             </span>
-          </Label>
-          <textarea
+          </FieldLabel>
+          <Textarea
             id={field.name}
             value={field.state.value}
             onBlur={field.handleBlur}
             onChange={(e) => field.handleChange(e.target.value)}
             placeholder="E.g., Experiencing severe headaches for the past 3 days."
             aria-required
-            className="min-h-25 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           />
-          {field.state.meta.errors.length > 0 && (
-            <p className="text-xs text-destructive">{field.state.meta.errors[0]?.message}</p>
-          )}
-        </div>
+          <FieldError>{field.state.meta.errors[0]?.message}</FieldError>
+        </Field>
       )}
     </form.Field>
   );
