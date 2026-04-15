@@ -29,7 +29,7 @@ export function DatePicker({ value, minDate, onChange }: DatePickerProps) {
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="date-input">Select Date</Label>
+      <Label htmlFor="date-picker-trigger">Select Date</Label>
       <Popover>
         <PopoverTrigger
           id="date-picker-trigger"
