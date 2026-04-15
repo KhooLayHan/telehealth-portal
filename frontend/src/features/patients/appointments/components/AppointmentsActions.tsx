@@ -36,7 +36,10 @@ export function AppointmentActions({ appointment }: { appointment: AppointmentDt
   const queryClient = useQueryClient();
   const [isCancelOpen, setIsCancelOpen] = useState(false);
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
+
   const [globalError, setGlobalError] = useState<string | null>(null);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+  const [rescheduleError, setRescheduleError] = useState<string | null>(null);
 
   // 1. Mutations
   const cancelMutation = useDeleteAppointmentBySlug();
