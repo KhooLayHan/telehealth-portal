@@ -1,3 +1,4 @@
+import { useNavigate } from "@tanstack/react-router";
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { AnimatePresence, motion } from "framer-motion";
 import { Search } from "lucide-react";
@@ -13,7 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatLocalTime } from "./UseDoctorSchedule";
+import { formatLocalDate, formatLocalTime } from "./UseDoctorSchedule";
 
 type Props = {
   items: DoctorAppointmentDto[];
@@ -26,7 +27,34 @@ type Props = {
   onSearchChange: (search: string) => void;
 };
 
+function ActionCell({ row }: { row: { original: DoctorAppointmentDto } }) {
+  const navigate = useNavigate();
+  const status = row.original.status ?? "";
+  const canView = status === "Booked" || status === "Completed";
+
+  if (!canView) return null;
+
+  return (
+    <Button
+      size="sm"
+      variant="outline"
+      onClick={() =>
+        navigate({ to: "/appointments/$id", params: { id: row.original.publicId ?? "" } })
+      }
+    >
+      View
+    </Button>
+  );
+}
+
 const columns: ColumnDef<DoctorAppointmentDto>[] = [
+  {
+    accessorKey: "date",
+    header: "Date",
+    cell: ({ row }) => (
+      <span className="text-foreground">{formatLocalDate(String(row.original.date ?? ""))}</span>
+    ),
+  },
   {
     accessorKey: "startTime",
     header: "Time",
@@ -62,6 +90,11 @@ const columns: ColumnDef<DoctorAppointmentDto>[] = [
         </Badge>
       );
     },
+  },
+  {
+    id: "action",
+    header: "Action",
+    cell: ({ row }) => <ActionCell row={row} />,
   },
 ];
 
@@ -119,7 +152,7 @@ export function DoctorScheduleTable({
             {isLoading ? (
               ["sk-1", "sk-2", "sk-3", "sk-4", "sk-5"].map((rowKey) => (
                 <TableRow key={rowKey}>
-                  {["time", "patient", "reason", "status"].map((colKey) => (
+                  {["date", "time", "patient", "reason", "status", "action"].map((colKey) => (
                     <TableCell key={`${rowKey}-${colKey}`}>
                       <div className="h-4 animate-pulse rounded bg-muted" />
                     </TableCell>

@@ -13,6 +13,27 @@ export function formatLocalTime(time?: string): string {
   return `${hour12}:${m} ${ampm}`;
 }
 
+// LocalDate from backend is "YYYY-MM-DD" — convert to "15 Apr 2026"
+export function formatLocalDate(date?: string): string {
+  if (!date) return "—";
+  const [y, m, d] = date.split("-");
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+  return `${Number.parseInt(d, 10)} ${months[Number.parseInt(m, 10) - 1]} ${y}`;
+}
+
 export function UseDoctorSchedule() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");

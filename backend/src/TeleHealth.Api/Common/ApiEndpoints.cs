@@ -55,6 +55,8 @@ public static class ApiEndpoints
 
         public const string GetById = $"{Base}/{{id:guid}}";
 
+        public const string GetByIdForDoctor = $"{Base}/{{id:guid}}/doctor";
+
         public const string GetAllAppointments = Base;
     }
 

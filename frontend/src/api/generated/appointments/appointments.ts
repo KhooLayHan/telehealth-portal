@@ -32,6 +32,10 @@ import type {
 } from '../../model/BookAppointmentResponse';
 
 import type {
+  DoctorAppointmentDetailDto
+} from '../../model/DoctorAppointmentDetailDto';
+
+import type {
   GetAllAppointmentsForReceptionistParams
 } from '../../model/GetAllAppointmentsForReceptionistParams';
 
@@ -374,6 +378,124 @@ export function useGetAppointmentByIdForReceptionist<TData = Awaited<ReturnType<
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetAppointmentByIdForReceptionistQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export type getAppointmentByIdForDoctorResponse200 = {
+  data: DoctorAppointmentDetailDto
+  status: 200
+}
+
+export type getAppointmentByIdForDoctorResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type getAppointmentByIdForDoctorResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type getAppointmentByIdForDoctorResponseSuccess = (getAppointmentByIdForDoctorResponse200) & {
+  headers: Headers;
+};
+export type getAppointmentByIdForDoctorResponseError = (getAppointmentByIdForDoctorResponse401 | getAppointmentByIdForDoctorResponse404) & {
+  headers: Headers;
+};
+
+export type getAppointmentByIdForDoctorResponse = (getAppointmentByIdForDoctorResponseSuccess | getAppointmentByIdForDoctorResponseError)
+
+export const getGetAppointmentByIdForDoctorUrl = (id: string,) => {
+
+
+
+
+  return `http://localhost:5144/api/v1/appointments/${id}/doctor`
+}
+
+export const getAppointmentByIdForDoctor = async (id: string, options?: RequestInit): Promise<getAppointmentByIdForDoctorResponse> => {
+
+  return ofetchMutator<getAppointmentByIdForDoctorResponse>(getGetAppointmentByIdForDoctorUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAppointmentByIdForDoctorQueryKey = (id: string,) => {
+    return [
+    `http://localhost:5144/api/v1/appointments/${id}/doctor`
+    ] as const;
+    }
+
+
+export const getGetAppointmentByIdForDoctorQueryOptions = <TData = Awaited<ReturnType<typeof getAppointmentByIdForDoctor>>, TError = ProblemDetails>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAppointmentByIdForDoctor>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAppointmentByIdForDoctorQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAppointmentByIdForDoctor>>> = ({ signal }) => getAppointmentByIdForDoctor(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAppointmentByIdForDoctor>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetAppointmentByIdForDoctorQueryResult = NonNullable<Awaited<ReturnType<typeof getAppointmentByIdForDoctor>>>
+export type GetAppointmentByIdForDoctorQueryError = ProblemDetails
+
+
+export function useGetAppointmentByIdForDoctor<TData = Awaited<ReturnType<typeof getAppointmentByIdForDoctor>>, TError = ProblemDetails>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAppointmentByIdForDoctor>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAppointmentByIdForDoctor>>,
+          TError,
+          Awaited<ReturnType<typeof getAppointmentByIdForDoctor>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAppointmentByIdForDoctor<TData = Awaited<ReturnType<typeof getAppointmentByIdForDoctor>>, TError = ProblemDetails>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAppointmentByIdForDoctor>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAppointmentByIdForDoctor>>,
+          TError,
+          Awaited<ReturnType<typeof getAppointmentByIdForDoctor>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAppointmentByIdForDoctor<TData = Awaited<ReturnType<typeof getAppointmentByIdForDoctor>>, TError = ProblemDetails>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAppointmentByIdForDoctor>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetAppointmentByIdForDoctor<TData = Awaited<ReturnType<typeof getAppointmentByIdForDoctor>>, TError = ProblemDetails>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAppointmentByIdForDoctor>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetAppointmentByIdForDoctorQueryOptions(id,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
