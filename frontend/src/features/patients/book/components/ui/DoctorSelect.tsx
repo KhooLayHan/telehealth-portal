@@ -29,7 +29,10 @@ export function DoctorSelect({ doctors, selectedId, isLoading, onChange }: Docto
           const spec = doctor.specialization ?? "";
 
           return (
-            <SelectItem key={`doctor-${id || "empty"}`} value={id}>
+            <SelectItem
+              key={`doctor-${id || "empty"}`}
+              value={`Dr. ${firstName} ${lastName} — ${spec}`}
+            >
               {id ? `Dr. ${firstName} ${lastName} — ${spec}` : "Unknown Doctor"}
             </SelectItem>
           );
