@@ -76,19 +76,13 @@ export function RegisterAccountSection({ form }: RegisterAccountSectionProps) {
         name="confirmPassword"
         validators={{
           onChangeListenTo: ["password"],
-          onChange: ({
-            value,
-            fieldApi,
-          }: {
-            value: string;
-            fieldApi: { form: { getFieldValue: (name: string) => string } };
-          }) => {
+          onChange: ({ value, fieldApi }) => {
             const password = fieldApi.form.getFieldValue("password");
             if (!value) {
-              return "Please confirm your password.";
+              return { message: "Please confirm your password." };
             }
             if (value !== password) {
-              return "Passwords do not match.";
+              return { message: "Passwords do not match." };
             }
             return undefined;
           },
