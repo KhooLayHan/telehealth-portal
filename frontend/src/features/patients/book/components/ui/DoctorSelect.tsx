@@ -29,7 +29,7 @@ export function DoctorSelect({ doctors, selectedId, isLoading, onChange }: Docto
           const spec = doctor.specialization ?? "";
 
           return (
-            <SelectItem key={id || `doc-${Math.random()}`} value={id}>
+            <SelectItem key={`doctor-${id || "empty"}`} value={id}>
               {id ? `Dr. ${firstName} ${lastName} — ${spec}` : "Unknown Doctor"}
             </SelectItem>
           );
