@@ -37,11 +37,11 @@ export function SymptomNameField({ form, index, symptomId }: SymptomNameFieldPro
   );
 }
 
-interface SymptomSeverityFieldProps {
+type SymptomSeverityFieldProps = {
   form: BookingFormInstance;
   index: number;
   symptomId: string;
-}
+};
 
 export function SymptomSeverityField({ form, index, symptomId }: SymptomSeverityFieldProps) {
   return (

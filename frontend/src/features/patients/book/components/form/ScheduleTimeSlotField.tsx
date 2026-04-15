@@ -69,12 +69,12 @@ export function ScheduleTimeSlotField({
   );
 }
 
-interface ScheduleStepContentProps {
+type ScheduleStepContentProps = {
   form: BookingFormInstance;
   availableSchedules: AvailableScheduleDto[];
   isLoading: boolean;
   isError: boolean;
-}
+};
 
 export function ScheduleStepContent({
   form,

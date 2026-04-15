@@ -28,9 +28,9 @@ export function SymptomCard({ symptom, index, onRemove, children }: SymptomCardP
   );
 }
 
-interface AddSymptomButtonProps {
+type AddSymptomButtonProps = {
   onClick: () => void;
-}
+};
 
 export function AddSymptomButton({ onClick }: AddSymptomButtonProps) {
   return (
