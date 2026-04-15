@@ -18,6 +18,8 @@ export const bookingSchema = z.object({
   symptoms: z.array(symptomItemSchema).default([]),
 });
 
+export type SymptomItem = z.infer<typeof symptomItemSchema>;
+
 export type BookingFormValues = z.infer<typeof bookingSchema>;
 
 export const defaultValues: BookingFormValues = {

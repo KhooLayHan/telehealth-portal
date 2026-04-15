@@ -1,60 +1,151 @@
-// src/features/appointments/book/ScheduleStep.tsx
+// src/features/appointments/book/ScheduleForm.tsx
 
-import { Calendar as CalendarIcon, ChevronRight, Clock } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useGetAll } from "@/api/generated/doctors/doctors";
-import { useGetAllAvailable } from "@/api/generated/schedules/schedules";
-import { Button } from "@/components/ui/button";
 import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { BookingFormValues, ScheduleStepProps } from "./schema";
-import { bookingSchema, formatLocalTime, getMinDate, isValidSlot } from "./schema";
+import { NextButton } from "./components/form/NextButton";
+import { ScheduleTimeSlotField } from "./components/form/ScheduleTimeSlotField";
+import { DatePicker } from "./components/ui/DatePicker";
+import { DoctorSelect } from "./components/ui/DoctorSelect";
+import { useDoctorsQuery } from "./hooks/useDoctorsQuery";
+import { useScheduleQuery } from "./hooks/useScheduleQuery";
+import type { ScheduleStepProps } from "./schema";
+import { getMinDate } from "./schema";
 
 export function ScheduleForm({ form, onNext }: ScheduleStepProps) {
   const minDate = useMemo(() => getMinDate(), []);
-
   const [selectedDoctorId, setSelectedDoctorId] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
 
-  const { data: response, isLoading: isLoadingDoctors } = useGetAll();
-  const doctors = response?.status === 200 && Array.isArray(response.data) ? response.data : [];
+  const { doctors, isLoading: isLoadingDoctors } = useDoctorsQuery();
+  const { availableSchedules, isLoading, isError } = useScheduleQuery({
+    selectedDate,
+    selectedDoctorId,
+  });
 
-  const {
-    data: schedulesResponse,
-    isLoading: isLoadingSchedules,
-    isError: isSchedulesRequestError,
-  } = useGetAllAvailable(
-    { Date: selectedDate, DoctorPublicId: selectedDoctorId || undefined },
-    { query: { enabled: !!selectedDate } },
-  );
+  const handleDoctorChange = (id: string) => {
+    setSelectedDoctorId(id);
+    form.setFieldValue("schedulePublicId", "");
+  };
 
-  const isSchedulesError =
-    isSchedulesRequestError ||
-    (schedulesResponse !== undefined && schedulesResponse.status !== 200);
-  const availableSchedules = schedulesResponse?.status === 200 ? schedulesResponse.data : [];
+  const handleDateChange = (date: string) => {
+    setSelectedDate(date);
+    form.setFieldValue("schedulePublicId", "");
+  };
 
   if (!selectedDate) {
-    return <p className="text-sm text-muted-foreground italic">Please select a date first.</p>;
-  }
-
-  if (isLoadingSchedules) {
-    return <p className="text-sm text-muted-foreground italic">Loading available slots…</p>;
-  }
-
-  if (isSchedulesError) {
     return (
-      <p className="text-sm text-destructive" role="alert">
-        Could not load available slots. Please try again.
-      </p>
+      <>
+        <CardHeader>
+          <CardTitle className="text-2xl">Choose a Time</CardTitle>
+          <CardDescription>
+            Select your preferred doctor, date, and available time slot.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="doctor-select">Select Doctor</Label>
+              <DoctorSelect
+                doctors={doctors}
+                selectedId={selectedDoctorId}
+                isLoading={isLoadingDoctors}
+                onChange={handleDoctorChange}
+              />
+            </div>
+            <DatePicker value={selectedDate} minDate={minDate} onChange={handleDateChange} />
+          </div>
+          <p className="text-sm text-muted-foreground italic">Please select a date first.</p>
+        </CardContent>
+      </>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <>
+        <CardHeader>
+          <CardTitle className="text-2xl">Choose a Time</CardTitle>
+          <CardDescription>
+            Select your preferred doctor, date, and available time slot.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="doctor-select">Select Doctor</Label>
+              <DoctorSelect
+                doctors={doctors}
+                selectedId={selectedDoctorId}
+                isLoading={isLoadingDoctors}
+                onChange={handleDoctorChange}
+              />
+            </div>
+            <DatePicker value={selectedDate} minDate={minDate} onChange={handleDateChange} />
+          </div>
+          <p className="text-sm text-muted-foreground italic">Loading available slots…</p>
+        </CardContent>
+      </>
+    );
+  }
+
+  if (isError) {
+    return (
+      <>
+        <CardHeader>
+          <CardTitle className="text-2xl">Choose a Time</CardTitle>
+          <CardDescription>
+            Select your preferred doctor, date, and available time slot.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="doctor-select">Select Doctor</Label>
+              <DoctorSelect
+                doctors={doctors}
+                selectedId={selectedDoctorId}
+                isLoading={isLoadingDoctors}
+                onChange={handleDoctorChange}
+              />
+            </div>
+            <DatePicker value={selectedDate} minDate={minDate} onChange={handleDateChange} />
+          </div>
+          <p className="text-sm text-destructive" role="alert">
+            Could not load available slots. Please try again.
+          </p>
+        </CardContent>
+      </>
     );
   }
 
   if (availableSchedules.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground italic">
-        No slots available for this date. Try another day.
-      </p>
+      <>
+        <CardHeader>
+          <CardTitle className="text-2xl">Choose a Time</CardTitle>
+          <CardDescription>
+            Select your preferred doctor, date, and available time slot.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="doctor-select">Select Doctor</Label>
+              <DoctorSelect
+                doctors={doctors}
+                selectedId={selectedDoctorId}
+                isLoading={isLoadingDoctors}
+                onChange={handleDoctorChange}
+              />
+            </div>
+            <DatePicker value={selectedDate} minDate={minDate} onChange={handleDateChange} />
+          </div>
+          <p className="text-sm text-muted-foreground italic">
+            No slots available for this date. Try another day.
+          </p>
+        </CardContent>
+      </>
     );
   }
 
@@ -71,101 +162,25 @@ export function ScheduleForm({ form, onNext }: ScheduleStepProps) {
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="doctor-select">Select Doctor</Label>
-            <select
-              id="doctor-select"
-              className="h-10 w-full rounded-md border border-input bg-transparent px-3 py-1 shadow-sm"
-              value={selectedDoctorId}
-              disabled={isLoadingDoctors}
-              onChange={(e) => {
-                setSelectedDoctorId(e.target.value);
-                form.setFieldValue("schedulePublicId", "");
-              }}
-            >
-              <option value="">{isLoadingDoctors ? "Loading…" : "Any Available Doctor"}</option>
-              {doctors.map((d) => (
-                <option key={d.publicId} value={d.publicId}>
-                  Dr. {d.firstName} {d.lastName} — {d.specialization}
-                </option>
-              ))}
-            </select>
+            <DoctorSelect
+              doctors={doctors}
+              selectedId={selectedDoctorId}
+              isLoading={isLoadingDoctors}
+              onChange={handleDoctorChange}
+            />
           </div>
-
-          {/* Date picker */}
-          <div className="space-y-2">
-            <Label htmlFor="date-input">Select Date</Label>
-            <div className="relative">
-              <CalendarIcon className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
-              <Input
-                id="date-input"
-                type="date"
-                className="pl-9"
-                value={selectedDate}
-                min={minDate}
-                onChange={(e) => {
-                  setSelectedDate(e.target.value);
-                  form.setFieldValue("schedulePublicId", "");
-                }}
-              />
-            </div>
-          </div>
+          <DatePicker value={selectedDate} minDate={minDate} onChange={handleDateChange} />
         </div>
 
-        {/* Time slot grid — bound to the form field that goes to the API */}
-        <form.Field
-          name="schedulePublicId"
-          validators={{ onChange: bookingSchema.shape.schedulePublicId }}
-        >
-          {(field) => (
-            <fieldset
-              className="space-y-3 pt-4 border-t border-border"
-              aria-labelledby="time-slots-label"
-            >
-              <legend id="time-slots-label" className="text-sm font-medium leading-none">
-                Available Time Slots
-              </legend>
-
-              <div className="grid grid-cols-3 gap-3">
-                {availableSchedules.filter(isValidSlot).map((slot) => {
-                  const isSelected = field.state.value === slot.publicId;
-                  return (
-                    <button
-                      key={slot.publicId}
-                      type="button"
-                      aria-pressed={isSelected}
-                      onClick={() => field.handleChange(slot?.publicId)}
-                      className={`flex flex-col items-center justify-center rounded-md border p-3 transition-all ${
-                        isSelected
-                          ? "border-primary bg-primary/10 text-primary ring-1 ring-primary"
-                          : "border-border hover:border-primary/50 hover:bg-muted/50"
-                      }`}
-                    >
-                      <Clock className="mb-1 size-4" />
-                      <span className="text-sm font-medium">{formatLocalTime(slot.startTime)}</span>
-                      <span className="text-xs text-muted-foreground">
-                        - {formatLocalTime(slot.endTime)}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {field.state.meta.errors.length > 0 && (
-                <p className="text-xs text-destructive">{field.state.meta.errors[0]?.message}</p>
-              )}
-            </fieldset>
-          )}
-        </form.Field>
+        <ScheduleTimeSlotField
+          form={form}
+          availableSchedules={availableSchedules}
+          isLoading={isLoading}
+          isError={isError}
+        />
 
         <div className="flex justify-end pt-6">
-          <form.Subscribe
-            selector={(state: { values: BookingFormValues }) => state.values.schedulePublicId}
-          >
-            {(scheduleId: string) => (
-              <Button type="button" onClick={onNext} disabled={!scheduleId}>
-                Next Step <ChevronRight className="ml-2 size-4" />
-              </Button>
-            )}
-          </form.Subscribe>
+          <NextButton form={form} onNext={onNext} />
         </div>
       </CardContent>
     </>
