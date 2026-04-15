@@ -23,8 +23,8 @@ export function ScheduleForm({ form, onNext }: ScheduleStepProps) {
     selectedDoctorId,
   });
 
-  const handleDoctorChange = (id: string) => {
-    setSelectedDoctorId(id);
+  const handleDoctorChange = (id: string | null) => {
+    setSelectedDoctorId(id ?? "");
     form.setFieldValue("schedulePublicId", "");
   };
 
@@ -179,7 +179,7 @@ export function ScheduleForm({ form, onNext }: ScheduleStepProps) {
           isError={isError}
         />
 
-        <div className="flex justify-end pt-6">
+        <div className="flex justify-end pt-6 border-t">
           <NextButton form={form} onNext={onNext} />
         </div>
       </CardContent>

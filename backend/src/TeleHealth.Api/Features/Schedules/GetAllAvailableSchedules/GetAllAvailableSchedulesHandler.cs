@@ -16,6 +16,12 @@ public sealed class GetAllAvailableSchedulesHandler(ApplicationDbContext db)
         CancellationToken ct
     )
     {
+        if (string.IsNullOrWhiteSpace(query.Date))
+        {
+            Log.Warning("A valid date (YYYY-MM-DD) must be provided in the query string");
+            throw new InvalidateDateException();
+        }
+
         var parseResult = LocalDatePattern.Iso.Parse(query.Date);
         if (!parseResult.Success)
         {

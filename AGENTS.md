@@ -179,6 +179,7 @@ public async Task TestName()
 This is a healthcare application. All code must comply with general GDPR and general health data privacy standards (HIPAA). Treat the following as PII/PHI that must never appear in logs, exception messages, or API responses:
 
 **Always PII — never log or expose:**
+
 - Email addresses
 - IC numbers  — also PHI under health data regulations
 - Full names in combination with any other identifier
@@ -187,6 +188,7 @@ This is a healthcare application. All code must comply with general GDPR and gen
 - Passwords or password hashes (any form)
 
 **Internal identifiers — safe to log:**
+
 - `PublicId` (GUIDs assigned by the system) — these are safe because they carry no real-world identity meaning on their own
 - `Slug` values
 - Appointment/schedule/record IDs
@@ -224,7 +226,7 @@ throw new DuplicateEmailException(); // detail: "An account with this email alre
 ### IC Numbers — Extra Caution
 
 IC numbers are PHI. Do not log them under any circumstances, including for debugging duplicate-registration attempts. Trace those events via the audit log only. If you need to reference an IC-related event in application logs, log only that the event occurred — never the value.
- 
+
 ---
 
 ## Security & Performance

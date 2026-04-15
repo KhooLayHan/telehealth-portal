@@ -1,5 +1,12 @@
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { BookingFormInstance, Severity } from "../../schema";
 import { SEVERITY_OPTIONS, symptomItemSchema } from "../../schema";
 
@@ -16,10 +23,10 @@ export function SymptomNameField({ form, index, symptomId }: SymptomNameFieldPro
       validators={{ onChange: symptomItemSchema.shape.name }}
     >
       {(subField) => (
-        <div className="space-y-1">
-          <Label htmlFor={`symptom-name-${symptomId}`} className="text-xs">
+        <Field data-invalid={subField.state.meta.errors.length > 0}>
+          <FieldLabel htmlFor={`symptom-name-${symptomId}`} className="text-xs">
             Symptom
-          </Label>
+          </FieldLabel>
           <Input
             id={`symptom-name-${symptomId}`}
             value={subField.state.value}
@@ -28,20 +35,18 @@ export function SymptomNameField({ form, index, symptomId }: SymptomNameFieldPro
             placeholder="Fever"
             aria-invalid={subField.state.meta.errors.length > 0}
           />
-          {subField.state.meta.errors.length > 0 && (
-            <p className="text-xs text-destructive">{subField.state.meta.errors[0]?.message}</p>
-          )}
-        </div>
+          <FieldError>{subField.state.meta.errors[0]?.message}</FieldError>
+        </Field>
       )}
     </form.Field>
   );
 }
 
-interface SymptomSeverityFieldProps {
+type SymptomSeverityFieldProps = {
   form: BookingFormInstance;
   index: number;
   symptomId: string;
-}
+};
 
 export function SymptomSeverityField({ form, index, symptomId }: SymptomSeverityFieldProps) {
   return (
@@ -50,37 +55,41 @@ export function SymptomSeverityField({ form, index, symptomId }: SymptomSeverity
       validators={{ onChange: symptomItemSchema.shape.severity }}
     >
       {(subField) => (
-        <div className="space-y-1">
-          <Label htmlFor={`symptom-severity-${symptomId}`} className="text-xs">
+        <Field data-invalid={subField.state.meta.errors.length > 0}>
+          <FieldLabel htmlFor={`symptom-severity-${symptomId}`} className="text-xs">
             Severity
-          </Label>
-          <select
-            id={`symptom-severity-${symptomId}`}
+          </FieldLabel>
+          <Select
             value={subField.state.value}
-            onBlur={subField.handleBlur}
-            onChange={(e) => subField.handleChange(e.target.value as Severity)}
-            className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+            onValueChange={(value) => subField.handleChange(value as Severity)}
           >
-            {SEVERITY_OPTIONS.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-          {subField.state.meta.errors.length > 0 && (
-            <p className="text-xs text-destructive">{subField.state.meta.errors[0]?.message}</p>
-          )}
-        </div>
+            <SelectTrigger
+              id={`symptom-severity-${symptomId}`}
+              className="h-9 w-full"
+              aria-invalid={subField.state.meta.errors.length > 0}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {SEVERITY_OPTIONS.map((s) => (
+                <SelectItem key={s} value={s}>
+                  {s}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <FieldError>{subField.state.meta.errors[0]?.message}</FieldError>
+        </Field>
       )}
     </form.Field>
   );
 }
 
-interface SymptomDurationFieldProps {
+type SymptomDurationFieldProps = {
   form: BookingFormInstance;
   index: number;
   symptomId: string;
-}
+};
 
 export function SymptomDurationField({ form, index, symptomId }: SymptomDurationFieldProps) {
   return (
@@ -89,10 +98,10 @@ export function SymptomDurationField({ form, index, symptomId }: SymptomDuration
       validators={{ onChange: symptomItemSchema.shape.duration }}
     >
       {(subField) => (
-        <div className="space-y-1">
-          <Label htmlFor={`symptom-duration-${symptomId}`} className="text-xs">
+        <Field data-invalid={subField.state.meta.errors.length > 0}>
+          <FieldLabel htmlFor={`symptom-duration-${symptomId}`} className="text-xs">
             Duration
-          </Label>
+          </FieldLabel>
           <Input
             id={`symptom-duration-${symptomId}`}
             value={subField.state.value}
@@ -101,10 +110,8 @@ export function SymptomDurationField({ form, index, symptomId }: SymptomDuration
             placeholder="2 days"
             aria-invalid={subField.state.meta.errors.length > 0}
           />
-          {subField.state.meta.errors.length > 0 && (
-            <p className="text-xs text-destructive">{subField.state.meta.errors[0]?.message}</p>
-          )}
-        </div>
+          <FieldError>{subField.state.meta.errors[0]?.message}</FieldError>
+        </Field>
       )}
     </form.Field>
   );

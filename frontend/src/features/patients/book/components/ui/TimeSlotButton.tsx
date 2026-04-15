@@ -22,8 +22,9 @@ export function TimeSlotButton({ slot, isSelected, onClick }: TimeSlotButtonProp
       }`}
     >
       <Clock className="mb-1 size-4" />
-      <span className="text-sm font-medium">{formatLocalTime(slot.startTime)}</span>
-      <span className="text-xs text-muted-foreground">- {formatLocalTime(slot.endTime)}</span>
+      <span className="text-sm font-medium">
+        {formatLocalTime(slot.startTime)} - {formatLocalTime(slot.endTime)}
+      </span>
     </button>
   );
 }

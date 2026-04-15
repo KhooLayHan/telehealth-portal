@@ -13,10 +13,10 @@ export function BackButton({ onClick }: BackButtonProps) {
   );
 }
 
-interface SubmitButtonProps {
+type SubmitButtonProps = {
   disabled: boolean;
   isSubmitting: boolean;
-}
+};
 
 export function SubmitButton({ disabled, isSubmitting }: SubmitButtonProps) {
   return (

@@ -1,6 +1,4 @@
 using System.Linq.Expressions;
-using Facet;
-using Facet.Mapping;
 using NodaTime;
 using TeleHealth.Api.Domain.Entities;
 
