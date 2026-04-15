@@ -2,9 +2,9 @@ import { Label } from "@/components/ui/label";
 import type { BookingFormInstance } from "../../schema";
 import { bookingSchema } from "../../schema";
 
-interface VisitReasonFieldProps {
+type VisitReasonFieldProps = {
   form: BookingFormInstance;
-}
+};
 
 export function VisitReasonField({ form }: VisitReasonFieldProps) {
   return (

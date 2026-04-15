@@ -1,12 +1,12 @@
 import type { ChangeEvent } from "react";
 import type { DoctorListDto } from "@/api/model/DoctorListDto";
 
-interface DoctorSelectProps {
+type DoctorSelectProps = {
   doctors: DoctorListDto[];
   selectedId: string;
   isLoading: boolean;
   onChange: (id: string) => void;
-}
+};
 
 export function DoctorSelect({ doctors, selectedId, isLoading, onChange }: DoctorSelectProps) {
   const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {

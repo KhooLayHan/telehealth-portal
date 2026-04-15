@@ -1,9 +1,9 @@
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-interface BackButtonProps {
+type BackButtonProps = {
   onClick: () => void;
-}
+};
 
 export function BackButton({ onClick }: BackButtonProps) {
   return (

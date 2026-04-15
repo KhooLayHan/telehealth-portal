@@ -3,11 +3,11 @@ import { Label } from "@/components/ui/label";
 import type { BookingFormInstance, Severity } from "../../schema";
 import { SEVERITY_OPTIONS, symptomItemSchema } from "../../schema";
 
-interface SymptomNameFieldProps {
+type SymptomNameFieldProps = {
   form: BookingFormInstance;
   index: number;
   symptomId: string;
-}
+};
 
 export function SymptomNameField({ form, index, symptomId }: SymptomNameFieldProps) {
   return (

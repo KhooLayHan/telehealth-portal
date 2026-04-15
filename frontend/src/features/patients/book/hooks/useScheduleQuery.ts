@@ -1,9 +1,9 @@
 import { useGetAllAvailable } from "@/api/generated/schedules/schedules";
 
-interface UseScheduleQueryParams {
+type UseScheduleQueryParams = {
   selectedDate: string;
   selectedDoctorId: string;
-}
+};
 
 export function useScheduleQuery({ selectedDate, selectedDoctorId }: UseScheduleQueryParams) {
   const {

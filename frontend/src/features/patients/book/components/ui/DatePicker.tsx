@@ -3,11 +3,11 @@ import type { ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-interface DatePickerProps {
+type DatePickerProps = {
   value: string;
   minDate: string;
   onChange: (date: string) => void;
-}
+};
 
 export function DatePicker({ value, minDate, onChange }: DatePickerProps) {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {

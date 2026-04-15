@@ -3,12 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import type { SymptomItem } from "../../schema";
 
-interface SymptomCardProps {
+type SymptomCardProps = {
   symptom: SymptomItem;
   index: number;
   onRemove: () => void;
   children: React.ReactNode;
-}
+};
 
 export function SymptomCard({ symptom, index, onRemove, children }: SymptomCardProps) {
   return (

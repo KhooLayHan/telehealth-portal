@@ -2,11 +2,11 @@ import { Clock } from "lucide-react";
 import type { AvailableScheduleDto } from "@/api/model/AvailableScheduleDto";
 import { formatLocalTime } from "../../schema";
 
-interface TimeSlotButtonProps {
+type TimeSlotButtonProps = {
   slot: Required<Pick<AvailableScheduleDto, "publicId" | "startTime" | "endTime">>;
   isSelected: boolean;
   onClick: () => void;
-}
+};
 
 export function TimeSlotButton({ slot, isSelected, onClick }: TimeSlotButtonProps) {
   return (

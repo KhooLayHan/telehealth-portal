@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
 import type { BookingFormInstance } from "../../schema";
 
-interface SubmitButtonProps {
+type SubmitButtonProps = {
   form: BookingFormInstance;
   isPending: boolean;
-}
+};
 
 export function SubmitButton({ form, isPending }: SubmitButtonProps) {
   return (

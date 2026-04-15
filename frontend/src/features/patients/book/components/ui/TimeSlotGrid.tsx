@@ -1,11 +1,11 @@
 import type { AvailableScheduleDto } from "@/api/model/AvailableScheduleDto";
 import { TimeSlotButton } from "./TimeSlotButton";
 
-interface TimeSlotGridProps {
+type TimeSlotGridProps = {
   slots: Required<Pick<AvailableScheduleDto, "publicId" | "startTime" | "endTime">>[];
   selectedId: string;
   onSelect: (id: string) => void;
-}
+};
 
 export function TimeSlotGrid({ slots, selectedId, onSelect }: TimeSlotGridProps) {
   return (

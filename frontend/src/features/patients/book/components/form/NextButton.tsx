@@ -2,10 +2,10 @@ import { ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { BookingFormInstance, BookingFormValues } from "../../schema";
 
-interface NextButtonProps {
+type NextButtonProps = {
   form: BookingFormInstance;
   onNext: () => void;
-}
+};
 
 export function NextButton({ form, onNext }: NextButtonProps) {
   return (

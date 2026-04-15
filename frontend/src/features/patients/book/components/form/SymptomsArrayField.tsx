@@ -2,9 +2,9 @@ import type { BookingFormInstance, SymptomItem } from "../../schema";
 import { AddSymptomButton, SymptomCard } from "../ui/SymptomCard";
 import { SymptomDurationField, SymptomNameField, SymptomSeverityField } from "./SymptomFields";
 
-interface SymptomsArrayFieldProps {
+type SymptomsArrayFieldProps = {
   form: BookingFormInstance;
-}
+};
 
 export function SymptomsArrayField({ form }: SymptomsArrayFieldProps) {
   return (

@@ -5,12 +5,12 @@ import type { BookingFormInstance } from "../../schema";
 import { bookingSchema, isValidSlot } from "../../schema";
 import { TimeSlotGrid } from "../ui/TimeSlotGrid";
 
-interface ScheduleTimeSlotFieldProps {
+type ScheduleTimeSlotFieldProps = {
   form: BookingFormInstance;
   availableSchedules: AvailableScheduleDto[];
   isLoading: boolean;
   isError: boolean;
-}
+};
 
 export function ScheduleTimeSlotField({
   form,
