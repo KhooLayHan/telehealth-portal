@@ -22,11 +22,18 @@ internal sealed class UnexpectedExceptionHandler(IProblemDetailsService problemD
         if (exception is BadHttpRequestException badRequestException)
         {
             httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+
+            var isDevelopment = httpContext
+                .RequestServices.GetRequiredService<IHostEnvironment>()
+                .IsDevelopment();
+
             var badRequestDetails = new ProblemDetails
             {
                 Title = "Bad Request",
                 Type = "BadRequest",
-                Detail = badRequestException.Message,
+                Detail = isDevelopment
+                    ? badRequestException.Message
+                    : "The request is malformed or invalid.",
                 Status = StatusCodes.Status400BadRequest,
             };
 
