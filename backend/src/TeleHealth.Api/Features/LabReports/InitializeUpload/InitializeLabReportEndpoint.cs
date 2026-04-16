@@ -1,18 +1,19 @@
+using Microsoft.AspNetCore.Mvc;
 using TeleHealth.Api.Common;
 using TeleHealth.Api.Common.Security;
 
-namespace TeleHealth.Api.Features.LabReports.Create;
+namespace TeleHealth.Api.Features.LabReports.InitializeUpload;
 
-public static class CreateLabReportEndpoint
+public static class InitializeLabReportEndpoint
 {
-    public static void MapCreateLabReportEndpoint(this RouteGroupBuilder group)
+    public static void MapInitializeLabReportEndpoint(this RouteGroupBuilder group)
     {
         group
             .MapPost(
                 $"{ApiEndpoints.LabReports.Create}",
                 async (
-                    CreateLabReportCommand cmd,
-                    CreateLabReportHandler handler,
+                    InitializeLabReportCommand cmd,
+                    InitializeLabReportHandler handler,
                     CancellationToken ct
                 ) =>
                 {
@@ -26,9 +27,10 @@ public static class CreateLabReportEndpoint
             .WithName(nameof(ApiEndpoints.LabReports.Create))
             .WithTags(nameof(ApiEndpoints.LabReports))
             .RequireAuthorization(AuthConstants.LabTechPolicy)
+            .Produces<InitializeLabReportResponse>(StatusCodes.Status201Created)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status403Forbidden)
-            .AddEndpointFilter<ValidationFilter<CreateLabReportCommand>>();
+            .AddEndpointFilter<ValidationFilter<InitializeLabReportCommand>>();
     }
 }

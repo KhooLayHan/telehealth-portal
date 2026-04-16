@@ -42,13 +42,6 @@ public static class ApiEndpoints
         public const string GetAllPatientsForReceptionist = Base;
     }
 
-    public static class LabReports
-    {
-        public const string Base = "lab-reports";
-
-        public const string Create = Base;
-    }
-
     public static class Appointments
     {
         private const string Base = "appointments";
@@ -101,5 +94,16 @@ public static class ApiEndpoints
         public const string UpdateById = $"{Base}/{{id:guid}}";
 
         public const string DeleteById = $"{Base}/{{id:guid}}";
+    }
+
+    public static class LabReports
+    {
+        private const string Base = "lab-reports";
+
+        public const string Create = $"{Base}/initialize";
+
+        public const string GetBySlug = $"{Base}/{{slug}}/download";
+
+        public const string UpdateBySlug = $"{Base}/{{slug}}/complete";
     }
 }
