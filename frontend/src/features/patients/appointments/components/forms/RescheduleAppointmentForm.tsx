@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FormError } from "@/features/auth/components/FormError";
+import { DatePicker } from "@/features/patients/book/components/ui/DatePicker";
 import type { useRescheduleForm } from "../hooks/useRescheduleForm";
 
 type RescheduleAppointmentFormProps = {
@@ -50,7 +51,7 @@ export function RescheduleAppointmentForm({
     >
       {error && <FormError message={error} />}
 
-      <div className="space-y-2">
+      {/* <div className="space-y-2">
         <label htmlFor="date-input" className="text-sm font-medium">
           Select New Date
         </label>
@@ -64,15 +65,19 @@ export function RescheduleAppointmentForm({
             form.setFieldValue("newSchedulePublicId", "");
           }}
         />
-      </div>
+      </div> */}
+
+      <DatePicker
+        value={selectedDate}
+        minDate={minDate}
+        onChange={(e) => {
+          setSelectedDate(e);
+          form.setFieldValue("newSchedulePublicId", "");
+        }}
+      />
 
       <form.Field name="newSchedulePublicId">
-        {(field: {
-          name: string;
-          state: { value: string; meta: { errors: unknown[] } };
-          handleBlur: () => void;
-          handleChange: (v: string) => void;
-        }) => (
+        {(field) => (
           <Field data-invalid={field.state.meta.errors.length > 0}>
             <FieldLabel htmlFor={field.name}>Available Slots</FieldLabel>
             <Select
@@ -95,13 +100,16 @@ export function RescheduleAppointmentForm({
               </SelectTrigger>
               <SelectContent>
                 {availableSchedules.map((slot) => (
-                  <SelectItem key={slot.publicId} value={slot.publicId ?? ""}>
+                  <SelectItem
+                    key={slot.publicId}
+                    value={`${slot.startTime?.slice(0, 5)} - ${slot.endTime?.slice(0, 5)}`}
+                  >
                     {slot.startTime?.slice(0, 5)} - {slot.endTime?.slice(0, 5)}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+            <FieldError errors={field.state.meta.errors} />
           </Field>
         )}
       </form.Field>

@@ -29,12 +29,7 @@ export function CancelAppointmentForm({
       {error && <FormError message={error} />}
 
       <form.Field name="cancellationReason">
-        {(field: {
-          name: string;
-          state: { value: string; meta: { errors: unknown[] } };
-          handleBlur: () => void;
-          handleChange: (v: string) => void;
-        }) => (
+        {(field) => (
           <Field data-invalid={field.state.meta.errors.length > 0}>
             <FieldLabel htmlFor={field.name}>Reason for Cancellation</FieldLabel>
             <Textarea
@@ -44,7 +39,7 @@ export function CancelAppointmentForm({
               onChange={(e) => field.handleChange(e.target.value)}
               placeholder="e.g., I have a sudden schedule conflict."
             />
-            <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+            <FieldError errors={field.state.meta.errors} />
           </Field>
         )}
       </form.Field>

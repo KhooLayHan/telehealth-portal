@@ -1,5 +1,3 @@
-// src/features/appointments/book/ScheduleForm.tsx
-
 import { useMemo, useState } from "react";
 import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";

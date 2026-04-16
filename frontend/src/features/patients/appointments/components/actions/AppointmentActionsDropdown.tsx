@@ -31,7 +31,7 @@ export function AppointmentActionsDropdown({
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button variant="ghost" className="h-8 w-8 p-0">
+          <Button variant="ghost" className="h-8 w-8 p-0 cursor-pointer">
             <span className="sr-only">Open menu</span>
             <MoreHorizontal className="size-4" />
           </Button>
@@ -40,16 +40,16 @@ export function AppointmentActionsDropdown({
       <DropdownMenuContent align="end">
         <DropdownMenuGroup>
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuItem onClick={onReschedule}>
+          <DropdownMenuItem onClick={onReschedule} className="cursor-pointer">
             <CalendarClock className="mr-2 size-4" />
             Reschedule
           </DropdownMenuItem>
           <DropdownMenuItem
-            className="text-destructive focus:bg-destructive focus:text-destructive-foreground"
+            className="text-destructive focus:text-destructive-foreground cursor-pointer"
             onClick={onCancel}
           >
-            <XCircle className="mr-2 size-4" />
-            Cancel Appointment
+            <XCircle className="mr-2 size-4 text-current" />
+            Cancel
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
