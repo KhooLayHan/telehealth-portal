@@ -25,6 +25,8 @@ public sealed class DoctorGetAppointmentByIdHandler(ApplicationDbContext db)
                 .ThenInclude(p => p.User)
             .Include(a => a.DoctorSchedule)
             .Include(a => a.AppointmentStatus)
+            .Include(a => a.Consultation)
+                .ThenInclude(c => c.Prescriptions)
             .Where(a => a.PublicId == id && a.Doctor.User.PublicId == doctorPublicId)
             .FirstOrDefaultAsync(ct);
 
@@ -57,6 +59,34 @@ public sealed class DoctorGetAppointmentByIdHandler(ApplicationDbContext db)
             "Not specified"
         );
 
+        ConsultationDetailDto? consultationDto = null;
+        if (appointment.Consultation is { } c)
+        {
+            consultationDto = new ConsultationDetailDto
+            {
+                PublicId = c.PublicId,
+                Subjective = c.ConsultationNotes.Subjective,
+                Objective = c.ConsultationNotes.Objective,
+                Assessment = c.ConsultationNotes.Assessment,
+                Plan = c.ConsultationNotes.Plan,
+                FollowUpDate = c.FollowUpDate,
+                Prescriptions = c
+                    .Prescriptions.Select(p => new PrescriptionDetailDto
+                    {
+                        PublicId = p.PublicId,
+                        MedicationName = p.MedicationName,
+                        Dosage = p.Dosage,
+                        Frequency = p.Frequency,
+                        DurationDays = p.DurationDays,
+                        TakeWith = p.Instructions.TakeWith,
+                        Warnings = p.Instructions.Warnings,
+                        Storage = p.Instructions.Storage,
+                        MissedDose = p.Instructions.MissedDose,
+                    })
+                    .ToList(),
+            };
+        }
+
         return new DoctorAppointmentDetailDto
         {
             PublicId = appointment.PublicId,
@@ -72,6 +102,7 @@ public sealed class DoctorGetAppointmentByIdHandler(ApplicationDbContext db)
             Status = appointment.AppointmentStatus.Name,
             StatusColorCode = appointment.AppointmentStatus.ColorCode ?? string.Empty,
             Symptoms = symptoms,
+            Consultation = consultationDto,
         };
     }
 }

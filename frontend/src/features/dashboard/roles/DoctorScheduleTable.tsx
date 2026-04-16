@@ -37,7 +37,7 @@ function ActionCell({ row }: { row: { original: DoctorAppointmentDto } }) {
   return (
     <Button
       size="sm"
-      variant="outline"
+      className="border-0 bg-[#0d9488] text-white hover:bg-[#0b857a]"
       onClick={() =>
         navigate({ to: "/appointments/$id", params: { id: row.original.publicId ?? "" } })
       }
