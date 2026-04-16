@@ -9,10 +9,10 @@ import {
   useDeleteAppointmentBySlug,
   useUpdateAppointmentBySlug,
 } from "@/api/generated/patients/patients";
+import { useGetAllAvailable } from "@/api/generated/schedules/schedules";
 import type { AppointmentDto } from "@/api/model/AppointmentDto";
 import type { ApiError } from "@/api/ofetch-mutator";
 
-// shadcn/ui components
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,11 +24,13 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -40,11 +42,21 @@ export function AppointmentActions({ appointment }: { appointment: AppointmentDt
   const [cancelError, setCancelError] = useState<string | null>(null);
   const [rescheduleError, setRescheduleError] = useState<string | null>(null);
 
-  // 1. Mutations
   const cancelMutation = useDeleteAppointmentBySlug();
   const rescheduleMutation = useUpdateAppointmentBySlug();
 
-  // 2. Cancel Form Setup
+  // Fetch real available schedules ONLY when a date is selected!
+  const { data: schedulesResponse, isLoading: isLoadingSchedules } = useGetAllAvailable(
+    { Date: selectedDate }, // Passes the date to ASP.NET
+    { query: { enabled: !!selectedDate } }, // Don't run the query if date is empty
+  );
+
+  // Safely extract the array from the Orval response
+  const availableSchedules =
+    schedulesResponse?.status === 200 && Array.isArray(schedulesResponse.data)
+      ? schedulesResponse.data
+      : [];
+
   const cancelForm = useForm({
     defaultValues: { cancellationReason: "" },
     validators: {
@@ -56,11 +68,10 @@ export function AppointmentActions({ appointment }: { appointment: AppointmentDt
       setCancelError(null);
       try {
         await cancelMutation.mutateAsync({
-          slug: appointment.slug, // Uses the slug from the row data!
+          slug: appointment.slug,
           data: value,
         });
 
-        // 🪄 MAGIC: Tell TanStack Query to refresh the table data instantly!
         queryClient.invalidateQueries({ queryKey: getGetAllAppointmentsQueryKey() });
         setIsCancelOpen(false);
       } catch (err) {
@@ -99,36 +110,37 @@ export function AppointmentActions({ appointment }: { appointment: AppointmentDt
   const isActionable = appointment.status?.toLowerCase() === "booked";
 
   if (!isActionable) {
-    return null; // Don't render the action menu if it's already past/cancelled
+    return null;
   }
 
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger>
+        <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
             <span className="sr-only">Open menu</span>
             <MoreHorizontal className="size-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setIsRescheduleOpen(true)}>
-            <CalendarClock className="mr-2 size-4" />
-            Reschedule
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="text-destructive focus:bg-destructive focus:text-destructive-foreground"
-            onClick={() => setIsCancelOpen(true)}
-          >
-            <XCircle className="mr-2 size-4" />
-            Cancel Appointment
-          </DropdownMenuItem>
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            {/* <DropdownMenuSeparator /> */}
+            <DropdownMenuItem onClick={() => setIsRescheduleOpen(true)}>
+              <CalendarClock className="mr-2 size-4" />
+              Reschedule
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="text-destructive focus:bg-destructive focus:text-destructive-foreground"
+              onClick={() => setIsCancelOpen(true)}
+            >
+              <XCircle className="mr-2 size-4" />
+              Cancel Appointment
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* 🛑 CANCEL DIALOG */}
       <Dialog
         open={isCancelOpen}
         onOpenChange={(open) => {
@@ -204,7 +216,6 @@ export function AppointmentActions({ appointment }: { appointment: AppointmentDt
         </DialogContent>
       </Dialog>
 
-      {/* 📅 RESCHEDULE DIALOG */}
       <Dialog
         open={isRescheduleOpen}
         onOpenChange={(open) => {
@@ -237,6 +248,22 @@ export function AppointmentActions({ appointment }: { appointment: AppointmentDt
               </div>
             )}
 
+            {/* 1. Date Picker */}
+            <div className="space-y-2">
+              <Label htmlFor="date-input">Select New Date</Label>
+              <Input
+                id="date-input"
+                type="date"
+                min={minDate}
+                value={selectedDate}
+                onChange={(e) => {
+                  setSelectedDate(e.target.value);
+                  rescheduleForm.setFieldValue("newSchedulePublicId", ""); // Reset time slot when date changes!
+                }}
+              />
+            </div>
+
+            {/* 2. Real API Time Slots */}
             <rescheduleForm.Field name="newSchedulePublicId">
               {(field) => (
                 <div className="space-y-2">
@@ -246,12 +273,29 @@ export function AppointmentActions({ appointment }: { appointment: AppointmentDt
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
+                    disabled={!selectedDate || isLoadingSchedules}
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <option value="">Select a new time...</option>
+                    {/* <option value="">Select a new time...</option>
                     <option value="dummy-uuid-1">Tomorrow at 09:00 AM</option>
-                    <option value="dummy-uuid-2">Tomorrow at 10:30 AM</option>
-                    {/* In a real app, you would map over a useGetAvailableSchedules() query here! */}
+                    <option value="dummy-uuid-2">Tomorrow at 10:30 AM</option> */}
+
+                    <option value="">
+                      {!selectedDate
+                        ? "Please select a date first..."
+                        : isLoadingSchedules
+                          ? "Loading slots..."
+                          : availableSchedules.length === 0
+                            ? "No slots available for this date."
+                            : "Select a new time..."}
+                    </option>
+
+                    {/* Map the real data from ASP.NET! */}
+                    {availableSchedules.map((slot: any) => (
+                      <option key={slot.publicId} value={slot.publicId}>
+                        {slot.startTime?.slice(0, 5)} - {slot.endTime?.slice(0, 5)}
+                      </option>
+                    ))}
                   </select>
                   {field.state.meta.errors.length > 0 && (
                     <p className="text-xs text-destructive">

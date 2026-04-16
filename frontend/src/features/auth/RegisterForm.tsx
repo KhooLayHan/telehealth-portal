@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FieldSeparator } from "@/components/ui/field";
+import { Separator } from "@/components/ui/separator";
 import { BrandingHeader } from "./components/BrandingHeader";
 import { FormError } from "./components/FormError";
 import { RegisterAccountSection } from "./components/RegisterAccountSection";
@@ -35,7 +35,7 @@ export function RegisterForm() {
 
             <RegisterPersonalInfoSection form={form} />
 
-            <FieldSeparator />
+            <Separator />
 
             <RegisterAccountSection form={form} />
 

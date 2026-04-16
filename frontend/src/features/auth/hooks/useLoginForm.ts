@@ -7,6 +7,7 @@ import type { PatientProfileDto } from "@/api/model/PatientProfileDto";
 import type { ApiError } from "@/api/ofetch-mutator";
 import { useAuthStore } from "@/store/useAuthStore";
 import type { LoginFormData } from "../schemas/loginSchema";
+import { pickPrimaryRole } from "../utils/roleUtils";
 
 export function useLoginForm() {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ export function useLoginForm() {
     defaultValues: {
       email: "",
       password: "",
-    } satisfies LoginFormData,
+    } as LoginFormData,
     onSubmit: async ({ value }) => {
       setGlobalError(null);
 
@@ -26,14 +27,26 @@ export function useLoginForm() {
         await loginMutation.mutateAsync({ data: value });
         const profileResponse = await getMe();
 
-        const profile = profileResponse.data as unknown as PatientProfileDto;
-        if (!profile) throw new Error("Invalid profile response from getMe");
+        // TODO: Full RBAC not supported yet
+        const profile = profileResponse.data as unknown as {
+          publicId: string;
+          email: string;
+          firstName: string;
+          lastName: string;
+          roles: string[];
+        };
+
+        // if (!profile?.userPublicId) {
+        //   setGlobalError("Signed in, but could not load your profile. Please try again.");
+        //   return;
+        // }
 
         setAuth({
-          publicId: profile.userPublicId,
+          publicId: profile.publicId,
           email: profile.email,
           firstName: profile.firstName,
-          role: profile.role,
+          role: pickPrimaryRole(profile.roles),
+          // roles: profile.roles,
         });
 
         navigate({ to: "/dashboard" });
