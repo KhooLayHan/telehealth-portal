@@ -2,7 +2,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 import { Calendar, Clock } from "lucide-react";
 
 import type { AppointmentDto } from "@/api/model/AppointmentDto";
-import { AppointmentActions } from "./AppointmentsActions";
+import { AppointmentActions } from "./actions/AppointmentActions";
 
 const columnHelper = createColumnHelper<AppointmentDto>();
 
