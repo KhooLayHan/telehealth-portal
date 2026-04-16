@@ -60,6 +60,10 @@ public static class ApiEndpoints
         public const string SubmitConsultation = $"{Base}/{{id:guid}}/consultation";
 
         public const string GetAllAppointments = Base;
+
+        public const string GetAllStatuses = $"{Base}/statuses";
+
+        public const string UpdateById = $"{Base}/{{id:guid}}";
     }
 
     public static class Doctors
