@@ -19,6 +19,8 @@ using TeleHealth.Api.Features.Appointments.GetAppointmentsById;
 using TeleHealth.Api.Features.Appointments.SubmitConsultation;
 using TeleHealth.Api.Features.Doctors.GetAllDoctors;
 using TeleHealth.Api.Features.Doctors.GetSchedule;
+using TeleHealth.Api.Features.LabReports.Complete;
+using TeleHealth.Api.Features.LabReports.InitializeUpload;
 using TeleHealth.Api.Features.Patients.CancelAppointment;
 using TeleHealth.Api.Features.Patients.GetAllAppointments;
 using TeleHealth.Api.Features.Patients.GetAppointmentByIdOrSlug;
@@ -150,6 +152,8 @@ builder.Services.AddScoped<CancelAppointmentHandler>();
 builder.Services.AddScoped<GetAllDoctorsHandler>();
 builder.Services.AddScoped<GetAllAvailableSchedulesHandler>();
 builder.Services.AddScoped<GetDoctorScheduleHandler>();
+builder.Services.AddScoped<InitializeLabReportHandler>();
+builder.Services.AddScoped<CompleteLabReportHandler>();
 
 builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonS3>();
@@ -202,6 +206,8 @@ api.MapCancelAppointmentEndpoint();
 api.MapGetAllDoctorsEndpoint();
 api.MapGetAllAvailableSchedulesEndpoint();
 api.MapGetDoctorScheduleEndpoint();
+api.MapInitializeLabReportEndpoint();
+api.MapCompleteLabReportsEndpoint();
 
 app.UseSerilogRequestLogging();
 

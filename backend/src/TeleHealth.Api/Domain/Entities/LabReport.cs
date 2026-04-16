@@ -9,7 +9,7 @@ public sealed class LabReport
     public required string Slug { get; init; }
     public long? ConsultationId { get; init; }
     public required long PatientId { get; init; }
-    public required int StatusId { get; init; }
+    public required int StatusId { get; set; }
     public required string ReportType { get; set; }
     public string? S3ObjectKey { get; set; }
     public string? FileName { get; set; }
