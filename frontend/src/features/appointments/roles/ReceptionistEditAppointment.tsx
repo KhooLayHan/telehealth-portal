@@ -3,7 +3,7 @@ import { motion, type Variants } from "framer-motion";
 import { useGetAppointmentByIdForReceptionist } from "@/api/generated/appointments/appointments";
 import type { ReceptionistAppointmentDetailDto } from "@/api/model/ReceptionistAppointmentDetailDto";
 import { AppointmentEditForm } from "./components/AppointmentEditForm";
-import { TERMINAL_SLUGS } from "./components/Constants";
+import { TERMINAL_SLUGS } from "./components/constants";
 import { PatientInfoCard } from "./components/PatientInfoCard";
 
 const container: Variants = {

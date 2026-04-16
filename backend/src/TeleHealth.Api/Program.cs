@@ -17,6 +17,7 @@ using TeleHealth.Api.Features.Appointments.GetAllAppointments;
 using TeleHealth.Api.Features.Appointments.GetAppointmentByIdForDoctor;
 using TeleHealth.Api.Features.Appointments.GetAppointmentsById;
 using TeleHealth.Api.Features.Appointments.GetAppointmentStatuses;
+using TeleHealth.Api.Features.Appointments.SubmitConsultation;
 using TeleHealth.Api.Features.Appointments.UpdateAppointmentByIdForReceptionist;
 using TeleHealth.Api.Features.Doctors.GetAllDoctors;
 using TeleHealth.Api.Features.Doctors.GetSchedule;

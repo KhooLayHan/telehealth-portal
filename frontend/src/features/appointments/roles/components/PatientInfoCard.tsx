@@ -1,6 +1,6 @@
 import type { ReceptionistAppointmentDetailDto } from "@/api/model/ReceptionistAppointmentDetailDto";
 import { Card, CardContent } from "@/components/ui/card";
-import { ACCENT } from "./Constants";
+import { ACCENT } from "./constants";
 import { SectionLabel } from "./SectionLabel";
 import { StatusBadge } from "./StatusBadge";
 
