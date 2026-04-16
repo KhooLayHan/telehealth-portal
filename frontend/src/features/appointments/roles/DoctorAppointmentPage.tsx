@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { AnimatePresence, motion } from "framer-motion";
-import { CalendarDays, Search } from "lucide-react";
+import { CalendarDays, Search, X } from "lucide-react";
 import type { DoctorAppointmentDto } from "@/api/model/DoctorAppointmentDto";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -206,8 +206,18 @@ export function DoctorAppointmentPage() {
               placeholder="Search patient or reason..."
               value={search}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="pl-9 h-9 text-sm"
+              className="pl-9 pr-8 h-9 text-sm"
             />
+            {search && (
+              <button
+                type="button"
+                onClick={() => handleSearchChange("")}
+                className="absolute top-1/2 right-2.5 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Clear search"
+              >
+                <X className="size-3.5" />
+              </button>
+            )}
           </div>
         </div>
 
