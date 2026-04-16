@@ -20,9 +20,15 @@ public sealed class InitializeLabReportHandler(ApplicationDbContext db, IS3Servi
     {
         SlugHelper slugHelper = new();
 
-        var patient =
-            await db.Patients.FirstOrDefaultAsync(p => p.PublicId == cmd.PatientPublicId, ct)
-            ?? throw new PatientNotFoundException();
+        var patient = await db
+            .Patients.AsNoTracking()
+            .FirstOrDefaultAsync(p => p.PublicId == cmd.PatientPublicId, ct);
+
+        if (patient is null)
+        {
+            Log.Warning("Patient with ID {PatientPublicId} was not found.", cmd.PatientPublicId);
+            throw new PatientNotFoundException();
+        }
 
         var publicId = Guid.NewGuid();
         var slug = slugHelper.GenerateSlug($"lab-{cmd.ReportType}-{publicId.ToString()[..8]}");

@@ -20,6 +20,7 @@ using TeleHealth.Api.Features.Appointments.SubmitConsultation;
 using TeleHealth.Api.Features.Doctors.GetAllDoctors;
 using TeleHealth.Api.Features.Doctors.GetSchedule;
 using TeleHealth.Api.Features.LabReports.Complete;
+using TeleHealth.Api.Features.LabReports.Download;
 using TeleHealth.Api.Features.LabReports.InitializeUpload;
 using TeleHealth.Api.Features.Patients.CancelAppointment;
 using TeleHealth.Api.Features.Patients.GetAllAppointments;
@@ -154,6 +155,7 @@ builder.Services.AddScoped<GetAllAvailableSchedulesHandler>();
 builder.Services.AddScoped<GetDoctorScheduleHandler>();
 builder.Services.AddScoped<InitializeLabReportHandler>();
 builder.Services.AddScoped<CompleteLabReportHandler>();
+builder.Services.AddScoped<DownloadLabReportHandler>();
 
 builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonS3>();
@@ -208,6 +210,7 @@ api.MapGetAllAvailableSchedulesEndpoint();
 api.MapGetDoctorScheduleEndpoint();
 api.MapInitializeLabReportEndpoint();
 api.MapCompleteLabReportsEndpoint();
+api.MapDownloadLabReportEndpoint();
 
 app.UseSerilogRequestLogging();
 

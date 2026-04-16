@@ -91,6 +91,8 @@ public static class ApiEndpoints
 
         public const string Create = $"{Base}/initialize";
 
+        public const string GetBySlug = $"{Base}/{{slug}}/download";
+
         public const string UpdateBySlug = $"{Base}/{{slug}}/complete";
     }
 }

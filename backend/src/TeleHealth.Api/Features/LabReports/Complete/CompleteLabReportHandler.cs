@@ -13,20 +13,24 @@ public class CompleteLabReportHandler(ApplicationDbContext db, IPublishEndpoint 
 {
     public async Task HandleAsync(string slug, CompleteLabReportCommand cmd, CancellationToken ct)
     {
-        var report =
-            await db
-                .LabReports.Include(r => r.Patient)
-                    .ThenInclude(p => p.User)
-                .FirstOrDefaultAsync(r => r.Slug == slug, ct)
-            ?? throw new LabReportNotFoundException(slug);
+        var report = await db
+            .LabReports.Include(r => r.Patient)
+                .ThenInclude(p => p.User)
+            .FirstOrDefaultAsync(r => r.Slug == slug, ct);
 
-        report.StatusId = StatusId.LabReport.Completed;
+        if (report is null)
+        {
+            Log.Warning("LabReport with slug {Slug} not found.", slug);
+            throw new LabReportNotFoundException();
+        }
 
         if (report.StatusId == StatusId.LabReport.Completed)
         {
-            throw new InvalidOperationException($"Lab report '{slug}' is already completed.");
+            Log.Warning("Duplicated complete lab report with slug {Slug} already exists.", slug);
+            throw new DuplicateLabReportException();
         }
 
+        report.StatusId = StatusId.LabReport.Completed;
         report.Biomarkers = cmd.Biomarkers;
         report.UploadedAt = SystemClock.Instance.GetCurrentInstant();
 

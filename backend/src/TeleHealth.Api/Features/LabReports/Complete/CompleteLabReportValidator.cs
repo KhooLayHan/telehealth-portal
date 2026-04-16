@@ -1,23 +1,9 @@
 using FluentValidation;
-using Microsoft.EntityFrameworkCore;
-using Serilog;
-using Slugify;
-using TeleHealth.Api.Common.Constants;
-using TeleHealth.Api.Common.Exceptions.Patients;
-using TeleHealth.Api.Domain.Entities;
-using TeleHealth.Api.Features.LabReports.InitializeUpload;
-using TeleHealth.Api.Infrastructure.Aws;
-using TeleHealth.Api.Infrastructure.Persistence;
 
 namespace TeleHealth.Api.Features.LabReports.Complete;
 
 public sealed class CompleteLabReportValidator : AbstractValidator<CompleteLabReportCommand>
 {
-    // string Name,
-    // string Value,
-    // string Unit,
-    // string ReferenceRange,
-    // string Flag
     public CompleteLabReportValidator()
     {
         RuleForEach(x => x.Biomarkers)

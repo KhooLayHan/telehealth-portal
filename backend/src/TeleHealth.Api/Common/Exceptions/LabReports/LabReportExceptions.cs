@@ -5,17 +5,14 @@ namespace TeleHealth.Api.Common.Exceptions.LabReports;
 
 public sealed class LabReportNotFoundException : NotFoundException
 {
-    public LabReportNotFoundException(string reportId)
-        : base(
-            LabReportErrorCodes.NotFound,
-            "Lab Report Not Found",
-            $"Lab report '{reportId}' was not found."
-        ) { }
+    public LabReportNotFoundException()
+        : base(LabReportErrorCodes.NotFound, "Lab Report Not Found", $"Lab report was not found.")
+    { }
 }
 
 public sealed class BiomarkerNotFoundException : NotFoundException
 {
-    public BiomarkerNotFoundException(string biomarkerName)
+    public BiomarkerNotFoundException()
         : base(
             LabReportErrorCodes.BiomarkerNotFound,
             "Biomarker Not Found",
@@ -25,7 +22,7 @@ public sealed class BiomarkerNotFoundException : NotFoundException
 
 public sealed class DuplicateLabReportException : Base.ConflictException
 {
-    public DuplicateLabReportException(string reportType, string patientId)
+    public DuplicateLabReportException()
         : base(
             LabReportErrorCodes.DuplicateReport,
             "Duplicate Lab Report",
