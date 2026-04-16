@@ -1,10 +1,9 @@
-import { Link } from "@tanstack/react-router";
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, Eye, Pencil, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, Search } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useGetAllAppointmentsForReceptionist } from "@/api/generated/appointments/appointments";
-import type { ReceptionistAppointmentDto } from "@/api/model/ReceptionistAppointmentDto";
+import { useReceptionistGetAllPatients } from "@/api/generated/patients/patients";
+import type { ReceptionistPatientsDto } from "@/api/model/ReceptionistPatientsDto";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
@@ -20,86 +19,77 @@ import {
 const ACCENT = "#0d9488";
 const PAGE_SIZE = 10;
 
-const columns: ColumnDef<ReceptionistAppointmentDto>[] = [
+const columns: ColumnDef<ReceptionistPatientsDto>[] = [
   {
-    accessorKey: "patientName",
-    header: "Patient",
-    cell: ({ row }) => <span className="font-medium">{row.getValue("patientName")}</span>,
-  },
-  {
-    accessorKey: "specialization",
-    header: "Specialization",
+    accessorKey: "firstName",
+    header: "Name",
     cell: ({ row }) => (
-      <span className="text-muted-foreground">{row.getValue("specialization")}</span>
-    ),
-  },
-  {
-    accessorKey: "date",
-    header: "Date",
-    cell: ({ row }) => <span className="font-mono text-xs">{String(row.getValue("date"))}</span>,
-  },
-  {
-    accessorKey: "startTime",
-    header: "Time",
-    cell: ({ row }) => (
-      <span className="font-mono text-xs">
-        {String(row.getValue("startTime"))} – {String(row.original.endTime)}
+      <span className="font-medium">
+        {row.original.firstName} {row.original.lastName}
       </span>
     ),
   },
   {
-    accessorKey: "status",
-    header: "Status",
+    accessorKey: "icNumber",
+    header: "IC Number",
+    cell: ({ row }) => <span className="font-mono text-xs">{row.getValue("icNumber")}</span>,
+  },
+  {
+    accessorKey: "patientEmail",
+    header: "Email",
+    cell: ({ row }) => (
+      <span className="text-muted-foreground text-xs">{row.getValue("patientEmail")}</span>
+    ),
+  },
+  {
+    accessorKey: "phoneNumber",
+    header: "Phone",
+    cell: ({ row }) => (
+      <span className="font-mono text-xs">{row.getValue("phoneNumber") || "—"}</span>
+    ),
+  },
+  {
+    accessorKey: "dateOfBirth",
+    header: "Date of Birth",
+    cell: ({ row }) => (
+      <span className="font-mono text-xs">{String(row.getValue("dateOfBirth") ?? "—")}</span>
+    ),
+  },
+  {
+    accessorKey: "bloodGroup",
+    header: "Blood Group",
     cell: ({ row }) => {
-      const status = row.getValue<string>("status");
-      const colorCode = row.original.statusColorCode;
-      return (
+      const bg = row.getValue<string>("bloodGroup");
+      return bg ? (
         <span
-          className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold"
+          className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold"
           style={{
-            borderColor: colorCode ?? undefined,
-            color: colorCode ?? undefined,
-            backgroundColor: colorCode ? `${colorCode}12` : undefined,
+            borderColor: ACCENT,
+            color: ACCENT,
+            backgroundColor: `${ACCENT}12`,
           }}
         >
-          <span
-            className="w-1.5 h-1.5 rounded-full shrink-0"
-            style={{ background: colorCode ?? undefined }}
-          />
-          {status}
+          {bg}
         </span>
+      ) : (
+        <span className="text-muted-foreground text-xs">—</span>
       );
     },
-  },
-  {
-    accessorKey: "visitReason",
-    header: "Visit Reason",
-    cell: ({ row }) => (
-      <span className="text-muted-foreground text-xs line-clamp-1 max-w-48">
-        {row.getValue("visitReason")}
-      </span>
-    ),
   },
   {
     id: "actions",
     header: "Actions",
     cell: ({ row }) => (
-      <div className="flex items-center gap-1">
-        <Link
-          to="/appointments/$id"
-          params={{ id: row.original.publicId ?? "" }}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-        >
-          <Eye className="size-3.5" />
-        </Link>
-        <Link
-          to="/appointments/edit/$id"
-          params={{ id: row.original.publicId ?? "" }}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-        >
-          <Pencil className="size-3.5" />
-        </Link>
-      </div>
+      <button
+        type="button"
+        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        onClick={() => {
+          // TODO: navigate to patient detail page
+          console.log("View patient", row.original.patientPublicId);
+        }}
+      >
+        <Eye className="size-3.5" />
+      </button>
     ),
   },
 ];
@@ -141,7 +131,7 @@ function DataTable<TData, TValue>({
       <div className="relative w-72">
         <Search className="absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground pointer-events-none" />
         <Input
-          placeholder="Search appointments…"
+          placeholder="Search by name, email or IC…"
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           className="pl-9 h-9 text-sm"
@@ -188,7 +178,7 @@ function DataTable<TData, TValue>({
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-32 text-center">
-                  <p className="text-sm text-muted-foreground">No appointments found.</p>
+                  <p className="text-sm text-muted-foreground">No patients found.</p>
                   <p className="text-xs text-muted-foreground/60 mt-1">
                     Try adjusting your search.
                   </p>
@@ -217,7 +207,6 @@ function DataTable<TData, TValue>({
               <ChevronLeft className="size-4" />
             </Button>
 
-            {/* Page number buttons — show up to 5 around current page */}
             {Array.from({ length: totalPages }, (_, i) => i + 1)
               .filter((p) => p === 1 || p === totalPages || (p >= page - 1 && p <= page + 1))
               .reduce<(number | string)[]>((acc, p, idx, arr) => {
@@ -261,7 +250,7 @@ function DataTable<TData, TValue>({
   );
 }
 
-export function ReceptionistApptPage() {
+export function ReceptionistPatientsPage() {
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
@@ -274,14 +263,14 @@ export function ReceptionistApptPage() {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
-  const { data, isLoading, isError } = useGetAllAppointmentsForReceptionist({
+  const { data, isLoading, isError } = useReceptionistGetAllPatients({
     Page: page,
     PageSize: PAGE_SIZE,
     Search: search || undefined,
   });
 
   const result = data?.status === 200 ? data.data : null;
-  const appointments = result?.items ?? [];
+  const patients = result?.items ?? [];
   const totalCount = result ? Number(result.totalCount) : 0;
   const totalPages = result ? Number(result.totalPages ?? 1) : 1;
 
@@ -305,9 +294,9 @@ export function ReceptionistApptPage() {
               className="text-[10px] tracking-[0.22em] uppercase font-semibold mb-1"
               style={{ color: ACCENT }}
             >
-              Appointments
+              Patients
             </p>
-            <h1 className="text-2xl font-semibold tracking-tight leading-none">All Appointments</h1>
+            <h1 className="text-2xl font-semibold tracking-tight leading-none">All Patients</h1>
           </div>
 
           {!isLoading && !isError && (
@@ -323,16 +312,16 @@ export function ReceptionistApptPage() {
         <div className="px-6 py-6">
           {isLoading ? (
             <div className="flex items-center justify-center h-48">
-              <p className="text-sm text-muted-foreground tracking-wide">Loading appointments…</p>
+              <p className="text-sm text-muted-foreground tracking-wide">Loading patients…</p>
             </div>
           ) : isError ? (
             <div className="flex items-center justify-center h-48">
-              <p className="text-sm text-destructive">Failed to load appointments.</p>
+              <p className="text-sm text-destructive">Failed to load patients.</p>
             </div>
           ) : (
             <DataTable
               columns={columns}
-              data={appointments}
+              data={patients}
               page={page}
               totalPages={totalPages}
               hasNextPage={result?.hasNextPage}
