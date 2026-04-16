@@ -23,6 +23,7 @@ type Props = {
   pageSize: number;
   search: string;
   isLoading: boolean;
+  hidePagination?: boolean;
   onPageChange: (page: number) => void;
   onSearchChange: (search: string) => void;
 };
@@ -37,7 +38,7 @@ function ActionCell({ row }: { row: { original: DoctorAppointmentDto } }) {
   return (
     <Button
       size="sm"
-      variant="outline"
+      className="border-0 bg-[#0d9488] text-white hover:bg-[#0b857a]"
       onClick={() =>
         navigate({ to: "/appointments/$id", params: { id: row.original.publicId ?? "" } })
       }
@@ -105,6 +106,7 @@ export function DoctorScheduleTable({
   pageSize,
   search,
   isLoading,
+  hidePagination = false,
   onPageChange,
   onSearchChange,
 }: Props) {
@@ -190,7 +192,7 @@ export function DoctorScheduleTable({
       </Table>
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {!hidePagination && totalPages > 1 && (
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <span>
             Page {page} of {totalPages}

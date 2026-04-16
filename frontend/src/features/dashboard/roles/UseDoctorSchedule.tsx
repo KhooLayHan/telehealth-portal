@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useGetDoctorSchedule } from "@/api/generated/doctors/doctors";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 5;
 
 // LocalTime from backend is "HH:mm:ss" — convert to "10:30 AM"
 export function formatLocalTime(time?: string): string {
@@ -34,11 +34,17 @@ export function formatLocalDate(date?: string): string {
   return `${Number.parseInt(d, 10)} ${months[Number.parseInt(m, 10) - 1]} ${y}`;
 }
 
+function getTodayStr(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 export function UseDoctorSchedule() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
 
   const { data, isLoading, isError } = useGetDoctorSchedule({
+    Date: getTodayStr(),
     Page: page,
     PageSize: PAGE_SIZE,
     Search: search.trim() || undefined,

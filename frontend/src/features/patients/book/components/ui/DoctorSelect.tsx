@@ -18,7 +18,24 @@ export function DoctorSelect({ doctors, selectedId, isLoading, onChange }: Docto
   return (
     <Select value={selectedId} onValueChange={onChange} disabled={isLoading}>
       <SelectTrigger id="doctor-select" className="w-full">
-        <SelectValue placeholder={isLoading ? "Loading…" : "Any Available Doctor"} />
+        <SelectValue>
+          {(() => {
+            const selectedDoctor = doctors.find((d) => d.doctorPublicId === selectedId);
+
+            if (selectedDoctor) {
+              const firstName = selectedDoctor.firstName ?? "";
+              const lastName = selectedDoctor.lastName ?? "";
+              const spec = selectedDoctor.specialization ?? "";
+              return `Dr. ${firstName} ${lastName} — ${spec}`;
+            }
+
+            if (isLoading) {
+              return "Loading…";
+            }
+
+            return "Any Available Doctor";
+          })()}
+        </SelectValue>
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="">Any Available Doctor</SelectItem>
@@ -29,10 +46,7 @@ export function DoctorSelect({ doctors, selectedId, isLoading, onChange }: Docto
           const spec = doctor.specialization ?? "";
 
           return (
-            <SelectItem
-              key={`doctor-${id || "empty"}`}
-              value={`Dr. ${firstName} ${lastName} — ${spec}`}
-            >
+            <SelectItem key={`doctor-${id || "empty"}`} value={id}>
               {id ? `Dr. ${firstName} ${lastName} — ${spec}` : "Unknown Doctor"}
             </SelectItem>
           );
