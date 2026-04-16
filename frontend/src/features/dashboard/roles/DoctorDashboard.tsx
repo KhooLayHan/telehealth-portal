@@ -1,10 +1,12 @@
-import { ClipboardPlus, Clock, Stethoscope, Users } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import { ClipboardPlus, Clock, List, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DoctorScheduleTable } from "./DoctorScheduleTable";
 import { formatLocalTime, UseDoctorSchedule } from "./UseDoctorSchedule";
 
 export function DoctorDashboard() {
+  const navigate = useNavigate();
   const { schedule, isLoading, page, setPage, search, setSearch, pageSize } = UseDoctorSchedule();
 
   const totalCount = Number(schedule?.totalCount ?? 0);
@@ -77,8 +79,12 @@ export function DoctorDashboard() {
               Click a patient to view medical history and add notes.
             </p>
           </div>
-          <Button size="sm">
-            <Stethoscope className="mr-2 size-4" /> View Full Calendar
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => navigate({ to: "/appointments", search: { today: true } })}
+          >
+            <List className="mr-2 size-4" /> View Full List
           </Button>
         </div>
         <div className="p-6">
@@ -89,6 +95,7 @@ export function DoctorDashboard() {
             pageSize={pageSize}
             search={search}
             isLoading={isLoading}
+            hidePagination
             onPageChange={setPage}
             onSearchChange={setSearch}
           />

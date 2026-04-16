@@ -40,12 +40,20 @@ import type {
 } from '../../model/PagedResultOfAppointmentDto';
 
 import type {
+  PagedResultOfReceptionistPatientsDto
+} from '../../model/PagedResultOfReceptionistPatientsDto';
+
+import type {
   PatientProfileDto
 } from '../../model/PatientProfileDto';
 
 import type {
   ProblemDetails
 } from '../../model/ProblemDetails';
+
+import type {
+  ReceptionistGetAllPatientsParams
+} from '../../model/ReceptionistGetAllPatientsParams';
 
 import type {
   RescheduleAppointmentCommand
@@ -59,6 +67,126 @@ import { ofetchMutator } from '../../ofetch-mutator';
 
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+
+
+export type receptionistGetAllPatientsResponse200 = {
+  data: PagedResultOfReceptionistPatientsDto
+  status: 200
+}
+
+export type receptionistGetAllPatientsResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type receptionistGetAllPatientsResponseSuccess = (receptionistGetAllPatientsResponse200) & {
+  headers: Headers;
+};
+export type receptionistGetAllPatientsResponseError = (receptionistGetAllPatientsResponse401) & {
+  headers: Headers;
+};
+
+export type receptionistGetAllPatientsResponse = (receptionistGetAllPatientsResponseSuccess | receptionistGetAllPatientsResponseError)
+
+export const getReceptionistGetAllPatientsUrl = (params?: ReceptionistGetAllPatientsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `http://localhost:5144/api/v1/patients?${stringifiedParams}` : `http://localhost:5144/api/v1/patients`
+}
+
+export const receptionistGetAllPatients = async (params?: ReceptionistGetAllPatientsParams, options?: RequestInit): Promise<receptionistGetAllPatientsResponse> => {
+
+  return ofetchMutator<receptionistGetAllPatientsResponse>(getReceptionistGetAllPatientsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getReceptionistGetAllPatientsQueryKey = (params?: ReceptionistGetAllPatientsParams,) => {
+    return [
+    `http://localhost:5144/api/v1/patients`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getReceptionistGetAllPatientsQueryOptions = <TData = Awaited<ReturnType<typeof receptionistGetAllPatients>>, TError = ProblemDetails>(params?: ReceptionistGetAllPatientsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof receptionistGetAllPatients>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getReceptionistGetAllPatientsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof receptionistGetAllPatients>>> = ({ signal }) => receptionistGetAllPatients(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof receptionistGetAllPatients>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ReceptionistGetAllPatientsQueryResult = NonNullable<Awaited<ReturnType<typeof receptionistGetAllPatients>>>
+export type ReceptionistGetAllPatientsQueryError = ProblemDetails
+
+
+export function useReceptionistGetAllPatients<TData = Awaited<ReturnType<typeof receptionistGetAllPatients>>, TError = ProblemDetails>(
+ params: undefined |  ReceptionistGetAllPatientsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof receptionistGetAllPatients>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof receptionistGetAllPatients>>,
+          TError,
+          Awaited<ReturnType<typeof receptionistGetAllPatients>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useReceptionistGetAllPatients<TData = Awaited<ReturnType<typeof receptionistGetAllPatients>>, TError = ProblemDetails>(
+ params?: ReceptionistGetAllPatientsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof receptionistGetAllPatients>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof receptionistGetAllPatients>>,
+          TError,
+          Awaited<ReturnType<typeof receptionistGetAllPatients>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useReceptionistGetAllPatients<TData = Awaited<ReturnType<typeof receptionistGetAllPatients>>, TError = ProblemDetails>(
+ params?: ReceptionistGetAllPatientsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof receptionistGetAllPatients>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useReceptionistGetAllPatients<TData = Awaited<ReturnType<typeof receptionistGetAllPatients>>, TError = ProblemDetails>(
+ params?: ReceptionistGetAllPatientsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof receptionistGetAllPatients>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getReceptionistGetAllPatientsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
 
 
 

@@ -20,7 +20,10 @@ public sealed class GetDoctorScheduleHandler(ApplicationDbContext db)
         var pageSize = Math.Clamp(query.PageSize, 1, MaxPageSize);
 
         var utcNow = SystemClock.Instance.GetCurrentInstant().InUtc();
-        var date = query.Date.HasValue ? LocalDate.FromDateOnly(query.Date.Value) : utcNow.Date;
+        var date = query.Date.HasValue
+            ? (LocalDate?)LocalDate.FromDateOnly(query.Date.Value)
+            : null;
+        var todayDate = utcNow.Date;
         var timeNow = utcNow.TimeOfDay;
 
         var doctor = await db
@@ -34,10 +37,11 @@ public sealed class GetDoctorScheduleHandler(ApplicationDbContext db)
 
         var doctorId = doctor.Id;
 
-        // Base query: this doctor's appointments for the requested date
-        var q = db
-            .Appointments.AsNoTracking()
-            .Where(a => a.DoctorId == doctorId && a.DoctorSchedule.Date == date);
+        // Base query: this doctor's appointments, optionally filtered by date
+        var q = db.Appointments.AsNoTracking().Where(a => a.DoctorId == doctorId);
+
+        if (date.HasValue)
+            q = q.Where(a => a.DoctorSchedule.Date == date.Value);
 
         if (query.Status is not null)
             q = q.Where(a => a.AppointmentStatus.Slug == query.Status);
@@ -55,23 +59,24 @@ public sealed class GetDoctorScheduleHandler(ApplicationDbContext db)
 
         var totalCount = await q.CountAsync(ct);
 
-        // Pending = booked but not yet started
+        // Pending = booked appointments on the queried date (or today if no date given)
+        var statsDate = date ?? todayDate;
         var pendingCount = await db
             .Appointments.AsNoTracking()
             .CountAsync(
                 a =>
                     a.DoctorId == doctorId
-                    && a.DoctorSchedule.Date == date
+                    && a.DoctorSchedule.Date == statsDate
                     && a.StatusId == StatusId.Appointment.Booked,
                 ct
             );
 
-        // Next appointment = soonest start time still in the future, not completed/cancelled
+        // Next appointment = soonest start time still in the future on statsDate
         var nextAppointmentTime = await db
             .Appointments.AsNoTracking()
             .Where(a =>
                 a.DoctorId == doctorId
-                && a.DoctorSchedule.Date == date
+                && a.DoctorSchedule.Date == statsDate
                 && a.DoctorSchedule.StartTime > timeNow
                 && (
                     a.StatusId == StatusId.Appointment.Booked
@@ -82,10 +87,8 @@ public sealed class GetDoctorScheduleHandler(ApplicationDbContext db)
             .Select(a => (LocalTime?)a.DoctorSchedule.StartTime)
             .FirstOrDefaultAsync(ct);
 
-        q =
-            query.SortOrder?.ToLowerInvariant() == "desc"
-                ? q.OrderByDescending(a => a.DoctorSchedule.StartTime)
-                : q.OrderBy(a => a.DoctorSchedule.StartTime);
+        // Date DESC (latest first), then time ASC (earliest slot first within each day)
+        q = q.OrderByDescending(a => a.DoctorSchedule.Date).ThenBy(a => a.DoctorSchedule.StartTime);
 
         var items = await q.Skip((page - 1) * pageSize)
             .Take(pageSize)

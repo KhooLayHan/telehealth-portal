@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { AnimatePresence, motion } from "framer-motion";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import type { DoctorAppointmentDto } from "@/api/model/DoctorAppointmentDto";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ type Props = {
   pageSize: number;
   search: string;
   isLoading: boolean;
+  hidePagination?: boolean;
   onPageChange: (page: number) => void;
   onSearchChange: (search: string) => void;
 };
@@ -105,6 +106,7 @@ export function DoctorScheduleTable({
   pageSize,
   search,
   isLoading,
+  hidePagination = false,
   onPageChange,
   onSearchChange,
 }: Props) {
@@ -124,7 +126,7 @@ export function DoctorScheduleTable({
       <div className="relative max-w-xs">
         <Search className="-translate-y-1/2 absolute top-1/2 left-3 size-4 text-muted-foreground" />
         <Input
-          className="pl-9"
+          className="pl-9 pr-8"
           placeholder="Search patient or reason..."
           value={search}
           onChange={(e) => {
@@ -132,6 +134,19 @@ export function DoctorScheduleTable({
             onPageChange(1);
           }}
         />
+        {search && (
+          <button
+            type="button"
+            onClick={() => {
+              onSearchChange("");
+              onPageChange(1);
+            }}
+            className="absolute top-1/2 right-2.5 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Clear search"
+          >
+            <X className="size-3.5" />
+          </button>
+        )}
       </div>
 
       {/* Table */}
@@ -190,7 +205,7 @@ export function DoctorScheduleTable({
       </Table>
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {!hidePagination && totalPages > 1 && (
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <span>
             Page {page} of {totalPages}

@@ -24,6 +24,10 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AppointmentStatusesDto
+} from '../../model/AppointmentStatusesDto';
+
+import type {
   BookAppointmentCommand
 } from '../../model/BookAppointmentCommand';
 
@@ -58,6 +62,10 @@ import type {
 import type {
   SubmitConsultationResponse
 } from '../../model/SubmitConsultationResponse';
+
+import type {
+  UpdateAppointmentByReceptionistCommand
+} from '../../model/UpdateAppointmentByReceptionistCommand';
 
 import { ofetchMutator } from '../../ofetch-mutator';
 
@@ -386,6 +394,223 @@ export function useGetAppointmentByIdForReceptionist<TData = Awaited<ReturnType<
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetAppointmentByIdForReceptionistQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export type updateByIdResponse204 = {
+  data: void
+  status: 204
+}
+
+export type updateByIdResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type updateByIdResponse403 = {
+  data: ProblemDetails
+  status: 403
+}
+
+export type updateByIdResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type updateByIdResponse409 = {
+  data: ProblemDetails
+  status: 409
+}
+
+export type updateByIdResponse422 = {
+  data: ProblemDetails
+  status: 422
+}
+
+export type updateByIdResponseSuccess = (updateByIdResponse204) & {
+  headers: Headers;
+};
+export type updateByIdResponseError = (updateByIdResponse401 | updateByIdResponse403 | updateByIdResponse404 | updateByIdResponse409 | updateByIdResponse422) & {
+  headers: Headers;
+};
+
+export type updateByIdResponse = (updateByIdResponseSuccess | updateByIdResponseError)
+
+export const getUpdateByIdUrl = (id: string,) => {
+
+
+
+
+  return `http://localhost:5144/api/v1/appointments/${id}`
+}
+
+export const updateById = async (id: string,
+    updateAppointmentByReceptionistCommand: UpdateAppointmentByReceptionistCommand, options?: RequestInit): Promise<updateByIdResponse> => {
+
+  return ofetchMutator<updateByIdResponse>(getUpdateByIdUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      updateAppointmentByReceptionistCommand,)
+  }
+);}
+
+
+
+
+export const getUpdateByIdMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateById>>, TError,{id: string;data: UpdateAppointmentByReceptionistCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateById>>, TError,{id: string;data: UpdateAppointmentByReceptionistCommand}, TContext> => {
+
+const mutationKey = ['updateById'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateById>>, {id: string;data: UpdateAppointmentByReceptionistCommand}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateById(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateByIdMutationResult = NonNullable<Awaited<ReturnType<typeof updateById>>>
+    export type UpdateByIdMutationBody = UpdateAppointmentByReceptionistCommand
+    export type UpdateByIdMutationError = ProblemDetails
+
+    export const useUpdateById = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateById>>, TError,{id: string;data: UpdateAppointmentByReceptionistCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateById>>,
+        TError,
+        {id: string;data: UpdateAppointmentByReceptionistCommand},
+        TContext
+      > => {
+      return useMutation(getUpdateByIdMutationOptions(options), queryClient);
+    }
+    export type getAllStatusesResponse200 = {
+  data: AppointmentStatusesDto[]
+  status: 200
+}
+
+export type getAllStatusesResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type getAllStatusesResponseSuccess = (getAllStatusesResponse200) & {
+  headers: Headers;
+};
+export type getAllStatusesResponseError = (getAllStatusesResponse401) & {
+  headers: Headers;
+};
+
+export type getAllStatusesResponse = (getAllStatusesResponseSuccess | getAllStatusesResponseError)
+
+export const getGetAllStatusesUrl = () => {
+
+
+
+
+  return `http://localhost:5144/api/v1/appointments/statuses`
+}
+
+export const getAllStatuses = async ( options?: RequestInit): Promise<getAllStatusesResponse> => {
+
+  return ofetchMutator<getAllStatusesResponse>(getGetAllStatusesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAllStatusesQueryKey = () => {
+    return [
+    `http://localhost:5144/api/v1/appointments/statuses`
+    ] as const;
+    }
+
+
+export const getGetAllStatusesQueryOptions = <TData = Awaited<ReturnType<typeof getAllStatuses>>, TError = ProblemDetails>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllStatuses>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAllStatusesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAllStatuses>>> = ({ signal }) => getAllStatuses({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAllStatuses>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetAllStatusesQueryResult = NonNullable<Awaited<ReturnType<typeof getAllStatuses>>>
+export type GetAllStatusesQueryError = ProblemDetails
+
+
+export function useGetAllStatuses<TData = Awaited<ReturnType<typeof getAllStatuses>>, TError = ProblemDetails>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllStatuses>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAllStatuses>>,
+          TError,
+          Awaited<ReturnType<typeof getAllStatuses>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAllStatuses<TData = Awaited<ReturnType<typeof getAllStatuses>>, TError = ProblemDetails>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllStatuses>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAllStatuses>>,
+          TError,
+          Awaited<ReturnType<typeof getAllStatuses>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAllStatuses<TData = Awaited<ReturnType<typeof getAllStatuses>>, TError = ProblemDetails>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllStatuses>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetAllStatuses<TData = Awaited<ReturnType<typeof getAllStatuses>>, TError = ProblemDetails>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllStatuses>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetAllStatusesQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
