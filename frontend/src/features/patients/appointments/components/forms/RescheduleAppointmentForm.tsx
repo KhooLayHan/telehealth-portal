@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useGetAllAvailable } from "@/api/generated/schedules/schedules";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -50,22 +51,6 @@ export function RescheduleAppointmentForm({
     >
       {error && <FormError message={error} />}
 
-      {/* <div className="space-y-2">
-        <label htmlFor="date-input" className="text-sm font-medium">
-          Select New Date
-        </label>
-        <Input
-          id="date-input"
-          type="date"
-          min={minDate}
-          value={selectedDate}
-          onChange={(e) => {
-            setSelectedDate(e.target.value);
-            form.setFieldValue("newSchedulePublicId", "");
-          }}
-        />
-      </div> */}
-
       <DatePicker
         value={selectedDate}
         minDate={minDate}
@@ -85,24 +70,35 @@ export function RescheduleAppointmentForm({
               disabled={!selectedDate || isLoadingSchedules}
             >
               <SelectTrigger aria-invalid={field.state.meta.errors.length > 0}>
-                <SelectValue
-                  placeholder={
-                    !selectedDate
-                      ? "Please select a date first..."
-                      : isLoadingSchedules
-                        ? "Loading slots..."
-                        : availableSchedules.length === 0
-                          ? "No slots available for this date."
-                          : "Select a new time..."
-                  }
-                />
+                <SelectValue>
+                  {(() => {
+                    const selectedSlot = availableSchedules.find(
+                      (slot) => slot.publicId === field.state.value,
+                    );
+
+                    if (selectedSlot) {
+                      return `${selectedSlot.startTime?.slice(0, 5)} - ${selectedSlot.endTime?.slice(0, 5)}`;
+                    }
+
+                    if (!selectedDate) {
+                      return "Please select a date first...";
+                    }
+
+                    if (isLoadingSchedules) {
+                      return "Loading slots...";
+                    }
+
+                    if (availableSchedules.length === 0) {
+                      return "No slots available for this date.";
+                    }
+
+                    return "Select a new time...";
+                  })()}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {availableSchedules.map((slot) => (
-                  <SelectItem
-                    key={slot.publicId}
-                    value={`${slot.startTime?.slice(0, 5)} - ${slot.endTime?.slice(0, 5)}`}
-                  >
+                  <SelectItem key={slot.publicId} value={slot.publicId ?? ""}>
                     {slot.startTime?.slice(0, 5)} - {slot.endTime?.slice(0, 5)}
                   </SelectItem>
                 ))}
