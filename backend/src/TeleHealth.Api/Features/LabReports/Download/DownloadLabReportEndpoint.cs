@@ -28,7 +28,7 @@ public static class DownloadLabReportEndpoint
 
                     var downloadUrl = await handler.HandleAsync(slug, publicId, role, ct);
 
-                    return Results.Ok(new { DownloadUrl = downloadUrl });
+                    return TypedResults.Ok(new { DownloadUrl = downloadUrl });
                 }
             )
             .WithName(nameof(ApiEndpoints.LabReports.GetBySlug))
