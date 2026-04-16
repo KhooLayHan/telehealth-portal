@@ -58,6 +58,12 @@ import type {
 import type {
   UpdateAppointmentByReceptionistCommand
 } from '../../model/UpdateAppointmentByReceptionistCommand';
+  SubmitConsultationRequest
+} from '../../model/SubmitConsultationRequest';
+
+import type {
+  SubmitConsultationResponse
+} from '../../model/SubmitConsultationResponse';
 
 import { ofetchMutator } from '../../ofetch-mutator';
 
@@ -732,3 +738,97 @@ export function useGetAppointmentByIdForDoctor<TData = Awaited<ReturnType<typeof
 
 
 
+export type submitConsultationResponse201 = {
+  data: SubmitConsultationResponse
+  status: 201
+}
+
+export type submitConsultationResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type submitConsultationResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type submitConsultationResponse409 = {
+  data: ProblemDetails
+  status: 409
+}
+
+export type submitConsultationResponseSuccess = (submitConsultationResponse201) & {
+  headers: Headers;
+};
+export type submitConsultationResponseError = (submitConsultationResponse401 | submitConsultationResponse404 | submitConsultationResponse409) & {
+  headers: Headers;
+};
+
+export type submitConsultationResponse = (submitConsultationResponseSuccess | submitConsultationResponseError)
+
+export const getSubmitConsultationUrl = (id: string,) => {
+
+
+
+
+  return `http://localhost:5144/api/v1/appointments/${id}/consultation`
+}
+
+export const submitConsultation = async (id: string,
+    submitConsultationRequest: SubmitConsultationRequest, options?: RequestInit): Promise<submitConsultationResponse> => {
+
+  return ofetchMutator<submitConsultationResponse>(getSubmitConsultationUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      submitConsultationRequest,)
+  }
+);}
+
+
+
+
+export const getSubmitConsultationMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitConsultation>>, TError,{id: string;data: SubmitConsultationRequest}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof submitConsultation>>, TError,{id: string;data: SubmitConsultationRequest}, TContext> => {
+
+const mutationKey = ['submitConsultation'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof submitConsultation>>, {id: string;data: SubmitConsultationRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  submitConsultation(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SubmitConsultationMutationResult = NonNullable<Awaited<ReturnType<typeof submitConsultation>>>
+    export type SubmitConsultationMutationBody = SubmitConsultationRequest
+    export type SubmitConsultationMutationError = ProblemDetails
+
+    export const useSubmitConsultation = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitConsultation>>, TError,{id: string;data: SubmitConsultationRequest}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof submitConsultation>>,
+        TError,
+        {id: string;data: SubmitConsultationRequest},
+        TContext
+      > => {
+      return useMutation(getSubmitConsultationMutationOptions(options), queryClient);
+    }

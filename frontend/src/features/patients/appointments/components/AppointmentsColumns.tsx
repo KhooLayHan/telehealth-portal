@@ -2,6 +2,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 import { Calendar, Clock } from "lucide-react";
 
 import type { AppointmentDto } from "@/api/model/AppointmentDto";
+import { AppointmentActions } from "./actions/AppointmentActions";
 
 const columnHelper = createColumnHelper<AppointmentDto>();
 
@@ -70,5 +71,10 @@ export const appointmentsColumns = [
         </span>
       );
     },
+  }),
+  columnHelper.display({
+    id: "actions",
+    header: () => <span className="sr-only">Actions</span>,
+    cell: ({ row }) => <AppointmentActions appointment={row.original} />,
   }),
 ];
