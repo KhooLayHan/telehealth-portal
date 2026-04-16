@@ -2,7 +2,6 @@ import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import { AlertCircle, Calendar, Phone, Search, Shield, User, Users, X } from "lucide-react";
 import type { DoctorPatientDto } from "@/api/model/DoctorPatientDto";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
