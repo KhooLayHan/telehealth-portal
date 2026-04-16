@@ -24,9 +24,9 @@ export function AppointmentsPagination({
   return (
     <nav aria-label="Appointments pagination" className="flex items-center justify-between px-2">
       <div className="text-sm text-muted-foreground">
-        Showing page {currentPage} of {totalPages ?? 1}
+        Showing Page {currentPage} of {totalPages ?? 1}
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 cursor-pointer">
         <Button
           variant="outline"
           size="sm"

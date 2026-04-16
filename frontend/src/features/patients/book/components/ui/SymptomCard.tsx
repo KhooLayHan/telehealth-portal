@@ -22,7 +22,7 @@ export function SymptomCard({ symptom, index, onRemove, children }: SymptomCardP
         className="text-destructive hover:bg-destructive/10 justify-center justify-items-center"
         onClick={onRemove}
       >
-        <Trash2 className="size-4" />
+        <Trash2 className="size-4 place-items-center" />
       </Button>
     </div>
   );
@@ -43,7 +43,8 @@ export function AddSymptomButton({ onClick }: AddSymptomButtonProps) {
           </p>
         </div>
         <Button type="button" variant="outline" size="sm" onClick={onClick}>
-          <Plus className="mr-1 size-3" /> Add Symptom
+          <Plus className="mr-1 size-3" />
+          Add Symptom
         </Button>
       </div>
     </div>

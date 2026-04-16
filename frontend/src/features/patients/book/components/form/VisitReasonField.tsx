@@ -15,7 +15,7 @@ export function VisitReasonField({ form }: VisitReasonFieldProps) {
           <FieldLabel htmlFor={field.name}>
             Reason for Visit
             <span className="text-destructive" aria-hidden>
-              *
+              *{" "}
             </span>
           </FieldLabel>
           <Textarea
