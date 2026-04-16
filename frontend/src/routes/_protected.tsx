@@ -1,4 +1,5 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { AppShell } from "@/components/layout/AppShell";
 import { useAuthStore } from "../store/useAuthStore";
 
 export const Route = createFileRoute("/_protected")({
@@ -11,7 +12,11 @@ export const Route = createFileRoute("/_protected")({
       });
     }
   },
-  component: () => <Outlet />,
+  component: () => (
+    <AppShell>
+      <Outlet />
+    </AppShell>
+  ),
   notFoundComponent: () => {
     return <p>This protected page doesn't exist!</p>;
   },
