@@ -18,6 +18,7 @@ import { Route as ProtectedAppointmentsRouteImport } from './routes/_protected/a
 import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as ProtectedAppointmentsIdRouteImport } from './routes/_protected/appointments.$id'
+import { Route as ProtectedAppointmentsEditIdRouteImport } from './routes/_protected/appointments.edit.$id'
 
 const ProtectedRoute = ProtectedRouteImport.update({
   id: '/_protected',
@@ -62,6 +63,12 @@ const ProtectedAppointmentsIdRoute = ProtectedAppointmentsIdRouteImport.update({
   path: '/appointments/$id',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ProtectedAppointmentsEditIdRoute =
+  ProtectedAppointmentsEditIdRouteImport.update({
+    id: '/appointments/edit/$id',
+    path: '/appointments/edit/$id',
+    getParentRoute: () => ProtectedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -71,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof ProtectedDashboardRoute
   '/settings': typeof ProtectedSettingsRoute
   '/appointments/$id': typeof ProtectedAppointmentsIdRoute
+  '/appointments/edit/$id': typeof ProtectedAppointmentsEditIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -80,6 +88,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof ProtectedDashboardRoute
   '/settings': typeof ProtectedSettingsRoute
   '/appointments/$id': typeof ProtectedAppointmentsIdRoute
+  '/appointments/edit/$id': typeof ProtectedAppointmentsEditIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -92,6 +101,7 @@ export interface FileRoutesById {
   '/_protected/dashboard': typeof ProtectedDashboardRoute
   '/_protected/settings': typeof ProtectedSettingsRoute
   '/_protected/appointments/$id': typeof ProtectedAppointmentsIdRoute
+  '/_protected/appointments/edit/$id': typeof ProtectedAppointmentsEditIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -103,6 +113,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/settings'
     | '/appointments/$id'
+    | '/appointments/edit/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -112,6 +123,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/settings'
     | '/appointments/$id'
+    | '/appointments/edit/$id'
   id:
     | '__root__'
     | '/'
@@ -123,6 +135,7 @@ export interface FileRouteTypes {
     | '/_protected/dashboard'
     | '/_protected/settings'
     | '/_protected/appointments/$id'
+    | '/_protected/appointments/edit/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -196,6 +209,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedAppointmentsIdRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/appointments/edit/$id': {
+      id: '/_protected/appointments/edit/$id'
+      path: '/appointments/edit/$id'
+      fullPath: '/appointments/edit/$id'
+      preLoaderRoute: typeof ProtectedAppointmentsEditIdRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
   }
 }
 
@@ -216,6 +236,7 @@ interface ProtectedRouteChildren {
   ProtectedDashboardRoute: typeof ProtectedDashboardRoute
   ProtectedSettingsRoute: typeof ProtectedSettingsRoute
   ProtectedAppointmentsIdRoute: typeof ProtectedAppointmentsIdRoute
+  ProtectedAppointmentsEditIdRoute: typeof ProtectedAppointmentsEditIdRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
@@ -223,6 +244,7 @@ const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedDashboardRoute: ProtectedDashboardRoute,
   ProtectedSettingsRoute: ProtectedSettingsRoute,
   ProtectedAppointmentsIdRoute: ProtectedAppointmentsIdRoute,
+  ProtectedAppointmentsEditIdRoute: ProtectedAppointmentsEditIdRoute,
 }
 
 const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(

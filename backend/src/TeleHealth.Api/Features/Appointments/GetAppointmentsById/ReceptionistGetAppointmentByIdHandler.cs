@@ -47,12 +47,15 @@ public sealed class ReceptionistGetAppointmentByIdHandler(ApplicationDbContext d
             CancellationReason = appointment.CancellationReason,
             PatientName =
                 $"{appointment.Patient.User.FirstName} {appointment.Patient.User.LastName}",
+            DoctorPublicId = appointment.Doctor.PublicId,
             DoctorName = $"{appointment.Doctor.User.FirstName} {appointment.Doctor.User.LastName}",
             Specialization = appointment.Doctor.Specialization,
+            SchedulePublicId = appointment.DoctorSchedule.PublicId,
             Date = appointment.DoctorSchedule.Date,
             StartTime = appointment.DoctorSchedule.StartTime,
             EndTime = appointment.DoctorSchedule.EndTime,
             Status = appointment.AppointmentStatus.Name,
+            StatusSlug = appointment.AppointmentStatus.Slug,
             StatusColorCode = appointment.AppointmentStatus.ColorCode ?? string.Empty,
             Symptoms = symptoms,
         };

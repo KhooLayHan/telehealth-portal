@@ -8,7 +8,7 @@ const ACCENT = "#0d9488";
 
 function Label({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[10px] tracking-[0.22em] uppercase font-semibold text-muted-foreground mb-3 select-none">
+    <p className="text-[12px] tracking-[0.22em] uppercase font-semibold text-muted-foreground mb-3 select-none">
       {children}
     </p>
   );
