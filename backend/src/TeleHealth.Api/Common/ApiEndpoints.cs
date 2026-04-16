@@ -76,6 +76,11 @@ public static class ApiEndpoints
 
         public const string GetSchedule = $"{Base}/me/schedule";
 
+        public const string GetPatients = $"{Base}/me/patients";
+
+        public const string GetPatientAppointments =
+            $"{Base}/me/patients/{{patientPublicId:guid}}/appointments";
+
         public const string GetByIdOrSlug = $"{Base}/{{idOrSlug}}";
 
         public const string GetAll = Base;

@@ -20,6 +20,8 @@ using TeleHealth.Api.Features.Appointments.GetAppointmentStatuses;
 using TeleHealth.Api.Features.Appointments.SubmitConsultation;
 using TeleHealth.Api.Features.Appointments.UpdateAppointmentByIdForReceptionist;
 using TeleHealth.Api.Features.Doctors.GetAllDoctors;
+using TeleHealth.Api.Features.Doctors.GetDoctorPatientAppointments;
+using TeleHealth.Api.Features.Doctors.GetDoctorPatients;
 using TeleHealth.Api.Features.Doctors.GetSchedule;
 using TeleHealth.Api.Features.Patients.CancelAppointment;
 using TeleHealth.Api.Features.Patients.GetAllAppointments;
@@ -156,6 +158,8 @@ builder.Services.AddScoped<GetAllDoctorsHandler>();
 builder.Services.AddScoped<GetAllAvailableSchedulesHandler>();
 builder.Services.AddScoped<GetDoctorScheduleHandler>();
 builder.Services.AddScoped<ReceptionistGetAllPatientsHandler>();
+builder.Services.AddScoped<GetDoctorPatientsHandler>();
+builder.Services.AddScoped<GetDoctorPatientAppointmentsHandler>();
 
 builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonS3>();
@@ -211,6 +215,8 @@ api.MapGetAllDoctorsEndpoint();
 api.MapGetAllAvailableSchedulesEndpoint();
 api.MapGetDoctorScheduleEndpoint();
 api.MapReceptionistGetAllPatientsEndpoint();
+api.MapGetDoctorPatientsEndpoint();
+api.MapGetDoctorPatientAppointmentsEndpoint();
 
 app.UseSerilogRequestLogging();
 

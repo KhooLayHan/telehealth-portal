@@ -18,6 +18,7 @@ import { Route as ProtectedDashboardRouteImport } from './routes/_protected/dash
 import { Route as ProtectedAppointmentsRouteImport } from './routes/_protected/appointments_'
 import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
+import { Route as ProtectedPatientsIdRouteImport } from './routes/_protected/patients.$id'
 import { Route as ProtectedAppointmentsIdRouteImport } from './routes/_protected/appointments.$id'
 import { Route as ProtectedAppointmentsEditIdRouteImport } from './routes/_protected/appointments.edit.$id'
 
@@ -64,6 +65,11 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => AuthRoute,
 } as any)
+const ProtectedPatientsIdRoute = ProtectedPatientsIdRouteImport.update({
+  id: '/patients/$id',
+  path: '/patients/$id',
+  getParentRoute: () => ProtectedRoute,
+} as any)
 const ProtectedAppointmentsIdRoute = ProtectedAppointmentsIdRouteImport.update({
   id: '/appointments/$id',
   path: '/appointments/$id',
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/patients': typeof ProtectedPatientsRoute
   '/settings': typeof ProtectedSettingsRoute
   '/appointments/$id': typeof ProtectedAppointmentsIdRoute
+  '/patients/$id': typeof ProtectedPatientsIdRoute
   '/appointments/edit/$id': typeof ProtectedAppointmentsEditIdRoute
 }
 export interface FileRoutesByTo {
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/patients': typeof ProtectedPatientsRoute
   '/settings': typeof ProtectedSettingsRoute
   '/appointments/$id': typeof ProtectedAppointmentsIdRoute
+  '/patients/$id': typeof ProtectedPatientsIdRoute
   '/appointments/edit/$id': typeof ProtectedAppointmentsEditIdRoute
 }
 export interface FileRoutesById {
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/_protected/patients_': typeof ProtectedPatientsRoute
   '/_protected/settings': typeof ProtectedSettingsRoute
   '/_protected/appointments/$id': typeof ProtectedAppointmentsIdRoute
+  '/_protected/patients/$id': typeof ProtectedPatientsIdRoute
   '/_protected/appointments/edit/$id': typeof ProtectedAppointmentsEditIdRoute
 }
 export interface FileRouteTypes {
@@ -123,6 +132,7 @@ export interface FileRouteTypes {
     | '/patients'
     | '/settings'
     | '/appointments/$id'
+    | '/patients/$id'
     | '/appointments/edit/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -134,6 +144,7 @@ export interface FileRouteTypes {
     | '/patients'
     | '/settings'
     | '/appointments/$id'
+    | '/patients/$id'
     | '/appointments/edit/$id'
   id:
     | '__root__'
@@ -147,6 +158,7 @@ export interface FileRouteTypes {
     | '/_protected/patients_'
     | '/_protected/settings'
     | '/_protected/appointments/$id'
+    | '/_protected/patients/$id'
     | '/_protected/appointments/edit/$id'
   fileRoutesById: FileRoutesById
 }
@@ -221,6 +233,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_protected/patients/$id': {
+      id: '/_protected/patients/$id'
+      path: '/patients/$id'
+      fullPath: '/patients/$id'
+      preLoaderRoute: typeof ProtectedPatientsIdRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
     '/_protected/appointments/$id': {
       id: '/_protected/appointments/$id'
       path: '/appointments/$id'
@@ -256,6 +275,7 @@ interface ProtectedRouteChildren {
   ProtectedPatientsRoute: typeof ProtectedPatientsRoute
   ProtectedSettingsRoute: typeof ProtectedSettingsRoute
   ProtectedAppointmentsIdRoute: typeof ProtectedAppointmentsIdRoute
+  ProtectedPatientsIdRoute: typeof ProtectedPatientsIdRoute
   ProtectedAppointmentsEditIdRoute: typeof ProtectedAppointmentsEditIdRoute
 }
 
@@ -265,6 +285,7 @@ const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedPatientsRoute: ProtectedPatientsRoute,
   ProtectedSettingsRoute: ProtectedSettingsRoute,
   ProtectedAppointmentsIdRoute: ProtectedAppointmentsIdRoute,
+  ProtectedPatientsIdRoute: ProtectedPatientsIdRoute,
   ProtectedAppointmentsEditIdRoute: ProtectedAppointmentsEditIdRoute,
 }
 
