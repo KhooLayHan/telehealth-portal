@@ -29,9 +29,12 @@ public sealed class DownloadLabReportHandler(ApplicationDbContext db, IS3Service
 
         if (userRole == "patient" && report.Patient.User.PublicId != userPublicId)
         {
-            throw new UnauthorizedAccessException(
-                "You do not have permission to view this report."
+            Log.Warning(
+                "Patient '{UserPublicId}' is not authorized to download report '{Slug}'.",
+                userPublicId,
+                slug
             );
+            throw new LabReportAccessDeniedException();
         }
 
         // 3. Ensure the PDF was actually uploaded

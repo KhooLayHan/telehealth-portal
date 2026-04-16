@@ -20,7 +20,7 @@ public sealed class BiomarkerNotFoundException : NotFoundException
         ) { }
 }
 
-public sealed class DuplicateLabReportException : Base.ConflictException
+public sealed class DuplicateLabReportException : ConflictException
 {
     public DuplicateLabReportException()
         : base(
@@ -47,5 +47,15 @@ public sealed class InvalidPdfFormatException : ValidationException
             LabReportErrorCodes.InvalidPdfFormat,
             "Invalid PDF Format",
             "The uploaded PDF file format is invalid."
+        ) { }
+}
+
+public sealed class LabReportAccessDeniedException : ForbiddenException
+{
+    public LabReportAccessDeniedException()
+        : base(
+            LabReportErrorCodes.AccessDenied,
+            "Access Denied",
+            "You do not have permission to view this report."
         ) { }
 }
