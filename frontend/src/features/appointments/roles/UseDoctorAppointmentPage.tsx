@@ -1,4 +1,4 @@
-import { useSearch } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 import { useGetDoctorSchedule } from "@/api/generated/doctors/doctors";
 
@@ -12,11 +12,13 @@ function getTodayStr(): string {
 }
 
 export function UseDoctorAppointmentPage() {
+  const navigate = useNavigate();
   const { today } = useSearch({ from: "/_protected/appointments_" });
+  const todayOnly = today === true;
+
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
-  const [todayOnly, setTodayOnly] = useState(today ?? false);
 
   const statusSlug = statusFilter === "all" ? undefined : statusFilter;
 
@@ -43,7 +45,10 @@ export function UseDoctorAppointmentPage() {
   }
 
   function handleTodayToggle() {
-    setTodayOnly((prev) => !prev);
+    navigate({
+      to: "/appointments",
+      search: { today: todayOnly ? undefined : true },
+    });
     setPage(1);
   }
 
