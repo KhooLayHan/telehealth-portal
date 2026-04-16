@@ -61,7 +61,7 @@ export function AppointmentEditForm({
           },
         });
         toast.success("Appointment updated successfully.");
-        navigate({ to: "/appointments" });
+        navigate({ to: "/appointments", search: { today: undefined } });
       } catch {
         toast.error("Failed to update appointment. Please try again.");
       }

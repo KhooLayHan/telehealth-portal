@@ -58,6 +58,8 @@ import type {
 import type {
   UpdateAppointmentByReceptionistCommand
 } from '../../model/UpdateAppointmentByReceptionistCommand';
+
+import type {
   SubmitConsultationRequest
 } from '../../model/SubmitConsultationRequest';
 
