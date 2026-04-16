@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import type { AppointmentDto } from "@/api/model/AppointmentDto";
 import {
   Dialog,
@@ -21,16 +22,15 @@ export function CancelDialog({ appointment, isOpen, onOpenChange }: CancelDialog
     onSuccess: () => onOpenChange(false),
   });
 
-  const handleOpenChange = (open: boolean) => {
-    onOpenChange(open);
-    if (!open) {
+  useEffect(() => {
+    if (!isOpen) {
       form.reset();
       resetError();
     }
-  };
+  }, [isOpen, form, resetError]);
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-106.25">
         <DialogHeader>
           <DialogTitle>Cancel Appointment</DialogTitle>
