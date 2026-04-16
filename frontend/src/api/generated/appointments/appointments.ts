@@ -56,16 +56,16 @@ import type {
 } from '../../model/ReceptionistAppointmentDetailDto';
 
 import type {
-  UpdateAppointmentByReceptionistCommand
-} from '../../model/UpdateAppointmentByReceptionistCommand';
-
-import type {
   SubmitConsultationRequest
 } from '../../model/SubmitConsultationRequest';
 
 import type {
   SubmitConsultationResponse
 } from '../../model/SubmitConsultationResponse';
+
+import type {
+  UpdateAppointmentByReceptionistCommand
+} from '../../model/UpdateAppointmentByReceptionistCommand';
 
 import { ofetchMutator } from '../../ofetch-mutator';
 
