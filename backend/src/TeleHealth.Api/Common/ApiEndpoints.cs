@@ -38,6 +38,8 @@ public static class ApiEndpoints
         public const string DeleteAppointmentBySlug = $"{AppointmentsBase}/{{slug}}";
 
         public const string GetById = $"{Base}/{{id:guid}}";
+
+        public const string GetAllPatientsForReceptionist = Base;
     }
 
     public static class Appointments
@@ -53,6 +55,10 @@ public static class ApiEndpoints
         public const string SubmitConsultation = $"{Base}/{{id:guid}}/consultation";
 
         public const string GetAllAppointments = Base;
+
+        public const string GetAllStatuses = $"{Base}/statuses";
+
+        public const string UpdateById = $"{Base}/{{id:guid}}";
     }
 
     public static class Doctors
@@ -62,6 +68,11 @@ public static class ApiEndpoints
         public const string Create = Base;
 
         public const string GetSchedule = $"{Base}/me/schedule";
+
+        public const string GetPatients = $"{Base}/me/patients";
+
+        public const string GetPatientAppointments =
+            $"{Base}/me/patients/{{patientPublicId:guid}}/appointments";
 
         public const string GetByIdOrSlug = $"{Base}/{{idOrSlug}}";
 

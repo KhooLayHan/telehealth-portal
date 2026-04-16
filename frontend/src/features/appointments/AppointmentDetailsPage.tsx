@@ -42,7 +42,9 @@ export function AppointmentDetailsPage() {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink render={<Link to="/appointments" />}>Appointments</BreadcrumbLink>
+              <BreadcrumbLink render={<Link to="/appointments" search={{ today: undefined }} />}>
+                Appointments
+              </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>

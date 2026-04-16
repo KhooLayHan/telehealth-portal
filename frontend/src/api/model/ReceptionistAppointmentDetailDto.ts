@@ -15,12 +15,15 @@ export interface ReceptionistAppointmentDetailDto {
   /** @nullable */
   cancellationReason?: string | null;
   patientName?: string;
+  doctorPublicId?: string;
   doctorName?: string;
   specialization?: string;
+  schedulePublicId?: string;
   date?: LocalDate;
   startTime?: LocalTime;
   endTime?: LocalTime;
   status?: string;
+  statusSlug?: string;
   statusColorCode?: string;
   /** @nullable */
   symptoms?: Symptom[] | null;

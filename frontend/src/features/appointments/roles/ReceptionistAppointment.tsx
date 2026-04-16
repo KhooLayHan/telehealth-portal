@@ -1,14 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import {
-  type ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
+import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { motion } from "framer-motion";
-import { Eye, Pencil, Search } from "lucide-react";
-import { useState } from "react";
+import { ChevronLeft, ChevronRight, Eye, Pencil, Search } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useGetAllAppointmentsForReceptionist } from "@/api/generated/appointments/appointments";
 import type { ReceptionistAppointmentDto } from "@/api/model/ReceptionistAppointmentDto";
 import { Button } from "@/components/ui/button";
@@ -24,6 +18,7 @@ import {
 } from "@/components/ui/table";
 
 const ACCENT = "#0d9488";
+const PAGE_SIZE = 10;
 
 const columns: ColumnDef<ReceptionistAppointmentDto>[] = [
   {
@@ -97,14 +92,13 @@ const columns: ColumnDef<ReceptionistAppointmentDto>[] = [
         >
           <Eye className="size-3.5" />
         </Link>
-        <Button
-          size="sm"
-          variant="ghost"
-          className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground cursor-pointer"
-          onClick={() => console.log("Edit", row.original.publicId)}
+        <Link
+          to="/appointments/edit/$id"
+          params={{ id: row.original.publicId ?? "" }}
+          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <Pencil className="size-3.5" />
-        </Button>
+        </Link>
       </div>
     ),
   },
@@ -113,34 +107,48 @@ const columns: ColumnDef<ReceptionistAppointmentDto>[] = [
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  page: number;
+  totalPages: number;
+  hasNextPage?: boolean;
+  hasPreviousPage?: boolean;
+  onPageChange: (page: number) => void;
+  search: string;
+  onSearchChange: (value: string) => void;
 }
 
-function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
-  const [globalFilter, setGlobalFilter] = useState("");
-
+function DataTable<TData, TValue>({
+  columns,
+  data,
+  page,
+  totalPages,
+  hasNextPage,
+  hasPreviousPage,
+  onPageChange,
+  search,
+  onSearchChange,
+}: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    state: { globalFilter },
-    onGlobalFilterChange: setGlobalFilter,
   });
 
   const rows = table.getRowModel().rows;
 
   return (
     <div className="space-y-4">
+      {/* Search */}
       <div className="relative w-72">
         <Search className="absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground pointer-events-none" />
         <Input
           placeholder="Search appointments…"
-          value={globalFilter}
-          onChange={(e) => setGlobalFilter(e.target.value)}
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
           className="pl-9 h-9 text-sm"
         />
       </div>
 
+      {/* Table */}
       <div className="rounded-lg border border-border overflow-hidden">
         <Table>
           <TableHeader>
@@ -190,15 +198,96 @@ function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValu
           </TableBody>
         </Table>
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between pt-1">
+          <p className="text-xs text-muted-foreground">
+            Page <span className="font-medium text-foreground">{page}</span> of{" "}
+            <span className="font-medium text-foreground">{totalPages}</span>
+          </p>
+          <div className="flex items-center gap-1.5">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 w-8 p-0"
+              disabled={!hasPreviousPage}
+              onClick={() => onPageChange(page - 1)}
+            >
+              <ChevronLeft className="size-4" />
+            </Button>
+
+            {/* Page number buttons — show up to 5 around current page */}
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter((p) => p === 1 || p === totalPages || (p >= page - 1 && p <= page + 1))
+              .reduce<(number | string)[]>((acc, p, idx, arr) => {
+                if (idx > 0 && p - (arr[idx - 1] as number) > 1)
+                  acc.push(`ellipsis-after-${arr[idx - 1]}`);
+                acc.push(p);
+                return acc;
+              }, [])
+              .map((item) =>
+                typeof item === "string" ? (
+                  <span key={item} className="text-xs text-muted-foreground px-1">
+                    …
+                  </span>
+                ) : (
+                  <Button
+                    key={item}
+                    variant={item === page ? "default" : "outline"}
+                    size="sm"
+                    className="h-8 w-8 p-0 text-xs"
+                    style={item === page ? { background: ACCENT } : undefined}
+                    onClick={() => onPageChange(item)}
+                  >
+                    {item}
+                  </Button>
+                ),
+              )}
+
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 w-8 p-0"
+              disabled={!hasNextPage}
+              onClick={() => onPageChange(page + 1)}
+            >
+              <ChevronRight className="size-4" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 export function ReceptionistApptPage() {
-  const { data, isLoading, isError } = useGetAllAppointmentsForReceptionist();
+  const [page, setPage] = useState(1);
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
 
-  const appointments = data?.status === 200 ? data.data.items : [];
-  const totalCount = data?.status === 200 ? data.data.totalCount : 0;
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearch(searchInput);
+      setPage(1);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  const { data, isLoading, isError } = useGetAllAppointmentsForReceptionist({
+    Page: page,
+    PageSize: PAGE_SIZE,
+    Search: search || undefined,
+  });
+
+  const result = data?.status === 200 ? data.data : null;
+  const appointments = result?.items ?? [];
+  const totalCount = result ? Number(result.totalCount) : 0;
+  const totalPages = result ? Number(result.totalPages ?? 1) : 1;
+
+  function handleSearchChange(value: string) {
+    setSearchInput(value);
+  }
 
   return (
     <motion.div
@@ -241,7 +330,17 @@ export function ReceptionistApptPage() {
               <p className="text-sm text-destructive">Failed to load appointments.</p>
             </div>
           ) : (
-            <DataTable columns={columns} data={appointments ?? []} />
+            <DataTable
+              columns={columns}
+              data={appointments}
+              page={page}
+              totalPages={totalPages}
+              hasNextPage={result?.hasNextPage}
+              hasPreviousPage={result?.hasPreviousPage}
+              onPageChange={setPage}
+              search={searchInput}
+              onSearchChange={handleSearchChange}
+            />
           )}
         </div>
       </div>
