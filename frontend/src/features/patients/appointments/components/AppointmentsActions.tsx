@@ -45,6 +45,11 @@ export function AppointmentActions({ appointment }: { appointment: AppointmentDt
   const cancelMutation = useDeleteAppointmentBySlug();
   const rescheduleMutation = useUpdateAppointmentBySlug();
 
+  const [selectedDate, setSelectedDate] = useState<string>("");
+
+  // Calculate minimum selectable date (today or tomorrow)
+  const minDate = new Date().toISOString().split("T")[0];
+
   // Fetch real available schedules ONLY when a date is selected!
   const { data: schedulesResponse, isLoading: isLoadingSchedules } = useGetAllAvailable(
     { Date: selectedDate }, // Passes the date to ASP.NET
@@ -72,7 +77,7 @@ export function AppointmentActions({ appointment }: { appointment: AppointmentDt
           data: value,
         });
 
-        queryClient.invalidateQueries({ queryKey: getGetAllAppointmentsQueryKey() });
+        await queryClient.invalidateQueries({ queryKey: getGetAllAppointmentsQueryKey() });
         setIsCancelOpen(false);
       } catch (err) {
         const apiError = err as ApiError;
@@ -291,7 +296,7 @@ export function AppointmentActions({ appointment }: { appointment: AppointmentDt
                     </option>
 
                     {/* Map the real data from ASP.NET! */}
-                    {availableSchedules.map((slot: any) => (
+                    {availableSchedules.map((slot) => (
                       <option key={slot.publicId} value={slot.publicId}>
                         {slot.startTime?.slice(0, 5)} - {slot.endTime?.slice(0, 5)}
                       </option>

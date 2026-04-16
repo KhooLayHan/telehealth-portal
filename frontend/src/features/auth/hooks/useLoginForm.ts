@@ -3,7 +3,6 @@ import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useLogin } from "@/api/generated/auth/auth";
 import { getMe } from "@/api/generated/users/users";
-import type { PatientProfileDto } from "@/api/model/PatientProfileDto";
 import type { ApiError } from "@/api/ofetch-mutator";
 import { useAuthStore } from "@/store/useAuthStore";
 import type { LoginFormData } from "../schemas/loginSchema";

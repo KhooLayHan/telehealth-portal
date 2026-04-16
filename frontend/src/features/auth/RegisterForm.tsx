@@ -25,10 +25,14 @@ export function RegisterForm() {
         <CardContent>
           <form
             className="space-y-6"
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
               e.stopPropagation();
-              form.handleSubmit();
+
+              if (!acceptTerms) {
+                return;
+              }
+              await form.handleSubmit();
             }}
           >
             {globalError && <FormError message={globalError} />}
