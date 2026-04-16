@@ -6,5 +6,5 @@ public sealed record LabReportCompletedEvent(
     Guid LabReportPublicId,
     Guid PatientPublicId,
     string ReportType,
-    Instant OccuredAt
+    Instant OccurredAt
 );

@@ -25,6 +25,10 @@ public static class CompleteLabReportEndpoint
             .WithName(nameof(ApiEndpoints.LabReports.UpdateBySlug))
             .WithTags(nameof(ApiEndpoints.LabReports))
             .RequireAuthorization(AuthConstants.LabTechPolicy)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status403Forbidden)
+            .ProducesProblem(StatusCodes.Status422UnprocessableEntity)
             .AddEndpointFilter<ValidationFilter<CompleteLabReportCommand>>();
     }
 }

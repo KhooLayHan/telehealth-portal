@@ -21,6 +21,12 @@ public class CompleteLabReportHandler(ApplicationDbContext db, IPublishEndpoint 
             ?? throw new LabReportNotFoundException(slug);
 
         report.StatusId = StatusId.LabReport.Completed;
+
+        if (report.StatusId == StatusId.LabReport.Completed)
+        {
+            throw new InvalidOperationException($"Lab report '{slug}' is already completed.");
+        }
+
         report.Biomarkers = cmd.Biomarkers;
         report.UploadedAt = SystemClock.Instance.GetCurrentInstant();
 
@@ -31,9 +37,8 @@ public class CompleteLabReportHandler(ApplicationDbContext db, IPublishEndpoint 
             SystemClock.Instance.GetCurrentInstant()
         );
 
-        await publishEndpoint.Publish(completedEvent, ct);
-
         await db.SaveChangesAsync(ct);
+        await publishEndpoint.Publish(completedEvent, ct);
 
         Log.Information("LabReport {Slug} marked as completed. MassTransit event queued.", slug);
     }

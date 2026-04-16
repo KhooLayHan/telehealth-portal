@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http.HttpResults;
 using TeleHealth.Api.Common;
 using TeleHealth.Api.Common.Security;
 
@@ -19,7 +18,7 @@ public static class CreateLabReportEndpoint
                 {
                     var response = await handler.HandleAsync(cmd, ct);
                     return TypedResults.Created(
-                        $"{ApiEndpoints.LabReports.Base}/{response.PublicId}",
+                        $"{ApiEndpoints.LabReports.Create}/{response.PublicId}",
                         response
                     );
                 }

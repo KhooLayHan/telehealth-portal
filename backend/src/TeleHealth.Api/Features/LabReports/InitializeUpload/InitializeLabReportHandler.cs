@@ -42,10 +42,10 @@ public sealed class InitializeLabReportHandler(ApplicationDbContext db, IS3Servi
             S3ObjectKey = s3ObjectKey,
         };
 
+        var uploadUrl = s3Service.GeneratePreSignedUploadUrl(s3ObjectKey, cmd.ContentType);
+
         db.LabReports.Add(labReport);
         await db.SaveChangesAsync(ct);
-
-        var uploadUrl = s3Service.GeneratePreSignedUploadUrl(s3ObjectKey, cmd.ContentType);
 
         Log.Information("Generated S3 Upload URL for LabReport {PublicId}", publicId);
 
