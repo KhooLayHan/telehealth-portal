@@ -121,12 +121,14 @@ export function AppointmentActions({ appointment }: { appointment: AppointmentDt
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
-            <MoreHorizontal className="size-4" />
-          </Button>
-        </DropdownMenuTrigger>
+        <DropdownMenuTrigger
+          render={
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="size-4" />
+            </Button>
+          }
+        />
         <DropdownMenuContent align="end">
           <DropdownMenuGroup>
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
