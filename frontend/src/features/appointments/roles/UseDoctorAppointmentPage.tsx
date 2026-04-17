@@ -22,13 +22,16 @@ export function UseDoctorAppointmentPage() {
 
   const statusSlug = statusFilter === "all" ? undefined : statusFilter;
 
-  const { data, isLoading, isError } = useGetDoctorSchedule({
-    Date: todayOnly ? getTodayStr() : undefined,
-    Status: statusSlug,
-    Search: search.trim() || undefined,
-    Page: page,
-    PageSize: PAGE_SIZE,
-  });
+  const { data, isLoading, isError } = useGetDoctorSchedule(
+    {
+      Date: todayOnly ? getTodayStr() : undefined,
+      Status: statusSlug,
+      Search: search.trim() || undefined,
+      Page: page,
+      PageSize: PAGE_SIZE,
+    },
+    { query: { refetchInterval: 1_500 } },
+  );
 
   const schedule = data?.status === 200 ? data.data : null;
   const totalCount = Number(schedule?.totalCount ?? 0);
