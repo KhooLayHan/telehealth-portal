@@ -30,14 +30,9 @@ export function LabReportUploadWizard({
   consultationPublicId,
 }: LabReportUploadWizardProps) {
   const [step, setStep] = useState<Step>(1);
-
-  // FIX #13: null initial state instead of empty string — clearly "not yet set"
   const [labReportId, setLabReportId] = useState<string | null>(null);
-
-  // reportType is captured in step 1 via a select, before the upload begins
   const [reportType, setReportType] = useState<string>(REPORT_TYPES[0]);
 
-  // FIX #12: callback only receives id — reportType is already in state
   const handlePdfUploaded = (id: string) => {
     setLabReportId(id);
     setStep(2);
@@ -101,8 +96,6 @@ export function LabReportUploadWizard({
         <CardContent className="space-y-6">
           {step === 1 && (
             <>
-              {/* FIX #12: reportType is selected here, before upload, so it's
-                  already in state when handlePdfUploaded fires */}
               <div className="space-y-2">
                 <Label htmlFor="report-type-select">Report Type</Label>
                 <select
@@ -119,7 +112,6 @@ export function LabReportUploadWizard({
                 </select>
               </div>
 
-              {/* FIX #11: correct prop names matching S3PdfDropzone's interface */}
               <S3PdfDropzone
                 patientPublicId={patientPublicId}
                 consultationPublicId={consultationPublicId}
@@ -129,7 +121,6 @@ export function LabReportUploadWizard({
             </>
           )}
 
-          {/* FIX #13: guard render — labReportId is guaranteed non-null in step 2 */}
           {step === 2 && labReportId !== null && (
             <BiomarkersForm
               labReportId={labReportId}

@@ -140,10 +140,10 @@ export function BiomarkersForm({ labReportId, onBack, onSuccess }: BiomarkersFor
                               aria-invalid={sub.state.meta.errors.length > 0}
                               className={sub.state.meta.errors.length ? "border-destructive" : ""}
                             />
-                            {/* FIX #9: show error message */}
+
                             {sub.state.meta.errors.length > 0 && (
                               <p className="text-xs text-destructive" role="alert">
-                                {sub.state.meta.errors[0]?.toString()}
+                                {sub.state.meta.errors[0]?.message}
                               </p>
                             )}
                           </div>
@@ -173,7 +173,7 @@ export function BiomarkersForm({ labReportId, onBack, onSuccess }: BiomarkersFor
                             />
                             {sub.state.meta.errors.length > 0 && (
                               <p className="text-xs text-destructive" role="alert">
-                                {sub.state.meta.errors[0]?.toString()}
+                                {sub.state.meta.errors[0]?.message}
                               </p>
                             )}
                           </div>
@@ -204,7 +204,7 @@ export function BiomarkersForm({ labReportId, onBack, onSuccess }: BiomarkersFor
                             />
                             {sub.state.meta.errors.length > 0 && (
                               <p className="text-xs text-destructive" role="alert">
-                                {sub.state.meta.errors[0]?.toString()}
+                                {sub.state.meta.errors[0]?.message}
                               </p>
                             )}
                           </div>
@@ -235,7 +235,7 @@ export function BiomarkersForm({ labReportId, onBack, onSuccess }: BiomarkersFor
                             />
                             {sub.state.meta.errors.length > 0 && (
                               <p className="text-xs text-destructive" role="alert">
-                                {sub.state.meta.errors[0]?.toString()}
+                                {sub.state.meta.errors[0]?.message}
                               </p>
                             )}
                           </div>

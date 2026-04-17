@@ -19,7 +19,7 @@ public static class CompleteLabReportEndpoint
                 ) =>
                 {
                     await handler.HandleAsync(slug, cmd, ct);
-                    return Results.NoContent();
+                    return TypedResults.NoContent();
                 }
             )
             .WithName(nameof(ApiEndpoints.LabReports.UpdateBySlug))
