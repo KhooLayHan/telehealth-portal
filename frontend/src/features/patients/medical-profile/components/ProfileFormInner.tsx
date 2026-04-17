@@ -1,13 +1,20 @@
-import { Button } from "@base-ui/react/button";
 import { Separator } from "@base-ui/react/separator";
 import { Activity, Save } from "lucide-react";
 import { useId } from "react";
 import type { PatientProfileDto } from "@/api/model/PatientProfileDto";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { BLOOD_GROUP_OPTIONS, medicalInfoSchema } from "../types";
 import { AllergiesManager } from "./AllergiesManager";
 import { EmergencyContactForm } from "./EmergencyContactForm";
+import { FormField } from "./FormField";
 import { PersonalInfoCard } from "./PersonalInfoCard";
 import { useMedicalProfile } from "./UseMedicalProfile";
 
@@ -34,31 +41,29 @@ export function ProfileFormInner({ profile }: { profile: PatientProfileDto }) {
           <CardDescription>Update your clinical details and emergency contacts.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Couldn't figure out how to extract out BloodGroupSelect... */}
           <form.Field
             name="bloodGroup"
             validators={{ onChange: medicalInfoSchema.shape.bloodGroup }}
           >
             {(field) => (
-              <div className="space-y-1.5 md:w-1/3">
-                <Label htmlFor={bloodGroupId}>Blood Group</Label>
-                <select
-                  id={bloodGroupId}
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                >
-                  <option value="">Select...</option>
-                  {BLOOD_GROUP_OPTIONS.map((bg) => (
-                    <option key={bg} value={bg}>
-                      {bg}
-                    </option>
-                  ))}
-                </select>
-                {field.state.meta.errors.length > 0 && (
-                  <p className="text-xs text-destructive">{field.state.meta.errors[0]?.message}</p>
-                )}
+              <div className="md:w-1/3">
+                <FormField label="Blood Group" error={field.state.meta.errors[0]?.message}>
+                  <Select
+                    value={field.state.value}
+                    onValueChange={(value) => field.handleChange(value ?? "")}
+                  >
+                    <SelectTrigger id={bloodGroupId} className="w-full">
+                      <SelectValue placeholder="Select..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {BLOOD_GROUP_OPTIONS.map((bg) => (
+                        <SelectItem key={bg} value={bg}>
+                          {bg}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormField>
               </div>
             )}
           </form.Field>
@@ -68,10 +73,14 @@ export function ProfileFormInner({ profile }: { profile: PatientProfileDto }) {
           <div className="space-y-3">
             <AllergiesManager form={form} />
           </div>
-          <div className="flex justify-end pt-4">
+          <div className="flex justify-end pt-4 cursor-pointer">
             <form.Subscribe>
               {(state) => (
-                <Button type="submit" disabled={!state.canSubmit || updateMutation.isPending}>
+                <Button
+                  type="submit"
+                  className="cursor-pointer"
+                  disabled={!state.canSubmit || updateMutation.isPending}
+                >
                   {updateMutation.isPending ? (
                     "Saving..."
                   ) : (
