@@ -25,6 +25,7 @@ using TeleHealth.Api.Features.Patients.CancelAppointment;
 using TeleHealth.Api.Features.Patients.GetAllAppointments;
 using TeleHealth.Api.Features.Patients.GetAllPatientsForReceptionist;
 using TeleHealth.Api.Features.Patients.GetAppointmentByIdOrSlug;
+using TeleHealth.Api.Features.Patients.GetPatientByIdForReceptionist;
 using TeleHealth.Api.Features.Patients.GetProfile;
 using TeleHealth.Api.Features.Patients.RescheduleAppointment;
 using TeleHealth.Api.Features.Patients.UpdateMedicalRecord;
@@ -156,6 +157,7 @@ builder.Services.AddScoped<GetAllDoctorsHandler>();
 builder.Services.AddScoped<GetAllAvailableSchedulesHandler>();
 builder.Services.AddScoped<GetDoctorScheduleHandler>();
 builder.Services.AddScoped<ReceptionistGetAllPatientsHandler>();
+builder.Services.AddScoped<ReceptionistGetPatientByIdHandler>();
 
 builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonS3>();
@@ -211,6 +213,7 @@ api.MapGetAllDoctorsEndpoint();
 api.MapGetAllAvailableSchedulesEndpoint();
 api.MapGetDoctorScheduleEndpoint();
 api.MapReceptionistGetAllPatientsEndpoint();
+api.MapReceptionistGetPatientByIdEndpoint();
 
 app.UseSerilogRequestLogging();
 
