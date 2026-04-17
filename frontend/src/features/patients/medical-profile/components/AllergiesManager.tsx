@@ -51,6 +51,7 @@ export function AllergiesManager({ form }: AllergiesManagerProps) {
                       {(subField) => (
                         <FormField
                           label={<span className="text-xs">Allergen</span>}
+                          htmlFor={`${subField.name}-input`}
                           error={subField.state.meta.errors[0]?.message}
                         >
                           <Input
@@ -67,6 +68,7 @@ export function AllergiesManager({ form }: AllergiesManagerProps) {
                       {(subField) => (
                         <FormField
                           label={<span className="text-xs">Severity</span>}
+                          htmlFor={`${subField.name}-input`}
                           error={subField.state.meta.errors[0]?.message}
                         >
                           <Select
@@ -104,6 +106,7 @@ export function AllergiesManager({ form }: AllergiesManagerProps) {
                       {(subField) => (
                         <FormField
                           label={<span className="text-xs">Reaction</span>}
+                          htmlFor={`${subField.name}-input`}
                           error={subField.state.meta.errors[0]?.message}
                         >
                           <Input
