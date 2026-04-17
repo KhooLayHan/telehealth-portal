@@ -43,12 +43,15 @@ export function UseDoctorSchedule() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
 
-  const { data, isLoading, isError } = useGetDoctorSchedule({
-    Date: getTodayStr(),
-    Page: page,
-    PageSize: PAGE_SIZE,
-    Search: search.trim() || undefined,
-  });
+  const { data, isLoading, isError } = useGetDoctorSchedule(
+    {
+      Date: getTodayStr(),
+      Page: page,
+      PageSize: PAGE_SIZE,
+      Search: search.trim() || undefined,
+    },
+    { query: { refetchInterval: 1_500 } },
+  );
 
   const schedule = data?.status === 200 ? data.data : null;
 
