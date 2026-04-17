@@ -4,8 +4,7 @@ import { CheckCircle, File, FileUp, Loader2, X } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
-// Orval hook generated from your CreateLabReportEndpoint
-import { useCreateLabReport } from "@/api/generated/lab-reports/lab-reports";
+import { useCreate } from "@/api/generated/lab-reports/lab-reports";
 import { Button } from "@/components/ui/button";
 
 type S3PdfDropzoneProps = {
@@ -27,7 +26,7 @@ export function S3PdfDropzone({
   >("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const createReportMutation = useCreateLabReport();
+  const createReportMutation = useCreate();
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
