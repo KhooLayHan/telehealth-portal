@@ -10,7 +10,6 @@ type FormFieldProps = {
 export function FormField({ label, htmlFor, error, children }: FormFieldProps) {
   return (
     <Field orientation="vertical" className="w-full">
-      <FieldLabel>{label}</FieldLabel>
       <FieldLabel htmlFor={htmlFor}>{label}</FieldLabel>
       <FieldContent>{children}</FieldContent>
       {error && <FieldError>{error}</FieldError>}
