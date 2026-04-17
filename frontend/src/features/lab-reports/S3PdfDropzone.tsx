@@ -38,11 +38,13 @@ export function S3PdfDropzone({
     if (!candidate) return;
 
     if (candidate.type !== ACCEPTED_MIME) {
+      setUploadState("error");
       setErrorMessage("Only PDF files are accepted.");
       return;
     }
 
     if (candidate.size > MAX_FILE_SIZE_BYTES) {
+      setUploadState("error");
       setErrorMessage("File exceeds the 10 MB limit.");
       return;
     }
@@ -54,20 +56,20 @@ export function S3PdfDropzone({
 
   // ─── Native drag-and-drop handlers ──────────────────────────────────────────
 
-  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragActive(true);
   }, []);
 
-  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragLeave = useCallback((e: React.DragEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragActive(false);
   }, []);
 
   const handleDrop = useCallback(
-    (e: React.DragEvent<HTMLDivElement>) => {
+    (e: React.DragEvent<HTMLButtonElement>) => {
       e.preventDefault();
       e.stopPropagation();
       setIsDragActive(false);
@@ -86,7 +88,7 @@ export function S3PdfDropzone({
   );
 
   // Allow keyboard activation of the drop zone (Enter / Space)
-  const handleDropZoneKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleDropZoneKeyDown = useCallback((e: React.KeyboardEvent<HTMLButtonElement>) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       inputRef.current?.click();
