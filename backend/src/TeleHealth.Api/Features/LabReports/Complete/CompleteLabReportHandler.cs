@@ -1,11 +1,7 @@
 using MassTransit;
-
 using Microsoft.EntityFrameworkCore;
-
 using NodaTime;
-
 using Serilog;
-
 using TeleHealth.Api.Common.Constants;
 using TeleHealth.Api.Common.Exceptions.LabReports;
 using TeleHealth.Api.Infrastructure.Persistence;

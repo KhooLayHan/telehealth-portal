@@ -1,8 +1,6 @@
 using MassTransit;
-
 using NodaTime;
 using NodaTime.Serialization.SystemTextJson;
-
 using TeleHealth.Api.Infrastructure.Persistence;
 
 namespace TeleHealth.Api.Common.Extensions;

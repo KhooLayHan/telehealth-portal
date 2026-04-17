@@ -1,11 +1,7 @@
 using Bogus;
-
 using Microsoft.AspNetCore.Identity;
-
 using NodaTime;
-
 using Slugify;
-
 using TeleHealth.Api.Common.Constants;
 using TeleHealth.Api.Domain.Entities;
 
@@ -302,18 +298,62 @@ internal static class SeedFakers
         List<Symptom>[] symptomSets =
         [
             [
-                new Symptom { Name = "Fever", Severity = "Moderate", Duration = "3 days" },
-                new Symptom { Name = "Cough", Severity = "Mild", Duration = "5 days" },
+                new Symptom
+                {
+                    Name = "Fever",
+                    Severity = "Moderate",
+                    Duration = "3 days",
+                },
+                new Symptom
+                {
+                    Name = "Cough",
+                    Severity = "Mild",
+                    Duration = "5 days",
+                },
             ],
-            [new Symptom { Name = "Chest pain", Severity = "Severe", Duration = "1 day" }],
             [
-                new Symptom { Name = "Fatigue", Severity = "Mild", Duration = "1 week" },
-                new Symptom { Name = "Headache", Severity = "Moderate", Duration = "2 days" },
+                new Symptom
+                {
+                    Name = "Chest pain",
+                    Severity = "Severe",
+                    Duration = "1 day",
+                },
             ],
-            [new Symptom { Name = "Skin rash", Severity = "Moderate", Duration = "4 days" }],
             [
-                new Symptom { Name = "Nausea", Severity = "Mild", Duration = "2 days" },
-                new Symptom { Name = "Dizziness", Severity = "Mild", Duration = "1 day" },
+                new Symptom
+                {
+                    Name = "Fatigue",
+                    Severity = "Mild",
+                    Duration = "1 week",
+                },
+                new Symptom
+                {
+                    Name = "Headache",
+                    Severity = "Moderate",
+                    Duration = "2 days",
+                },
+            ],
+            [
+                new Symptom
+                {
+                    Name = "Skin rash",
+                    Severity = "Moderate",
+                    Duration = "4 days",
+                },
+            ],
+            [
+                new Symptom
+                {
+                    Name = "Nausea",
+                    Severity = "Mild",
+                    Duration = "2 days",
+                },
+                new Symptom
+                {
+                    Name = "Dizziness",
+                    Severity = "Mild",
+                    Duration = "1 day",
+                },
             ],
             [],
         ];

@@ -1,11 +1,7 @@
 using Facet.Extensions;
-
 using Microsoft.EntityFrameworkCore;
-
 using NodaTime;
-
 using Serilog;
-
 using TeleHealth.Api.Common.Exceptions.Patients;
 using TeleHealth.Api.Features.Patients.GetProfile;
 using TeleHealth.Api.Infrastructure.Persistence;

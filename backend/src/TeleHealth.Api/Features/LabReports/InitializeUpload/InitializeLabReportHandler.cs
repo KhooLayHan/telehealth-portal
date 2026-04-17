@@ -1,9 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-
 using Serilog;
-
 using Slugify;
-
 using TeleHealth.Api.Common.Constants;
 using TeleHealth.Api.Common.Exceptions.Patients;
 using TeleHealth.Api.Domain.Entities;

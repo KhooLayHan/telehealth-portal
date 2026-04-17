@@ -8,8 +8,7 @@ public sealed class InternalServerException : ProblemException
             StatusCodes.Status500InternalServerError,
             "Internal Server Error",
             message
-        )
-    { }
+        ) { }
 
     public InternalServerException(string errorCode, string title, string message)
         : base(errorCode, StatusCodes.Status500InternalServerError, title, message) { }

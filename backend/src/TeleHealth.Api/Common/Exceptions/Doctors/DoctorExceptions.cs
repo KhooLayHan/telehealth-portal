@@ -10,8 +10,7 @@ public sealed class DoctorNotFoundException : NotFoundException
             DoctorErrorCodes.NotFound,
             "Doctor Not Found",
             "The requested doctor could not be found."
-        )
-    { }
+        ) { }
 }
 
 public sealed class QualificationNotFoundException : NotFoundException
@@ -21,8 +20,7 @@ public sealed class QualificationNotFoundException : NotFoundException
             DoctorErrorCodes.QualificationNotFound,
             "Qualification Not Found",
             "The requested qualification could not be found."
-        )
-    { }
+        ) { }
 }
 
 public sealed class InvalidScheduleException : ValidationException
@@ -32,8 +30,7 @@ public sealed class InvalidScheduleException : ValidationException
             DoctorErrorCodes.InvalidSchedule,
             "Invalid Schedule",
             "The provided schedule is invalid."
-        )
-    { }
+        ) { }
 }
 
 public sealed class OverlappingScheduleException : ConflictException
@@ -43,8 +40,7 @@ public sealed class OverlappingScheduleException : ConflictException
             DoctorErrorCodes.OverlappingSchedule,
             "Overlapping Schedule",
             "This schedule overlaps with an existing schedule."
-        )
-    { }
+        ) { }
 }
 
 public sealed class DepartmentRequiredException : ValidationException
@@ -54,6 +50,5 @@ public sealed class DepartmentRequiredException : ValidationException
             DoctorErrorCodes.DepartmentRequired,
             "Department Required",
             "A department is required for this operation."
-        )
-    { }
+        ) { }
 }

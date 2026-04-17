@@ -1,5 +1,4 @@
 using FluentValidation;
-
 using NodaTime;
 
 namespace TeleHealth.Api.Features.Users.Create;

@@ -8,7 +8,6 @@ import { getGetDailySchedulesForReceptionistQueryKey } from "@/api/generated/sch
 import type { AppointmentStatusesDto } from "@/api/model/AppointmentStatusesDto";
 import type { ReceptionistDoctorScheduleSlotDto } from "@/api/model/ReceptionistDoctorScheduleSlotDto";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -79,17 +78,18 @@ function StatusActionCell({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button size="sm" variant="outline" className="h-7 gap-1 px-2 text-xs" disabled={!!pending}>
-          {pending ? (
-            <Loader2 className="size-3 animate-spin" />
-          ) : (
-            <>
-              Update
-              <ChevronDown className="size-3 text-muted-foreground" />
-            </>
-          )}
-        </Button>
+      <DropdownMenuTrigger
+        disabled={!!pending}
+        className="inline-flex h-7 items-center gap-1 rounded-md border border-input bg-background px-2 text-xs font-medium shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50"
+      >
+        {pending ? (
+          <Loader2 className="size-3 animate-spin" />
+        ) : (
+          <>
+            Update
+            <ChevronDown className="size-3 text-muted-foreground" />
+          </>
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44">
         <DropdownMenuLabel className="text-xs">Set status</DropdownMenuLabel>

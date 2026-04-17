@@ -1,13 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-
 using NodaTime;
-
 using Serilog;
-
 using Slugify;
-
 using TeleHealth.Api.Common.Exceptions;
 using TeleHealth.Api.Common.Exceptions.Seeding;
 using TeleHealth.Api.Domain.Entities;

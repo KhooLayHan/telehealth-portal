@@ -1,7 +1,5 @@
 using System.Security.Claims;
-
 using Microsoft.AspNetCore.Mvc;
-
 using TeleHealth.Api.Common;
 using TeleHealth.Api.Common.Exceptions.Auth;
 using TeleHealth.Api.Common.Security;

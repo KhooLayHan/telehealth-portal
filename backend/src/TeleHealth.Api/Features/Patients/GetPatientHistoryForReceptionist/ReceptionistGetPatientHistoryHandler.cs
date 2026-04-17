@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-
 using TeleHealth.Api.Features.Doctors.GetDoctorPatientAppointments;
 using TeleHealth.Api.Infrastructure.Persistence;
 
@@ -30,9 +29,9 @@ public sealed class ReceptionistGetPatientHistoryHandler(ApplicationDbContext db
             .Appointments.Include(a => a.DoctorSchedule)
             .Include(a => a.AppointmentStatus)
             .Include(a => a.Doctor)
-            .ThenInclude(d => d.User)
+                .ThenInclude(d => d.User)
             .Include(a => a.Consultation)
-            .ThenInclude(c => c.Prescriptions)
+                .ThenInclude(c => c.Prescriptions)
             .Where(a => a.PatientId == patient.Id)
             .OrderByDescending(a => a.DoctorSchedule.Date)
             .ThenByDescending(a => a.DoctorSchedule.StartTime)

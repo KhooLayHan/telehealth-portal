@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-
 using TeleHealth.Api.Common.Exceptions.Doctors;
 using TeleHealth.Api.Infrastructure.Persistence;
 

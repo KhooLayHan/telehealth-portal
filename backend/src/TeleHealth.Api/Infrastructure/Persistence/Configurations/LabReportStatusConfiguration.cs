@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
 using TeleHealth.Api.Domain.Entities;
 
 namespace TeleHealth.Api.Infrastructure.Persistence.Configurations;

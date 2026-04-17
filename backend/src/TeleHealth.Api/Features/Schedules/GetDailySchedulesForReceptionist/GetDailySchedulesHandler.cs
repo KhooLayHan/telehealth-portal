@@ -1,9 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-
 using NodaTime.Text;
-
 using Serilog;
-
 using TeleHealth.Api.Common.Exceptions.Schedules;
 using TeleHealth.Api.Infrastructure.Persistence;
 
@@ -35,12 +32,12 @@ public sealed class GetDailySchedulesHandler(ApplicationDbContext db)
             .DoctorSchedules.AsNoTracking()
             .Include(s => s.ScheduleStatus)
             .Include(s => s.Doctor)
-            .ThenInclude(d => d.User)
+                .ThenInclude(d => d.User)
             .Include(s => s.Appointment)
-            .ThenInclude(a => a!.Patient)
-            .ThenInclude(p => p.User)
+                .ThenInclude(a => a!.Patient)
+                    .ThenInclude(p => p.User)
             .Include(s => s.Appointment)
-            .ThenInclude(a => a!.AppointmentStatus)
+                .ThenInclude(a => a!.AppointmentStatus)
             .Where(s => s.Date == targetDate);
 
         if (query.DoctorPublicId.HasValue)

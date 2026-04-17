@@ -13,6 +13,7 @@ public sealed record ReceptionistDoctorScheduleSlotDto
     public Guid DoctorPublicId { get; init; }
     public string DoctorName { get; init; } = string.Empty;
     public string DoctorSpecialization { get; init; } = string.Empty;
+
     // Populated when the slot is booked
     public Guid? AppointmentPublicId { get; init; }
     public string? PatientName { get; init; }

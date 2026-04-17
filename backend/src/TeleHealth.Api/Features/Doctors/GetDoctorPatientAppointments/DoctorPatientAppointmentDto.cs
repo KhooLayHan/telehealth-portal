@@ -1,5 +1,4 @@
 using NodaTime;
-
 using TeleHealth.Api.Domain.Entities;
 
 namespace TeleHealth.Api.Features.Doctors.GetDoctorPatientAppointments;

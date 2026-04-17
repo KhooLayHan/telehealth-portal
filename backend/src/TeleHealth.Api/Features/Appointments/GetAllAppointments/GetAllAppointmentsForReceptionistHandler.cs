@@ -1,7 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-
 using NodaTime;
-
 using TeleHealth.Api.Common.Models;
 using TeleHealth.Api.Infrastructure.Persistence;
 

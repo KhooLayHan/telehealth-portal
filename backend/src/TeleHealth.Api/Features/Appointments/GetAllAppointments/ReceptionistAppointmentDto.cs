@@ -1,8 +1,6 @@
 using Facet;
 using Facet.Mapping;
-
 using NodaTime;
-
 using TeleHealth.Api.Domain.Entities;
 
 namespace TeleHealth.Api.Features.Appointments.GetAllAppointments;
