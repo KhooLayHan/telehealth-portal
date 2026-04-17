@@ -50,36 +50,36 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-export type initializeLabReportResponse201 = {
+export type createResponse201 = {
   data: InitializeLabReportResponse
   status: 201
 }
 
-export type initializeLabReportResponse400 = {
+export type createResponse400 = {
   data: ProblemDetails
   status: 400
 }
 
-export type initializeLabReportResponse401 = {
+export type createResponse401 = {
   data: ProblemDetails
   status: 401
 }
 
-export type initializeLabReportResponse403 = {
+export type createResponse403 = {
   data: ProblemDetails
   status: 403
 }
 
-export type initializeLabReportResponseSuccess = (initializeLabReportResponse201) & {
+export type createResponseSuccess = (createResponse201) & {
   headers: Headers;
 };
-export type initializeLabReportResponseError = (initializeLabReportResponse400 | initializeLabReportResponse401 | initializeLabReportResponse403) & {
+export type createResponseError = (createResponse400 | createResponse401 | createResponse403) & {
   headers: Headers;
 };
 
-export type initializeLabReportResponse = (initializeLabReportResponseSuccess | initializeLabReportResponseError)
+export type createResponse = (createResponseSuccess | createResponseError)
 
-export const getInitializeLabReportUrl = () => {
+export const getCreateUrl = () => {
 
 
 
@@ -87,9 +87,9 @@ export const getInitializeLabReportUrl = () => {
   return `http://localhost:5144/api/v1/lab-reports/initialize`
 }
 
-export const initializeLabReport = async (initializeLabReportCommand: InitializeLabReportCommand, options?: RequestInit): Promise<initializeLabReportResponse> => {
+export const create = async (initializeLabReportCommand: InitializeLabReportCommand, options?: RequestInit): Promise<createResponse> => {
 
-  return ofetchMutator<initializeLabReportResponse>(getInitializeLabReportUrl(),
+  return ofetchMutator<createResponse>(getCreateUrl(),
   {
     ...options,
     method: 'POST',
@@ -102,11 +102,11 @@ export const initializeLabReport = async (initializeLabReportCommand: Initialize
 
 
 
-export const getInitializeLabReportMutationOptions = <TError = ProblemDetails,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof initializeLabReport>>, TError,{data: InitializeLabReportCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof initializeLabReport>>, TError,{data: InitializeLabReportCommand}, TContext> => {
+export const getCreateMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof create>>, TError,{data: InitializeLabReportCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof create>>, TError,{data: InitializeLabReportCommand}, TContext> => {
 
-const mutationKey = ['initializeLabReport'];
+const mutationKey = ['create'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -116,10 +116,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof initializeLabReport>>, {data: InitializeLabReportCommand}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof create>>, {data: InitializeLabReportCommand}> = (props) => {
           const {data} = props ?? {};
 
-          return  initializeLabReport(data,requestOptions)
+          return  create(data,requestOptions)
         }
 
 
@@ -129,21 +129,26 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type InitializeLabReportMutationResult = NonNullable<Awaited<ReturnType<typeof initializeLabReport>>>
-    export type InitializeLabReportMutationBody = InitializeLabReportCommand
-    export type InitializeLabReportMutationError = ProblemDetails
+    export type CreateMutationResult = NonNullable<Awaited<ReturnType<typeof create>>>
+    export type CreateMutationBody = InitializeLabReportCommand
+    export type CreateMutationError = ProblemDetails
 
-    export const useInitializeLabReport = <TError = ProblemDetails,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof initializeLabReport>>, TError,{data: InitializeLabReportCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+    export const useCreate = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof create>>, TError,{data: InitializeLabReportCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof initializeLabReport>>,
+        Awaited<ReturnType<typeof create>>,
         TError,
         {data: InitializeLabReportCommand},
         TContext
       > => {
-      return useMutation(getInitializeLabReportMutationOptions(options), queryClient);
+      return useMutation(getCreateMutationOptions(options), queryClient);
     }
-    export type updateBySlugResponse400 = {
+    export type updateBySlugResponse204 = {
+  data: void
+  status: 204
+}
+
+export type updateBySlugResponse400 = {
   data: ProblemDetails
   status: 400
 }
@@ -168,12 +173,14 @@ export type updateBySlugResponse422 = {
   status: 422
 }
 
-;
+export type updateBySlugResponseSuccess = (updateBySlugResponse204) & {
+  headers: Headers;
+};
 export type updateBySlugResponseError = (updateBySlugResponse400 | updateBySlugResponse401 | updateBySlugResponse403 | updateBySlugResponse409 | updateBySlugResponse422) & {
   headers: Headers;
 };
 
-export type updateBySlugResponse = (updateBySlugResponseError)
+export type updateBySlugResponse = (updateBySlugResponseSuccess | updateBySlugResponseError)
 
 export const getUpdateBySlugUrl = (slug: string,) => {
 
