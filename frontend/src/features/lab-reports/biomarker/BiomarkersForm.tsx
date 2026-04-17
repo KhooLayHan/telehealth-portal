@@ -1,5 +1,3 @@
-// src/features/lab-reports/components/biomarker/BiomarkersForm.tsx
-
 import { useForm } from "@tanstack/react-form";
 import { ChevronLeft, Plus, Send, Trash2 } from "lucide-react";
 import { z } from "zod";
@@ -35,7 +33,7 @@ type BiomarkersFormProps = {
   onSuccess: () => void;
 };
 
-export const defaultValues: BiomarkersFormValues = {};
+export const defaultValues: BiomarkersFormValues = { biomarkers: [] };
 
 const EMPTY_ROW = (): BiomarkerRow => ({
   _id: crypto.randomUUID(),

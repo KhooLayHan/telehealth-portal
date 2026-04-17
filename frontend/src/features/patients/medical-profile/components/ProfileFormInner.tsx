@@ -47,7 +47,11 @@ export function ProfileFormInner({ profile }: { profile: PatientProfileDto }) {
           >
             {(field) => (
               <div className="md:w-1/3">
-                <FormField label="Blood Group" error={field.state.meta.errors[0]?.message}>
+                <FormField
+                  label="Blood Group"
+                  htmlFor={bloodGroupId}
+                  error={field.state.meta.errors[0]?.message}
+                >
                   <Select
                     value={field.state.value}
                     onValueChange={(value) => field.handleChange(value ?? "")}

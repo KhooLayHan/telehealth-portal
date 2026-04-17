@@ -1,5 +1,3 @@
-// src/features/lab-reports/components/LabReportUploadWizard.tsx
-
 import { CheckCircle2 } from "lucide-react";
 import { useState } from "react";
 
@@ -9,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { BiomarkersForm } from "./biomarker/BiomarkersForm";
 import { S3PdfDropzone } from "./dropzone/S3PdfDropzone";
 
-// Supported report types — extend as needed
 const REPORT_TYPES = [
   "Full Blood Count",
   "Liver Function Test",
@@ -24,11 +21,14 @@ const REPORT_TYPES = [
 type Step = 1 | 2 | 3;
 
 type LabReportUploadWizardProps = {
-  // FIX #11: renamed to patientId (numeric) to match S3PdfDropzone's interface
-  patientId: number;
+  patientPublicId: string;
+  consultationPublicId?: string | null;
 };
 
-export function LabReportUploadWizard({ patientId }: LabReportUploadWizardProps) {
+export function LabReportUploadWizard({
+  patientPublicId,
+  consultationPublicId,
+}: LabReportUploadWizardProps) {
   const [step, setStep] = useState<Step>(1);
 
   // FIX #13: null initial state instead of empty string — clearly "not yet set"
@@ -74,7 +74,7 @@ export function LabReportUploadWizard({ patientId }: LabReportUploadWizardProps)
   return (
     <div className="max-w-3xl mx-auto py-4">
       {/* Progress bar */}
-      <div className="mb-8 flex items-center justify-between" aria-label={`Step ${step} of 2`}>
+      <progress className="mb-8 flex items-center justify-between" aria-label={`Step ${step} of 2`}>
         <div
           className={`flex-1 h-2 rounded-full transition-colors ${step >= 1 ? "bg-primary" : "bg-muted"}`}
         />
@@ -84,7 +84,7 @@ export function LabReportUploadWizard({ patientId }: LabReportUploadWizardProps)
         <div
           className={`flex-1 h-2 rounded-full transition-colors ${step >= 2 ? "bg-primary" : "bg-muted"}`}
         />
-      </div>
+      </progress>
 
       <Card className="shadow-lg">
         <CardHeader>
@@ -121,7 +121,8 @@ export function LabReportUploadWizard({ patientId }: LabReportUploadWizardProps)
 
               {/* FIX #11: correct prop names matching S3PdfDropzone's interface */}
               <S3PdfDropzone
-                patientId={patientId}
+                patientPublicId={patientPublicId}
+                consultationPublicId={consultationPublicId}
                 reportType={reportType}
                 onUploadComplete={handlePdfUploaded}
               />

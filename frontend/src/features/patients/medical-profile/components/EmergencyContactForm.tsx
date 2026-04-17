@@ -42,6 +42,7 @@ export function EmergencyContactForm({ form }: EmergencyContactFormProps) {
                 {(subField) => (
                   <FormField
                     label={<span className="text-xs">Full Name</span>}
+                    htmlFor={`${subField.name}-input`}
                     error={subField.state.meta.errors[0]?.message}
                   >
                     <Input
@@ -58,6 +59,7 @@ export function EmergencyContactForm({ form }: EmergencyContactFormProps) {
                 {(subField) => (
                   <FormField
                     label={<span className="text-xs">Relationship</span>}
+                    htmlFor={`${subField.name}-input`}
                     error={subField.state.meta.errors[0]?.message}
                   >
                     <Input
@@ -74,6 +76,7 @@ export function EmergencyContactForm({ form }: EmergencyContactFormProps) {
                 {(subField) => (
                   <FormField
                     label={<span className="text-xs">Phone Number</span>}
+                    htmlFor={`${subField.name}-input`}
                     error={subField.state.meta.errors[0]?.message}
                   >
                     <Input
