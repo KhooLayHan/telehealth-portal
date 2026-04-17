@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { useCreate } from "@/api/generated/lab-reports/lab-reports";
+import { useInitializeLabReport } from "@/api/generated/lab-reports/lab-reports";
 import { ACCEPTED_MIME, MAX_FILE_SIZE_BYTES } from "../constants";
 import type { S3PdfDropzoneProps, UploadState, UseS3FileUploadResult } from "../types";
 
@@ -13,7 +13,7 @@ export function useS3FileUpload({
   const [uploadState, setUploadState] = useState<UploadState>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const createReportMutation = useCreate();
+  const createReportMutation = useInitializeLabReport();
 
   const validateAndSetFile = useCallback((candidate: File | null | undefined) => {
     if (!candidate) return;
