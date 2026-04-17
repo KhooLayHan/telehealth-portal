@@ -7,4 +7,6 @@ public interface IS3Service
         string contentType,
         int expiresMinutes = 15
     );
+
+    string GeneratePreSignedDownloadUrl(string objectKey, int expireMinutes = 15);
 }
