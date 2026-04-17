@@ -1,5 +1,7 @@
 using System.Security.Claims;
+
 using Microsoft.EntityFrameworkCore;
+
 using TeleHealth.Api.Infrastructure.Persistence;
 
 namespace TeleHealth.Api.Features.Users.GetMe;

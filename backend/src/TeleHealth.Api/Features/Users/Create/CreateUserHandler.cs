@@ -1,9 +1,14 @@
 using MassTransit;
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+
 using NodaTime;
+
 using Serilog;
+
 using Slugify;
+
 using TeleHealth.Api.Common.Exceptions.Users;
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Infrastructure.Persistence;

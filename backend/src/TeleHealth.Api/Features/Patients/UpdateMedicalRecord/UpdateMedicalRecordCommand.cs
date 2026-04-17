@@ -6,4 +6,5 @@ public sealed record UpdateMedicalRecordCommand(
     string BloodGroup,
     EmergencyContact? EmergencyContact,
     List<Allergy> Allergies
-) { }
+)
+{ }

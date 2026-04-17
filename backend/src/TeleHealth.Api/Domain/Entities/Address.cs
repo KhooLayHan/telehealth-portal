@@ -9,4 +9,5 @@ public sealed record class Address(
     string State,
     string PostalCode,
     string Country
-) { }
+)
+{ }

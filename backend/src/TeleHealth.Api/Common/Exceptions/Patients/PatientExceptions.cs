@@ -1,4 +1,5 @@
 using Serilog;
+
 using TeleHealth.Api.Common.Exceptions.Base;
 using TeleHealth.Api.Common.Exceptions.ErrorCodes;
 
@@ -11,7 +12,8 @@ public sealed class PatientNotFoundException : NotFoundException
             PatientErrorCodes.NotFound,
             "Patient Not Found",
             "The requested patient could not be found."
-        ) { }
+        )
+    { }
 }
 
 public sealed class MedicalRecordNotFoundException : NotFoundException
@@ -47,7 +49,8 @@ public sealed class InvalidMedicalDataException : ValidationException
             PatientErrorCodes.InvalidMedicalData,
             "Invalid Medical Data",
             "Invalid medical data was provided."
-        ) { }
+        )
+    { }
 }
 
 public sealed class EmergencyContactRequiredException : ValidationException
@@ -57,5 +60,6 @@ public sealed class EmergencyContactRequiredException : ValidationException
             PatientErrorCodes.EmergencyContactRequired,
             "Emergency Contact Required",
             "At least one emergency contact is required."
-        ) { }
+        )
+    { }
 }

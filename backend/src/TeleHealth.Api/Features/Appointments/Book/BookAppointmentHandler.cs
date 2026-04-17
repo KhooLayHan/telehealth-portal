@@ -1,9 +1,15 @@
 using MassTransit;
+
 using Microsoft.EntityFrameworkCore;
+
 using NodaTime;
+
 using Npgsql;
+
 using Serilog;
+
 using Slugify;
+
 using TeleHealth.Api.Common.Exceptions.Appointments;
 using TeleHealth.Api.Common.Exceptions.Patients;
 using TeleHealth.Api.Domain.Entities;

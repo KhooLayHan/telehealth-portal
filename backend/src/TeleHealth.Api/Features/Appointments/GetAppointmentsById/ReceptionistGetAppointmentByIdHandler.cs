@@ -1,5 +1,7 @@
 using System.Text.Json;
+
 using Microsoft.EntityFrameworkCore;
+
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Infrastructure.Persistence;
 

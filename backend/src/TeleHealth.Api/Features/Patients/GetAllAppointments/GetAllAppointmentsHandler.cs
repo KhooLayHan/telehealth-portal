@@ -1,8 +1,12 @@
 using Facet.Extensions;
+
 using Microsoft.EntityFrameworkCore;
+
 using NodaTime;
 using NodaTime.Text;
+
 using Serilog;
+
 using TeleHealth.Api.Common.Models;
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Infrastructure.Persistence;

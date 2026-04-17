@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+
 using Serilog;
+
 using TeleHealth.Api.Common.Constants;
 using TeleHealth.Api.Common.Exceptions.Appointments;
 using TeleHealth.Api.Domain.Entities;

@@ -7,7 +7,7 @@ namespace TeleHealth.Api.Migrations
     /// <inheritdoc />
     public partial class FixedAuditLogsPublicIdIssue : Migration
     {
-        private readonly string[] _auditTables = ["users", "appointments", 
+        private readonly string[] _auditTables = ["users", "appointments",
         "consultations", "prescriptions", "lab_reports"];
 
         /// <inheritdoc />

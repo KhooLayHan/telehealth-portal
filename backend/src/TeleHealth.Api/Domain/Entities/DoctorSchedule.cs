@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+
 using Microsoft.EntityFrameworkCore;
+
 using NodaTime;
 
 namespace TeleHealth.Api.Domain.Entities;

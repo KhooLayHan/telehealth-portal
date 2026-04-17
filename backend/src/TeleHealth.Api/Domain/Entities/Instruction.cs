@@ -5,4 +5,5 @@ public sealed record Instruction(
     List<string> Warnings,
     string Storage,
     string MissedDose
-) { }
+)
+{ }

@@ -39,6 +39,9 @@ public static class ApiEndpoints
 
         public const string GetById = $"{Base}/{{id:guid}}";
 
+        public const string GetPatientAppointmentsForReceptionist =
+            $"{Base}/{{id:guid}}/appointments";
+
         public const string GetAllPatientsForReceptionist = Base;
     }
 
@@ -90,6 +93,8 @@ public static class ApiEndpoints
         public const string GetAll = Base;
 
         public const string GetAllAvailable = $"{Base}/available";
+
+        public const string GetDailyForReceptionist = $"{Base}/daily";
 
         public const string UpdateById = $"{Base}/{{id:guid}}";
 

@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+
 using NodaTime;
+
 using TeleHealth.Api.Common.Constants;
 using TeleHealth.Api.Common.Exceptions.Doctors;
 using TeleHealth.Api.Infrastructure.Persistence;

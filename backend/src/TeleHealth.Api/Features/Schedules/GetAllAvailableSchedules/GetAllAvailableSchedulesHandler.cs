@@ -1,7 +1,11 @@
 using Facet.Extensions;
+
 using Microsoft.EntityFrameworkCore;
+
 using NodaTime.Text;
+
 using Serilog;
+
 using TeleHealth.Api.Common.Constants;
 using TeleHealth.Api.Common.Exceptions.Schedules;
 using TeleHealth.Api.Domain.Entities;

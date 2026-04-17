@@ -1,4 +1,4 @@
-import { Link, useParams } from "@tanstack/react-router";
+import { Link, Outlet, useChildMatches, useParams } from "@tanstack/react-router";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -14,6 +14,12 @@ import { ReceptionistPatientDetailsPage } from "./roles/ReceptionistPatientDetai
 export function PatientDetailsPage() {
   const { id } = useParams({ from: "/_protected/patients/$id" });
   const { user } = useAuthStore();
+  const childMatches = useChildMatches();
+
+  // When a child route (e.g. /patients/$id/history) is active, render it directly
+  if (childMatches.length > 0) {
+    return <Outlet />;
+  }
 
   const renderPatientDetails = () => {
     switch (user?.role?.toLowerCase()) {

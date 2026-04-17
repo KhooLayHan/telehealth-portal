@@ -6,4 +6,5 @@ public sealed record CreateLabReportCommand(
     string ReportType,
     string FileName,
     string ContentType
-) { }
+)
+{ }

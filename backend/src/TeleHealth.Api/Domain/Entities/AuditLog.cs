@@ -1,4 +1,5 @@
 using System.Text.Json;
+
 using NodaTime;
 
 namespace TeleHealth.Api.Domain.Entities;

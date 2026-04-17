@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+
 using Serilog;
+
 using TeleHealth.Api.Common.Exceptions.Auth;
 using TeleHealth.Api.Common.Security;
 using TeleHealth.Api.Domain.Entities;
