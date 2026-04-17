@@ -42,3 +42,6 @@ test-results/
 # Claude Code (personal local config — not for shared repo)
 .claude/
 
+# Github Copilot
+.github/copilot-instructions.md
+.github/instructions/
