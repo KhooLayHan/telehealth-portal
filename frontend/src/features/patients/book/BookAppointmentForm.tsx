@@ -1,7 +1,7 @@
 import { useForm } from "@tanstack/react-form";
 import { useState } from "react";
 
-import { useCreateAppointment } from "@/api/generated/appointments/appointments";
+import { useBookAppointment } from "@/api/generated/appointments/appointments";
 import type { BookAppointmentCommand } from "@/api/model/BookAppointmentCommand";
 import { Card } from "@/components/ui/card";
 
@@ -16,7 +16,7 @@ export function BookAppointmentForm() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [bookingError, setBookingError] = useState<string | null>(null);
 
-  const bookMutation = useCreateAppointment();
+  const bookMutation = useBookAppointment();
 
   const form = useForm({
     defaultValues: defaultValues,

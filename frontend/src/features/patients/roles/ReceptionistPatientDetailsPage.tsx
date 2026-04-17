@@ -122,10 +122,13 @@ export function ReceptionistPatientDetailsPage() {
             </div>
 
             {/* View Appointments button */}
-            <Link to="/appointments" search={{ today: undefined }}>
-              <Button variant="outline" size="sm" className="shrink-0 gap-2">
+            <Link to="/patients/$id/history" params={{ id }}>
+              <Button
+                size="sm"
+                className="shrink-0 gap-2 cursor-pointer bg-[#0d9488] text-white hover:bg-[#0f766e] border-0"
+              >
                 <CalendarDays className="size-3.5" />
-                View Appointments
+                View Appointment History
               </Button>
             </Link>
 

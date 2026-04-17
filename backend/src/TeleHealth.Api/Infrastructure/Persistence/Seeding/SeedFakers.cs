@@ -277,7 +277,8 @@ internal static class SeedFakers
             long createdById,
             string visitReason,
             NodaTime.Instant? checkIn = null,
-            string? cancellationReason = null
+            string? cancellationReason = null,
+            List<Symptom>? symptoms = null
         ) =>
             new()
             {
@@ -291,14 +292,82 @@ internal static class SeedFakers
                 VisitReason = visitReason,
                 CheckInDateTime = checkIn,
                 CancellationReason = cancellationReason,
+                Symptoms = symptoms,
             };
+
+        List<Symptom>[] symptomSets =
+        [
+            [
+                new Symptom
+                {
+                    Name = "Fever",
+                    Severity = "Moderate",
+                    Duration = "3 days",
+                },
+                new Symptom
+                {
+                    Name = "Cough",
+                    Severity = "Mild",
+                    Duration = "5 days",
+                },
+            ],
+            [
+                new Symptom
+                {
+                    Name = "Chest pain",
+                    Severity = "Severe",
+                    Duration = "1 day",
+                },
+            ],
+            [
+                new Symptom
+                {
+                    Name = "Fatigue",
+                    Severity = "Mild",
+                    Duration = "1 week",
+                },
+                new Symptom
+                {
+                    Name = "Headache",
+                    Severity = "Moderate",
+                    Duration = "2 days",
+                },
+            ],
+            [
+                new Symptom
+                {
+                    Name = "Skin rash",
+                    Severity = "Moderate",
+                    Duration = "4 days",
+                },
+            ],
+            [
+                new Symptom
+                {
+                    Name = "Nausea",
+                    Severity = "Mild",
+                    Duration = "2 days",
+                },
+                new Symptom
+                {
+                    Name = "Dizziness",
+                    Severity = "Mild",
+                    Duration = "1 day",
+                },
+            ],
+            [],
+        ];
 
         // Completed (past)
         var pastSchedules = schedules.Where(s => s.Date < today).Take(6).ToList();
+        var symptomIndex = 0;
 
         foreach (var schedule in pastSchedules)
         {
             var publicId = Guid.NewGuid();
+            var symptoms = symptomSets[symptomIndex % symptomSets.Length];
+            symptomIndex++;
+
             appointments.Add(
                 MakeAppointment(
                     publicId,
@@ -314,7 +383,8 @@ internal static class SeedFakers
                         "Fever and cough",
                         "Skin rash"
                     ),
-                    checkIn: now.Minus(NodaTime.Duration.FromDays(faker.Random.Int(1, 3)))
+                    checkIn: now.Minus(NodaTime.Duration.FromDays(faker.Random.Int(1, 3))),
+                    symptoms: symptoms.Count > 0 ? symptoms : null
                 )
             );
 

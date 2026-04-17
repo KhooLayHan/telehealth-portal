@@ -1,4 +1,4 @@
-import { Link, Outlet, useChildMatches, useParams } from "@tanstack/react-router";
+import { Link, useParams } from "@tanstack/react-router";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -8,27 +8,20 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { useAuthStore } from "@/store/useAuthStore";
-import { DoctorPatientHistoryPage } from "../doctor-patients/DoctorPatientHistoryPage";
-import { ReceptionistPatientDetailsPage } from "./roles/ReceptionistPatientDetailsPage";
+import { ReceptionistCheckPatientHistory } from "./roles/ReceptionistCheckPatientHistory";
 
-export function PatientDetailsPage() {
-  const { id } = useParams({ from: "/_protected/patients/$id" });
+export function PatientHistoryPage() {
+  const { id } = useParams({ from: "/_protected/patients/$id/history" });
   const { user } = useAuthStore();
-  const childMatches = useChildMatches();
 
-  // When a child route (e.g. /patients/$id/history) is active, render it directly
-  if (childMatches.length > 0) {
-    return <Outlet />;
-  }
-
-  const renderPatientDetails = () => {
+  const renderPatientHistory = () => {
     switch (user?.role?.toLowerCase()) {
       case "patient":
         return "Do something";
       case "receptionist":
-        return <ReceptionistPatientDetailsPage />;
+        return <ReceptionistCheckPatientHistory />;
       case "doctor":
-        return <DoctorPatientHistoryPage />;
+        return "";
       case "admin":
         return "Do something";
       case "lab-tech":
@@ -52,14 +45,20 @@ export function PatientDetailsPage() {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>Patient Details</BreadcrumbPage>
+              <BreadcrumbLink render={<Link to={`/patients/$id`} params={{ id }} />}>
+                Patient Details
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Patient Visit Record</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <p className="mt-2 text-muted-foreground text-sm">Patient ID: {id}</p>
+        {/* <p className="mt-2 text-muted-foreground text-sm">View Patient Visit History</p> */}
       </div>
 
-      {renderPatientDetails()}
+      {renderPatientHistory()}
     </>
   );
 }

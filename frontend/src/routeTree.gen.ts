@@ -13,6 +13,7 @@ import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProtectedSettingsRouteImport } from './routes/_protected/settings'
+import { Route as ProtectedSchedulesRouteImport } from './routes/_protected/schedules'
 import { Route as ProtectedPatientsRouteImport } from './routes/_protected/patients_'
 import { Route as ProtectedDashboardRouteImport } from './routes/_protected/dashboard'
 import { Route as ProtectedAppointmentsRouteImport } from './routes/_protected/appointments_'
@@ -20,6 +21,7 @@ import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as ProtectedPatientsIdRouteImport } from './routes/_protected/patients.$id'
 import { Route as ProtectedAppointmentsIdRouteImport } from './routes/_protected/appointments.$id'
+import { Route as ProtectedPatientsIdHistoryRouteImport } from './routes/_protected/patients.$id.history'
 import { Route as ProtectedAppointmentsEditIdRouteImport } from './routes/_protected/appointments.edit.$id'
 
 const ProtectedRoute = ProtectedRouteImport.update({
@@ -38,6 +40,11 @@ const IndexRoute = IndexRouteImport.update({
 const ProtectedSettingsRoute = ProtectedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedSchedulesRoute = ProtectedSchedulesRouteImport.update({
+  id: '/schedules',
+  path: '/schedules',
   getParentRoute: () => ProtectedRoute,
 } as any)
 const ProtectedPatientsRoute = ProtectedPatientsRouteImport.update({
@@ -75,6 +82,12 @@ const ProtectedAppointmentsIdRoute = ProtectedAppointmentsIdRouteImport.update({
   path: '/appointments/$id',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ProtectedPatientsIdHistoryRoute =
+  ProtectedPatientsIdHistoryRouteImport.update({
+    id: '/history',
+    path: '/history',
+    getParentRoute: () => ProtectedPatientsIdRoute,
+  } as any)
 const ProtectedAppointmentsEditIdRoute =
   ProtectedAppointmentsEditIdRouteImport.update({
     id: '/appointments/edit/$id',
@@ -89,10 +102,12 @@ export interface FileRoutesByFullPath {
   '/appointments': typeof ProtectedAppointmentsRoute
   '/dashboard': typeof ProtectedDashboardRoute
   '/patients': typeof ProtectedPatientsRoute
+  '/schedules': typeof ProtectedSchedulesRoute
   '/settings': typeof ProtectedSettingsRoute
   '/appointments/$id': typeof ProtectedAppointmentsIdRoute
-  '/patients/$id': typeof ProtectedPatientsIdRoute
+  '/patients/$id': typeof ProtectedPatientsIdRouteWithChildren
   '/appointments/edit/$id': typeof ProtectedAppointmentsEditIdRoute
+  '/patients/$id/history': typeof ProtectedPatientsIdHistoryRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -101,10 +116,12 @@ export interface FileRoutesByTo {
   '/appointments': typeof ProtectedAppointmentsRoute
   '/dashboard': typeof ProtectedDashboardRoute
   '/patients': typeof ProtectedPatientsRoute
+  '/schedules': typeof ProtectedSchedulesRoute
   '/settings': typeof ProtectedSettingsRoute
   '/appointments/$id': typeof ProtectedAppointmentsIdRoute
-  '/patients/$id': typeof ProtectedPatientsIdRoute
+  '/patients/$id': typeof ProtectedPatientsIdRouteWithChildren
   '/appointments/edit/$id': typeof ProtectedAppointmentsEditIdRoute
+  '/patients/$id/history': typeof ProtectedPatientsIdHistoryRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -116,10 +133,12 @@ export interface FileRoutesById {
   '/_protected/appointments_': typeof ProtectedAppointmentsRoute
   '/_protected/dashboard': typeof ProtectedDashboardRoute
   '/_protected/patients_': typeof ProtectedPatientsRoute
+  '/_protected/schedules': typeof ProtectedSchedulesRoute
   '/_protected/settings': typeof ProtectedSettingsRoute
   '/_protected/appointments/$id': typeof ProtectedAppointmentsIdRoute
-  '/_protected/patients/$id': typeof ProtectedPatientsIdRoute
+  '/_protected/patients/$id': typeof ProtectedPatientsIdRouteWithChildren
   '/_protected/appointments/edit/$id': typeof ProtectedAppointmentsEditIdRoute
+  '/_protected/patients/$id/history': typeof ProtectedPatientsIdHistoryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -130,10 +149,12 @@ export interface FileRouteTypes {
     | '/appointments'
     | '/dashboard'
     | '/patients'
+    | '/schedules'
     | '/settings'
     | '/appointments/$id'
     | '/patients/$id'
     | '/appointments/edit/$id'
+    | '/patients/$id/history'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -142,10 +163,12 @@ export interface FileRouteTypes {
     | '/appointments'
     | '/dashboard'
     | '/patients'
+    | '/schedules'
     | '/settings'
     | '/appointments/$id'
     | '/patients/$id'
     | '/appointments/edit/$id'
+    | '/patients/$id/history'
   id:
     | '__root__'
     | '/'
@@ -156,10 +179,12 @@ export interface FileRouteTypes {
     | '/_protected/appointments_'
     | '/_protected/dashboard'
     | '/_protected/patients_'
+    | '/_protected/schedules'
     | '/_protected/settings'
     | '/_protected/appointments/$id'
     | '/_protected/patients/$id'
     | '/_protected/appointments/edit/$id'
+    | '/_protected/patients/$id/history'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -196,6 +221,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof ProtectedSettingsRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/schedules': {
+      id: '/_protected/schedules'
+      path: '/schedules'
+      fullPath: '/schedules'
+      preLoaderRoute: typeof ProtectedSchedulesRouteImport
       parentRoute: typeof ProtectedRoute
     }
     '/_protected/patients_': {
@@ -247,6 +279,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedAppointmentsIdRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/patients/$id/history': {
+      id: '/_protected/patients/$id/history'
+      path: '/history'
+      fullPath: '/patients/$id/history'
+      preLoaderRoute: typeof ProtectedPatientsIdHistoryRouteImport
+      parentRoute: typeof ProtectedPatientsIdRoute
+    }
     '/_protected/appointments/edit/$id': {
       id: '/_protected/appointments/edit/$id'
       path: '/appointments/edit/$id'
@@ -269,13 +308,25 @@ const AuthRouteChildren: AuthRouteChildren = {
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
+interface ProtectedPatientsIdRouteChildren {
+  ProtectedPatientsIdHistoryRoute: typeof ProtectedPatientsIdHistoryRoute
+}
+
+const ProtectedPatientsIdRouteChildren: ProtectedPatientsIdRouteChildren = {
+  ProtectedPatientsIdHistoryRoute: ProtectedPatientsIdHistoryRoute,
+}
+
+const ProtectedPatientsIdRouteWithChildren =
+  ProtectedPatientsIdRoute._addFileChildren(ProtectedPatientsIdRouteChildren)
+
 interface ProtectedRouteChildren {
   ProtectedAppointmentsRoute: typeof ProtectedAppointmentsRoute
   ProtectedDashboardRoute: typeof ProtectedDashboardRoute
   ProtectedPatientsRoute: typeof ProtectedPatientsRoute
+  ProtectedSchedulesRoute: typeof ProtectedSchedulesRoute
   ProtectedSettingsRoute: typeof ProtectedSettingsRoute
   ProtectedAppointmentsIdRoute: typeof ProtectedAppointmentsIdRoute
-  ProtectedPatientsIdRoute: typeof ProtectedPatientsIdRoute
+  ProtectedPatientsIdRoute: typeof ProtectedPatientsIdRouteWithChildren
   ProtectedAppointmentsEditIdRoute: typeof ProtectedAppointmentsEditIdRoute
 }
 
@@ -283,9 +334,10 @@ const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedAppointmentsRoute: ProtectedAppointmentsRoute,
   ProtectedDashboardRoute: ProtectedDashboardRoute,
   ProtectedPatientsRoute: ProtectedPatientsRoute,
+  ProtectedSchedulesRoute: ProtectedSchedulesRoute,
   ProtectedSettingsRoute: ProtectedSettingsRoute,
   ProtectedAppointmentsIdRoute: ProtectedAppointmentsIdRoute,
-  ProtectedPatientsIdRoute: ProtectedPatientsIdRoute,
+  ProtectedPatientsIdRoute: ProtectedPatientsIdRouteWithChildren,
   ProtectedAppointmentsEditIdRoute: ProtectedAppointmentsEditIdRoute,
 }
 
