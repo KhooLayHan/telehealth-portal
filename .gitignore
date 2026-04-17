@@ -44,7 +44,5 @@ test-results/
 
 # Github Copilot
 .github/copilot-instructions.md
-
-# Copilot-specific ignore file
-.copilotignore
+.github/instructions/
 
