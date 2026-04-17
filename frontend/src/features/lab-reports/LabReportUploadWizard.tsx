@@ -1,26 +1,60 @@
+// src/features/lab-reports/components/LabReportUploadWizard.tsx
+
 import { CheckCircle2 } from "lucide-react";
 import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { BiomarkersForm } from "./biomarker/BiomarkersForm";
 import { S3PdfDropzone } from "./dropzone/S3PdfDropzone";
 
-export function LabReportUploadWizard({ patientPublicId }: { patientPublicId: string }) {
-  const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [labReportId, setLabReportId] = useState<string>("");
-  const [reportType, setReportType] = useState<string>("");
+// Supported report types — extend as needed
+const REPORT_TYPES = [
+  "Full Blood Count",
+  "Liver Function Test",
+  "Kidney Function Test",
+  "Lipid Panel",
+  "Thyroid Function Test",
+  "HbA1c",
+  "Urinalysis",
+  "Other",
+] as const;
 
-  const handlePdfUploaded = (id: string, type: string) => {
+type Step = 1 | 2 | 3;
+
+type LabReportUploadWizardProps = {
+  // FIX #11: renamed to patientId (numeric) to match S3PdfDropzone's interface
+  patientId: number;
+};
+
+export function LabReportUploadWizard({ patientId }: LabReportUploadWizardProps) {
+  const [step, setStep] = useState<Step>(1);
+
+  // FIX #13: null initial state instead of empty string — clearly "not yet set"
+  const [labReportId, setLabReportId] = useState<string | null>(null);
+
+  // reportType is captured in step 1 via a select, before the upload begins
+  const [reportType, setReportType] = useState<string>(REPORT_TYPES[0]);
+
+  // FIX #12: callback only receives id — reportType is already in state
+  const handlePdfUploaded = (id: string) => {
     setLabReportId(id);
-    setReportType(type);
     setStep(2);
   };
 
+  const handleReset = () => {
+    setStep(1);
+    setLabReportId(null);
+    setReportType(REPORT_TYPES[0]);
+  };
+
+  // ─── Step 3: success screen ───────────────────────────────────────────────────
   if (step === 3) {
     return (
       <Card className="shadow-lg border-green-500/20">
         <CardContent className="py-12 flex flex-col items-center justify-center text-center space-y-4">
-          <div className="rounded-full bg-green-100 p-3 text-green-600">
+          <div className="rounded-full bg-green-100 p-3 text-green-600" aria-hidden="true">
             <CheckCircle2 className="size-12" />
           </div>
           <CardTitle className="text-2xl">Report Published!</CardTitle>
@@ -28,7 +62,7 @@ export function LabReportUploadWizard({ patientPublicId }: { patientPublicId: st
             The {reportType} report has been securely saved, and the patient has been notified via
             email.
           </CardDescription>
-          <Button className="mt-4" onClick={() => setStep(1)} variant="outline">
+          <Button className="mt-4" onClick={handleReset} variant="outline">
             Upload Another
           </Button>
         </CardContent>
@@ -36,13 +70,20 @@ export function LabReportUploadWizard({ patientPublicId }: { patientPublicId: st
     );
   }
 
+  // ─── Step 1 & 2 ──────────────────────────────────────────────────────────────
   return (
     <div className="max-w-3xl mx-auto py-4">
-      {/* Progress Bar */}
-      <div className="mb-8 flex items-center justify-between">
-        <div className={`flex-1 h-2 rounded-full ${step >= 1 ? "bg-primary" : "bg-muted"}`} />
-        <div className="mx-4 text-sm font-medium text-muted-foreground">Step {step} of 2</div>
-        <div className={`flex-1 h-2 rounded-full ${step >= 2 ? "bg-primary" : "bg-muted"}`} />
+      {/* Progress bar */}
+      <div className="mb-8 flex items-center justify-between" aria-label={`Step ${step} of 2`}>
+        <div
+          className={`flex-1 h-2 rounded-full transition-colors ${step >= 1 ? "bg-primary" : "bg-muted"}`}
+        />
+        <div className="mx-4 text-sm font-medium text-muted-foreground" aria-hidden="true">
+          Step {step} of 2
+        </div>
+        <div
+          className={`flex-1 h-2 rounded-full transition-colors ${step >= 2 ? "bg-primary" : "bg-muted"}`}
+        />
       </div>
 
       <Card className="shadow-lg">
@@ -56,11 +97,39 @@ export function LabReportUploadWizard({ patientPublicId }: { patientPublicId: st
               : "Input key metrics to make them searchable and trendable for the doctor."}
           </CardDescription>
         </CardHeader>
-        <CardContent>
+
+        <CardContent className="space-y-6">
           {step === 1 && (
-            <S3PdfDropzone patientPublicId={patientPublicId} onUploadSuccess={handlePdfUploaded} />
+            <>
+              {/* FIX #12: reportType is selected here, before upload, so it's
+                  already in state when handlePdfUploaded fires */}
+              <div className="space-y-2">
+                <Label htmlFor="report-type-select">Report Type</Label>
+                <select
+                  id="report-type-select"
+                  value={reportType}
+                  onChange={(e) => setReportType(e.target.value)}
+                  className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+                >
+                  {REPORT_TYPES.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* FIX #11: correct prop names matching S3PdfDropzone's interface */}
+              <S3PdfDropzone
+                patientId={patientId}
+                reportType={reportType}
+                onUploadComplete={handlePdfUploaded}
+              />
+            </>
           )}
-          {step === 2 && (
+
+          {/* FIX #13: guard render — labReportId is guaranteed non-null in step 2 */}
+          {step === 2 && labReportId !== null && (
             <BiomarkersForm
               labReportId={labReportId}
               onBack={() => setStep(1)}
