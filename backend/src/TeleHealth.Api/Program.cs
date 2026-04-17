@@ -30,6 +30,7 @@ using TeleHealth.Api.Features.Patients.CancelAppointment;
 using TeleHealth.Api.Features.Patients.GetAllAppointments;
 using TeleHealth.Api.Features.Patients.GetAllPatientsForReceptionist;
 using TeleHealth.Api.Features.Patients.GetAppointmentByIdOrSlug;
+using TeleHealth.Api.Features.Patients.GetPatientByIdForReceptionist;
 using TeleHealth.Api.Features.Patients.GetProfile;
 using TeleHealth.Api.Features.Patients.RescheduleAppointment;
 using TeleHealth.Api.Features.Patients.UpdateMedicalRecord;
@@ -164,6 +165,7 @@ builder.Services.AddScoped<InitializeLabReportHandler>();
 builder.Services.AddScoped<CompleteLabReportHandler>();
 builder.Services.AddScoped<DownloadLabReportHandler>();
 builder.Services.AddScoped<ReceptionistGetAllPatientsHandler>();
+builder.Services.AddScoped<ReceptionistGetPatientByIdHandler>();
 builder.Services.AddScoped<GetDoctorPatientsHandler>();
 builder.Services.AddScoped<GetDoctorPatientAppointmentsHandler>();
 
@@ -224,6 +226,7 @@ api.MapInitializeLabReportEndpoint();
 api.MapCompleteLabReportsEndpoint();
 api.MapDownloadLabReportEndpoint();
 api.MapReceptionistGetAllPatientsEndpoint();
+api.MapReceptionistGetPatientByIdEndpoint();
 api.MapGetDoctorPatientsEndpoint();
 api.MapGetDoctorPatientAppointmentsEndpoint();
 
