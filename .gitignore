@@ -42,3 +42,9 @@ test-results/
 # Claude Code (personal local config — not for shared repo)
 .claude/
 
+# Github Copilot
+.github/copilot-instructions.md
+
+# Copilot-specific ignore file
+.copilotignore
+
