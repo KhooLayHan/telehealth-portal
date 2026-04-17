@@ -5,7 +5,10 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type GetAllAvailableParams = {
-Date: string;
-DoctorPublicId?: string;
-};
+export interface Biomarker {
+  name: string;
+  value: string;
+  unit: string;
+  referenceRange: string;
+  flag: string;
+}

@@ -74,36 +74,36 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-export type createResponse201 = {
+export type createAppointmentResponse201 = {
   data: BookAppointmentResponse
   status: 201
 }
 
-export type createResponse404 = {
+export type createAppointmentResponse404 = {
   data: ProblemDetails
   status: 404
 }
 
-export type createResponse409 = {
+export type createAppointmentResponse409 = {
   data: ProblemDetails
   status: 409
 }
 
-export type createResponse422 = {
+export type createAppointmentResponse422 = {
   data: ProblemDetails
   status: 422
 }
 
-export type createResponseSuccess = (createResponse201) & {
+export type createAppointmentResponseSuccess = (createAppointmentResponse201) & {
   headers: Headers;
 };
-export type createResponseError = (createResponse404 | createResponse409 | createResponse422) & {
+export type createAppointmentResponseError = (createAppointmentResponse404 | createAppointmentResponse409 | createAppointmentResponse422) & {
   headers: Headers;
 };
 
-export type createResponse = (createResponseSuccess | createResponseError)
+export type createAppointmentResponse = (createAppointmentResponseSuccess | createAppointmentResponseError)
 
-export const getCreateUrl = () => {
+export const getCreateAppointmentUrl = () => {
 
 
 
@@ -111,9 +111,9 @@ export const getCreateUrl = () => {
   return `http://localhost:5144/api/v1/appointments`
 }
 
-export const create = async (bookAppointmentCommand: BookAppointmentCommand, options?: RequestInit): Promise<createResponse> => {
+export const createAppointment = async (bookAppointmentCommand: BookAppointmentCommand, options?: RequestInit): Promise<createAppointmentResponse> => {
 
-  return ofetchMutator<createResponse>(getCreateUrl(),
+  return ofetchMutator<createAppointmentResponse>(getCreateAppointmentUrl(),
   {
     ...options,
     method: 'POST',
@@ -126,11 +126,11 @@ export const create = async (bookAppointmentCommand: BookAppointmentCommand, opt
 
 
 
-export const getCreateMutationOptions = <TError = ProblemDetails,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof create>>, TError,{data: BookAppointmentCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof create>>, TError,{data: BookAppointmentCommand}, TContext> => {
+export const getCreateAppointmentMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAppointment>>, TError,{data: BookAppointmentCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof createAppointment>>, TError,{data: BookAppointmentCommand}, TContext> => {
 
-const mutationKey = ['create'];
+const mutationKey = ['createAppointment'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -140,10 +140,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof create>>, {data: BookAppointmentCommand}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createAppointment>>, {data: BookAppointmentCommand}> = (props) => {
           const {data} = props ?? {};
 
-          return  create(data,requestOptions)
+          return  createAppointment(data,requestOptions)
         }
 
 
@@ -153,19 +153,19 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type CreateMutationResult = NonNullable<Awaited<ReturnType<typeof create>>>
-    export type CreateMutationBody = BookAppointmentCommand
-    export type CreateMutationError = ProblemDetails
+    export type CreateAppointmentMutationResult = NonNullable<Awaited<ReturnType<typeof createAppointment>>>
+    export type CreateAppointmentMutationBody = BookAppointmentCommand
+    export type CreateAppointmentMutationError = ProblemDetails
 
-    export const useCreate = <TError = ProblemDetails,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof create>>, TError,{data: BookAppointmentCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+    export const useCreateAppointment = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAppointment>>, TError,{data: BookAppointmentCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof create>>,
+        Awaited<ReturnType<typeof createAppointment>>,
         TError,
         {data: BookAppointmentCommand},
         TContext
       > => {
-      return useMutation(getCreateMutationOptions(options), queryClient);
+      return useMutation(getCreateAppointmentMutationOptions(options), queryClient);
     }
     export type getAllAppointmentsForReceptionistResponse200 = {
   data: PagedResultOfReceptionistAppointmentDto

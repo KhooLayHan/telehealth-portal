@@ -5,7 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type GetAllAvailableParams = {
-Date: string;
-DoctorPublicId?: string;
-};
+export interface InitializeLabReportResponse {
+  publicId: string;
+  uploadUrl: string;
+}

@@ -4,8 +4,8 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
+import type { Biomarker } from './Biomarker';
 
-export type GetAllAvailableParams = {
-Date: string;
-DoctorPublicId?: string;
-};
+export interface CompleteLabReportCommand {
+  biomarkers: Biomarker[];
+}
