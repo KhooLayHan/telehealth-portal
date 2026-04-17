@@ -282,17 +282,6 @@ export function BiomarkersForm({ labReportId, onBack, onSuccess }: BiomarkersFor
         )}
       </form.Field>
 
-      {/* FIX #5: surface submit-level errors in the UI */}
-      <form.Subscribe selector={(s) => s.errorMap.onSubmit}>
-        {(submitError) =>
-          submitError ? (
-            <p role="alert" className="text-sm text-destructive">
-              {submitError}
-            </p>
-          ) : null
-        }
-      </form.Subscribe>
-
       <form.Subscribe selector={(s) => s.errorMap.onSubmit}>
         {submitError && (
           <p role="alert" className="text-sm text-destructive">
@@ -300,6 +289,7 @@ export function BiomarkersForm({ labReportId, onBack, onSuccess }: BiomarkersFor
           </p>
         )}
       </form.Subscribe>
+
       <div className="flex justify-between pt-6 border-t border-border">
         <Button type="button" variant="ghost" onClick={onBack}>
           <ChevronLeft className="mr-2 size-4" aria-hidden="true" /> Back
