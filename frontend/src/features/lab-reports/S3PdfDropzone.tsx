@@ -276,6 +276,7 @@ export function S3PdfDropzone({
             </>
           )}
           {uploadState === "idle" && "Upload to Patient Record"}
+          {uploadState === "error" && "Retry upload"}
         </Button>
       )}
     </div>
