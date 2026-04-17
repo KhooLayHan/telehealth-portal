@@ -1,7 +1,7 @@
 import { useForm } from "@tanstack/react-form";
 import { ChevronLeft, Plus, Send, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { z } from "zod";
-
 import { useUpdateBySlug } from "@/api/generated/lab-reports/lab-reports";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,25 +47,21 @@ const EMPTY_ROW = (): BiomarkerRow => ({
 export function BiomarkersForm({ labReportId, onBack, onSuccess }: BiomarkersFormProps) {
   const completeMutation = useUpdateBySlug();
 
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
   const form = useForm({
     defaultValues: defaultValues,
     onSubmit: async ({ value }) => {
-      // FIX #3: strip the internal _id before sending to the API
-      const payload = value.biomarkers.map(({ _id: _, ...rest }) => rest);
+      try {
+        await completeMutation.mutateAsync({
+          slug: labReportId,
+          data: { biomarkers: value.biomarkers },
+        });
 
-      const response = await completeMutation.mutateAsync({
-        slug: labReportId,
-        data: { biomarkers: payload },
-      });
-
-      // FIX #5: narrow by status instead of casting
-      if (response.status !== 200 && response.status !== 204) {
-        const detail =
-          "data" in response && response.data && "title" in response.data
-            ? String(response.data.title)
-            : "Failed to complete lab report.";
-        form.setErrorMap({ onSubmit: detail });
-        return;
+        onSuccess();
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Failed to complete lab report.";
+        setSubmitError(message);
       }
 
       onSuccess();
@@ -229,7 +225,7 @@ export function BiomarkersForm({ labReportId, onBack, onSuccess }: BiomarkersFor
                               value={sub.state.value}
                               onChange={(e) => sub.handleChange(e.target.value)}
                               onBlur={sub.handleBlur}
-                              placeholder="12.0–16.0"
+                              placeholder="12.0-16.0"
                               aria-invalid={sub.state.meta.errors.length > 0}
                               className={sub.state.meta.errors.length ? "border-destructive" : ""}
                             />
@@ -297,6 +293,13 @@ export function BiomarkersForm({ labReportId, onBack, onSuccess }: BiomarkersFor
         }
       </form.Subscribe>
 
+      <form.Subscribe selector={(s) => s.errorMap.onSubmit}>
+        {submitError && (
+          <p role="alert" className="text-sm text-destructive">
+            {submitError}
+          </p>
+        )}
+      </form.Subscribe>
       <div className="flex justify-between pt-6 border-t border-border">
         <Button type="button" variant="ghost" onClick={onBack}>
           <ChevronLeft className="mr-2 size-4" aria-hidden="true" /> Back
