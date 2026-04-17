@@ -38,7 +38,7 @@ public static class BookAppointmentEndpoint
                     );
                 }
             )
-            .WithName(nameof(ApiEndpoints.Appointments.Create))
+            .WithName("BookAppointment")
             .WithTags(nameof(ApiEndpoints.Appointments))
             .RequireAuthorization(AuthConstants.PatientPolicy)
             .ProducesProblem(StatusCodes.Status404NotFound)
