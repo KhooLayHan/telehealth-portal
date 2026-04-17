@@ -25,7 +25,7 @@ public static class InitializeLabReportEndpoint
                     );
                 }
             )
-            .WithName("InitializeLabReport")
+            .WithName(nameof(ApiEndpoints.LabReports.Create))
             .WithTags(nameof(ApiEndpoints.LabReports))
             .RequireAuthorization(AuthConstants.LabTechPolicy)
             .Produces<InitializeLabReportResponse>(StatusCodes.Status201Created)

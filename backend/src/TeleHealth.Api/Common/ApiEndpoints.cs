@@ -49,7 +49,7 @@ public static class ApiEndpoints
     {
         private const string Base = "appointments";
 
-        public const string Create = Base;
+        public const string CreateAppointment = Base;
 
         public const string GetById = $"{Base}/{{id:guid}}";
 
@@ -68,7 +68,7 @@ public static class ApiEndpoints
     {
         private const string Base = "doctors";
 
-        public const string Create = Base;
+        public const string CreateDoctor = Base;
 
         public const string GetSchedule = $"{Base}/me/schedule";
 
@@ -86,7 +86,7 @@ public static class ApiEndpoints
     {
         private const string Base = "schedules";
 
-        public const string Create = Base;
+        public const string CreateSchedule = Base;
 
         public const string GetByIdOrSlug = $"{Base}/{{idOrSlug}}";
 

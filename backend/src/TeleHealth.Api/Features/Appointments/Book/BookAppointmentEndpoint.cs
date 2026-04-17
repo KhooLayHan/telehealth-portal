@@ -15,7 +15,7 @@ public static class BookAppointmentEndpoint
     public static IEndpointRouteBuilder MapBookAppointmentEndpoint(this RouteGroupBuilder app)
     {
         app.MapPost(
-                ApiEndpoints.Appointments.Create,
+                ApiEndpoints.Appointments.CreateAppointment,
                 async Task<Created<BookAppointmentResponse>> (
                     BookAppointmentCommand command,
                     BookAppointmentHandler handler,
@@ -40,7 +40,7 @@ public static class BookAppointmentEndpoint
                     );
                 }
             )
-            .WithName("BookAppointment")
+            .WithName(nameof(ApiEndpoints.Appointments.CreateAppointment))
             .WithTags(nameof(ApiEndpoints.Appointments))
             .RequireAuthorization(AuthConstants.PatientPolicy)
             .ProducesProblem(StatusCodes.Status404NotFound)
