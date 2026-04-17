@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { DoctorPatientHistoryPage } from "@/features/doctor-patients/DoctorPatientHistoryPage";
+
+import { PatientDetailsPage } from "@/features/patients/PatientDetailsPage";
 
 export const Route = createFileRoute("/_protected/patients/$id")({
-  component: DoctorPatientHistoryPage,
+  component: PatientDetailsPage,
 });

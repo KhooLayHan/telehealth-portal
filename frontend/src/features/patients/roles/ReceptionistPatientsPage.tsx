@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Eye, Search } from "lucide-react";
@@ -80,16 +81,13 @@ const columns: ColumnDef<ReceptionistPatientsDto>[] = [
     id: "actions",
     header: "Actions",
     cell: ({ row }) => (
-      <button
-        type="button"
+      <Link
+        to="/patients/$id"
+        params={{ id: row.original.patientPublicId ?? "" }}
         className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-        onClick={() => {
-          // TODO: navigate to patient detail page
-          console.log("View patient", row.original.patientPublicId);
-        }}
       >
         <Eye className="size-3.5" />
-      </button>
+      </Link>
     ),
   },
 ];
