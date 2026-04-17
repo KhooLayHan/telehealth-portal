@@ -4,7 +4,7 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { PrescriptionInstructionsRequest } from './PrescriptionInstructionsRequest';
+import type { PrescriptionInstructionsRequest } from "./PrescriptionInstructionsRequest";
 
 export interface PrescriptionRequest {
   medicationName: string;

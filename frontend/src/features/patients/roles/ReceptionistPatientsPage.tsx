@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Eye, Search } from "lucide-react";
@@ -15,7 +16,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Link } from "@tanstack/react-router";
 
 const ACCENT = "#0d9488";
 const PAGE_SIZE = 10;
@@ -81,13 +81,13 @@ const columns: ColumnDef<ReceptionistPatientsDto>[] = [
     id: "actions",
     header: "Actions",
     cell: ({ row }) => (
-        <Link
-          to="/patients/$id"
-          params={{ id: row.original.patientPublicId ?? "" }}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-        >
-          <Eye className="size-3.5" />
-        </Link>
+      <Link
+        to="/patients/$id"
+        params={{ id: row.original.patientPublicId ?? "" }}
+        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+      >
+        <Eye className="size-3.5" />
+      </Link>
     ),
   },
 ];
