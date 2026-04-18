@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using TeleHealth.Api.Common.Exceptions.Doctors;
 using TeleHealth.Api.Infrastructure.Persistence;
 
 namespace TeleHealth.Api.Features.Doctors.GetDoctorPatientAppointments;
@@ -19,7 +18,7 @@ public sealed class GetDoctorPatientAppointmentsHandler(ApplicationDbContext db)
             .FirstOrDefaultAsync(ct);
 
         if (doctor is null)
-            throw new DoctorNotFoundException(userPublicId.ToString());
+            return null;
 
         var doctorId = doctor.Id;
 

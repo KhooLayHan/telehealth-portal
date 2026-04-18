@@ -94,7 +94,7 @@ function PatientCard({ patient }: { patient: DoctorPatientDto }) {
           {/* Allergies */}
           {(patient.allergies?.length ?? 0) > 0 && (
             <div className="flex flex-wrap gap-1">
-              {patient.allergies!.slice(0, 3).map((a) => (
+              {patient.allergies?.slice(0, 3).map((a) => (
                 <span
                   key={a.allergen}
                   className="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200 px-2 py-0.5 text-[10px] font-medium text-amber-700"
@@ -247,7 +247,7 @@ export function DoctorPatientsPage() {
         <div className="flex flex-col items-center justify-center h-64 gap-2">
           <Users className="size-8 text-muted-foreground/30" />
           <p className="text-sm text-muted-foreground">
-            {search ? "No patients match your search." : "No patients found."}
+            {search ? "No patients match your search." : "No patients available for you."}
           </p>
         </div>
       ) : (
