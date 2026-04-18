@@ -306,6 +306,7 @@ export function DoctorAppointmentPage() {
                   variant="outline"
                   disabled={page <= 1}
                   onClick={() => setPage(page - 1)}
+                  className="border-border hover:bg-[#0d9488] hover:text-white hover:border-[#0d9488] disabled:hover:bg-transparent disabled:hover:text-muted-foreground disabled:hover:border-border transition-colors"
                 >
                   Previous
                 </Button>
@@ -314,6 +315,7 @@ export function DoctorAppointmentPage() {
                   variant="outline"
                   disabled={page >= totalPages}
                   onClick={() => setPage(page + 1)}
+                  className="border-border hover:bg-[#0d9488] hover:text-white hover:border-[#0d9488] disabled:hover:bg-transparent disabled:hover:text-muted-foreground disabled:hover:border-border transition-colors"
                 >
                   Next
                 </Button>
