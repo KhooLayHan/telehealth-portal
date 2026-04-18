@@ -21,6 +21,7 @@ import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as ProtectedPatientsIdRouteImport } from './routes/_protected/patients.$id'
 import { Route as ProtectedAppointmentsIdRouteImport } from './routes/_protected/appointments.$id'
+import { Route as ProtectedPatientsIdMedicalProfileRouteImport } from './routes/_protected/patients.$id.medical-profile'
 import { Route as ProtectedPatientsIdHistoryRouteImport } from './routes/_protected/patients.$id.history'
 import { Route as ProtectedAppointmentsEditIdRouteImport } from './routes/_protected/appointments.edit.$id'
 
@@ -82,6 +83,12 @@ const ProtectedAppointmentsIdRoute = ProtectedAppointmentsIdRouteImport.update({
   path: '/appointments/$id',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ProtectedPatientsIdMedicalProfileRoute =
+  ProtectedPatientsIdMedicalProfileRouteImport.update({
+    id: '/medical-profile',
+    path: '/medical-profile',
+    getParentRoute: () => ProtectedPatientsIdRoute,
+  } as any)
 const ProtectedPatientsIdHistoryRoute =
   ProtectedPatientsIdHistoryRouteImport.update({
     id: '/history',
@@ -108,6 +115,7 @@ export interface FileRoutesByFullPath {
   '/patients/$id': typeof ProtectedPatientsIdRouteWithChildren
   '/appointments/edit/$id': typeof ProtectedAppointmentsEditIdRoute
   '/patients/$id/history': typeof ProtectedPatientsIdHistoryRoute
+  '/patients/$id/medical-profile': typeof ProtectedPatientsIdMedicalProfileRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -122,6 +130,7 @@ export interface FileRoutesByTo {
   '/patients/$id': typeof ProtectedPatientsIdRouteWithChildren
   '/appointments/edit/$id': typeof ProtectedAppointmentsEditIdRoute
   '/patients/$id/history': typeof ProtectedPatientsIdHistoryRoute
+  '/patients/$id/medical-profile': typeof ProtectedPatientsIdMedicalProfileRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -139,6 +148,7 @@ export interface FileRoutesById {
   '/_protected/patients/$id': typeof ProtectedPatientsIdRouteWithChildren
   '/_protected/appointments/edit/$id': typeof ProtectedAppointmentsEditIdRoute
   '/_protected/patients/$id/history': typeof ProtectedPatientsIdHistoryRoute
+  '/_protected/patients/$id/medical-profile': typeof ProtectedPatientsIdMedicalProfileRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
     | '/patients/$id'
     | '/appointments/edit/$id'
     | '/patients/$id/history'
+    | '/patients/$id/medical-profile'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -169,6 +180,7 @@ export interface FileRouteTypes {
     | '/patients/$id'
     | '/appointments/edit/$id'
     | '/patients/$id/history'
+    | '/patients/$id/medical-profile'
   id:
     | '__root__'
     | '/'
@@ -185,6 +197,7 @@ export interface FileRouteTypes {
     | '/_protected/patients/$id'
     | '/_protected/appointments/edit/$id'
     | '/_protected/patients/$id/history'
+    | '/_protected/patients/$id/medical-profile'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -279,6 +292,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedAppointmentsIdRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/patients/$id/medical-profile': {
+      id: '/_protected/patients/$id/medical-profile'
+      path: '/medical-profile'
+      fullPath: '/patients/$id/medical-profile'
+      preLoaderRoute: typeof ProtectedPatientsIdMedicalProfileRouteImport
+      parentRoute: typeof ProtectedPatientsIdRoute
+    }
     '/_protected/patients/$id/history': {
       id: '/_protected/patients/$id/history'
       path: '/history'
@@ -310,10 +330,13 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 interface ProtectedPatientsIdRouteChildren {
   ProtectedPatientsIdHistoryRoute: typeof ProtectedPatientsIdHistoryRoute
+  ProtectedPatientsIdMedicalProfileRoute: typeof ProtectedPatientsIdMedicalProfileRoute
 }
 
 const ProtectedPatientsIdRouteChildren: ProtectedPatientsIdRouteChildren = {
   ProtectedPatientsIdHistoryRoute: ProtectedPatientsIdHistoryRoute,
+  ProtectedPatientsIdMedicalProfileRoute:
+    ProtectedPatientsIdMedicalProfileRoute,
 }
 
 const ProtectedPatientsIdRouteWithChildren =
