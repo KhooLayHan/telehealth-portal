@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿// TODO: WIP: Do not use yet
+
+using System.Collections.Generic;
 using Pulumi;
 using Aws = Pulumi.Aws;
 
@@ -101,6 +103,28 @@ return await Deployment.RunAsync(() =>
             Topic = medicalAlertsTopic.Arn,
             Protocol = "sqs",
             Endpoint = processingQueue.Arn,
+        }
+    );
+
+    var queuePolicy = new Aws.Sqs.QueuePolicy(
+        "queue-policy",
+        new Aws.Sqs.QueuePolicyArgs
+        {
+            QueueUrl = processingQueue.Id,
+            Policy = Output
+                .Tuple(processingQueue.Arn, medicalAlertsTopic.Arn)
+                .Apply(t =>
+                    @$"{{
+                    ""Version"": ""2012-10-17"",
+                    ""Statement"": [{{
+                        ""Effect"": ""Allow"",
+                        ""Principal"": {{ ""Service"": ""sns.amazonaws.com"" }},
+                        ""Action"": ""sqs:SendMessage"",
+                        ""Resource"": ""{t.Item1}"",
+                        ""Condition"": {{ ""ArnEquals"": {{ ""aws:SourceArn"": ""{t.Item2}"" }} }}
+                    }}]
+                }}"
+                ),
         }
     );
 

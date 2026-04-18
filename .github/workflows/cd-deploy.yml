@@ -1,72 +1,73 @@
-name: CD — Deploy to AWS
+# name: CD — Deploy to AWS
 
-on:
-  push:
-    branches: ["main"]
-    paths:
-      - "backend/**"
-      - "frontend/**"
-      - "infra/**"
-      - ".github/workflows/cd-deploy.yml"
+# on:
+#   push:
+#     branches: ["main"]
+#     paths:
+#       - "backend/**"
+#       - "frontend/**"
+#       - "infra/**"
+#       - ".github/workflows/cd-deploy.yml"
 
-jobs:
-  deploy:
-    name: Build & Deploy Full Stack
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write 
-      contents: read
+# jobs:
+#   deploy:
+#     name: Build & Deploy Full Stack
+#     runs-on: ubuntu-latest
+#     permissions:
+#       id-token: write 
+#       contents: read
     
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v6
+#     steps:
+#       - name: Checkout Code
+#         uses: actions/checkout@v6
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: '10.0.x'
+#       - name: Setup .NET
+#         uses: actions/setup-dotnet@v5
+#         with:
+#           dotnet-version: '10.0.x'
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+#       - name: Setup Bun
+#         uses: oven-sh/setup-bun@v2
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::123456789012:role/GitHubActions-PulumiRole # 🚨 CHANGE TO YOUR AWS ACCOUNT ID!
-          aws-region: us-east-1
+#       - name: Configure AWS Credentials
+#         uses: aws-actions/configure-aws-credentials@v4
+#         with:
+#           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+#           aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
 
-      - name: Pulumi Up
-        uses: pulumi/actions@v5
-        id: pulumi
-        with:
-          command: up
-          stack-name: dev
-          work-dir: infra
-        env:
-          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }} # Set this in GitHub Settings -> Secrets
+#       - name: Pulumi Up
+#         uses: pulumi/actions@v5
+#         id: pulumi
+#         with:
+#           command: up
+#           stack-name: dev
+#           work-dir: infra
+#         env:
+#           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }} 
 
-      - name: Build Frontend
-        working-directory: frontend
-        run: |
-          bun install
-          bun run build
+#       - name: Build Frontend
+#         working-directory: frontend
+#         run: |
+#           bun install
+#           bun run build
 
-      - name: Deploy Frontend to S3
-        run: aws s3 sync frontend/dist s3://${{ steps.pulumi.outputs.FrontendBucketName }} --delete
+#       - name: Deploy Frontend to S3
+#         run: aws s3 sync frontend/dist s3://${{ steps.pulumi.outputs.FrontendBucketName }} --delete
 
-      - name: Zip Backend for Elastic Beanstalk
-        working-directory: backend/src/TeleHealth.Api
-        # EB Docker platform just needs the source code and the Dockerfile!
-        run: zip -r deploy.zip . -x "bin/*" "obj/*"
+#       - name: Zip Backend for Elastic Beanstalk
+#         working-directory: backend/src/TeleHealth.Api
+#         # EB Docker platform just needs the source code and the Dockerfile!
+#         run: zip -r deploy.zip . \
+            #  -x "bin/*" "obj/*" "appsettings.Development.json" ".env*" ".vs/*" "*.user"
 
-      - name: Deploy to Elastic Beanstalk
-        uses: einaregilsson/beanstalk-deploy@v22
-        with:
-          aws_access_key: ${{ env.AWS_ACCESS_KEY_ID }}
-          aws_secret_key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          aws_session_token: ${{ env.AWS_SESSION_TOKEN }} # Required for OIDC
-          region: us-east-1
-          application_name: ${{ steps.pulumi.outputs.EbAppName }}
-          environment_name: ${{ steps.pulumi.outputs.EbEnvName }}
-          version_label: "telehealth-${{ github.sha }}"
-          deployment_package: backend/src/TeleHealth.Api/deploy.zip
+#       - name: Deploy to Elastic Beanstalk
+#         uses: aws-actions/aws-elasticbeanstalk-deploy@v22
+#         with:
+#           aws_access_key: ${{ env.AWS_ACCESS_KEY_ID }}
+#           aws_secret_key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+#           aws_session_token: ${{ env.AWS_SESSION_TOKEN }} # Required for OIDC
+#           region: us-east-1
+#           application_name: ${{ steps.pulumi.outputs.EbAppName }}
+#           environment_name: ${{ steps.pulumi.outputs.EbEnvName }}
+#           version_label: "telehealth-${{ github.sha }}"
+#           deployment_package: backend/src/TeleHealth.Api/deploy.zip
