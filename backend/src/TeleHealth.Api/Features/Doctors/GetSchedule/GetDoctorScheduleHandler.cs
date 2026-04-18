@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
 using TeleHealth.Api.Common.Constants;
-using TeleHealth.Api.Common.Exceptions.Doctors;
 using TeleHealth.Api.Infrastructure.Persistence;
 
 namespace TeleHealth.Api.Features.Doctors.GetSchedule;
@@ -33,7 +32,15 @@ public sealed class GetDoctorScheduleHandler(ApplicationDbContext db)
             .FirstOrDefaultAsync(ct);
 
         if (doctor is null)
-            throw new DoctorNotFoundException(userPublicId.ToString());
+            return new DoctorScheduleResponse
+            {
+                Items = [],
+                TotalCount = 0,
+                PendingCount = 0,
+                NextAppointmentTime = null,
+                Page = page,
+                PageSize = pageSize,
+            };
 
         var doctorId = doctor.Id;
 
