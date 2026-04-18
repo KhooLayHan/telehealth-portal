@@ -1,137 +1,50 @@
-import { CheckCircle2 } from "lucide-react";
-import { useState } from "react";
+import { Card } from "@/components/ui/card";
+import { BiomarkersStep } from "./components/BiomarkersStep";
+import { SuccessScreen } from "./components/SuccessScreen";
+import { UploadStep } from "./components/UploadStep";
+import { WizardProgress } from "./components/WizardProgress";
+import { useWizard } from "./hooks/useWizard";
+import type { LabReportUploadWizardProps } from "./schema";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { BiomarkersForm } from "./biomarker/BiomarkersForm";
-import { S3PdfDropzone } from "./dropzone/S3PdfDropzone";
-
-const REPORT_TYPES = [
-  "Full Blood Count",
-  "Liver Function Test",
-  "Kidney Function Test",
-  "Lipid Panel",
-  "Thyroid Function Test",
-  "HbA1c",
-  "Urinalysis",
-  "Other",
-] as const;
-
-type Step = 1 | 2 | 3;
-
-type LabReportUploadWizardProps = {
-  patientPublicId: string;
-  consultationPublicId?: string | null;
-};
+export type { LabReportUploadWizardProps } from "./schema";
 
 export function LabReportUploadWizard({
   patientPublicId,
   consultationPublicId,
 }: LabReportUploadWizardProps) {
-  const [step, setStep] = useState<Step>(1);
-  const [labReportId, setLabReportId] = useState<string | null>(null);
-  const [reportType, setReportType] = useState<string>(REPORT_TYPES[0]);
+  const {
+    step,
+    labReportId,
+    reportType,
+    setReportType,
+    handlePdfUploaded,
+    handleReset,
+    handleSuccess,
+    goBack,
+  } = useWizard();
 
-  const handlePdfUploaded = (id: string) => {
-    setLabReportId(id);
-    setStep(2);
-  };
-
-  const handleReset = () => {
-    setStep(1);
-    setLabReportId(null);
-    setReportType(REPORT_TYPES[0]);
-  };
-
-  // ─── Step 3: success screen ───────────────────────────────────────────────────
   if (step === 3) {
-    return (
-      <Card className="shadow-lg border-green-500/20">
-        <CardContent className="py-12 flex flex-col items-center justify-center text-center space-y-4">
-          <div className="rounded-full bg-green-100 p-3 text-green-600" aria-hidden="true">
-            <CheckCircle2 className="size-12" />
-          </div>
-          <CardTitle className="text-2xl">Report Published!</CardTitle>
-          <CardDescription className="max-w-sm mx-auto">
-            The {reportType} report has been securely saved, and the patient has been notified via
-            email.
-          </CardDescription>
-          <Button className="mt-4" onClick={handleReset} variant="outline">
-            Upload Another
-          </Button>
-        </CardContent>
-      </Card>
-    );
+    return <SuccessScreen reportType={reportType} onReset={handleReset} />;
   }
 
-  // ─── Step 1 & 2 ──────────────────────────────────────────────────────────────
   return (
     <div className="max-w-3xl mx-auto py-4">
-      {/* Progress bar */}
-      <progress className="mb-8 flex items-center justify-between" aria-label={`Step ${step} of 2`}>
-        <div
-          className={`flex-1 h-2 rounded-full transition-colors ${step >= 1 ? "bg-primary" : "bg-muted"}`}
-        />
-        <div className="mx-4 text-sm font-medium text-muted-foreground" aria-hidden="true">
-          Step {step} of 2
-        </div>
-        <div
-          className={`flex-1 h-2 rounded-full transition-colors ${step >= 2 ? "bg-primary" : "bg-muted"}`}
-        />
-      </progress>
+      <WizardProgress currentStep={step} totalSteps={2} />
 
       <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-2xl">
-            {step === 1 ? "Upload PDF Report" : "Extract Biomarkers"}
-          </CardTitle>
-          <CardDescription>
-            {step === 1
-              ? "Securely upload the raw lab results directly to Amazon S3."
-              : "Input key metrics to make them searchable and trendable for the doctor."}
-          </CardDescription>
-        </CardHeader>
+        {step === 1 && (
+          <UploadStep
+            patientPublicId={patientPublicId}
+            consultationPublicId={consultationPublicId}
+            reportType={reportType}
+            onReportTypeChange={setReportType}
+            onUploadComplete={handlePdfUploaded}
+          />
+        )}
 
-        <CardContent className="space-y-6">
-          {step === 1 && (
-            <BiomarkersForm labReportId="" onBack={() => setStep(1)} onSuccess={() => setStep(3)} />
-          )}
-          {step === 1 && (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="report-type-select">Report Type</Label>
-                <select
-                  id="report-type-select"
-                  value={reportType}
-                  onChange={(e) => setReportType(e.target.value)}
-                  className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
-                >
-                  {REPORT_TYPES.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <S3PdfDropzone
-                patientPublicId={patientPublicId}
-                consultationPublicId={consultationPublicId}
-                reportType={reportType}
-                onUploadComplete={handlePdfUploaded}
-              />
-            </>
-          )}
-
-          {step === 2 && labReportId !== null && (
-            <BiomarkersForm
-              labReportId={labReportId}
-              onBack={() => setStep(1)}
-              onSuccess={() => setStep(3)}
-            />
-          )}
-        </CardContent>
+        {step === 2 && labReportId !== null && (
+          <BiomarkersStep labReportId={labReportId} onBack={goBack} onSuccess={handleSuccess} />
+        )}
       </Card>
     </div>
   );
