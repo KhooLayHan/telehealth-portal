@@ -4,8 +4,8 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { LocalDate } from './LocalDate';
-import type { PrescriptionDetailDto } from './PrescriptionDetailDto';
+import type { LocalDate } from "./LocalDate";
+import type { PrescriptionDetailDto } from "./PrescriptionDetailDto";
 
 export interface ConsultationDetailDto {
   publicId?: string;

@@ -95,6 +95,9 @@ export function LabReportUploadWizard({
 
         <CardContent className="space-y-6">
           {step === 1 && (
+            <BiomarkersForm labReportId="" onBack={() => setStep(1)} onSuccess={() => setStep(3)} />
+          )}
+          {step === 1 && (
             <>
               <div className="space-y-2">
                 <Label htmlFor="report-type-select">Report Type</Label>
