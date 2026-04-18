@@ -35,7 +35,7 @@ type BiomarkersFormProps = {
 
 export const defaultValues: BiomarkersFormValues = { biomarkers: [] };
 
-const EMPTY_ROW = (): BiomarkerRow => ({
+const createEmptyBiomarkerRow = (): BiomarkerRow => ({
   _id: crypto.randomUUID(),
   name: "",
   value: "",
@@ -94,7 +94,7 @@ export function BiomarkersForm({ labReportId, onBack, onSuccess }: BiomarkersFor
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => field.pushValue(EMPTY_ROW())}
+                onClick={() => field.pushValue(createEmptyBiomarkerRow())}
               >
                 <Plus className="mr-1 size-3" aria-hidden="true" /> Add Metric
               </Button>
@@ -109,7 +109,7 @@ export function BiomarkersForm({ labReportId, onBack, onSuccess }: BiomarkersFor
               )}
 
               {/* FIX #1: key by stable _id, not array index */}
-              {field.state.value.map((row, i) => (
+              {(field.state.value as BiomarkerRow[]).map((row, i) => (
                 <div
                   key={row._id}
                   className="flex items-start gap-2 bg-muted/20 p-3 rounded-lg border border-border"
