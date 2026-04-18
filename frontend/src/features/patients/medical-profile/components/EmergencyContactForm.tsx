@@ -2,8 +2,8 @@ import { Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import type { EmergencyContactFormProps } from "../types";
+import { FormField } from "./FormField";
 
 export function EmergencyContactForm({ form }: EmergencyContactFormProps) {
   return (
@@ -26,7 +26,7 @@ export function EmergencyContactForm({ form }: EmergencyContactFormProps) {
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="text-destructive hover:bg-destructive/10"
+                className="text-destructive hover:bg-destructive/10 cursor-pointer"
                 onClick={() => field.handleChange(null)}
               >
                 <Trash2 className="mr-1 size-3" /> Remove
@@ -40,74 +40,53 @@ export function EmergencyContactForm({ form }: EmergencyContactFormProps) {
             <div className="grid gap-3 sm:grid-cols-3">
               <form.Field name="emergencyContact.name">
                 {(subField) => (
-                  <div className="space-y-1.5">
-                    <Label htmlFor={`${subField.name}-input`} className="text-xs">
-                      Full Name
-                    </Label>
+                  <FormField
+                    label={<span className="text-xs">Full Name</span>}
+                    htmlFor={`${subField.name}-input`}
+                    error={subField.state.meta.errors[0]?.message}
+                  >
                     <Input
                       id={`${subField.name}-input`}
-                      aria-describedby={
-                        subField.state.meta.errors.length > 0 ? `${subField.name}-error` : undefined
-                      }
                       value={subField.state.value ?? ""}
                       onBlur={subField.handleBlur}
                       onChange={(e) => subField.handleChange(e.target.value)}
                       placeholder="Jane Doe"
                     />
-                    {subField.state.meta.errors.length > 0 && (
-                      <p id={`${subField.name}-error`} className="text-xs text-destructive">
-                        {subField.state.meta.errors[0]?.message}
-                      </p>
-                    )}
-                  </div>
+                  </FormField>
                 )}
               </form.Field>
               <form.Field name="emergencyContact.relationship">
                 {(subField) => (
-                  <div className="space-y-1.5">
-                    <Label htmlFor={`${subField.name}-input`} className="text-xs">
-                      Relationship
-                    </Label>
+                  <FormField
+                    label={<span className="text-xs">Relationship</span>}
+                    htmlFor={`${subField.name}-input`}
+                    error={subField.state.meta.errors[0]?.message}
+                  >
                     <Input
                       id={`${subField.name}-input`}
-                      aria-describedby={
-                        subField.state.meta.errors.length > 0 ? `${subField.name}-error` : undefined
-                      }
                       value={subField.state.value ?? ""}
                       onBlur={subField.handleBlur}
                       onChange={(e) => subField.handleChange(e.target.value)}
                       placeholder="Spouse"
                     />
-                    {subField.state.meta.errors.length > 0 && (
-                      <p id={`${subField.name}-error`} className="text-xs text-destructive">
-                        {subField.state.meta.errors[0]?.message}
-                      </p>
-                    )}
-                  </div>
+                  </FormField>
                 )}
               </form.Field>
               <form.Field name="emergencyContact.phone">
                 {(subField) => (
-                  <div className="space-y-1.5">
-                    <Label htmlFor={`${subField.name}-input`} className="text-xs">
-                      Phone Number
-                    </Label>
+                  <FormField
+                    label={<span className="text-xs">Phone Number</span>}
+                    htmlFor={`${subField.name}-input`}
+                    error={subField.state.meta.errors[0]?.message}
+                  >
                     <Input
                       id={`${subField.name}-input`}
-                      aria-describedby={
-                        subField.state.meta.errors.length > 0 ? `${subField.name}-error` : undefined
-                      }
                       value={subField.state.value ?? ""}
                       onBlur={subField.handleBlur}
                       onChange={(e) => subField.handleChange(e.target.value)}
                       placeholder="+60123456789"
                     />
-                    {subField.state.meta.errors.length > 0 && (
-                      <p id={`${subField.name}-error`} className="text-xs text-destructive">
-                        {subField.state.meta.errors[0]?.message}
-                      </p>
-                    )}
-                  </div>
+                  </FormField>
                 )}
               </form.Field>
             </div>
