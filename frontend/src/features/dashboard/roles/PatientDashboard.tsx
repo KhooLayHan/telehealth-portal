@@ -156,9 +156,9 @@ export function PatientDashboard() {
           </table>
         </div>
       </div>
-      {/* <PatientAppointmentsList />
+      <PatientAppointmentsList />
       <PatientMedicalProfileForm />
-      <BookAppointmentForm /> */}
+      <BookAppointmentForm />
       <LabReportUploadWizard patientPublicId="" consultationPublicId="" />
     </div>
   );
