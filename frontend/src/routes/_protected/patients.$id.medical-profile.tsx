@@ -18,8 +18,14 @@ export const Route = createFileRoute("/_protected/patients/$id/medical-profile")
     const role = user?.role?.toLowerCase();
     const userPublicId = user?.publicId;
 
-    if (role === "patient" && userPublicId && params.id !== userPublicId) {
-      redirect({
+    if (role !== "patient") {
+      throw redirect({ to: "/dashboard" });
+    }
+    if (!userPublicId) {
+      throw redirect({ to: "/login" });
+    }
+    if (params.id !== userPublicId) {
+      throw redirect({
         to: "/patients/$id/medical-profile",
         params: { id: userPublicId },
       });

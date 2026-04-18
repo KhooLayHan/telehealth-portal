@@ -61,7 +61,7 @@
             #  -x "bin/*" "obj/*" "appsettings.Development.json" ".env*" ".vs/*" "*.user"
 
 #       - name: Deploy to Elastic Beanstalk
-#         uses: aws-actions/aws-elasticbeanstalk-deploy@v22
+#         uses: aws-actions/aws-elasticbeanstalk-deploy@v1.0.4
 #         with:
 #           aws_access_key: ${{ env.AWS_ACCESS_KEY_ID }}
 #           aws_secret_key: ${{ env.AWS_SECRET_ACCESS_KEY }}
