@@ -24,7 +24,7 @@ public static class GetAllAppointmentsForReceptionistEndpoint
             )
             .WithName("GetAllAppointmentsForReceptionist")
             .WithTags("Appointments")
-            .RequireAuthorization(AuthConstants.ReceptionistPolicy)
+            .RequireAuthorization(AuthConstants.AdminOrReceptionistPolicy)
             .ProducesProblem(StatusCodes.Status401Unauthorized);
     }
 }

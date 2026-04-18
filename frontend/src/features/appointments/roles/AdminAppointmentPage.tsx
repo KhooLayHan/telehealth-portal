@@ -1,73 +1,33 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, LayoutGrid, List } from "lucide-react";
+import { ChevronLeft, ChevronRight, LayoutGrid, List, Search } from "lucide-react";
 import { useState } from "react";
+import type { ReceptionistAppointmentDto } from "@/api/model/ReceptionistAppointmentDto";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { type DayData, useAdminAppointments } from "./UseAdminAppointments";
 
 // ---------------------------------------------------------------------------
-// Types
+// Helpers
 // ---------------------------------------------------------------------------
 
-type AppointmentType =
-  | "FOLLOW-UP"
-  | "GENERAL CHECKUP"
-  | "POST-OP REVIEW"
-  | "CONSULTATION"
-  | "LAB REVIEW";
-
-interface TodayAppointment {
-  id: string;
-  time: string;
-  type: AppointmentType;
-  patientName: string;
-  detail: string;
+// Converts a NodaTime LocalTime string "HH:mm:ss" to a 12-hour display string "H:mm AM/PM"
+function formatLocalTime(time: string | undefined): string {
+  if (!time) return "";
+  const [hourStr, minuteStr] = time.split(":");
+  const hour = Number(hourStr);
+  const minute = minuteStr?.padStart(2, "0") ?? "00";
+  const period = hour >= 12 ? "PM" : "AM";
+  const displayHour = hour % 12 === 0 ? 12 : hour % 12;
+  return `${displayHour}:${minute} ${period}`;
 }
 
-// Days that have scheduled appointments (day-of-month numbers)
-type DayData = { day: number; count: number };
-
-// ---------------------------------------------------------------------------
-// Mock data — replace with API data once endpoint is available
-// ---------------------------------------------------------------------------
-
-const MOCK_TODAY_APPOINTMENTS: TodayAppointment[] = [
-  {
-    id: "1",
-    time: "09:30 AM",
-    type: "FOLLOW-UP",
-    patientName: "Eleanor P. Shellstrop",
-    detail: "Virtual Consult • Room 04",
-  },
-  {
-    id: "2",
-    time: "11:15 AM",
-    type: "GENERAL CHECKUP",
-    patientName: "Chidi Anagonye",
-    detail: "In-person • Station B",
-  },
-  {
-    id: "3",
-    time: "02:00 PM",
-    type: "POST-OP REVIEW",
-    patientName: "Tahani Al-Jamil",
-    detail: "Virtual Consult • Room 12",
-  },
-  {
-    id: "4",
-    time: "04:45 PM",
-    type: "FOLLOW-UP",
-    patientName: "Jason Mendoza",
-    detail: "Virtual Consult • Room 04",
-  },
-];
-
-// Which days in the month have scheduled appointments and how many
-const MOCK_SCHEDULED_DAYS: DayData[] = [
-  { day: 3, count: 1 },
-  { day: 4, count: 1 },
-  { day: 6, count: 3 },
-  { day: 10, count: 2 },
-  { day: 13, count: 2 },
-];
+// Converts year/month/day to ISO "YYYY-MM-DD" string for filtering appointments by date
+function toIsoDate(year: number, month: number, day: number): string {
+  const m = String(month + 1).padStart(2, "0");
+  const d = String(day).padStart(2, "0");
+  return `${year}-${m}-${d}`;
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -105,10 +65,30 @@ function daysInMonth(year: number, month: number): number {
 // Sub-components
 // ---------------------------------------------------------------------------
 
-function AppointmentTypeBadge({ type }: { type: AppointmentType }) {
+// Displays the visit reason as an uppercase label badge
+function AppointmentTypeBadge({ visitReason }: { visitReason: string }) {
   return (
     <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold tracking-wide bg-zinc-800 text-zinc-300">
-      {type}
+      {visitReason.toUpperCase()}
+    </span>
+  );
+}
+
+// Renders a status badge using the color code returned by the API
+function AppointmentStatusBadge({
+  status,
+  colorCode,
+}: {
+  status: string;
+  colorCode: string | undefined;
+}) {
+  const color = colorCode ?? "#71717a";
+  return (
+    <span
+      className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold tracking-wide capitalize"
+      style={{ backgroundColor: `${color}33`, color }}
+    >
+      {status}
     </span>
   );
 }
@@ -171,10 +151,6 @@ function MiniCalendar({
           <span className="inline-block size-2 rounded-full bg-foreground" />
           SCHEDULED
         </span>
-        <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-          <span className="inline-block size-2 rounded-full border border-foreground" />
-          AVAILABLE
-        </span>
       </div>
 
       {/* Weekday headers */}
@@ -232,10 +208,11 @@ function MiniCalendar({
 }
 
 interface UpcomingTodayPanelProps {
-  appointments: TodayAppointment[];
+  appointments: ReceptionistAppointmentDto[];
+  isLoading: boolean;
 }
 
-function UpcomingTodayPanel({ appointments }: UpcomingTodayPanelProps) {
+function UpcomingTodayPanel({ appointments, isLoading }: UpcomingTodayPanelProps) {
   return (
     <div className="flex flex-col h-full bg-zinc-900 rounded-xl overflow-hidden">
       <div className="px-5 pt-5 pb-3">
@@ -243,16 +220,26 @@ function UpcomingTodayPanel({ appointments }: UpcomingTodayPanelProps) {
       </div>
 
       <div className="flex-1 overflow-y-auto px-5 space-y-4 pb-4">
-        {appointments.map((appt) => (
-          <div key={appt.id} className="space-y-0.5">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">{appt.time}</span>
-              <AppointmentTypeBadge type={appt.type} />
+        {isLoading ? (
+          <p className="text-zinc-400 text-sm">Loading…</p>
+        ) : appointments.length === 0 ? (
+          <p className="text-zinc-400 text-sm">No appointments today.</p>
+        ) : (
+          appointments.map((appt) => (
+            <div key={appt.publicId} className="space-y-0.5">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">
+                  {formatLocalTime(appt.startTime)}
+                </span>
+                <AppointmentTypeBadge visitReason={appt.visitReason ?? ""} />
+              </div>
+              <p className="text-white font-semibold text-sm pl-[4.5rem]">{appt.patientName}</p>
+              <p className="text-zinc-400 text-xs pl-[4.5rem]">
+                {appt.doctorName} · {appt.specialization}
+              </p>
             </div>
-            <p className="text-white font-semibold text-sm pl-[4.5rem]">{appt.patientName}</p>
-            <p className="text-zinc-400 text-xs pl-[4.5rem]">{appt.detail}</p>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       <div className="px-5 pb-5 pt-2 border-t border-zinc-800">
@@ -268,38 +255,161 @@ function UpcomingTodayPanel({ appointments }: UpcomingTodayPanelProps) {
 }
 
 // ---------------------------------------------------------------------------
-// List view — simple table of all appointments for the selected month
+// Day detail dialog — shows scrollable list of appointments for a selected date
 // ---------------------------------------------------------------------------
 
-function ListViewTable(_props: { scheduledDays: DayData[] }) {
-  const allItems: TodayAppointment[] = MOCK_TODAY_APPOINTMENTS;
+interface AppointmentDayDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  date: { year: number; month: number; day: number };
+  appointments: ReceptionistAppointmentDto[];
+}
+
+function AppointmentDayDialog({
+  open,
+  onOpenChange,
+  date,
+  appointments,
+}: AppointmentDayDialogProps) {
+  const label = `${MONTH_NAMES[date.month]} ${date.day}, ${date.year}`;
 
   return (
-    <div className="rounded-xl border border-border overflow-hidden">
-      <table className="w-full text-sm">
-        <thead className="bg-muted/50">
-          <tr>
-            <th className="px-4 py-3 text-left font-medium text-muted-foreground">Time</th>
-            <th className="px-4 py-3 text-left font-medium text-muted-foreground">Patient</th>
-            <th className="px-4 py-3 text-left font-medium text-muted-foreground">Type</th>
-            <th className="px-4 py-3 text-left font-medium text-muted-foreground">Location</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-border">
-          {allItems.map((appt) => (
-            <tr key={appt.id} className="hover:bg-muted/30 transition-colors">
-              <td className="px-4 py-3 font-mono text-xs text-foreground">{appt.time}</td>
-              <td className="px-4 py-3 font-medium text-foreground">{appt.patientName}</td>
-              <td className="px-4 py-3">
-                <span className="inline-flex items-center rounded px-2 py-0.5 text-[10px] font-semibold tracking-wide bg-muted text-muted-foreground">
-                  {appt.type}
-                </span>
-              </td>
-              <td className="px-4 py-3 text-muted-foreground text-xs">{appt.detail}</td>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Appointments — {label}</DialogTitle>
+        </DialogHeader>
+
+        {appointments.length === 0 ? (
+          <p className="py-6 text-center text-sm text-muted-foreground">
+            No appointments scheduled for this day.
+          </p>
+        ) : (
+          <div className="max-h-80 overflow-y-auto pr-1 space-y-4">
+            {appointments.map((appt) => (
+              <div
+                key={appt.publicId}
+                className="flex gap-3 rounded-lg border border-border bg-muted/30 p-3"
+              >
+                <div className="flex w-16 shrink-0 flex-col items-start gap-1 pt-0.5">
+                  <span className="font-mono text-xs font-semibold text-foreground">
+                    {formatLocalTime(appt.startTime)}
+                  </span>
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  <AppointmentTypeBadge visitReason={appt.visitReason ?? ""} />
+                  <p className="text-sm font-semibold text-foreground">{appt.patientName}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {appt.doctorName} · {appt.specialization}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+
+interface ListViewTableProps {
+  appointments: ReceptionistAppointmentDto[];
+  isLoading: boolean;
+  page: number;
+  totalPages: number;
+  onPrev: () => void;
+  onNext: () => void;
+}
+
+function ListViewTable({
+  appointments,
+  isLoading,
+  page,
+  totalPages,
+  onPrev,
+  onNext,
+}: ListViewTableProps) {
+  return (
+    <div className="space-y-3">
+      <div className="rounded-xl border border-border overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-muted/50">
+            <tr>
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground">Time</th>
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground">Date</th>
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground">Patient</th>
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground">
+                Visit Reason
+              </th>
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground">Doctor</th>
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {isLoading ? (
+              <tr>
+                <td colSpan={6} className="px-4 py-8 text-center text-sm text-muted-foreground">
+                  Loading appointments…
+                </td>
+              </tr>
+            ) : appointments.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-4 py-8 text-center text-sm text-muted-foreground">
+                  No appointments found.
+                </td>
+              </tr>
+            ) : (
+              appointments.map((appt) => (
+                <tr key={appt.publicId} className="hover:bg-muted/30 transition-colors">
+                  <td className="px-4 py-3 font-mono text-xs text-foreground">
+                    {formatLocalTime(appt.startTime)}
+                  </td>
+                  <td className="px-4 py-3 font-mono text-xs text-foreground">{appt.date}</td>
+                  <td className="px-4 py-3 font-medium text-foreground">{appt.patientName}</td>
+                  <td className="px-4 py-3 text-muted-foreground text-xs">{appt.visitReason}</td>
+                  <td className="px-4 py-3 text-muted-foreground text-xs">
+                    {appt.doctorName} · {appt.specialization}
+                  </td>
+                  <td className="px-4 py-3">
+                    <AppointmentStatusBadge
+                      status={appt.status ?? ""}
+                      colorCode={appt.statusColorCode}
+                    />
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination controls */}
+      <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <span>
+          Page {page} of {totalPages}
+        </span>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={onPrev}
+            disabled={page <= 1}
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors hover:bg-muted disabled:opacity-40"
+          >
+            <ChevronLeft className="size-4" />
+          </button>
+          <button
+            type="button"
+            onClick={onNext}
+            disabled={page >= totalPages}
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors hover:bg-muted disabled:opacity-40"
+          >
+            <ChevronRight className="size-4" />
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -316,6 +426,28 @@ export function AdminAppointmentPage() {
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [selectedDay, setSelectedDay] = useState(today.getDate());
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [listPage, setListPage] = useState(1);
+  const [search, setSearch] = useState("");
+
+  const {
+    monthItems,
+    scheduledDays,
+    todayAppointments,
+    isMonthLoading,
+    listItems,
+    listTotalPages,
+    isListLoading,
+  } = useAdminAppointments(currentYear, currentMonth, listPage, search);
+
+  function handleDaySelect(day: number) {
+    setSelectedDay(day);
+    setDialogOpen(true);
+  }
+
+  // Filter month appointments by the selected day for the dialog
+  const selectedDateIso = toIsoDate(currentYear, currentMonth, selectedDay);
+  const dialogAppointments = monthItems.filter((a) => a.date === selectedDateIso);
 
   function handlePrev() {
     if (currentMonth === 0) {
@@ -339,9 +471,24 @@ export function AdminAppointmentPage() {
 
   return (
     <div className="space-y-4">
-      {/* View toggle */}
-      <div className="flex justify-end">
-        <div className="inline-flex rounded-lg border border-border overflow-hidden">
+      <h1 className="text-2xl font-bold text-foreground">View Appointments</h1>
+
+      {/* Search bar + view toggle */}
+      <div className="flex items-center gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+          <Input
+            type="search"
+            placeholder="Search by patient name, doctor, or visit reason…"
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setListPage(1);
+            }}
+            className="pl-9"
+          />
+        </div>
+        <div className="inline-flex shrink-0 rounded-lg border border-border overflow-hidden">
           <button
             type="button"
             onClick={() => setViewMode("calendar")}
@@ -383,19 +530,23 @@ export function AdminAppointmentPage() {
           >
             {/* Calendar card */}
             <div className="rounded-xl border border-border bg-card p-5">
-              <MiniCalendar
-                year={currentYear}
-                month={currentMonth}
-                selectedDay={selectedDay}
-                scheduledDays={MOCK_SCHEDULED_DAYS}
-                onDaySelect={setSelectedDay}
-                onPrev={handlePrev}
-                onNext={handleNext}
-              />
+              {isMonthLoading ? (
+                <p className="text-sm text-muted-foreground">Loading calendar…</p>
+              ) : (
+                <MiniCalendar
+                  year={currentYear}
+                  month={currentMonth}
+                  selectedDay={selectedDay}
+                  scheduledDays={scheduledDays}
+                  onDaySelect={handleDaySelect}
+                  onPrev={handlePrev}
+                  onNext={handleNext}
+                />
+              )}
             </div>
 
             {/* Upcoming today panel */}
-            <UpcomingTodayPanel appointments={MOCK_TODAY_APPOINTMENTS} />
+            <UpcomingTodayPanel appointments={todayAppointments} isLoading={isMonthLoading} />
           </motion.div>
         ) : (
           <motion.div
@@ -405,10 +556,24 @@ export function AdminAppointmentPage() {
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.18 }}
           >
-            <ListViewTable scheduledDays={MOCK_SCHEDULED_DAYS} />
+            <ListViewTable
+              appointments={listItems}
+              isLoading={isListLoading}
+              page={listPage}
+              totalPages={listTotalPages}
+              onPrev={() => setListPage((p) => Math.max(1, p - 1))}
+              onNext={() => setListPage((p) => Math.min(listTotalPages, p + 1))}
+            />
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AppointmentDayDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        date={{ year: currentYear, month: currentMonth, day: selectedDay }}
+        appointments={dialogAppointments}
+      />
     </div>
   );
 }
