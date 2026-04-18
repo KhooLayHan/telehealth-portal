@@ -1,3 +1,6 @@
+import { Link } from "@tanstack/react-router";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AppointmentsPagination } from "./components/AppointmentsPagination";
@@ -22,6 +25,13 @@ export function PatientAppointmentsList() {
           <CardTitle className="text-xl">My Appointments</CardTitle>
           <CardDescription>View and manage your clinical visits.</CardDescription>
         </div>
+
+        <Button>
+          <Link to="/appointments/book">
+            <Plus className="mr-2 size-4" />
+            Book New Appointment
+          </Link>
+        </Button>
 
         <Tabs value={view} onValueChange={handleViewChange} className="w-50">
           <TabsList className="grid w-full grid-cols-2">

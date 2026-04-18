@@ -9,6 +9,7 @@ import {
   Search,
   Settings,
   Stethoscope,
+  User,
   Users,
 } from "lucide-react";
 import type { ReactNode } from "react";
@@ -115,6 +116,18 @@ export function AppShell({ children }: { children: ReactNode }) {
               <DropdownMenuContent className="w-45">
                 <DropdownMenuGroup>
                   <DropdownMenuLabel>Account</DropdownMenuLabel>
+                  {normalizedRole === "patient" && user?.publicId ? (
+                    <DropdownMenuItem className="cursor-pointer">
+                      <Link
+                        to="/patients/$id/medical-profile"
+                        params={{ id: user.publicId }}
+                        className="..."
+                      >
+                        <User className="size-3 shrink-0" />
+                        My Profile
+                      </Link>
+                    </DropdownMenuItem>
+                  ) : null}
                   <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
                     <LogOut className="size-3 shrink-0" />
                     Log out
@@ -158,6 +171,18 @@ export function AppShell({ children }: { children: ReactNode }) {
               <DropdownMenuContent className="w-45">
                 <DropdownMenuGroup>
                   <DropdownMenuLabel>Account</DropdownMenuLabel>
+                  {normalizedRole === "patient" && user?.publicId ? (
+                    <DropdownMenuItem className="cursor-pointer">
+                      <Link
+                        to="/patients/$id/medical-profile"
+                        params={{ id: user.publicId }}
+                        className="..."
+                      >
+                        <User className="size-3 shrink-0" />
+                        My Profile
+                      </Link>
+                    </DropdownMenuItem>
+                  ) : null}
                   <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
                     <LogOut className="size-3 shrink-0" />
                     Log out
