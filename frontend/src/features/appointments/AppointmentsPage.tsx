@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { useAuthStore } from "@/store/useAuthStore";
 import { AdminAppointmentPage } from "./roles/AdminAppointmentPage";
+import { PatientAppointmentsList } from "../patients/appointments/AppointmentsList";
 import { DoctorAppointmentPage } from "./roles/DoctorAppointmentPage";
 import { ReceptionistApptPage } from "./roles/ReceptionistAppointment";
 
@@ -18,7 +19,7 @@ export function AppointmentsPage() {
   const renderAppointmentContent = () => {
     switch (user?.role?.toLowerCase()) {
       case "patient":
-        return "Do something";
+        return <PatientAppointmentsList />;
       case "receptionist":
         return <ReceptionistApptPage />;
       case "doctor":

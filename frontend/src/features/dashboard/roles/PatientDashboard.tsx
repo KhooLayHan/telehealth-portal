@@ -1,9 +1,7 @@
 import { Activity, Calendar, FileText, Stethoscope, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PatientAppointmentsList } from "@/features/patients/appointments/AppointmentsList";
-import { BookAppointmentForm } from "@/features/patients/book/BookAppointmentForm";
-import { PatientMedicalProfileForm } from "@/features/patients/medical-profile/MedicalProfileForm";
+import { LabReportUploadWizard } from "@/features/lab-reports/LabReportUploadWizard";
 
 // --- Static scaffold data ---
 
@@ -155,9 +153,7 @@ export function PatientDashboard() {
           </table>
         </div>
       </div>
-      <PatientAppointmentsList />
-      <PatientMedicalProfileForm />
-      <BookAppointmentForm />
+      <LabReportUploadWizard patientPublicId="" consultationPublicId="" />
     </div>
   );
 }

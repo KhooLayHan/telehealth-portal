@@ -9,10 +9,19 @@ import {
   Search,
   Settings,
   Stethoscope,
+  User,
   Users,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/store/useAuthStore";
 
@@ -45,7 +54,7 @@ const navItems = [
     icon: FileText,
     label: "Lab Reports",
     href: "/lab-reports",
-    allowedRoles: ["admin", "doctor", "lab-tech", "patient"],
+    allowedRoles: ["admin", "lab-tech", "patient"],
   },
   {
     icon: Settings,
@@ -98,9 +107,34 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         <div className="border-border border-t p-3">
           <div className="mb-1 flex items-center gap-3 rounded-lg px-3 py-2">
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground text-xs">
-              {userInitial}
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground text-xs cursor-pointer">
+                  {userInitial}
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-45">
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>Account</DropdownMenuLabel>
+                  {normalizedRole === "patient" && user?.publicId ? (
+                    <DropdownMenuItem className="cursor-pointer">
+                      <Link
+                        to="/patients/$id/medical-profile"
+                        params={{ id: user.publicId }}
+                        className="..."
+                      >
+                        <User className="size-3 shrink-0" />
+                        My Profile
+                      </Link>
+                    </DropdownMenuItem>
+                  ) : null}
+                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                    <LogOut className="size-3 shrink-0" />
+                    Log out
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <div className="min-w-0 flex-1">
               <p className="truncate font-medium text-sm">{user?.firstName ?? "User"}</p>
               <p className="truncate text-muted-foreground text-xs">{user?.role ?? "User"}</p>
@@ -128,9 +162,34 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Button size="icon" variant="ghost">
               <Bell className="size-4" />
             </Button>
-            <div className="flex size-8 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground text-xs">
-              {userInitial}
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <div className="flex size-8 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground text-xs cursor-pointer">
+                  {userInitial}
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-45">
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>Account</DropdownMenuLabel>
+                  {normalizedRole === "patient" && user?.publicId ? (
+                    <DropdownMenuItem className="cursor-pointer">
+                      <Link
+                        to="/patients/$id/medical-profile"
+                        params={{ id: user.publicId }}
+                        className="..."
+                      >
+                        <User className="size-3 shrink-0" />
+                        My Profile
+                      </Link>
+                    </DropdownMenuItem>
+                  ) : null}
+                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                    <LogOut className="size-3 shrink-0" />
+                    Log out
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
 

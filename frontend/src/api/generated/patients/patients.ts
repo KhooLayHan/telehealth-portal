@@ -56,6 +56,10 @@ import type {
 } from '../../model/ReceptionistGetAllPatientsParams';
 
 import type {
+  ReceptionistPatientHistoryResponse
+} from '../../model/ReceptionistPatientHistoryResponse';
+
+import type {
   ReceptionistPatientsDto
 } from '../../model/ReceptionistPatientsDto';
 
@@ -938,6 +942,124 @@ export function useReceptionistGetPatientById<TData = Awaited<ReturnType<typeof 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getReceptionistGetPatientByIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export type receptionistGetPatientHistoryResponse200 = {
+  data: ReceptionistPatientHistoryResponse
+  status: 200
+}
+
+export type receptionistGetPatientHistoryResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type receptionistGetPatientHistoryResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type receptionistGetPatientHistoryResponseSuccess = (receptionistGetPatientHistoryResponse200) & {
+  headers: Headers;
+};
+export type receptionistGetPatientHistoryResponseError = (receptionistGetPatientHistoryResponse401 | receptionistGetPatientHistoryResponse404) & {
+  headers: Headers;
+};
+
+export type receptionistGetPatientHistoryResponse = (receptionistGetPatientHistoryResponseSuccess | receptionistGetPatientHistoryResponseError)
+
+export const getReceptionistGetPatientHistoryUrl = (id: string,) => {
+
+
+
+
+  return `http://localhost:5144/api/v1/patients/${id}/appointments`
+}
+
+export const receptionistGetPatientHistory = async (id: string, options?: RequestInit): Promise<receptionistGetPatientHistoryResponse> => {
+
+  return ofetchMutator<receptionistGetPatientHistoryResponse>(getReceptionistGetPatientHistoryUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getReceptionistGetPatientHistoryQueryKey = (id: string,) => {
+    return [
+    `http://localhost:5144/api/v1/patients/${id}/appointments`
+    ] as const;
+    }
+
+
+export const getReceptionistGetPatientHistoryQueryOptions = <TData = Awaited<ReturnType<typeof receptionistGetPatientHistory>>, TError = ProblemDetails>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof receptionistGetPatientHistory>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getReceptionistGetPatientHistoryQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof receptionistGetPatientHistory>>> = ({ signal }) => receptionistGetPatientHistory(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof receptionistGetPatientHistory>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ReceptionistGetPatientHistoryQueryResult = NonNullable<Awaited<ReturnType<typeof receptionistGetPatientHistory>>>
+export type ReceptionistGetPatientHistoryQueryError = ProblemDetails
+
+
+export function useReceptionistGetPatientHistory<TData = Awaited<ReturnType<typeof receptionistGetPatientHistory>>, TError = ProblemDetails>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof receptionistGetPatientHistory>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof receptionistGetPatientHistory>>,
+          TError,
+          Awaited<ReturnType<typeof receptionistGetPatientHistory>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useReceptionistGetPatientHistory<TData = Awaited<ReturnType<typeof receptionistGetPatientHistory>>, TError = ProblemDetails>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof receptionistGetPatientHistory>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof receptionistGetPatientHistory>>,
+          TError,
+          Awaited<ReturnType<typeof receptionistGetPatientHistory>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useReceptionistGetPatientHistory<TData = Awaited<ReturnType<typeof receptionistGetPatientHistory>>, TError = ProblemDetails>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof receptionistGetPatientHistory>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useReceptionistGetPatientHistory<TData = Awaited<ReturnType<typeof receptionistGetPatientHistory>>, TError = ProblemDetails>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof receptionistGetPatientHistory>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getReceptionistGetPatientHistoryQueryOptions(id,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

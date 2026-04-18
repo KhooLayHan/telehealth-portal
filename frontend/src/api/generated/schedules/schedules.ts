@@ -28,8 +28,16 @@ import type {
 } from '../../model/GetAllAvailableParams';
 
 import type {
+  GetDailySchedulesForReceptionistParams
+} from '../../model/GetDailySchedulesForReceptionistParams';
+
+import type {
   ProblemDetails
 } from '../../model/ProblemDetails';
+
+import type {
+  ReceptionistDoctorScheduleSlotDto
+} from '../../model/ReceptionistDoctorScheduleSlotDto';
 
 import { ofetchMutator } from '../../ofetch-mutator';
 
@@ -147,6 +155,126 @@ export function useGetAllAvailable<TData = Awaited<ReturnType<typeof getAllAvail
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetAllAvailableQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export type getDailySchedulesForReceptionistResponse200 = {
+  data: ReceptionistDoctorScheduleSlotDto[]
+  status: 200
+}
+
+export type getDailySchedulesForReceptionistResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type getDailySchedulesForReceptionistResponseSuccess = (getDailySchedulesForReceptionistResponse200) & {
+  headers: Headers;
+};
+export type getDailySchedulesForReceptionistResponseError = (getDailySchedulesForReceptionistResponse401) & {
+  headers: Headers;
+};
+
+export type getDailySchedulesForReceptionistResponse = (getDailySchedulesForReceptionistResponseSuccess | getDailySchedulesForReceptionistResponseError)
+
+export const getGetDailySchedulesForReceptionistUrl = (params: GetDailySchedulesForReceptionistParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `http://localhost:5144/api/v1/schedules/daily?${stringifiedParams}` : `http://localhost:5144/api/v1/schedules/daily`
+}
+
+export const getDailySchedulesForReceptionist = async (params: GetDailySchedulesForReceptionistParams, options?: RequestInit): Promise<getDailySchedulesForReceptionistResponse> => {
+
+  return ofetchMutator<getDailySchedulesForReceptionistResponse>(getGetDailySchedulesForReceptionistUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetDailySchedulesForReceptionistQueryKey = (params?: GetDailySchedulesForReceptionistParams,) => {
+    return [
+    `http://localhost:5144/api/v1/schedules/daily`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetDailySchedulesForReceptionistQueryOptions = <TData = Awaited<ReturnType<typeof getDailySchedulesForReceptionist>>, TError = ProblemDetails>(params: GetDailySchedulesForReceptionistParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDailySchedulesForReceptionist>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetDailySchedulesForReceptionistQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDailySchedulesForReceptionist>>> = ({ signal }) => getDailySchedulesForReceptionist(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getDailySchedulesForReceptionist>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetDailySchedulesForReceptionistQueryResult = NonNullable<Awaited<ReturnType<typeof getDailySchedulesForReceptionist>>>
+export type GetDailySchedulesForReceptionistQueryError = ProblemDetails
+
+
+export function useGetDailySchedulesForReceptionist<TData = Awaited<ReturnType<typeof getDailySchedulesForReceptionist>>, TError = ProblemDetails>(
+ params: GetDailySchedulesForReceptionistParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDailySchedulesForReceptionist>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getDailySchedulesForReceptionist>>,
+          TError,
+          Awaited<ReturnType<typeof getDailySchedulesForReceptionist>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetDailySchedulesForReceptionist<TData = Awaited<ReturnType<typeof getDailySchedulesForReceptionist>>, TError = ProblemDetails>(
+ params: GetDailySchedulesForReceptionistParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDailySchedulesForReceptionist>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getDailySchedulesForReceptionist>>,
+          TError,
+          Awaited<ReturnType<typeof getDailySchedulesForReceptionist>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetDailySchedulesForReceptionist<TData = Awaited<ReturnType<typeof getDailySchedulesForReceptionist>>, TError = ProblemDetails>(
+ params: GetDailySchedulesForReceptionistParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDailySchedulesForReceptionist>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetDailySchedulesForReceptionist<TData = Awaited<ReturnType<typeof getDailySchedulesForReceptionist>>, TError = ProblemDetails>(
+ params: GetDailySchedulesForReceptionistParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDailySchedulesForReceptionist>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetDailySchedulesForReceptionistQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
