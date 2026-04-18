@@ -1,9 +1,31 @@
 import { useNavigate } from "@tanstack/react-router";
+import { motion } from "framer-motion";
 import { ClipboardPlus, Clock, List, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { DoctorScheduleTable } from "./DoctorScheduleTable";
 import { formatLocalTime, UseDoctorSchedule } from "./UseDoctorSchedule";
+
+const STAT_CARDS = [
+  {
+    label: "Today's Patients",
+    icon: Users,
+    color: "#0d9488",
+    bg: "#0d948812",
+  },
+  {
+    label: "Pending Consultations",
+    icon: ClipboardPlus,
+    color: "#f59e0b",
+    bg: "#f59e0b12",
+  },
+  {
+    label: "Next Appointment",
+    icon: Clock,
+    color: "#3b82f6",
+    bg: "#3b82f612",
+  },
+];
 
 export function DoctorDashboard() {
   const navigate = useNavigate();
@@ -13,61 +35,47 @@ export function DoctorDashboard() {
   const pendingCount = Number(schedule?.pendingCount ?? 0);
   const nextTime = formatLocalTime(schedule?.nextAppointmentTime ?? undefined);
 
+  const statValues = [totalCount, pendingCount, nextTime];
+
   return (
     <div className="space-y-6">
       {/* Doctor Stats */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="font-medium text-muted-foreground text-sm">
-              Today's Patients
-            </CardTitle>
-            <Users className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="font-bold text-2xl">
-              {isLoading ? (
-                <span className="inline-block h-8 w-8 animate-pulse rounded bg-muted" />
-              ) : (
-                totalCount
-              )}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="font-medium text-muted-foreground text-sm">
-              Pending Consultations
-            </CardTitle>
-            <ClipboardPlus className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="font-bold text-2xl">
-              {isLoading ? (
-                <span className="inline-block h-8 w-8 animate-pulse rounded bg-muted" />
-              ) : (
-                pendingCount
-              )}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="font-medium text-muted-foreground text-sm">
-              Next Appointment
-            </CardTitle>
-            <Clock className="size-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <p className="font-bold text-xl">
-              {isLoading ? (
-                <span className="inline-block h-7 w-20 animate-pulse rounded bg-muted" />
-              ) : (
-                nextTime
-              )}
-            </p>
-          </CardContent>
-        </Card>
+        {STAT_CARDS.map(({ label, icon: Icon, color, bg }, i) => (
+          <motion.div
+            key={label}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.07, duration: 0.25 }}
+          >
+            <Card className="relative overflow-hidden">
+              <div
+                className="absolute inset-x-0 top-0 h-0.5"
+                style={{ background: `linear-gradient(90deg, ${color}, transparent)` }}
+              />
+              <CardContent className="flex items-center justify-between px-4 pb-3 pt-4">
+                <div className="space-y-0.5">
+                  <p className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground/60">
+                    {label}
+                  </p>
+                  <p className="text-2xl font-bold tabular-nums" style={{ color }}>
+                    {isLoading ? (
+                      <span className="inline-block h-7 w-10 animate-pulse rounded bg-muted" />
+                    ) : (
+                      statValues[i]
+                    )}
+                  </p>
+                </div>
+                <div
+                  className="flex size-9 items-center justify-center rounded-lg"
+                  style={{ background: bg }}
+                >
+                  <Icon className="size-4" style={{ color }} />
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
       </div>
 
       {/* Daily Schedule Table */}
