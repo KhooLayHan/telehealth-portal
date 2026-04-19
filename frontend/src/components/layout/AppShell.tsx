@@ -135,7 +135,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                       <Link
                         to="/patients/$id/medical-profile"
                         params={{ id: user.publicId }}
-                        className="..."
+                        className="flex items-center gap-1.5"
                       >
                         <User className="size-3 shrink-0" />
                         My Profile
@@ -190,7 +190,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                       <Link
                         to="/patients/$id/medical-profile"
                         params={{ id: user.publicId }}
-                        className="..."
+                        className="flex items-center gap-1.5"
                       >
                         <User className="size-3 shrink-0" />
                         My Profile

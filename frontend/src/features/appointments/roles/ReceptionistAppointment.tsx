@@ -1,13 +1,18 @@
 import { Link } from "@tanstack/react-router";
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, Eye, Pencil, Search } from "lucide-react";
+import { CalendarCheck, ChevronLeft, ChevronRight, Eye, Pencil, Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useGetAllAppointmentsForReceptionist } from "@/api/generated/appointments/appointments";
+import {
+  useGetAllAppointmentsForReceptionist,
+  useGetAllStatuses,
+} from "@/api/generated/appointments/appointments";
 import type { ReceptionistAppointmentDto } from "@/api/model/ReceptionistAppointmentDto";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -19,6 +24,10 @@ import {
 
 const ACCENT = "#0d9488";
 const PAGE_SIZE = 10;
+
+function getTodayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
 
 const columns: ColumnDef<ReceptionistAppointmentDto>[] = [
   {
@@ -63,7 +72,7 @@ const columns: ColumnDef<ReceptionistAppointmentDto>[] = [
           }}
         >
           <span
-            className="w-1.5 h-1.5 rounded-full shrink-0"
+            className="h-1.5 w-1.5 shrink-0 rounded-full"
             style={{ background: colorCode ?? undefined }}
           />
           {status}
@@ -75,7 +84,7 @@ const columns: ColumnDef<ReceptionistAppointmentDto>[] = [
     accessorKey: "visitReason",
     header: "Visit Reason",
     cell: ({ row }) => (
-      <span className="text-muted-foreground text-xs line-clamp-1 max-w-48">
+      <span className="line-clamp-1 max-w-48 text-xs text-muted-foreground">
         {row.getValue("visitReason")}
       </span>
     ),
@@ -114,6 +123,11 @@ interface DataTableProps<TData, TValue> {
   onPageChange: (page: number) => void;
   search: string;
   onSearchChange: (value: string) => void;
+  statusFilter: string;
+  onStatusChange: (value: string) => void;
+  statuses: { slug?: string; name?: string; colorCode?: string }[];
+  todayOnly: boolean;
+  onTodayOnlyChange: (value: boolean) => void;
 }
 
 function DataTable<TData, TValue>({
@@ -126,6 +140,11 @@ function DataTable<TData, TValue>({
   onPageChange,
   search,
   onSearchChange,
+  statusFilter,
+  onStatusChange,
+  statuses,
+  todayOnly,
+  onTodayOnlyChange,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
@@ -134,22 +153,92 @@ function DataTable<TData, TValue>({
   });
 
   const rows = table.getRowModel().rows;
+  const hasFilters = !!search || !!statusFilter || todayOnly;
 
   return (
     <div className="space-y-4">
-      {/* Search */}
-      <div className="relative w-72">
-        <Search className="absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-        <Input
-          placeholder="Search appointments…"
-          value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-9 h-9 text-sm"
-        />
+      {/* Filter bar */}
+      <div className="flex flex-wrap items-center gap-2">
+        {/* Search */}
+        <div className="relative min-w-52 flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search patient, doctor, reason…"
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="h-9 pl-9 pr-8 text-sm"
+          />
+          {search && (
+            <button
+              type="button"
+              onClick={() => onSearchChange("")}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <X className="size-3.5" />
+            </button>
+          )}
+        </div>
+
+        {/* Status filter pills */}
+        <div className="flex items-center gap-1 rounded-lg border border-border overflow-hidden h-9">
+          <button
+            type="button"
+            onClick={() => onStatusChange("")}
+            className={`h-full px-3 text-xs font-medium transition-colors capitalize cursor-pointer ${
+              !statusFilter
+                ? "text-white"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+            }`}
+            style={!statusFilter ? { background: ACCENT } : {}}
+          >
+            All
+          </button>
+          {statuses.map((s) => (
+            <button
+              type="button"
+              key={s.slug}
+              onClick={() => onStatusChange(statusFilter === s.slug ? "" : (s.slug ?? ""))}
+              className={`h-full px-3 text-xs font-medium transition-colors cursor-pointer ${
+                statusFilter === s.slug
+                  ? "text-white"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              }`}
+              style={statusFilter === s.slug ? { background: s.colorCode ?? ACCENT } : {}}
+            >
+              {s.name}
+            </button>
+          ))}
+        </div>
+
+        {/* Today switch */}
+        <div className="flex items-center gap-2 rounded-lg border border-border h-9 px-3">
+          <CalendarCheck className="size-3.5 text-muted-foreground" />
+          <Label htmlFor="today-switch" className="text-xs font-medium cursor-pointer select-none">
+            Today only
+          </Label>
+          <Switch id="today-switch" checked={todayOnly} onCheckedChange={onTodayOnlyChange} />
+        </div>
+
+        {/* Clear all filters */}
+        {hasFilters && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-9 gap-1.5 text-xs text-muted-foreground"
+            onClick={() => {
+              onSearchChange("");
+              onStatusChange("");
+              onTodayOnlyChange(false);
+            }}
+          >
+            <X className="size-3" />
+            Clear
+          </Button>
+        )}
       </div>
 
       {/* Table */}
-      <div className="rounded-lg border border-border overflow-hidden">
+      <div className="overflow-hidden rounded-lg border border-border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -160,7 +249,7 @@ function DataTable<TData, TValue>({
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
-                    className="text-background/70 font-semibold px-5 py-3.5 text-[11px] tracking-[0.15em] uppercase"
+                    className="px-5 py-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-background/70"
                   >
                     {header.isPlaceholder
                       ? null
@@ -189,8 +278,8 @@ function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-32 text-center">
                   <p className="text-sm text-muted-foreground">No appointments found.</p>
-                  <p className="text-xs text-muted-foreground/60 mt-1">
-                    Try adjusting your search.
+                  <p className="mt-1 text-xs text-muted-foreground/60">
+                    Try adjusting your filters.
                   </p>
                 </TableCell>
               </TableRow>
@@ -217,7 +306,6 @@ function DataTable<TData, TValue>({
               <ChevronLeft className="size-4" />
             </Button>
 
-            {/* Page number buttons — show up to 5 around current page */}
             {Array.from({ length: totalPages }, (_, i) => i + 1)
               .filter((p) => p === 1 || p === totalPages || (p >= page - 1 && p <= page + 1))
               .reduce<(number | string)[]>((acc, p, idx, arr) => {
@@ -228,7 +316,7 @@ function DataTable<TData, TValue>({
               }, [])
               .map((item) =>
                 typeof item === "string" ? (
-                  <span key={item} className="text-xs text-muted-foreground px-1">
+                  <span key={item} className="px-1 text-xs text-muted-foreground">
                     …
                   </span>
                 ) : (
@@ -265,20 +353,34 @@ export function ReceptionistApptPage() {
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [todayOnly, setTodayOnly] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setSearch(searchInput);
       setPage(1);
-    }, 1000);
+    }, 500);
     return () => clearTimeout(timer);
   }, [searchInput]);
+
+  const today = getTodayStr();
 
   const { data, isLoading, isError } = useGetAllAppointmentsForReceptionist({
     Page: page,
     PageSize: PAGE_SIZE,
+    SortOrder: "desc",
     Search: search || undefined,
+    Status: statusFilter || undefined,
+    From: todayOnly ? today : undefined,
+    To: todayOnly ? today : undefined,
   });
+
+  const { data: statusData } = useGetAllStatuses();
+  const statuses =
+    statusData?.status === 200
+      ? statusData.data.map((s) => ({ slug: s.slug, name: s.name, colorCode: s.colorCode }))
+      : [];
 
   const result = data?.status === 200 ? data.data : null;
   const appointments = result?.items ?? [];
@@ -289,6 +391,16 @@ export function ReceptionistApptPage() {
     setSearchInput(value);
   }
 
+  function handleStatusChange(slug: string) {
+    setStatusFilter(slug);
+    setPage(1);
+  }
+
+  function handleTodayOnlyChange(value: boolean) {
+    setTodayOnly(value);
+    setPage(1);
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -296,22 +408,22 @@ export function ReceptionistApptPage() {
       transition={{ duration: 0.35, ease: "easeOut" }}
     >
       <div className="relative overflow-hidden rounded-xl border border-border bg-card">
-        <div className="absolute top-0 inset-x-0 h-0.75" style={{ background: ACCENT }} />
+        <div className="absolute inset-x-0 top-0 h-0.75" style={{ background: ACCENT }} />
 
         {/* Card header */}
-        <div className="flex items-end justify-between px-6 pt-6 pb-4">
+        <div className="flex items-end justify-between px-6 pb-4 pt-6">
           <div>
             <p
-              className="text-[10px] tracking-[0.22em] uppercase font-semibold mb-1"
+              className="mb-1 text-[10px] font-semibold uppercase tracking-[0.22em]"
               style={{ color: ACCENT }}
             >
               Appointments
             </p>
-            <h1 className="text-2xl font-semibold tracking-tight leading-none">All Appointments</h1>
+            <h1 className="text-2xl font-semibold leading-none tracking-tight">All Appointments</h1>
           </div>
 
           {!isLoading && !isError && (
-            <span className="font-mono text-xs text-muted-foreground border border-border rounded-full px-3 py-1">
+            <span className="rounded-full border border-border px-3 py-1 font-mono text-xs text-muted-foreground">
               {totalCount} total
             </span>
           )}
@@ -322,11 +434,11 @@ export function ReceptionistApptPage() {
         {/* Card content */}
         <div className="px-6 py-6">
           {isLoading ? (
-            <div className="flex items-center justify-center h-48">
-              <p className="text-sm text-muted-foreground tracking-wide">Loading appointments…</p>
+            <div className="flex h-48 items-center justify-center">
+              <p className="text-sm tracking-wide text-muted-foreground">Loading appointments…</p>
             </div>
           ) : isError ? (
-            <div className="flex items-center justify-center h-48">
+            <div className="flex h-48 items-center justify-center">
               <p className="text-sm text-destructive">Failed to load appointments.</p>
             </div>
           ) : (
@@ -340,6 +452,11 @@ export function ReceptionistApptPage() {
               onPageChange={setPage}
               search={searchInput}
               onSearchChange={handleSearchChange}
+              statusFilter={statusFilter}
+              onStatusChange={handleStatusChange}
+              statuses={statuses}
+              todayOnly={todayOnly}
+              onTodayOnlyChange={handleTodayOnlyChange}
             />
           )}
         </div>
