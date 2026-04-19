@@ -4,45 +4,35 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { Instant } from "./Instant";
-import type { LocalDate } from "./LocalDate";
-
-export interface QualificationDoctorDto {
-  degree: string;
-  institution: string;
-  year: number;
-}
-
-export interface AddressDoctorDto {
-  street: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  country: string;
-}
+import type { AddressDoctorDto } from './AddressDoctorDto';
+import type { Instant } from './Instant';
+import type { LocalDate } from './LocalDate';
+import type { QualificationDoctorDto } from './QualificationDoctorDto';
 
 export interface DoctorListDto {
-  doctorPublicId: string;
-  firstName: string;
-  lastName: string;
-  username: string;
-  email: string;
-  specialization: string;
-  departmentName: string;
-  licenseNumber: string;
+  doctorPublicId?: string;
+  firstName?: string;
+  lastName?: string;
+  username?: string;
+  email?: string;
+  specialization?: string;
+  departmentName?: string;
+  licenseNumber?: string;
+  /**
+     * @nullable
+     * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+     */
+  consultationFee?: number | string | null;
   /** @nullable */
-  consultationFee: number | null;
+  phoneNumber?: string | null;
+  slug?: string;
+  gender?: string;
+  dateOfBirth?: LocalDate;
   /** @nullable */
-  phoneNumber: string | null;
-  slug: string;
-  gender: string;
-  dateOfBirth: LocalDate;
+  avatarUrl?: string | null;
+  address?: null | AddressDoctorDto;
+  qualifications?: QualificationDoctorDto[];
   /** @nullable */
-  avatarUrl: string | null;
-  /** @nullable */
-  address: AddressDoctorDto | null;
-  qualifications: QualificationDoctorDto[];
-  /** @nullable */
-  bio: string | null;
-  createdAt: Instant;
+  bio?: string | null;
+  createdAt?: Instant;
 }

@@ -80,6 +80,8 @@ public static class ApiEndpoints
         public const string GetByIdOrSlug = $"{Base}/{{idOrSlug}}";
 
         public const string GetAll = Base;
+
+        public const string UpdateById = $"{Base}/{{id:guid}}";
     }
 
     public static class Schedules

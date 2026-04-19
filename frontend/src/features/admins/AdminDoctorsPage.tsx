@@ -1,3 +1,5 @@
+import { useForm } from "@tanstack/react-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { motion } from "framer-motion";
@@ -7,12 +9,18 @@ import {
   Eye,
   GraduationCap,
   Pencil,
+  Plus,
   Search,
   Stethoscope,
+  Trash2,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { useGetAll } from "@/api/generated/doctors/doctors";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
+import { z } from "zod";
+import { getGetAllQueryKey, useGetAll, useUpdateDoctorById } from "@/api/generated/doctors/doctors";
 import type { DoctorListDto } from "@/api/model/DoctorListDto";
+import type { UpdateDoctorCommand } from "@/api/model/UpdateDoctorCommand";
+import { ApiError } from "@/api/ofetch-mutator";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -29,7 +37,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import {
   Table,
@@ -39,9 +55,67 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 
 const ACCENT = "#0d9488";
 const PAGE_SIZE = 10;
+
+// Zod schema that validates every field in the edit-doctor dialog form
+const editDoctorSchema = z.object({
+  firstName: z.string().min(1, "Required"),
+  lastName: z.string().min(1, "Required"),
+  username: z.string().min(1, "Required"),
+  email: z.string().email("Invalid email"),
+  phoneNumber: z.string(),
+  gender: z.string().min(1, "Required"),
+  dateOfBirth: z.string().min(1, "Required"),
+  bio: z.string(),
+  specialization: z.string().min(1, "Required"),
+  licenseNumber: z.string().min(1, "Required"),
+  consultationFee: z.number().nonnegative("Must be ≥ 0").nullable(),
+  departmentName: z.string().min(1, "Required"),
+  addressStreet: z.string(),
+  addressCity: z.string(),
+  addressState: z.string(),
+  addressPostalCode: z.string(),
+  addressCountry: z.string(),
+  qualifications: z.array(
+    z.object({
+      degree: z.string().min(1, "Required"),
+      institution: z.string().min(1, "Required"),
+      year: z.number().int().min(1900, "Min 1900").max(2100, "Max 2100"),
+    }),
+  ),
+});
+
+// Converts a DoctorListDto into the flat default-values shape used by the edit form
+function buildEditDefaultValues(doctor: DoctorListDto) {
+  return {
+    firstName: doctor.firstName,
+    lastName: doctor.lastName,
+    username: doctor.username,
+    email: doctor.email,
+    phoneNumber: doctor.phoneNumber ?? "",
+    gender: doctor.gender,
+    dateOfBirth: String(doctor.dateOfBirth),
+    bio: doctor.bio ?? "",
+    specialization: doctor.specialization,
+    licenseNumber: doctor.licenseNumber,
+    consultationFee: doctor.consultationFee,
+    departmentName: doctor.departmentName,
+    addressStreet: doctor.address?.street ?? "",
+    addressCity: doctor.address?.city ?? "",
+    addressState: doctor.address?.state ?? "",
+    addressPostalCode: doctor.address?.postalCode ?? "",
+    addressCountry: doctor.address?.country ?? "",
+    qualifications: doctor.qualifications.map((q) => ({
+      degree: q.degree,
+      institution: q.institution,
+      year: q.year,
+    })),
+  };
+}
 
 // Formats a date string or NodaTime Instant as "15 Apr 1982"
 function formatDate(iso: unknown): string {
@@ -174,6 +248,560 @@ function DoctorDetailsDialog({ doctor, open, onOpenChange }: DoctorDetailsDialog
   );
 }
 
+interface EditDoctorDialogProps {
+  doctor: DoctorListDto | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+// Guard that prevents the inner form from mounting until a doctor is selected
+function EditDoctorDialog({ doctor, open, onOpenChange }: EditDoctorDialogProps) {
+  if (!doctor) return null;
+  return <EditDoctorForm doctor={doctor} open={open} onOpenChange={onOpenChange} />;
+}
+
+// Inner form component; keeps the TanStack Form instance alive for a single doctor
+function EditDoctorForm({
+  doctor,
+  open,
+  onOpenChange,
+}: {
+  doctor: DoctorListDto;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const queryClient = useQueryClient();
+  const { mutateAsync, isPending } = useUpdateDoctorById();
+  const initials = `${doctor.firstName[0]}${doctor.lastName[0]}`;
+
+  // Stable UUID keys so qualification rows keep their identity when items are added/removed
+  const qualKeysRef = useRef<string[]>(doctor.qualifications.map(() => crypto.randomUUID()));
+
+  const form = useForm({
+    defaultValues: buildEditDefaultValues(doctor),
+    validators: { onSubmit: editDoctorSchema },
+    onSubmit: async ({ value }) => {
+      const payload: UpdateDoctorCommand = {
+        firstName: value.firstName,
+        lastName: value.lastName,
+        username: value.username,
+        email: value.email,
+        phoneNumber: value.phoneNumber || null,
+        gender: value.gender[0] ?? "N",
+        dateOfBirth: value.dateOfBirth,
+        bio: value.bio || null,
+        specialization: value.specialization,
+        licenseNumber: value.licenseNumber,
+        consultationFee: value.consultationFee,
+        departmentName: value.departmentName,
+        address: value.addressStreet
+          ? {
+              street: value.addressStreet,
+              city: value.addressCity,
+              state: value.addressState,
+              postalCode: value.addressPostalCode,
+              country: value.addressCountry,
+            }
+          : null,
+        qualifications: value.qualifications.map((q) => ({
+          degree: q.degree,
+          institution: q.institution,
+          year: q.year,
+        })),
+      };
+
+      try {
+        await mutateAsync({ id: String(doctor.doctorPublicId), data: payload });
+        toast.success(`Dr. ${doctor.firstName} ${doctor.lastName}'s profile updated.`);
+        await queryClient.invalidateQueries({ queryKey: getGetAllQueryKey() });
+        onOpenChange(false);
+      } catch (error) {
+        if (error instanceof ApiError) {
+          toast.error(error.data?.title ?? "Failed to update doctor.");
+        } else {
+          toast.error("Failed to update doctor.");
+        }
+      }
+    },
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl gap-0 overflow-hidden p-0">
+        {/* Accent bar */}
+        <div className="absolute inset-x-0 top-0 h-1" style={{ background: ACCENT }} />
+
+        <DialogHeader className="px-6 pb-4 pt-7">
+          <div className="flex items-start gap-4">
+            <div
+              className="flex size-14 shrink-0 items-center justify-center rounded-full text-lg font-bold text-white"
+              style={{ background: ACCENT }}
+            >
+              {initials}
+            </div>
+            <div className="min-w-0 flex-1">
+              <DialogTitle className="text-xl font-semibold leading-none">
+                Edit Dr. {doctor.firstName} {doctor.lastName}
+              </DialogTitle>
+              <DialogDescription className="mt-1 text-sm text-muted-foreground">
+                Update profile details. Changes are front-end only — not yet connected to the
+                backend.
+              </DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
+          className="flex flex-col"
+        >
+          <Tabs defaultValue="personal" className="flex-1 px-6 pb-2">
+            <TabsList className="mb-5 grid w-full grid-cols-4">
+              <TabsTrigger value="personal">Personal</TabsTrigger>
+              <TabsTrigger value="professional">Professional</TabsTrigger>
+              <TabsTrigger value="address">Address</TabsTrigger>
+              <TabsTrigger value="qualifications">Qualifications</TabsTrigger>
+            </TabsList>
+
+            {/* ── Personal ─────────────────────────────────────────────── */}
+            <TabsContent
+              value="personal"
+              className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
+            >
+              <div className="grid grid-cols-2 gap-4">
+                <form.Field name="firstName">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>First Name</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+                <form.Field name="lastName">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Last Name</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <form.Field name="username">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Username</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+                <form.Field name="email">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Email</FieldLabel>
+                      <Input
+                        type="email"
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <form.Field name="phoneNumber">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Phone Number</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="+601x-xxxxxxx"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+
+                {/* Gender select */}
+                <form.Field name="gender">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Gender</FieldLabel>
+                      <Select
+                        value={field.state.value}
+                        onValueChange={(v) => field.handleChange(v ?? "")}
+                      >
+                        <SelectTrigger className="w-full" onBlur={field.handleBlur}>
+                          <SelectValue placeholder="Select gender" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Male">Male</SelectItem>
+                          <SelectItem value="Female">Female</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                          <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+
+              <form.Field name="dateOfBirth">
+                {(field) => (
+                  <Field>
+                    <FieldLabel>Date of Birth</FieldLabel>
+                    <Input
+                      type="date"
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                    />
+                    <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                  </Field>
+                )}
+              </form.Field>
+
+              {/* Bio textarea */}
+              <form.Field name="bio">
+                {(field) => (
+                  <Field>
+                    <FieldLabel>Bio</FieldLabel>
+                    <Textarea
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      rows={3}
+                      placeholder="Brief professional bio…"
+                    />
+                    <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                  </Field>
+                )}
+              </form.Field>
+            </TabsContent>
+
+            {/* ── Professional ─────────────────────────────────────────── */}
+            <TabsContent
+              value="professional"
+              className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
+            >
+              <div className="grid grid-cols-2 gap-4">
+                <form.Field name="specialization">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Specialization</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. Cardiology"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+                <form.Field name="departmentName">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Department</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. Cardiology Department"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <form.Field name="licenseNumber">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>License Number</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. MMC12345"
+                        className="font-mono"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+
+                {/* Consultation fee — nullable number */}
+                <form.Field name="consultationFee">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Consultation Fee (MYR)</FieldLabel>
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={field.state.value ?? ""}
+                        onChange={(e) =>
+                          field.handleChange(e.target.value === "" ? null : Number(e.target.value))
+                        }
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. 150.00"
+                        className="font-mono"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+            </TabsContent>
+
+            {/* ── Address ──────────────────────────────────────────────── */}
+            <TabsContent
+              value="address"
+              className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
+            >
+              <form.Field name="addressStreet">
+                {(field) => (
+                  <Field>
+                    <FieldLabel>Street</FieldLabel>
+                    <Input
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      placeholder="e.g. 123 Jalan Ampang"
+                    />
+                    <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                  </Field>
+                )}
+              </form.Field>
+              <div className="grid grid-cols-2 gap-4">
+                <form.Field name="addressCity">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>City</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. Kuala Lumpur"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+                <form.Field name="addressState">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>State</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. Wilayah Persekutuan"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <form.Field name="addressPostalCode">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Postal Code</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. 50450"
+                        className="font-mono"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+                <form.Field name="addressCountry">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Country</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. Malaysia"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+            </TabsContent>
+
+            {/* ── Qualifications ───────────────────────────────────────── */}
+            <TabsContent
+              value="qualifications"
+              className="mt-0 max-h-[52vh] overflow-y-auto pb-2 pr-1"
+            >
+              <form.Field name="qualifications" mode="array">
+                {(field) => (
+                  <div className="space-y-3">
+                    {field.state.value.map((_, i) => (
+                      <div
+                        key={qualKeysRef.current[i]}
+                        className="relative rounded-lg border border-border bg-muted/30 p-4"
+                      >
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-2 top-2 h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                          title="Remove qualification"
+                          onClick={() => {
+                            qualKeysRef.current.splice(i, 1);
+                            field.removeValue(i);
+                          }}
+                        >
+                          <Trash2 className="size-3.5" />
+                        </Button>
+
+                        <div className="grid grid-cols-3 gap-3">
+                          <form.Field name={`qualifications[${i}].degree`}>
+                            {(degreeField) => (
+                              <Field>
+                                <FieldLabel>Degree</FieldLabel>
+                                <Input
+                                  value={degreeField.state.value}
+                                  onChange={(e) => degreeField.handleChange(e.target.value)}
+                                  onBlur={degreeField.handleBlur}
+                                  placeholder="e.g. MBBS"
+                                />
+                                <FieldError
+                                  errors={
+                                    degreeField.state.meta.errors as Array<{ message?: string }>
+                                  }
+                                />
+                              </Field>
+                            )}
+                          </form.Field>
+
+                          <form.Field name={`qualifications[${i}].institution`}>
+                            {(instField) => (
+                              <Field>
+                                <FieldLabel>Institution</FieldLabel>
+                                <Input
+                                  value={instField.state.value}
+                                  onChange={(e) => instField.handleChange(e.target.value)}
+                                  onBlur={instField.handleBlur}
+                                  placeholder="e.g. University of Malaya"
+                                />
+                                <FieldError
+                                  errors={
+                                    instField.state.meta.errors as Array<{ message?: string }>
+                                  }
+                                />
+                              </Field>
+                            )}
+                          </form.Field>
+
+                          <form.Field name={`qualifications[${i}].year`}>
+                            {(yearField) => (
+                              <Field>
+                                <FieldLabel>Year</FieldLabel>
+                                <Input
+                                  type="number"
+                                  value={yearField.state.value}
+                                  onChange={(e) => yearField.handleChange(Number(e.target.value))}
+                                  onBlur={yearField.handleBlur}
+                                  placeholder="e.g. 2010"
+                                  className="font-mono"
+                                />
+                                <FieldError
+                                  errors={
+                                    yearField.state.meta.errors as Array<{ message?: string }>
+                                  }
+                                />
+                              </Field>
+                            )}
+                          </form.Field>
+                        </div>
+                      </div>
+                    ))}
+
+                    {field.state.value.length === 0 && (
+                      <p className="py-4 text-center text-sm text-muted-foreground">
+                        No qualifications added yet.
+                      </p>
+                    )}
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => {
+                        qualKeysRef.current.push(crypto.randomUUID());
+                        field.pushValue({
+                          degree: "",
+                          institution: "",
+                          year: new Date().getFullYear(),
+                        });
+                      }}
+                    >
+                      <Plus className="mr-1.5 size-3.5" />
+                      Add Qualification
+                    </Button>
+                  </div>
+                )}
+              </form.Field>
+            </TabsContent>
+          </Tabs>
+
+          {/* Footer actions */}
+          <div className="flex justify-end gap-2 border-t border-border px-6 py-4">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting] as const}>
+              {([canSubmit, isSubmitting]) => (
+                <Button
+                  type="submit"
+                  disabled={!canSubmit || isSubmitting || isPending}
+                  style={{ background: ACCENT }}
+                >
+                  {isSubmitting || isPending ? "Saving…" : "Save Changes"}
+                </Button>
+              )}
+            </form.Subscribe>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 const columns: ColumnDef<DoctorListDto>[] = [
   {
     accessorKey: "firstName",
@@ -239,29 +867,34 @@ const columns: ColumnDef<DoctorListDto>[] = [
   {
     id: "actions",
     header: "Actions",
-    cell: ({ row, table }) => (
-      <div className="flex items-center gap-1">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
-          title="View details"
-          onClick={() =>
-            (table.options.meta as { onView: (d: DoctorListDto) => void }).onView(row.original)
-          }
-        >
-          <Eye className="size-3.5" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
-          title="Edit doctor"
-        >
-          <Pencil className="size-3.5" />
-        </Button>
-      </div>
-    ),
+    cell: ({ row, table }) => {
+      const meta = table.options.meta as {
+        onView: (d: DoctorListDto) => void;
+        onEdit: (d: DoctorListDto) => void;
+      };
+      return (
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+            title="View details"
+            onClick={() => meta.onView(row.original)}
+          >
+            <Eye className="size-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+            title="Edit doctor"
+            onClick={() => meta.onEdit(row.original)}
+          >
+            <Pencil className="size-3.5" />
+          </Button>
+        </div>
+      );
+    },
   },
 ];
 
@@ -273,6 +906,7 @@ interface DataTableProps {
   search: string;
   onSearchChange: (value: string) => void;
   onView: (doctor: DoctorListDto) => void;
+  onEdit: (doctor: DoctorListDto) => void;
 }
 
 function DataTable({
@@ -283,12 +917,13 @@ function DataTable({
   search,
   onSearchChange,
   onView,
+  onEdit,
 }: DataTableProps) {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    meta: { onView },
+    meta: { onView, onEdit },
   });
 
   const rows = table.getRowModel().rows;
@@ -421,6 +1056,8 @@ export function AdminDoctorsPage() {
   const [search, setSearch] = useState("");
   const [selectedDoctor, setSelectedDoctor] = useState<DoctorListDto | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedDoctorForEdit, setSelectedDoctorForEdit] = useState<DoctorListDto | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const { data, isLoading } = useGetAll();
   const allDoctors = data?.status === 200 ? data.data : [];
@@ -428,6 +1065,11 @@ export function AdminDoctorsPage() {
   const handleView = (doctor: DoctorListDto) => {
     setSelectedDoctor(doctor);
     setDialogOpen(true);
+  };
+
+  const handleEdit = (doctor: DoctorListDto) => {
+    setSelectedDoctorForEdit(doctor);
+    setEditDialogOpen(true);
   };
 
   useEffect(() => {
@@ -516,12 +1158,20 @@ export function AdminDoctorsPage() {
               search={searchInput}
               onSearchChange={setSearchInput}
               onView={handleView}
+              onEdit={handleEdit}
             />
           </div>
         </div>
       </motion.div>
 
       <DoctorDetailsDialog doctor={selectedDoctor} open={dialogOpen} onOpenChange={setDialogOpen} />
+
+      <EditDoctorDialog
+        key={selectedDoctorForEdit?.doctorPublicId}
+        doctor={selectedDoctorForEdit}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+      />
     </>
   );
 }
