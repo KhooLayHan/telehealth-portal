@@ -2,6 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import {
   Bell,
   Calendar,
+  ClipboardList,
   FileText,
   Heart,
   LayoutDashboard,
@@ -10,6 +11,7 @@ import {
   Settings,
   Stethoscope,
   User,
+  UserCog,
   Users,
 } from "lucide-react";
 import type { ReactNode } from "react";
@@ -55,6 +57,18 @@ const navItems = [
     label: "Lab Reports",
     href: "/lab-reports",
     allowedRoles: ["admin", "lab-tech", "patient"],
+  },
+  {
+    icon: UserCog,
+    label: "Doctor List",
+    href: "/doctors",
+    allowedRoles: ["admin"],
+  },
+  {
+    icon: ClipboardList,
+    label: "Receptionist List",
+    href: "/receptionists",
+    allowedRoles: ["admin"],
   },
   {
     icon: Settings,
