@@ -274,7 +274,81 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getUpdateDoctorByIdMutationOptions(options), queryClient);
     }
-    export type getDoctorScheduleResponse200 = {
+
+export type deleteDoctorByIdResponse204 = {
+  data: undefined
+  status: 204
+}
+
+export type deleteDoctorByIdResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type deleteDoctorByIdResponse403 = {
+  data: ProblemDetails
+  status: 403
+}
+
+export type deleteDoctorByIdResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type deleteDoctorByIdResponseSuccess = (deleteDoctorByIdResponse204) & {
+  headers: Headers;
+};
+export type deleteDoctorByIdResponseError = (deleteDoctorByIdResponse401 | deleteDoctorByIdResponse403 | deleteDoctorByIdResponse404) & {
+  headers: Headers;
+};
+
+export type deleteDoctorByIdResponse = (deleteDoctorByIdResponseSuccess | deleteDoctorByIdResponseError)
+
+export const getDeleteDoctorByIdUrl = (id: string,) => {
+  return `http://localhost:5144/api/v1/doctors/${id}/deactivate`
+}
+
+export const deleteDoctorById = async (id: string, options?: RequestInit): Promise<deleteDoctorByIdResponse> => {
+  return ofetchMutator<deleteDoctorByIdResponse>(getDeleteDoctorByIdUrl(id),
+  {
+    ...options,
+    method: 'PATCH'
+  }
+);}
+
+export const getDeleteDoctorByIdMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDoctorById>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteDoctorById>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['deleteDoctorById'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteDoctorById>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+          return deleteDoctorById(id, requestOptions)
+        }
+
+  return { mutationFn, ...mutationOptions }}
+
+    export type DeleteDoctorByIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteDoctorById>>>
+    export type DeleteDoctorByIdMutationError = ProblemDetails
+
+    export const useDeleteDoctorById = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDoctorById>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteDoctorById>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getDeleteDoctorByIdMutationOptions(options), queryClient);
+    }
+
+export type getDoctorScheduleResponse200 = {
   data: DoctorScheduleResponse
   status: 200
 }

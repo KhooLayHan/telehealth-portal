@@ -4,7 +4,7 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { ReceptionistPatientAppointmentDto } from './ReceptionistPatientAppointmentDto';
+import type { ReceptionistPatientAppointmentDto } from "./ReceptionistPatientAppointmentDto";
 
 export interface ReceptionistPatientHistoryResponse {
   patientName?: string;

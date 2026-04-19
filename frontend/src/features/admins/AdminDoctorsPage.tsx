@@ -17,7 +17,12 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { getGetAllQueryKey, useGetAll, useUpdateDoctorById } from "@/api/generated/doctors/doctors";
+import {
+  getGetAllQueryKey,
+  useDeleteDoctorById,
+  useGetAll,
+  useUpdateDoctorById,
+} from "@/api/generated/doctors/doctors";
 import type { DoctorListDto } from "@/api/model/DoctorListDto";
 import type { UpdateDoctorCommand } from "@/api/model/UpdateDoctorCommand";
 import { ApiError } from "@/api/ofetch-mutator";
@@ -802,6 +807,61 @@ function EditDoctorForm({
   );
 }
 
+interface DeleteDoctorDialogProps {
+  doctor: DoctorListDto | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+// Confirmation dialog shown before a doctor record is soft-deleted
+function DeleteDoctorDialog({ doctor, open, onOpenChange }: DeleteDoctorDialogProps) {
+  const queryClient = useQueryClient();
+  const { mutateAsync, isPending } = useDeleteDoctorById();
+
+  if (!doctor) return null;
+
+  const handleConfirm = async () => {
+    try {
+      await mutateAsync({ id: String(doctor.doctorPublicId) });
+      toast.success(`Dr. ${doctor.firstName} ${doctor.lastName} has been removed.`);
+      await queryClient.invalidateQueries({ queryKey: getGetAllQueryKey() });
+      onOpenChange(false);
+    } catch (error) {
+      if (error instanceof ApiError) {
+        toast.error(error.data?.title ?? "Failed to delete doctor.");
+      } else {
+        toast.error("Failed to delete doctor.");
+      }
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md gap-0 overflow-hidden p-0">
+        <div className="absolute inset-x-0 top-0 h-1 bg-destructive" />
+        <DialogHeader className="px-6 pb-4 pt-7">
+          <DialogTitle className="text-lg font-semibold">Delete Doctor</DialogTitle>
+          <DialogDescription className="mt-1 text-sm text-muted-foreground">
+            Are you sure you want to delete{" "}
+            <span className="font-medium text-foreground">
+              Dr. {doctor.firstName} {doctor.lastName}
+            </span>
+            ? This action cannot be undone.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex justify-end gap-2 border-t border-border px-6 py-4">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button variant="destructive" disabled={isPending} onClick={handleConfirm}>
+            {isPending ? "Deleting…" : "Delete"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 const columns: ColumnDef<DoctorListDto>[] = [
   {
     accessorKey: "firstName",
@@ -871,6 +931,7 @@ const columns: ColumnDef<DoctorListDto>[] = [
       const meta = table.options.meta as {
         onView: (d: DoctorListDto) => void;
         onEdit: (d: DoctorListDto) => void;
+        onDelete: (d: DoctorListDto) => void;
       };
       return (
         <div className="flex items-center gap-1">
@@ -892,6 +953,15 @@ const columns: ColumnDef<DoctorListDto>[] = [
           >
             <Pencil className="size-3.5" />
           </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+            title="Delete doctor"
+            onClick={() => meta.onDelete(row.original)}
+          >
+            <Trash2 className="size-3.5" />
+          </Button>
         </div>
       );
     },
@@ -907,6 +977,7 @@ interface DataTableProps {
   onSearchChange: (value: string) => void;
   onView: (doctor: DoctorListDto) => void;
   onEdit: (doctor: DoctorListDto) => void;
+  onDelete: (doctor: DoctorListDto) => void;
 }
 
 function DataTable({
@@ -918,12 +989,13 @@ function DataTable({
   onSearchChange,
   onView,
   onEdit,
+  onDelete,
 }: DataTableProps) {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    meta: { onView, onEdit },
+    meta: { onView, onEdit, onDelete },
   });
 
   const rows = table.getRowModel().rows;
@@ -1058,6 +1130,10 @@ export function AdminDoctorsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedDoctorForEdit, setSelectedDoctorForEdit] = useState<DoctorListDto | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedDoctorForDelete, setSelectedDoctorForDelete] = useState<DoctorListDto | null>(
+    null,
+  );
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const { data, isLoading } = useGetAll();
   const allDoctors = data?.status === 200 ? data.data : [];
@@ -1070,6 +1146,11 @@ export function AdminDoctorsPage() {
   const handleEdit = (doctor: DoctorListDto) => {
     setSelectedDoctorForEdit(doctor);
     setEditDialogOpen(true);
+  };
+
+  const handleDelete = (doctor: DoctorListDto) => {
+    setSelectedDoctorForDelete(doctor);
+    setDeleteDialogOpen(true);
   };
 
   useEffect(() => {
@@ -1159,6 +1240,7 @@ export function AdminDoctorsPage() {
               onSearchChange={setSearchInput}
               onView={handleView}
               onEdit={handleEdit}
+              onDelete={handleDelete}
             />
           </div>
         </div>
@@ -1171,6 +1253,12 @@ export function AdminDoctorsPage() {
         doctor={selectedDoctorForEdit}
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
+      />
+
+      <DeleteDoctorDialog
+        doctor={selectedDoctorForDelete}
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
       />
     </>
   );
