@@ -104,9 +104,10 @@ export function SlotRow({
               NOW
             </span>
           )}
-          <StatusPill label={slot.scheduleStatus ?? "—"} color={slot.scheduleStatusColorCode} />
-          {isBooked && slot.appointmentStatus && (
+          {isBooked && slot.appointmentStatus ? (
             <StatusPill label={slot.appointmentStatus} color={slot.appointmentStatusColorCode} />
+          ) : (
+            <StatusPill label={slot.scheduleStatus ?? "—"} color={slot.scheduleStatusColorCode} />
           )}
         </div>
       </div>

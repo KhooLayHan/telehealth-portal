@@ -1,4 +1,5 @@
 using Facet;
+
 using TeleHealth.Api.Domain.Entities;
 
 namespace TeleHealth.Api.Features.Schedules.GetAllAvailableSchedules;

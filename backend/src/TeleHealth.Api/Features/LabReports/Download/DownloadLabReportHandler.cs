@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+
 using Serilog;
+
 using TeleHealth.Api.Common.Exceptions.LabReports;
 using TeleHealth.Api.Infrastructure.Aws;
 using TeleHealth.Api.Infrastructure.Persistence;

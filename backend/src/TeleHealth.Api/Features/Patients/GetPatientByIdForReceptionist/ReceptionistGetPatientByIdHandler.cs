@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+
 using TeleHealth.Api.Features.Patients.GetAllPatientsForReceptionist;
 using TeleHealth.Api.Infrastructure.Persistence;
 

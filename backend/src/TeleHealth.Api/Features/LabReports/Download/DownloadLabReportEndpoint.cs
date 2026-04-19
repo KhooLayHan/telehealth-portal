@@ -1,4 +1,5 @@
 using System.Security.Claims;
+
 using TeleHealth.Api.Common;
 using TeleHealth.Api.Common.Exceptions.Auth;
 

@@ -1,6 +1,9 @@
 using Facet.Extensions;
+
 using Microsoft.EntityFrameworkCore;
+
 using Serilog;
+
 using TeleHealth.Api.Common.Exceptions.Appointments;
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Features.Patients.GetAllAppointments;

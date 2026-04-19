@@ -1,4 +1,5 @@
 using Serilog;
+
 using TeleHealth.Api.Common.Exceptions.Base;
 using TeleHealth.Api.Common.Exceptions.ErrorCodes;
 
@@ -33,7 +34,8 @@ public sealed class DuplicateUsernameException : ConflictException
             UserErrorCodes.DuplicateUsername,
             "Username Already Taken",
             "The chosen username is already in use."
-        ) { }
+        )
+    { }
 }
 
 public sealed class DuplicateEmailException : ConflictException
@@ -43,7 +45,8 @@ public sealed class DuplicateEmailException : ConflictException
             UserErrorCodes.DuplicateEmail,
             "Email Already Registered",
             "An account with this email address already exists."
-        ) { }
+        )
+    { }
 }
 
 public sealed class DuplicateIcNumberException : ConflictException
@@ -53,7 +56,8 @@ public sealed class DuplicateIcNumberException : ConflictException
             UserErrorCodes.DuplicateIcNumber,
             "IC Number Already Registered",
             "An account with this IC number already exists."
-        ) { }
+        )
+    { }
 }
 
 public sealed class UserAlreadyExistsException : ConflictException
@@ -63,7 +67,8 @@ public sealed class UserAlreadyExistsException : ConflictException
             UserErrorCodes.AlreadyExists,
             "User Already Exists",
             "A user with these details already exists."
-        ) { }
+        )
+    { }
 }
 
 public sealed class InvalidUserDataException : ValidationException
@@ -82,7 +87,8 @@ public sealed class WeakPasswordException : ValidationException
             UserErrorCodes.WeakPassword,
             "Weak Password",
             "The provided password does not meet security requirements."
-        ) { }
+        )
+    { }
 }
 
 public sealed class InvalidEmailFormatException : ValidationException
@@ -92,5 +98,6 @@ public sealed class InvalidEmailFormatException : ValidationException
             UserErrorCodes.InvalidEmailFormat,
             "Invalid Email Format",
             "The provided email address format is invalid."
-        ) { }
+        )
+    { }
 }

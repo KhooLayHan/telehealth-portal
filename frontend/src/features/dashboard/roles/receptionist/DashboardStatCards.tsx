@@ -1,35 +1,21 @@
 import { motion } from "framer-motion";
-import { CalendarCheck, CalendarClock, Hash, Users } from "lucide-react";
+import { CalendarCheck, CheckCircle2, Hash, XCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface DashboardStatCardsProps {
-  totalSlots: number;
-  bookedCount: number;
-  availableCount: number;
-  activeQueueCount: number;
+  totalAppointments: number;
+  inQueueCount: number;
+  completedCount: number;
+  cancelledCount: number;
 }
 
-const STATS = (total: number, booked: number, available: number, queue: number) => [
+const STATS = (total: number, queue: number, completed: number, cancelled: number) => [
   {
-    label: "Today's Slots",
+    label: "Today's Appointments",
     value: total,
-    icon: CalendarClock,
+    icon: CalendarCheck,
     color: "#0d9488",
     bg: "#0d948812",
-  },
-  {
-    label: "Booked",
-    value: booked,
-    icon: CalendarCheck,
-    color: "#f59e0b",
-    bg: "#f59e0b12",
-  },
-  {
-    label: "Available",
-    value: available,
-    icon: Users,
-    color: "#22c55e",
-    bg: "#22c55e12",
   },
   {
     label: "In Queue",
@@ -38,17 +24,31 @@ const STATS = (total: number, booked: number, available: number, queue: number) 
     color: "#8b5cf6",
     bg: "#8b5cf612",
   },
+  {
+    label: "Completed",
+    value: completed,
+    icon: CheckCircle2,
+    color: "#22c55e",
+    bg: "#22c55e12",
+  },
+  {
+    label: "Cancelled",
+    value: cancelled,
+    icon: XCircle,
+    color: "#ef4444",
+    bg: "#ef444412",
+  },
 ];
 
 export function DashboardStatCards({
-  totalSlots,
-  bookedCount,
-  availableCount,
-  activeQueueCount,
+  totalAppointments,
+  inQueueCount,
+  completedCount,
+  cancelledCount,
 }: DashboardStatCardsProps) {
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-      {STATS(totalSlots, bookedCount, availableCount, activeQueueCount).map(
+      {STATS(totalAppointments, inQueueCount, completedCount, cancelledCount).map(
         ({ label, value, icon: Icon, color, bg }, i) => (
           <motion.div
             key={label}

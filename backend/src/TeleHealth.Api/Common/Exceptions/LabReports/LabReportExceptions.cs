@@ -17,7 +17,8 @@ public sealed class BiomarkerNotFoundException : NotFoundException
             LabReportErrorCodes.BiomarkerNotFound,
             "Biomarker Not Found",
             "The requested biomarker was not found."
-        ) { }
+        )
+    { }
 }
 
 public sealed class DuplicateLabReportException : ConflictException
@@ -27,7 +28,8 @@ public sealed class DuplicateLabReportException : ConflictException
             LabReportErrorCodes.DuplicateReport,
             "Duplicate Lab Report",
             "A lab report of this type already exists for this patient."
-        ) { }
+        )
+    { }
 }
 
 public sealed class InvalidBiomarkerDataException : ValidationException
@@ -37,7 +39,8 @@ public sealed class InvalidBiomarkerDataException : ValidationException
             LabReportErrorCodes.InvalidBiomarkerData,
             "Invalid Biomarker Data",
             "Invalid biomarker data was provided."
-        ) { }
+        )
+    { }
 }
 
 public sealed class InvalidPdfFormatException : ValidationException
@@ -47,7 +50,8 @@ public sealed class InvalidPdfFormatException : ValidationException
             LabReportErrorCodes.InvalidPdfFormat,
             "Invalid PDF Format",
             "The uploaded PDF file format is invalid."
-        ) { }
+        )
+    { }
 }
 
 public sealed class LabReportAccessDeniedException : ForbiddenException
@@ -57,5 +61,6 @@ public sealed class LabReportAccessDeniedException : ForbiddenException
             LabReportErrorCodes.AccessDenied,
             "Access Denied",
             "You do not have permission to view this report."
-        ) { }
+        )
+    { }
 }

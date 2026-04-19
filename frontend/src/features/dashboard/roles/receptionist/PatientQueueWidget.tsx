@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import { Clock } from "lucide-react";
 import type { ReceptionistDoctorScheduleSlotDto } from "@/api/model/ReceptionistDoctorScheduleSlotDto";
 import { formatLocalTime } from "@/features/dashboard/roles/UseDoctorSchedule";
-import { isSlotNow } from "@/features/schedules/ScheduleUtils";
 
 interface QueueEntry {
   queueNum: number;
@@ -113,33 +112,4 @@ export function PatientQueueWidget({ queue, isToday }: PatientQueueWidgetProps) 
       ))}
     </div>
   );
-}
-
-/** Build queue entries from all slots (only booked ones get a number) */
-export function buildQueue(
-  slots: ReceptionistDoctorScheduleSlotDto[],
-  isToday: boolean,
-): QueueEntry[] {
-  const booked = slots.filter((s) => !!s.patientName);
-
-  let foundNext = false;
-
-  return booked.map((slot, idx) => {
-    const isNow = isToday && isSlotNow(String(slot.startTime), String(slot.endTime));
-
-    let isNext = false;
-    if (isToday && !isNow && !foundNext) {
-      const start = String(slot.startTime);
-      const now = new Date();
-      const [h, m] = start.split(":").map(Number);
-      const slotMinutes = h * 60 + m;
-      const nowMinutes = now.getHours() * 60 + now.getMinutes();
-      if (slotMinutes > nowMinutes) {
-        isNext = true;
-        foundNext = true;
-      }
-    }
-
-    return { queueNum: idx + 1, slot, isNow, isNext };
-  });
 }

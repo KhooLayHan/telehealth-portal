@@ -1,7 +1,11 @@
 using Bogus;
+
 using Microsoft.AspNetCore.Identity;
+
 using NodaTime;
+
 using Slugify;
+
 using TeleHealth.Api.Common.Constants;
 using TeleHealth.Api.Domain.Entities;
 

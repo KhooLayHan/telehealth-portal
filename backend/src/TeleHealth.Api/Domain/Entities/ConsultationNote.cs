@@ -5,4 +5,5 @@ public sealed record ConsultationNote(
     string Objective,
     string Assessment,
     string Plan
-) { }
+)
+{ }

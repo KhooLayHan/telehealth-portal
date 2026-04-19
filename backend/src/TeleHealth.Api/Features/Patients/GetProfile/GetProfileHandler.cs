@@ -1,6 +1,9 @@
 using Facet.Extensions;
+
 using Microsoft.EntityFrameworkCore;
+
 using Serilog;
+
 using TeleHealth.Api.Common.Exceptions.Patients;
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Infrastructure.Persistence;

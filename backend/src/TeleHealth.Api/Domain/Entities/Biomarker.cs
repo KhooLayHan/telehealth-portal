@@ -6,4 +6,5 @@ public sealed record Biomarker(
     string Unit,
     string ReferenceRange,
     string Flag
-) { }
+)
+{ }
