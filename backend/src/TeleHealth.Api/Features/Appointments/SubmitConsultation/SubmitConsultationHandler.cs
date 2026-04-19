@@ -1,9 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-
 using NodaTime;
-
 using Slugify;
-
 using TeleHealth.Api.Common.Exceptions.Appointments;
 using TeleHealth.Api.Common.Exceptions.Consultations;
 using TeleHealth.Api.Domain.Entities;

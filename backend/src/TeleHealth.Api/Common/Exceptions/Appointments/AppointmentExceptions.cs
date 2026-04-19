@@ -10,8 +10,7 @@ public sealed class AppointmentNotFoundException : NotFoundException
             AppointmentErrorCodes.NotFound,
             "Appointment Not Found",
             "The requested appointment could not be found."
-        )
-    { }
+        ) { }
 }
 
 public sealed class DoctorScheduleNotFoundException : NotFoundException
@@ -21,8 +20,7 @@ public sealed class DoctorScheduleNotFoundException : NotFoundException
             AppointmentErrorCodes.ScheduleNotFound,
             "Schedule Not Found",
             "The requested schedule could not be found."
-        )
-    { }
+        ) { }
 }
 
 public sealed class ScheduleSlotNotFoundException : NotFoundException
@@ -32,8 +30,7 @@ public sealed class ScheduleSlotNotFoundException : NotFoundException
             AppointmentErrorCodes.ScheduleSlotNotFound,
             "Schedule Slot Not Found",
             "The requested schedule slot could not be found."
-        )
-    { }
+        ) { }
 }
 
 public sealed class ScheduleSlotUnavailableException : ConflictException
@@ -43,8 +40,7 @@ public sealed class ScheduleSlotUnavailableException : ConflictException
             AppointmentErrorCodes.ScheduleUnavailable,
             "Schedule Slot Unavailable",
             "This schedule slot is no longer available."
-        )
-    { }
+        ) { }
 }
 
 public sealed class AppointmentTimeConflictException : ConflictException
@@ -54,8 +50,7 @@ public sealed class AppointmentTimeConflictException : ConflictException
             AppointmentErrorCodes.TimeConflict,
             "Appointment Time Conflict",
             "You already have an appointment at this time."
-        )
-    { }
+        ) { }
 }
 
 public sealed class ScheduleExpiredException : ConflictException
@@ -65,8 +60,7 @@ public sealed class ScheduleExpiredException : ConflictException
             AppointmentErrorCodes.ScheduleExpired,
             "Schedule Expired",
             "This schedule slot has expired."
-        )
-    { }
+        ) { }
 }
 
 public sealed class AppointmentAlreadyCompletedException : ConflictException
@@ -76,8 +70,7 @@ public sealed class AppointmentAlreadyCompletedException : ConflictException
             AppointmentErrorCodes.AlreadyCompleted,
             "Appointment Already Completed",
             "This appointment has already been completed."
-        )
-    { }
+        ) { }
 }
 
 public sealed class AppointmentAlreadyCancelledException : ConflictException
@@ -87,8 +80,7 @@ public sealed class AppointmentAlreadyCancelledException : ConflictException
             AppointmentErrorCodes.AlreadyCancelled,
             "Appointment Already Cancelled",
             "This appointment has already been cancelled."
-        )
-    { }
+        ) { }
 }
 
 public sealed class AppointmentAlreadyTerminatedException : ConflictException
@@ -98,8 +90,7 @@ public sealed class AppointmentAlreadyTerminatedException : ConflictException
             AppointmentErrorCodes.AlreadyTerminated,
             "Appointment Already Terminated",
             $"This appointment cannot be modified because it is already '{statusName}'."
-        )
-    { }
+        ) { }
 }
 
 public sealed class AppointmentInProgressException : ConflictException
@@ -109,8 +100,7 @@ public sealed class AppointmentInProgressException : ConflictException
             AppointmentErrorCodes.InProgress,
             "Appointment In Progress",
             "This appointment is currently in progress and cannot be self-cancelled. Please contact the clinic."
-        )
-    { }
+        ) { }
 }
 
 public sealed class ConcurrentBookingException : ConflictException
@@ -120,8 +110,7 @@ public sealed class ConcurrentBookingException : ConflictException
             AppointmentErrorCodes.ConcurrentModification,
             "Concurrent Booking Detected",
             "Another user booked this slot simultaneously. Please try again."
-        )
-    { }
+        ) { }
 }
 
 public sealed class InvalidAppointmentTimeException : ValidationException
@@ -131,8 +120,7 @@ public sealed class InvalidAppointmentTimeException : ValidationException
             AppointmentErrorCodes.InvalidTime,
             "Invalid Appointment Time",
             "The selected appointment time is invalid."
-        )
-    { }
+        ) { }
 }
 
 public sealed class PastAppointmentException : ValidationException
@@ -142,8 +130,7 @@ public sealed class PastAppointmentException : ValidationException
             AppointmentErrorCodes.PastAppointment,
             "Cannot Book Past Appointment",
             "Appointments cannot be booked for past dates or times."
-        )
-    { }
+        ) { }
 }
 
 public sealed class TooShortNoticeException : ValidationException
@@ -153,8 +140,7 @@ public sealed class TooShortNoticeException : ValidationException
             AppointmentErrorCodes.TooShortNotice,
             "Insufficient Notice",
             "This appointment requires more advance notice."
-        )
-    { }
+        ) { }
 }
 
 public sealed class InvalidRescheduleException : ValidationException
@@ -164,8 +150,7 @@ public sealed class InvalidRescheduleException : ValidationException
             AppointmentErrorCodes.InvalidReschedule,
             "Cannot Reschedule",
             "This appointment cannot be rescheduled."
-        )
-    { }
+        ) { }
 }
 
 public sealed class DoctorNotAvailableException : ValidationException
@@ -175,8 +160,7 @@ public sealed class DoctorNotAvailableException : ValidationException
             AppointmentErrorCodes.DoctorNotAvailable,
             "Doctor Not Available",
             "The selected doctor is not available at that time."
-        )
-    { }
+        ) { }
 }
 
 public sealed class PatientRequiredException : ValidationException
@@ -186,6 +170,5 @@ public sealed class PatientRequiredException : ValidationException
             AppointmentErrorCodes.PatientRequired,
             "Patient Required",
             "A patient is required to book an appointment."
-        )
-    { }
+        ) { }
 }

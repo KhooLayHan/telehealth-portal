@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Http.HttpResults;
-
 using TeleHealth.Api.Common;
 using TeleHealth.Api.Common.Security;
 using TeleHealth.Api.Features.Patients.GetAllPatientsForReceptionist;

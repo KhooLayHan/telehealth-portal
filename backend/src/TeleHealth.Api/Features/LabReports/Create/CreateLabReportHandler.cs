@@ -1,11 +1,7 @@
 using Facet.Extensions;
-
 using Microsoft.EntityFrameworkCore;
-
 using Serilog;
-
 using Slugify;
-
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Infrastructure.Aws;
 using TeleHealth.Api.Infrastructure.Persistence;

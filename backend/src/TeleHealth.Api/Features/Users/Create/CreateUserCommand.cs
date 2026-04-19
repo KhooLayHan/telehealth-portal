@@ -1,5 +1,4 @@
 using Destructurama.Attributed;
-
 using NodaTime;
 
 namespace TeleHealth.Api.Features.Users.Create;
@@ -14,5 +13,4 @@ public sealed record CreateUserCommand(
     LocalDate DateOfBirth,
     string Phone,
     string IcNumber
-)
-{ }
+) { }

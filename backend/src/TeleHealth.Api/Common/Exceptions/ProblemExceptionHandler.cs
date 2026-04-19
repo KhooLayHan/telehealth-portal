@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-
 using Serilog;
 
 namespace TeleHealth.Api.Common.Exceptions;

@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-
 using TeleHealth.Api.Infrastructure.Persistence;
 
 namespace TeleHealth.Api.Features.Doctors.GetAllDoctors;

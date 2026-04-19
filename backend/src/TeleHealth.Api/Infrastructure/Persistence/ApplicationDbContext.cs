@@ -1,7 +1,5 @@
 using MassTransit;
-
 using Microsoft.EntityFrameworkCore;
-
 using TeleHealth.Api.Domain.Entities;
 
 namespace TeleHealth.Api.Infrastructure.Persistence;

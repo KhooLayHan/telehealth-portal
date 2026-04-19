@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-
 using TeleHealth.Api.Common.Models;
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Infrastructure.Persistence;

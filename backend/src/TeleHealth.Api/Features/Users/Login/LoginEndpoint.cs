@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Http.HttpResults;
-
 using TeleHealth.Api.Common;
 
 namespace TeleHealth.Api.Features.Users.Login;

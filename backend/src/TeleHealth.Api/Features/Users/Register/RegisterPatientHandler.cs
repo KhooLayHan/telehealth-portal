@@ -1,24 +1,16 @@
 using Amazon.CloudWatchLogs.Model;
-
 using MassTransit;
-
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-
 using NodaTime;
-
 using Npgsql;
-
 using Serilog;
-
 using Slugify;
-
 using TeleHealth.Api.Common.Exceptions;
 using TeleHealth.Api.Common.Exceptions.Users;
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Infrastructure.Persistence;
 using TeleHealth.Contracts;
-
 using InvalidOperationException = System.InvalidOperationException;
 
 namespace TeleHealth.Api.Features.Users.Register;

@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Http.Features;
-
 using TeleHealth.Api.Common.Exceptions;
 
 namespace TeleHealth.Api.Common.Extensions;

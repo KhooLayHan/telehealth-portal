@@ -10,8 +10,7 @@ public sealed class ConsultationNotFoundException : NotFoundException
             ConsultationErrorCodes.NotFound,
             "Consultation Not Found",
             $"Consultation '{consultationId}' was not found."
-        )
-    { }
+        ) { }
 }
 
 public sealed class ConsultationNoteNotFoundException : NotFoundException
@@ -21,8 +20,7 @@ public sealed class ConsultationNoteNotFoundException : NotFoundException
             ConsultationErrorCodes.NoteNotFound,
             "Consultation Note Not Found",
             $"Consultation note was not found."
-        )
-    { }
+        ) { }
 }
 
 public sealed class PrescriptionNotFoundException : NotFoundException
@@ -32,8 +30,7 @@ public sealed class PrescriptionNotFoundException : NotFoundException
             ConsultationErrorCodes.PrescriptionNotFound,
             "Prescription Not Found",
             "Prescription was not found."
-        )
-    { }
+        ) { }
 }
 
 public sealed class ConsultationAlreadyExistsException : Base.ConflictException
@@ -43,8 +40,7 @@ public sealed class ConsultationAlreadyExistsException : Base.ConflictException
             ConsultationErrorCodes.AlreadyExists,
             "Consultation Already Exists",
             "A consultation already exists for this appointment."
-        )
-    { }
+        ) { }
 }
 
 public sealed class EmptyConsultationNoteException : ValidationException
@@ -54,8 +50,7 @@ public sealed class EmptyConsultationNoteException : ValidationException
             ConsultationErrorCodes.EmptyNote,
             "Empty Consultation Note",
             "Consultation notes cannot be empty."
-        )
-    { }
+        ) { }
 }
 
 public sealed class InvalidPrescriptionDataException : ValidationException
@@ -65,8 +60,7 @@ public sealed class InvalidPrescriptionDataException : ValidationException
             ConsultationErrorCodes.InvalidPrescription,
             "Invalid Prescription Data",
             "Invalid prescription data was provided."
-        )
-    { }
+        ) { }
 }
 
 public sealed class AppointmentRequiredForConsultationException : ValidationException
@@ -76,8 +70,7 @@ public sealed class AppointmentRequiredForConsultationException : ValidationExce
             ConsultationErrorCodes.AppointmentRequired,
             "Appointment Required",
             "A valid appointment is required to create a consultation."
-        )
-    { }
+        ) { }
 }
 
 public sealed class PatientNotCheckedInException : ValidationException
@@ -87,6 +80,5 @@ public sealed class PatientNotCheckedInException : ValidationException
             ConsultationErrorCodes.PatientNotCheckedIn,
             "Patient Not Checked In",
             "The patient must be checked in before starting a consultation."
-        )
-    { }
+        ) { }
 }

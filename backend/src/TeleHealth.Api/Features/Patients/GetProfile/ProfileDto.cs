@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-
 using TeleHealth.Api.Domain.Entities;
 
 namespace TeleHealth.Api.Features.Patients.GetProfile;

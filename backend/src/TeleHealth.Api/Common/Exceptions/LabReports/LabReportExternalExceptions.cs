@@ -11,8 +11,7 @@ public sealed class S3UploadFailedException : ProblemException
             StatusCodes.Status502BadGateway,
             "S3 Upload Failed",
             "Failed to upload file to storage."
-        )
-    { }
+        ) { }
 }
 
 public sealed class PdfProcessingFailedException : ProblemException
@@ -23,6 +22,5 @@ public sealed class PdfProcessingFailedException : ProblemException
             StatusCodes.Status422UnprocessableEntity,
             "PDF Processing Failed",
             "Failed to process the uploaded PDF file."
-        )
-    { }
+        ) { }
 }

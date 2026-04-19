@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-
 using TeleHealth.Api.Features.Doctors.GetDoctorPatientAppointments;
 using TeleHealth.Api.Infrastructure.Persistence;
 

@@ -1,7 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-
 using NodaTime;
-
 using TeleHealth.Api.Infrastructure.Persistence;
 
 namespace TeleHealth.Api.Features.Doctors.GetDoctorPatients;

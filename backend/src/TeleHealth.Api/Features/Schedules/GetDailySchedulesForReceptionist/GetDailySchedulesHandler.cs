@@ -1,9 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-
 using NodaTime.Text;
-
 using Serilog;
-
 using TeleHealth.Api.Common.Exceptions.Schedules;
 using TeleHealth.Api.Infrastructure.Persistence;
 
@@ -53,8 +50,8 @@ public sealed class GetDailySchedulesHandler(ApplicationDbContext db)
         // Load all appointments for these slots, then pick the most recent per slot.
         // This ensures cancelled/completed statuses are shown correctly, and a re-booked
         // slot shows the new active appointment rather than the old cancelled one.
-        var allAppointments = await db.Appointments
-            .AsNoTracking()
+        var allAppointments = await db
+            .Appointments.AsNoTracking()
             .Include(a => a.Patient)
                 .ThenInclude(p => p.User)
             .Include(a => a.AppointmentStatus)
