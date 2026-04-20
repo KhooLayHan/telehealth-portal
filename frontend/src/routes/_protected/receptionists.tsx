@@ -1,4 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import { AdminReceptionistsPage } from "@/features/admins/AdminReceptionistsPage";
 import { useAuthStore } from "@/store/useAuthStore";
 
 export const Route = createFileRoute("/_protected/receptionists")({
@@ -10,5 +11,5 @@ export const Route = createFileRoute("/_protected/receptionists")({
       throw redirect({ to: "/dashboard" });
     }
   },
-  component: () => <div>Admin Receptionist List Here!</div>,
+  component: AdminReceptionistsPage,
 });

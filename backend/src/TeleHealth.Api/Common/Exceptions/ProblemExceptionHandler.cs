@@ -13,10 +13,14 @@ internal sealed class ProblemExceptionHandler(IProblemDetailsService problemDeta
         CancellationToken cancellationToken
     )
     {
-        // Cold starts and slow queries causes the endpoint to run slowly for the first time...
+        // OperationCanceledException can arrive before httpContext.RequestAborted reflects
+        // the cancellation (timing race in Kestrel), so also check the exception's own token.
         if (
-            exception is OperationCanceledException
-            && httpContext.RequestAborted.IsCancellationRequested
+            exception is OperationCanceledException oce
+            && (
+                httpContext.RequestAborted.IsCancellationRequested
+                || oce.CancellationToken.IsCancellationRequested
+            )
         )
         {
             Log.Information(

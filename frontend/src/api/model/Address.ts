@@ -5,4 +5,10 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type Instant = {};
+export interface Address {
+  street: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+}
