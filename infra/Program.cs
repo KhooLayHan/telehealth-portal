@@ -259,12 +259,17 @@ return await Deployment.RunAsync(() =>
     // ============================================================
     var labReportsBucket = new Aws.S3.Bucket(
         "telehealth-lab-reports",
-        new Aws.S3.BucketArgs
+        new Aws.S3.BucketArgs { ForceDestroy = true, Tags = tags }
+    );
+
+    var labReportsCors = new Aws.S3.BucketCorsConfiguration(
+        "labReportsCors",
+        new Aws.S3.BucketCorsConfigurationArgs
         {
-            ForceDestroy = true,
+            Bucket = labReportsBucket.Id,
             CorsRules = new[]
             {
-                new Aws.S3.Inputs.BucketCorsRuleArgs
+                new Aws.S3.Inputs.BucketCorsConfigurationCorsRuleArgs
                 {
                     AllowedHeaders = { "*" },
                     AllowedMethods = { "PUT", "POST", "GET" },
@@ -272,7 +277,6 @@ return await Deployment.RunAsync(() =>
                     MaxAgeSeconds = 3000,
                 },
             },
-            Tags = tags,
         }
     );
 
@@ -309,7 +313,7 @@ return await Deployment.RunAsync(() =>
         }
     );
 
-    new Aws.Sqs.QueuePolicy(
+    var queuePolicy = new Aws.Sqs.QueuePolicy(
         "queue-policy",
         new Aws.Sqs.QueuePolicyArgs
         {
@@ -356,7 +360,7 @@ return await Deployment.RunAsync(() =>
         }
     );
 
-    new Aws.Iam.RolePolicyAttachment(
+    var rdsMonitoringPolicyAttachment = new Aws.Iam.RolePolicyAttachment(
         "rds-monitoring-policy",
         new Aws.Iam.RolePolicyAttachmentArgs
         {
@@ -408,7 +412,7 @@ return await Deployment.RunAsync(() =>
         }
     );
 
-    new Aws.CloudWatch.LogGroup(
+    var telehealthRdsLogsLogGroup = new Aws.CloudWatch.LogGroup(
         "telehealth-rds-logs",
         new Aws.CloudWatch.LogGroupArgs
         {
@@ -419,7 +423,7 @@ return await Deployment.RunAsync(() =>
     );
 
     // Alarm: RDS CPU > 80% for 10 minutes → SNS
-    new Aws.CloudWatch.MetricAlarm(
+    var rdsHighCpuAlarm = new Aws.CloudWatch.MetricAlarm(
         "rds-high-cpu",
         new Aws.CloudWatch.MetricAlarmArgs
         {
@@ -439,7 +443,7 @@ return await Deployment.RunAsync(() =>
     );
 
     // Alarm: RDS free storage < 2 GiB
-    new Aws.CloudWatch.MetricAlarm(
+    var rdsLowStorageAlarm = new Aws.CloudWatch.MetricAlarm(
         "rds-low-storage",
         new Aws.CloudWatch.MetricAlarmArgs
         {
@@ -458,23 +462,23 @@ return await Deployment.RunAsync(() =>
     );
 
     // Alarm: API 5xx errors > 10/min
-    new Aws.CloudWatch.MetricAlarm(
-        "eb-5xx-errors",
-        new Aws.CloudWatch.MetricAlarmArgs
-        {
-            ComparisonOperator = "GreaterThanThreshold",
-            EvaluationPeriods = 1,
-            MetricName = "ApplicationRequests5xx",
-            Namespace = "AWS/ElasticBeanstalk",
-            Period = 60,
-            Statistic = "Sum",
-            Threshold = 10,
-            AlarmDescription = "More than 10 HTTP 5xx responses per minute",
-            Dimensions = new InputMap<string> { { "EnvironmentName", ebEnv.Name } },
-            AlarmActions = { medicalAlertsTopic.Arn },
-            Tags = tags,
-        }
-    );
+    // var eb5xxErrorsAlarm = new Aws.CloudWatch.MetricAlarm(
+    //     "eb-5xx-errors",
+    //     new Aws.CloudWatch.MetricAlarmArgs
+    //     {
+    //         ComparisonOperator = "GreaterThanThreshold",
+    //         EvaluationPeriods = 1,
+    //         MetricName = "ApplicationRequests5xx",
+    //         Namespace = "AWS/ElasticBeanstalk",
+    //         Period = 60,
+    //         Statistic = "Sum",
+    //         Threshold = 10,
+    //         AlarmDescription = "More than 10 HTTP 5xx responses per minute",
+    //         Dimensions = new InputMap<string> { { "EnvironmentName", ebEnv.Name } },
+    //         AlarmActions = { medicalAlertsTopic.Arn },
+    //         Tags = tags,
+    //     }
+    // );
 
     // ============================================================
     // 8. X-RAY — Tracing group + sampling rule
@@ -482,7 +486,7 @@ return await Deployment.RunAsync(() =>
     //    .NET app only needs OpenTelemetry.Instrumentation.AWS to
     //    emit traces automatically.
     // ============================================================
-    new Aws.Xray.SamplingRule(
+    var telehealthSamplingRule = new Aws.Xray.SamplingRule(
         "telehealth-sampling-rule",
         new Aws.Xray.SamplingRuleArgs
         {
@@ -555,14 +559,14 @@ return await Deployment.RunAsync(() =>
         }
     )
     {
-        new Aws.Iam.RolePolicyAttachment(
+        var attachment = new Aws.Iam.RolePolicyAttachment(
             $"policy-{suffix}",
             new Aws.Iam.RolePolicyAttachmentArgs { Role = ebRole.Name, PolicyArn = policyArn }
         );
     }
 
     // Inline policy: scoped S3 access for lab-reports bucket only
-    new Aws.Iam.RolePolicy(
+    var labReportsPolicy = new Aws.Iam.RolePolicy(
         "policy-s3-lab-reports",
         new Aws.Iam.RolePolicyArgs
         {
@@ -581,7 +585,7 @@ return await Deployment.RunAsync(() =>
     );
 
     // Inline policy: read the DB secret (app retrieves password at startup)
-    new Aws.Iam.RolePolicy(
+    var secretsManagerPolicy = new Aws.Iam.RolePolicy(
         "policy-secrets-manager",
         new Aws.Iam.RolePolicyArgs
         {
