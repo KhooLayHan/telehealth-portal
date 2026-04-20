@@ -58,8 +58,8 @@ jobs:
           command: up
           stack-name: dev
           work-dir: infra
-          # refresh=true ensures Pulumi detects any out-of-band drift before applying
-          upsert: true
+          upsert: true # creates the stack on first run; refresh=true reconciles state before the update
+          refresh: true
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
@@ -157,12 +157,12 @@ jobs:
       - name: Build, tag & push image to ECR
         id: build-image
         env:
-          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
-          # Short SHA keeps labels readable; full SHA used for traceability
-          SHORT_SHA: ${{ github.sha }}
-          VERSION_LABEL: telehealth-${{ github.run_number }}-${{ github.sha }}
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}          
         run: |
+          SHORT_SHA="${GITHUB_SHA:0:8}"
+          VERSION_LABEL="telehealth-${{ github.run_number }}-${SHORT_SHA}"
           IMAGE_URI="$ECR_REGISTRY/$ECR_REPOSITORY:$SHORT_SHA"
+          echo "version_label=$VERSION_LABEL" >> "$GITHUB_OUTPUT"
 
           # Build from repo root so the Dockerfile can COPY backend/** correctly.
           # The multi-stage Dockerfile handles `dotnet restore` + `dotnet publish`

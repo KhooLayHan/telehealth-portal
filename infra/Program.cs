@@ -90,7 +90,7 @@ return await Deployment.RunAsync(() =>
                     {
                         ""rulePriority"": 2,
                         ""description"": ""Keep last 10 tagged images"",
-                        ""selection"": { ""tagStatus"": ""tagged"", ""tagPrefixList"": [""telehealth-""], ""countType"": ""imageCountMoreThan"", ""countNumber"": 10 },
+                        ""selection"": { ""tagStatus"": ""any"", ""countType"": ""imageCountMoreThan"", ""countNumber"": 10 },
                         ""action"": { ""type"": ""expire"" }
                     }
                 ]
@@ -470,6 +470,7 @@ return await Deployment.RunAsync(() =>
             Statistic = "Sum",
             Threshold = 10,
             AlarmDescription = "More than 10 HTTP 5xx responses per minute",
+            Dimensions = new InputMap<string> { { "EnvironmentName", ebEnv.Name } },
             AlarmActions = { medicalAlertsTopic.Arn },
             Tags = tags,
         }
@@ -481,9 +482,9 @@ return await Deployment.RunAsync(() =>
     //    .NET app only needs OpenTelemetry.Instrumentation.AWS to
     //    emit traces automatically.
     // ============================================================
-    new Aws.XRay.SamplingRule(
+    new Aws.Xray.SamplingRule(
         "telehealth-sampling-rule",
-        new Aws.XRay.SamplingRuleArgs
+        new Aws.Xray.SamplingRuleArgs
         {
             RuleName = "telehealth-api-sampling",
             Priority = 9000,
@@ -500,13 +501,13 @@ return await Deployment.RunAsync(() =>
         }
     );
 
-    var xrayGroup = new Aws.XRay.Group(
+    var xrayGroup = new Aws.Xray.Group(
         "telehealth-xray-group",
-        new Aws.XRay.GroupArgs
+        new Aws.Xray.GroupArgs
         {
             GroupName = "telehealth-api",
             FilterExpression = "service(\"telehealth-api\")",
-            InsightsConfiguration = new Aws.XRay.Inputs.GroupInsightsConfigurationArgs
+            InsightsConfiguration = new Aws.Xray.Inputs.GroupInsightsConfigurationArgs
             {
                 InsightsEnabled = true,
                 NotificationsEnabled = false,
