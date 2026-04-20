@@ -9,10 +9,15 @@ on:
   push:
     branches: ["main"]
     paths:
+      - "Directory.Build.props"
+      - "Directory.Packages.props"
       - "backend/**"
       - "frontend/**"
       - "infra/**"
       - ".github/workflows/cd-deploy.yml"
+concurrency:
+  group: cd-deploy-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
@@ -160,9 +165,9 @@ jobs:
           ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}          
         run: |
           SHORT_SHA="${GITHUB_SHA:0:8}"
-          VERSION_LABEL="telehealth-${{ github.run_number }}-${SHORT_SHA}"
-          IMAGE_URI="$ECR_REGISTRY/$ECR_REPOSITORY:$SHORT_SHA"
-          echo "version_label=$VERSION_LABEL" >> "$GITHUB_OUTPUT"
+          VERSION_LABEL="telehealth-${{ github.run_number }}-${{ github.run_attempt }}-${SHORT_SHA}"
+          IMAGE_URI="$ECR_REPOSITORY_URL:$SHORT_SHA"
+
 
           # Build from repo root so the Dockerfile can COPY backend/** correctly.
           # The multi-stage Dockerfile handles `dotnet restore` + `dotnet publish`
@@ -171,15 +176,15 @@ jobs:
             --file backend/src/TeleHealth.Api/Dockerfile \
             --build-arg BUILD_CONFIGURATION=Release \
             --tag "$IMAGE_URI" \
-            --tag "$ECR_REGISTRY/$ECR_REPOSITORY:latest" \
+            --tag "$ECR_REPOSITORY_URL:latest" \
             .
 
           docker push "$IMAGE_URI"
-          docker push "$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+          docker push "$ECR_REPOSITORY_URL:latest"
 
           # Pass image URI and version label to subsequent steps
           echo "image_uri=$IMAGE_URI" >> "$GITHUB_OUTPUT"
-          echo "version_label=telehealth-${{ github.run_number }}-${SHORT_SHA:0:8}" >> "$GITHUB_OUTPUT"
+          echo "version_label=$VERSION_LABEL" >> "$GITHUB_OUTPUT"
 
       # ── Create a Dockerrun.aws.json that points EB at the ECR image ──
       - name: Create Dockerrun.aws.json
