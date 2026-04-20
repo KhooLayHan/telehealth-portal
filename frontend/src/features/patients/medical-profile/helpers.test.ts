@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { generateId, normalizeEmergencyContact, toFormAllergies } from "./helpers";
 
 describe("helpers", () => {
@@ -7,6 +7,10 @@ describe("helpers", () => {
       vi.spyOn(crypto, "randomUUID").mockReturnValue(
         "12345678-1234-1234-1234-123456789abc" as `${string}-${string}-${string}-${string}-${string}`,
       );
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
     });
 
     it("returns a string from crypto.randomUUID", () => {

@@ -3,7 +3,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { PatientProfileDto } from "@/api/model/PatientProfileDto";
 import { useMedicalProfile } from "./UseMedicalProfile";
 
-const mockMutateAsync = vi.fn().mockResolvedValue(undefined);
+const { mockMutateAsync } = vi.hoisted(() => ({
+  mockMutateAsync: vi.fn().mockResolvedValue(undefined),
+}));
 
 vi.mock("@/api/generated/patients/patients", () => ({
   useUpdateMedicalRecord: vi.fn(() => ({

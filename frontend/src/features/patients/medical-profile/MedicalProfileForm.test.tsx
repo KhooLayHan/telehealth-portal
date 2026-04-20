@@ -3,7 +3,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { PatientProfileDto } from "@/api/model/PatientProfileDto";
 import { PatientMedicalProfileForm } from "./MedicalProfileForm";
 
-const mockUseGetProfile = vi.fn();
+const { mockUseGetProfile } = vi.hoisted(() => ({
+  mockUseGetProfile: vi.fn(),
+}));
 
 vi.mock("@/api/generated/patients/patients", () => ({
   useGetProfile: (...args: unknown[]) => mockUseGetProfile(...args),
