@@ -173,6 +173,7 @@ builder.Services.AddScoped<ReceptionistGetPatientByIdHandler>();
 builder.Services.AddScoped<ReceptionistGetPatientHistoryHandler>();
 builder.Services.AddScoped<GetDoctorPatientsHandler>();
 builder.Services.AddScoped<GetDoctorPatientAppointmentsHandler>();
+builder.Services.AddScoped<ClinicStaffGetAllPatientsHandler>();
 
 builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonS3>();

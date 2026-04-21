@@ -33,14 +33,21 @@ public sealed class ClinicStaffGetAllPatientsHandler(ApplicationDbContext db)
             q = q.Where(p => EF.Functions.ILike(p.User.FirstName + " " + p.User.LastName, pattern));
         }
 
-        q =
-            query.SortOrder?.ToLowerInvariant() == "desc"
-                ? q.OrderByDescending(p => p.User.LastName)
-                : q.OrderBy(p => p.User.LastName);
+        q = string.Equals(query.SortOrder, "desc", StringComparison.OrdinalIgnoreCase)
+            ? q.OrderByDescending(p => p.User.LastName)
+                .ThenByDescending(p => p.User.FirstName)
+                .ThenByDescending(p => p.PublicId)
+            : q.OrderBy(p => p.User.LastName).ThenBy(p => p.User.FirstName).ThenBy(p => p.PublicId);
 
         var totalCount = await q.CountAsync(ct);
 
-        var rawItems = await q.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(ct);
+        var skip = ((long)page - 1) * pageSize;
+        if (skip >= totalCount)
+        {
+            return new PagedResult<ClinicStaffPatientDto>([], totalCount, page, pageSize);
+        }
+
+        var rawItems = await q.Skip((int)skip).Take(pageSize).ToListAsync(ct);
 
         var items = rawItems
             .Select(p => new ClinicStaffPatientDto

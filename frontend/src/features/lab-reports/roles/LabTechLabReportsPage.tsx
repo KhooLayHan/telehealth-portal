@@ -20,6 +20,10 @@ export function LabTechLabReportsPage() {
   });
 
   const patients = data?.data?.items ?? [];
+  const totalCount = data?.data?.totalCount ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  const canGoPrevious = page > 1;
+  const canGoNext = page < totalPages;
 
   const handleSearchChange = (value: string) => {
     setSearch(value);
@@ -48,8 +52,15 @@ export function LabTechLabReportsPage() {
       </div>
 
       <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+        <label htmlFor="patient-search" className="sr-only">
+          Search patients
+        </label>
+        <Search
+          aria-hidden="true"
+          className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground"
+        />
         <Input
+          id="patient-search"
           placeholder="Search by patient name..."
           value={search}
           onChange={(e) => handleSearchChange(e.target.value)}
@@ -58,10 +69,11 @@ export function LabTechLabReportsPage() {
         {search && (
           <button
             type="button"
+            aria-label="Clear patient search"
             onClick={() => handleSearchChange("")}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
           >
-            <X className="size-4" />
+            <X aria-hidden="true" className="size-4" />
           </button>
         )}
       </div>
@@ -73,34 +85,56 @@ export function LabTechLabReportsPage() {
           {search ? "No patients found." : "Type a name to search patients."}
         </p>
       ) : (
-        <div className="grid gap-3">
-          {patients.map((patient) => (
-            <Card
-              key={patient.patientPublicId}
-              className="hover:border-primary/50 transition-colors"
+        <>
+          <div className="grid gap-3">
+            {patients.map((patient) => (
+              <Card
+                key={patient.patientPublicId}
+                className="hover:border-primary/50 transition-colors"
+              >
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <User className="size-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium">{patient.fullName}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {patient.gender} · {patient.age} yrs
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => setSelectedPatientId(patient.patientPublicId ?? null)}
+                    size="sm"
+                  >
+                    Select <ChevronRight className="size-4 ml-1" />
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <div className="flex items-center justify-between">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={!canGoPrevious}
+              onClick={() => setPage((currentPage) => Math.max(1, currentPage - 1))}
             >
-              <CardContent className="p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <User className="size-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-medium">{patient.fullName}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {patient.gender} · {patient.age} yrs
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  onClick={() => setSelectedPatientId(patient.patientPublicId ?? null)}
-                  size="sm"
-                >
-                  Select <ChevronRight className="size-4 ml-1" />
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+              Previous
+            </Button>
+            Page {page} of {totalPages}
+            <span className="text-muted-foreground text-sm" aria-live="polite"></span>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={!canGoNext}
+              onClick={() => setPage((currentPage) => Math.min(totalPages, currentPage + 1))}
+            >
+              Next
+            </Button>
+          </div>
+        </>
       )}
     </div>
   );
