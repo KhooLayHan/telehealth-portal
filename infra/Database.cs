@@ -84,11 +84,14 @@ public static class Database
                 PubliclyAccessible = false,
                 StorageEncrypted = true,
 
-                // Backup safety net (makes SkipFinalSnapshot = true safer)
+                // Backup & snapshot policy
                 BackupRetentionPeriod = 7,
                 BackupWindow = "03:00-04:00",
                 MaintenanceWindow = "sun:04:30-sun:05:30",
-                SkipFinalSnapshot = true,
+                SkipFinalSnapshot = cfg.SkipFinalSnapshot,
+                FinalSnapshotIdentifier = cfg.SkipFinalSnapshot
+                    ? null!
+                    : $"telehealth-db-{cfg.StackName}-final",
 
                 // Observability
                 MonitoringInterval = 60,

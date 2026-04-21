@@ -12,7 +12,6 @@ public static class Observability
     public sealed class Result
     {
         public required Aws.CloudWatch.LogGroup ApiLogGroup { get; init; }
-        public required Aws.CloudWatch.LogGroup RdsLogGroup { get; init; }
         public required Aws.Xray.Group XrayGroup { get; init; }
     }
 
@@ -31,15 +30,9 @@ public static class Observability
                 Tags = cfg.Tags,
             });
 
-        // RDS log group name derived from the auto-generated instance identifier
-        var rdsLogGroup = new Aws.CloudWatch.LogGroup(
-            "telehealth-rds-logs",
-            new Aws.CloudWatch.LogGroupArgs
-            {
-                Name = db.Instance.Identifier.Apply(id => $"/aws/rds/instance/{id}/postgresql"),
-                RetentionInDays = 14,
-                Tags = cfg.Tags,
-            });
+        // NOTE: RDS log groups (/aws/rds/instance/{id}/postgresql, /aws/rds/instance/{id}/upgrade)
+        // are auto-created by AWS when EnabledCloudwatchLogsExports is set on the RDS instance.
+        // Do not create them here — it would conflict with the AWS-managed groups.
 
         // ── Metric alarms — route to SNS ──
 
@@ -83,6 +76,7 @@ public static class Observability
                     { "DBInstanceIdentifier", db.Instance.Id },
                 },
                 AlarmActions = { msg.MedicalAlertsTopic.Arn },
+                OkActions = { msg.MedicalAlertsTopic.Arn },
                 Tags = cfg.Tags,
             });
 
@@ -122,7 +116,6 @@ public static class Observability
         return new Result
         {
             ApiLogGroup = apiLogGroup,
-            RdsLogGroup = rdsLogGroup,
             XrayGroup = xrayGroup,
         };
     }
