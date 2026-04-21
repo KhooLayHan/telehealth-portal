@@ -18,13 +18,6 @@ public sealed class StackConfig
     // AWS
     public string AwsRegion { get; }
 
-    /// <summary>
-    /// Allowed CORS origin for the lab reports S3 bucket.
-    /// Defaults to "*" (any origin) for dev convenience.
-    /// Set per-stack: pulumi config set telehealth:frontendOrigin https://telehealth.example.com
-    /// </summary>
-    public string FrontendOrigin { get; }
-
     // Stack metadata
     public string StackName { get; }
     public InputMap<string> Tags { get; }
@@ -44,8 +37,6 @@ public sealed class StackConfig
         DbInstanceClass = config.Get("dbInstanceClass") ?? "db.t3.micro";
         DbName = config.Get("dbName") ?? "telehealth_dev";
         DbUsername = config.Get("dbUsername") ?? "telehealth_admin";
-
-        FrontendOrigin = config.Get("frontendOrigin") ?? "*";
 
         var awsConfig = new Config("aws");
         AwsRegion = awsConfig.Get("region") ?? "us-east-1";
