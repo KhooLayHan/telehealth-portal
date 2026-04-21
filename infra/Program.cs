@@ -1,4 +1,4 @@
-﻿// TeleHealth DDAC — Pulumi Infrastructure
+// TeleHealth DDAC — Pulumi Infrastructure
 // Run: pulumi up --stack dev
 // Prerequisites: pulumi config set telehealth:dbPassword <secret> --secret
 
@@ -20,11 +20,13 @@ return await Deployment.RunAsync(() =>
     var awsConfig = new Config("aws");
     var awsRegion = awsConfig.Get("region") ?? "us-east-1";
 
+    var stackName = Deployment.Instance.StackName;
+
     var tags = new InputMap<string>
     {
         { "Project", "TeleHealth-DDAC" },
         { "ManagedBy", "Pulumi" },
-        { "Environment", "dev" },
+        { "Environment", stackName },
     };
 
     // ============================================================
@@ -37,8 +39,8 @@ return await Deployment.RunAsync(() =>
         "telehealth-db-secret",
         new Aws.SecretsManager.SecretArgs
         {
-            Name = "telehealth/dev/db-password",
-            Description = "RDS PostgreSQL password for TeleHealth dev environment",
+            Name = $"telehealth/{stackName}/db-password",
+            Description = $"RDS PostgreSQL password for TeleHealth {stackName} environment",
             RecoveryWindowInDays = 0, // Immediate deletion — set ≥7 for production
             Tags = tags,
         }
@@ -62,7 +64,7 @@ return await Deployment.RunAsync(() =>
         "telehealth-api-repo",
         new Aws.Ecr.RepositoryArgs
         {
-            Name = "telehealth-api",
+            Name = $"telehealth-api-{stackName}",
             ImageTagMutability = "MUTABLE",
             ImageScanningConfiguration = new Aws.Ecr.Inputs.RepositoryImageScanningConfigurationArgs
             {
@@ -255,11 +257,12 @@ return await Deployment.RunAsync(() =>
     );
 
     // ============================================================
-    // 5. LAB REPORTS — S3 (private) + SNS topic + SQS queue
+    // 5. LAB REPORTS — S3 (private, protected) + SNS topic + SQS queue
     // ============================================================
     var labReportsBucket = new Aws.S3.Bucket(
         "telehealth-lab-reports",
-        new Aws.S3.BucketArgs { ForceDestroy = true, Tags = tags }
+        new Aws.S3.BucketArgs { Tags = tags },
+        new CustomResourceOptions { Protect = true }
     );
 
     var labReportsCors = new Aws.S3.BucketCorsConfiguration(
@@ -273,7 +276,7 @@ return await Deployment.RunAsync(() =>
                 {
                     AllowedHeaders = { "*" },
                     AllowedMethods = { "PUT", "POST", "GET" },
-                    AllowedOrigins = { "*" }, // Restrict to your domain in production
+                    AllowedOrigins = { "*" }, // TODO: Restrict to your domain in production
                     MaxAgeSeconds = 3000,
                 },
             },
@@ -338,11 +341,11 @@ return await Deployment.RunAsync(() =>
     // ============================================================
     // 6. RDS — PostgreSQL with security hardening
     //    FIXES applied vs original:
-    //      • PubliclyAccessible = false  (DB not on public internet)
-    //      • StorageEncrypted = true     (encryption at rest, free)
-    //      • BackupRetentionPeriod = 7   (7-day automated backups)
-    //      • Security group: EB-only ingress (see section 3)
-    //      • CloudWatch log exports enabled
+    //      * PubliclyAccessible = false  (DB not on public internet)
+    //      * StorageEncrypted = true     (encryption at rest, free)
+    //      * BackupRetentionPeriod = 7   (7-day automated backups)
+    //      * Security group: EB-only ingress (see section 3)
+    //      * CloudWatch log exports enabled
     // ============================================================
     var rdsMonitoringRole = new Aws.Iam.Role(
         "rds-monitoring-role",
@@ -382,21 +385,26 @@ return await Deployment.RunAsync(() =>
             Password = dbPassword,
             VpcSecurityGroupIds = { dbSecurityGroup.Id },
             DbSubnetGroupName = dbSubnetGroup.Name,
+
             // Security hardening
             PubliclyAccessible = false,
             StorageEncrypted = true,
+
             // Backup safety net (makes SkipFinalSnapshot = true safer)
             BackupRetentionPeriod = 7,
             BackupWindow = "03:00-04:00",
             MaintenanceWindow = "sun:04:30-sun:05:30",
             SkipFinalSnapshot = true,
+
             // Observability
             MonitoringInterval = 60,
             MonitoringRoleArn = rdsMonitoringRole.Arn,
             PerformanceInsightsEnabled = true,
             EnabledCloudwatchLogsExports = { "postgresql", "upgrade" },
+
             Tags = tags,
-        }
+        },
+        new CustomResourceOptions { Protect = true }
     );
 
     // ============================================================
@@ -406,23 +414,24 @@ return await Deployment.RunAsync(() =>
         "telehealth-api-logs",
         new Aws.CloudWatch.LogGroupArgs
         {
-            Name = "/telehealth/api",
+            Name = $"/telehealth/{stackName}/api",
             RetentionInDays = 30,
             Tags = tags,
         }
     );
 
-    var telehealthRdsLogsLogGroup = new Aws.CloudWatch.LogGroup(
+    // RDS log group name derived from the auto-generated instance identifier
+    var rdsLogGroup = new Aws.CloudWatch.LogGroup(
         "telehealth-rds-logs",
         new Aws.CloudWatch.LogGroupArgs
         {
-            Name = "/aws/rds/instance/telehealth-db/postgresql",
+            Name = database.Identifier.Apply(id => $"/aws/rds/instance/{id}/postgresql"),
             RetentionInDays = 14,
             Tags = tags,
         }
     );
 
-    // Alarm: RDS CPU > 80% for 10 minutes → SNS
+    // Alarm: RDS CPU > 80% for 10 minutes -> SNS
     var rdsHighCpuAlarm = new Aws.CloudWatch.MetricAlarm(
         "rds-high-cpu",
         new Aws.CloudWatch.MetricAlarmArgs
@@ -460,25 +469,6 @@ return await Deployment.RunAsync(() =>
             Tags = tags,
         }
     );
-
-    // Alarm: API 5xx errors > 10/min
-    // var eb5xxErrorsAlarm = new Aws.CloudWatch.MetricAlarm(
-    //     "eb-5xx-errors",
-    //     new Aws.CloudWatch.MetricAlarmArgs
-    //     {
-    //         ComparisonOperator = "GreaterThanThreshold",
-    //         EvaluationPeriods = 1,
-    //         MetricName = "ApplicationRequests5xx",
-    //         Namespace = "AWS/ElasticBeanstalk",
-    //         Period = 60,
-    //         Statistic = "Sum",
-    //         Threshold = 10,
-    //         AlarmDescription = "More than 10 HTTP 5xx responses per minute",
-    //         Dimensions = new InputMap<string> { { "EnvironmentName", ebEnv.Name } },
-    //         AlarmActions = { medicalAlertsTopic.Arn },
-    //         Tags = tags,
-    //     }
-    // );
 
     // ============================================================
     // 8. X-RAY — Tracing group + sampling rule
@@ -522,12 +512,15 @@ return await Deployment.RunAsync(() =>
 
     // ============================================================
     // 9. IAM — Elastic Beanstalk EC2 instance role
-    //    FIXES applied vs original:
-    //      • Added ECR read (pull pre-built Docker images)
-    //      • Added SQS / SNS / scoped S3 for lab reports
-    //      • Added CloudWatch Logs
-    //      • Added X-Ray daemon write access
-    //      • Added Secrets Manager GetSecretValue for DB secret
+    //    Permissions:
+    //      * EB Web Tier (managed)
+    //      * ECR read-only (managed) — pull pre-built Docker images
+    //      * X-Ray daemon write (managed)
+    //      * Scoped SQS — SendMessage/ReceiveMessage on processing queue only
+    //      * Scoped SNS — Publish to medical alerts topic only
+    //      * Scoped CloudWatch Logs — write to API log group only
+    //      * Scoped S3 — CRUD on lab-reports bucket only
+    //      * Scoped Secrets Manager — GetSecretValue on DB secret only
     // ============================================================
     var ebRole = new Aws.Iam.Role(
         "eb-ec2-role",
@@ -546,27 +539,81 @@ return await Deployment.RunAsync(() =>
         }
     );
 
-    // AWS managed policies attached to EB role
+    // AWS managed policies — only for broad AWS-service integration
     foreach (
         var (suffix, policyArn) in new[]
         {
             ("eb-web-tier", "arn:aws:iam::aws:policy/AWSElasticBeanstalkWebTier"),
             ("eb-ecr-readonly", "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"),
-            ("eb-sqs", "arn:aws:iam::aws:policy/AmazonSQSFullAccess"),
-            ("eb-sns", "arn:aws:iam::aws:policy/AmazonSNSFullAccess"),
             ("eb-xray", "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"),
-            ("eb-cloudwatch-logs", "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"),
         }
     )
     {
-        var attachment = new Aws.Iam.RolePolicyAttachment(
+        _ = new Aws.Iam.RolePolicyAttachment(
             $"policy-{suffix}",
             new Aws.Iam.RolePolicyAttachmentArgs { Role = ebRole.Name, PolicyArn = policyArn }
         );
     }
 
-    // Inline policy: scoped S3 access for lab-reports bucket only
-    var labReportsPolicy = new Aws.Iam.RolePolicy(
+    // Scoped inline policy: SQS — only the processing queue
+    _ = new Aws.Iam.RolePolicy(
+        "policy-sqs-scoped",
+        new Aws.Iam.RolePolicyArgs
+        {
+            Role = ebRole.Name,
+            Policy = processingQueue.Arn.Apply(queueArn =>
+                $@"{{
+                    ""Version"": ""2012-10-17"",
+                    ""Statement"": [{{
+                        ""Effect"": ""Allow"",
+                        ""Action"": [""sqs:SendMessage"",""sqs:ReceiveMessage"",""sqs:DeleteMessage"",""sqs:GetQueueAttributes""],
+                        ""Resource"": ""{queueArn}""
+                    }}]
+                }}"
+            ),
+        }
+    );
+
+    // Scoped inline policy: SNS — only the medical alerts topic
+    _ = new Aws.Iam.RolePolicy(
+        "policy-sns-scoped",
+        new Aws.Iam.RolePolicyArgs
+        {
+            Role = ebRole.Name,
+            Policy = medicalAlertsTopic.Arn.Apply(topicArn =>
+                $@"{{
+                    ""Version"": ""2012-10-17"",
+                    ""Statement"": [{{
+                        ""Effect"": ""Allow"",
+                        ""Action"": [""sns:Publish""],
+                        ""Resource"": ""{topicArn}""
+                    }}]
+                }}"
+            ),
+        }
+    );
+
+    // Scoped inline policy: CloudWatch Logs — only the API log group
+    _ = new Aws.Iam.RolePolicy(
+        "policy-cloudwatch-logs-scoped",
+        new Aws.Iam.RolePolicyArgs
+        {
+            Role = ebRole.Name,
+            Policy = apiLogGroup.Arn.Apply(logGroupArn =>
+                $@"{{
+                    ""Version"": ""2012-10-17"",
+                    ""Statement"": [{{
+                        ""Effect"": ""Allow"",
+                        ""Action"": [""logs:CreateLogStream"",""logs:PutLogEvents"",""logs:DescribeLogStreams""],
+                        ""Resource"": [""{logGroupArn}"",""{logGroupArn}:*""]
+                    }}]
+                }}"
+            ),
+        }
+    );
+
+    // Scoped inline policy: S3 — only the lab-reports bucket
+    _ = new Aws.Iam.RolePolicy(
         "policy-s3-lab-reports",
         new Aws.Iam.RolePolicyArgs
         {
@@ -584,8 +631,8 @@ return await Deployment.RunAsync(() =>
         }
     );
 
-    // Inline policy: read the DB secret (app retrieves password at startup)
-    var secretsManagerPolicy = new Aws.Iam.RolePolicy(
+    // Scoped inline policy: Secrets Manager — only the DB secret
+    _ = new Aws.Iam.RolePolicy(
         "policy-secrets-manager",
         new Aws.Iam.RolePolicyArgs
         {
@@ -611,23 +658,16 @@ return await Deployment.RunAsync(() =>
     // ============================================================
     // 10. ELASTIC BEANSTALK
     //     FIXES applied vs original:
-    //       • SecurityGroups set to ebSecurityGroup (not default SG)
-    //       • CloudWatch log streaming enabled
-    //       • X-Ray daemon enabled
-    //       • ConnectionStrings__Database injected from RDS outputs
-    //       • All required AWS_ env vars injected
+    //       * SecurityGroups set to ebSecurityGroup (not default SG)
+    //       * CloudWatch log streaming enabled
+    //       * X-Ray daemon enabled
+    //       * App resolves DB password from Secrets Manager at runtime
+    //       * All required AWS_ env vars injected
     // ============================================================
     var ebApp = new Aws.ElasticBeanstalk.Application(
         "telehealth-api",
         new Aws.ElasticBeanstalk.ApplicationArgs { Tags = tags }
     );
-
-    var dbConnectionString = Output
-        .Tuple(database.Address, dbPassword)
-        .Apply(t =>
-            $"Host={t.Item1};Port=5432;Database={dbName};Username={dbUsername};Password={t.Item2};"
-            + "SSL Mode=Require;Trust Server Certificate=true;"
-        );
 
     var ebEnv = new Aws.ElasticBeanstalk.Environment(
         "telehealth-env",
@@ -637,7 +677,7 @@ return await Deployment.RunAsync(() =>
             SolutionStackName = "64bit Amazon Linux 2023 v4.3.0 running Docker",
             Settings = new[]
             {
-                // ── Instance & networking ────────────────────────────────────
+                // -- Instance & networking --
                 new Aws.ElasticBeanstalk.Inputs.EnvironmentSettingArgs
                 {
                     Namespace = "aws:autoscaling:launchconfiguration",
@@ -662,7 +702,7 @@ return await Deployment.RunAsync(() =>
                     Name = "EnvironmentType",
                     Value = "SingleInstance",
                 },
-                // ── CloudWatch log streaming ─────────────────────────────────
+                // -- CloudWatch log streaming --
                 new Aws.ElasticBeanstalk.Inputs.EnvironmentSettingArgs
                 {
                     Namespace = "aws:elasticbeanstalk:cloudwatch:logs",
@@ -681,14 +721,14 @@ return await Deployment.RunAsync(() =>
                     Name = "RetentionInDays",
                     Value = "30",
                 },
-                // ── X-Ray daemon ─────────────────────────────────────────────
+                // -- X-Ray daemon --
                 new Aws.ElasticBeanstalk.Inputs.EnvironmentSettingArgs
                 {
                     Namespace = "aws:elasticbeanstalk:xray",
                     Name = "XRayEnabled",
                     Value = "true",
                 },
-                // ── App environment variables ─────────────────────────────────
+                // -- App environment variables --
                 new Aws.ElasticBeanstalk.Inputs.EnvironmentSettingArgs
                 {
                     Namespace = "aws:elasticbeanstalk:application:environment",
@@ -701,14 +741,7 @@ return await Deployment.RunAsync(() =>
                     Name = "ASPNETCORE_HTTP_PORTS",
                     Value = "8080",
                 },
-                // DB connection — builder.Configuration.GetConnectionString("Database")
-                new Aws.ElasticBeanstalk.Inputs.EnvironmentSettingArgs
-                {
-                    Namespace = "aws:elasticbeanstalk:application:environment",
-                    Name = "ConnectionStrings__Database",
-                    Value = dbConnectionString,
-                },
-                // Individual RDS components so the app can also build its own string
+                // DB connection — app resolves password from Secrets Manager at runtime
                 new Aws.ElasticBeanstalk.Inputs.EnvironmentSettingArgs
                 {
                     Namespace = "aws:elasticbeanstalk:application:environment",
@@ -727,7 +760,13 @@ return await Deployment.RunAsync(() =>
                     Name = "RDS_DB",
                     Value = dbName,
                 },
-                // Secret ARN — app resolves the password at runtime via SDK
+                new Aws.ElasticBeanstalk.Inputs.EnvironmentSettingArgs
+                {
+                    Namespace = "aws:elasticbeanstalk:application:environment",
+                    Name = "RDS_USERNAME",
+                    Value = dbUsername,
+                },
+                // Secret ARN — app resolves the password at runtime via AWS SDK
                 new Aws.ElasticBeanstalk.Inputs.EnvironmentSettingArgs
                 {
                     Namespace = "aws:elasticbeanstalk:application:environment",
