@@ -1,0 +1,4 @@
+config:
+  telehealth:dbPassword:
+    secure: AAABAI2N/jsGR4CXZKNGyALsb+8+inV5jr2HIrrjsuY6ap8yW+xIjnpZCnD4gYKji9EGWXRy4OnONZ2/VQ==
+  aws:region: us-east-1
