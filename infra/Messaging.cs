@@ -19,11 +19,19 @@ public static class Messaging
     {
         var medicalAlertsTopic = new Aws.Sns.Topic(
             "medical-alerts-topic",
-            new Aws.Sns.TopicArgs { Tags = cfg.Tags });
+            new Aws.Sns.TopicArgs
+            {
+                KmsMasterKeyId = "alias/aws/sns", // Server-side encryption with AWS-managed key
+                Tags = cfg.Tags,
+            });
 
         var processingQueue = new Aws.Sqs.Queue(
             "report-processing-queue",
-            new Aws.Sqs.QueueArgs { Tags = cfg.Tags });
+            new Aws.Sqs.QueueArgs
+            {
+                SqsManagedSseEnabled = true, // Server-side encryption with SQS-managed keys
+                Tags = cfg.Tags,
+            });
 
         _ = new Aws.Sns.TopicSubscription(
             "queue-topic-sub",
