@@ -36,8 +36,16 @@ import type {
 } from '../../model/GetAllAppointmentsParams';
 
 import type {
+  GetAllPatientsForClinicStaffParams
+} from '../../model/GetAllPatientsForClinicStaffParams';
+
+import type {
   PagedResultOfAppointmentDto
 } from '../../model/PagedResultOfAppointmentDto';
+
+import type {
+  PagedResultOfClinicStaffPatientDto
+} from '../../model/PagedResultOfClinicStaffPatientDto';
 
 import type {
   PagedResultOfReceptionistPatientsDto
@@ -1060,6 +1068,126 @@ export function useReceptionistGetPatientHistory<TData = Awaited<ReturnType<type
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getReceptionistGetPatientHistoryQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export type getAllPatientsForClinicStaffResponse200 = {
+  data: PagedResultOfClinicStaffPatientDto
+  status: 200
+}
+
+export type getAllPatientsForClinicStaffResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type getAllPatientsForClinicStaffResponseSuccess = (getAllPatientsForClinicStaffResponse200) & {
+  headers: Headers;
+};
+export type getAllPatientsForClinicStaffResponseError = (getAllPatientsForClinicStaffResponse401) & {
+  headers: Headers;
+};
+
+export type getAllPatientsForClinicStaffResponse = (getAllPatientsForClinicStaffResponseSuccess | getAllPatientsForClinicStaffResponseError)
+
+export const getGetAllPatientsForClinicStaffUrl = (params?: GetAllPatientsForClinicStaffParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `http://localhost:5144/api/v1/patients/staff?${stringifiedParams}` : `http://localhost:5144/api/v1/patients/staff`
+}
+
+export const getAllPatientsForClinicStaff = async (params?: GetAllPatientsForClinicStaffParams, options?: RequestInit): Promise<getAllPatientsForClinicStaffResponse> => {
+
+  return ofetchMutator<getAllPatientsForClinicStaffResponse>(getGetAllPatientsForClinicStaffUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAllPatientsForClinicStaffQueryKey = (params?: GetAllPatientsForClinicStaffParams,) => {
+    return [
+    `http://localhost:5144/api/v1/patients/staff`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetAllPatientsForClinicStaffQueryOptions = <TData = Awaited<ReturnType<typeof getAllPatientsForClinicStaff>>, TError = ProblemDetails>(params?: GetAllPatientsForClinicStaffParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllPatientsForClinicStaff>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAllPatientsForClinicStaffQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAllPatientsForClinicStaff>>> = ({ signal }) => getAllPatientsForClinicStaff(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAllPatientsForClinicStaff>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetAllPatientsForClinicStaffQueryResult = NonNullable<Awaited<ReturnType<typeof getAllPatientsForClinicStaff>>>
+export type GetAllPatientsForClinicStaffQueryError = ProblemDetails
+
+
+export function useGetAllPatientsForClinicStaff<TData = Awaited<ReturnType<typeof getAllPatientsForClinicStaff>>, TError = ProblemDetails>(
+ params: undefined |  GetAllPatientsForClinicStaffParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllPatientsForClinicStaff>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAllPatientsForClinicStaff>>,
+          TError,
+          Awaited<ReturnType<typeof getAllPatientsForClinicStaff>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAllPatientsForClinicStaff<TData = Awaited<ReturnType<typeof getAllPatientsForClinicStaff>>, TError = ProblemDetails>(
+ params?: GetAllPatientsForClinicStaffParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllPatientsForClinicStaff>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAllPatientsForClinicStaff>>,
+          TError,
+          Awaited<ReturnType<typeof getAllPatientsForClinicStaff>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAllPatientsForClinicStaff<TData = Awaited<ReturnType<typeof getAllPatientsForClinicStaff>>, TError = ProblemDetails>(
+ params?: GetAllPatientsForClinicStaffParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllPatientsForClinicStaff>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetAllPatientsForClinicStaff<TData = Awaited<ReturnType<typeof getAllPatientsForClinicStaff>>, TError = ProblemDetails>(
+ params?: GetAllPatientsForClinicStaffParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllPatientsForClinicStaff>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetAllPatientsForClinicStaffQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

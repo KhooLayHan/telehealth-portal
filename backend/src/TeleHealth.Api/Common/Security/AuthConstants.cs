@@ -9,6 +9,7 @@ public static class AuthConstants
     public const string LabTechPolicy = "LabTechPolicy";
     public const string ReceptionistPolicy = "ReceptionistPolicy";
     public const string AdminOrReceptionistPolicy = "AdminOrReceptionistPolicy";
+    public const string ClinicStaffPolicy = "ClinicStaffPolicy";
     public const string AnyRole = "AnyRolePolicy";
 
     // Standard Claim Types
