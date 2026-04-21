@@ -5,9 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type GetDoctorScheduleParams = {
-Date?: string;
-Status?: string;
+export type GetAllPatientsForClinicStaffParams = {
 Search?: string;
 /**
  * @pattern ^-?(?:0|[1-9]\d*)$

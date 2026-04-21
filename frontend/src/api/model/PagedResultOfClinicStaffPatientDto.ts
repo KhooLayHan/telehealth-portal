@@ -4,10 +4,10 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { AppointmentDto } from './AppointmentDto';
+import type { ClinicStaffPatientDto } from './ClinicStaffPatientDto';
 
-export interface PagedResultOfAppointmentDto {
-  items: AppointmentDto[];
+export interface PagedResultOfClinicStaffPatientDto {
+  items: ClinicStaffPatientDto[];
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   totalCount: number | string;
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
