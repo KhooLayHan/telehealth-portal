@@ -374,7 +374,7 @@ return await Deployment.RunAsync(() =>
         new Aws.Rds.InstanceArgs
         {
             Engine = "postgres",
-            EngineVersion = "16.4",
+            EngineVersion = "18.0",
             InstanceClass = dbInstanceClass,
             AllocatedStorage = 20,
             DbName = dbName,
