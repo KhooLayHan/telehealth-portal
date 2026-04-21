@@ -1,6 +1,6 @@
 import { ChevronRight, Search, User, X } from "lucide-react";
 import { useState } from "react";
-import { useClinicStaffGetAllPatients } from "@/api/generated/patients/patients";
+import { useGetAllPatientsForClinicStaff } from "@/api/generated/patients/patients";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,7 @@ export function LabTechLabReportsPage() {
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
-  const { data, isLoading } = useClinicStaffGetAllPatients({
+  const { data, isLoading } = useGetAllPatientsForClinicStaff({
     Search: search.trim() || undefined,
     Page: page,
     PageSize: PAGE_SIZE,
