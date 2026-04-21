@@ -15,13 +15,13 @@ on:
       - "frontend/**"
       - "infra/**"
       - ".github/workflows/cd-deploy.yml"
+
 concurrency:
   group: cd-deploy-${{ github.ref }}
   cancel-in-progress: true
 
 env:
   AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
-  ECR_REPOSITORY: telehealth-api
 
 jobs:
   # ──────────────────────────────────────────────────────────────
@@ -40,7 +40,6 @@ jobs:
       eb-app-name:       ${{ steps.pulumi.outputs.EbAppName }}
       eb-env-name:       ${{ steps.pulumi.outputs.EbEnvName }}
       ecr-url:           ${{ steps.pulumi.outputs.EcrRepositoryUrl }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -54,17 +53,17 @@ jobs:
       - name: Setup .NET (required by Pulumi C# program)
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "10.0.x"
+          dotnet-version: "9.0.x"
 
       - name: Pulumi up
         uses: pulumi/actions@v6
         id: pulumi
         with:
-          command: preview
+          command: up
           stack-name: dev
           work-dir: infra
-          upsert: true # creates the stack on first run; refresh=true reconciles state before the update
-          refresh: true
+          upsert: true    # creates the stack on first run
+          refresh: true   # reconciles state before the update
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
@@ -78,7 +77,6 @@ jobs:
     permissions:
       id-token: write
       contents: read
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -143,7 +141,6 @@ jobs:
     permissions:
       id-token: write
       contents: read
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -162,12 +159,11 @@ jobs:
       - name: Build, tag & push image to ECR
         id: build-image
         env:
-          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}          
+          ECR_REPOSITORY_URL: ${{ needs.deploy-infra.outputs.ecr-url }}
         run: |
           SHORT_SHA="${GITHUB_SHA:0:8}"
           VERSION_LABEL="telehealth-${{ github.run_number }}-${{ github.run_attempt }}-${SHORT_SHA}"
-          IMAGE_URI="$ECR_REPOSITORY_URL:$SHORT_SHA"
-
+          IMAGE_URI="${ECR_REPOSITORY_URL}:${SHORT_SHA}"
 
           # Build from repo root so the Dockerfile can COPY backend/** correctly.
           # The multi-stage Dockerfile handles `dotnet restore` + `dotnet publish`
@@ -176,11 +172,11 @@ jobs:
             --file backend/src/TeleHealth.Api/Dockerfile \
             --build-arg BUILD_CONFIGURATION=Release \
             --tag "$IMAGE_URI" \
-            --tag "$ECR_REPOSITORY_URL:latest" \
+            --tag "${ECR_REPOSITORY_URL}:latest" \
             .
 
           docker push "$IMAGE_URI"
-          docker push "$ECR_REPOSITORY_URL:latest"
+          docker push "${ECR_REPOSITORY_URL}:latest"
 
           # Pass image URI and version label to subsequent steps
           echo "image_uri=$IMAGE_URI" >> "$GITHUB_OUTPUT"
@@ -231,11 +227,12 @@ jobs:
             --version-label "$VERSION_LABEL"
 
           echo "Waiting for environment update to complete..."
+
           # Poll EB until the environment is back to Ready (up to 10 min)
           aws elasticbeanstalk wait environment-updated \
             --environment-names "$EB_ENV_NAME"
 
-          echo "✅ Deployment complete."
+          echo "Deployment complete."
           echo "API URL: $(aws elasticbeanstalk describe-environments \
             --environment-names "$EB_ENV_NAME" \
             --query 'Environments[0].CNAME' \
