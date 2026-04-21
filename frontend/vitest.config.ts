@@ -12,12 +12,20 @@ const dirname =
 
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      "@": path.resolve(dirname, "./src"),
+    },
+  },
   test: {
     projects: [
       {
+        extends: true,
         test: {
           include: ["src/**/*.{test,spec}.{ts,tsx}"],
           name: "unit",
+          environment: "happy-dom",
+          setupFiles: ["./src/test/setup.ts"],
         },
       },
       {
