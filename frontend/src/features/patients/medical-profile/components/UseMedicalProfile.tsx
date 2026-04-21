@@ -21,7 +21,10 @@ export function useMedicalProfile(profile: PatientProfileDto) {
       onChange: medicalInfoSchema,
     },
     onSubmit: async ({ value }) => {
-      const allergies: Allergy[] = value.allergies.map(({ id: _id, ...rest }) => rest);
+      const allergies: Allergy[] = value.allergies.map(({ id: _id, ...rest }) => ({
+        ...rest,
+        severity: rest.severity.charAt(0).toUpperCase() + rest.severity.slice(1),
+      }));
 
       await updateMutation.mutateAsync({
         data: {
