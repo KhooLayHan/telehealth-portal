@@ -19,7 +19,7 @@ public sealed record ClinicStaffPatientDto(
     string BloodGroup,
     char? Gender,
     List<AllergyDto>? Allergies,
-    List<EmergencyContactDto>? EmergencyContacts
+    EmergencyContactDto EmergencyContact
 )
 {
     public static Expression<Func<Patient, ClinicStaffPatientDto>> Projection =>
@@ -33,10 +33,15 @@ public sealed record ClinicStaffPatientDto(
             p.User.Phone ?? string.Empty,
             p.BloodGroup ?? string.Empty,
             p.User.Gender,
-            p.Allergies.Select(a => new AllergyDto(a.Allergen, a.Severity, a.Reaction)).ToList()
-                ?? new(),
-            p.EmergencyContact.Select(e => new EmergencyContactDto(e.Name, e.Relationship, e.Phone))
-                .ToList()
-                ?? new()
+            (p.Allergies ?? new List<Allergy>())
+                .Select(a => new AllergyDto(a.Allergen, a.Severity, a.Reaction))
+                .ToList(),
+            p.EmergencyContact != null
+                ? new EmergencyContactDto(
+                    p.EmergencyContact.Name,
+                    p.EmergencyContact.Relationship,
+                    p.EmergencyContact.Phone
+                )
+                : new EmergencyContactDto(string.Empty, string.Empty, string.Empty)
         );
 }
