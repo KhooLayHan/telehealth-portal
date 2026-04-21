@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using NodaTime;
 using TeleHealth.Api.Domain.Entities;
 
@@ -17,31 +16,25 @@ public sealed record ClinicStaffPatientDto(
     LocalDate DateOfBirth,
     string PhoneNumber,
     string BloodGroup,
-    char? Gender,
+    char Gender,
     List<AllergyDto>? Allergies,
-    EmergencyContactDto EmergencyContact
+    EmergencyContactDto? EmergencyContact
 )
 {
-    public static Expression<Func<Patient, ClinicStaffPatientDto>> Projection =>
-        p => new ClinicStaffPatientDto(
+    public static ClinicStaffPatientDto FromEntity(Patient p) =>
+        new(
             p.PublicId,
             p.User.Slug,
-            p.User.FirstName ?? string.Empty,
-            p.User.LastName ?? string.Empty,
+            p.User.FirstName,
+            p.User.LastName,
             $"{p.User.FirstName} {p.User.LastName}",
             p.User.DateOfBirth,
             p.User.Phone ?? string.Empty,
             p.BloodGroup ?? string.Empty,
             p.User.Gender,
-            (p.Allergies ?? new List<Allergy>())
-                .Select(a => new AllergyDto(a.Allergen, a.Severity, a.Reaction))
-                .ToList(),
-            p.EmergencyContact != null
-                ? new EmergencyContactDto(
-                    p.EmergencyContact.Name,
-                    p.EmergencyContact.Relationship,
-                    p.EmergencyContact.Phone
-                )
-                : new EmergencyContactDto(string.Empty, string.Empty, string.Empty)
+            p.Allergies?.Select(a => new AllergyDto(a.Allergen, a.Severity, a.Reaction)).ToList(),
+            p.EmergencyContact is { } ec
+                ? new EmergencyContactDto(ec.Name, ec.Relationship, ec.Phone)
+                : null
         );
 }

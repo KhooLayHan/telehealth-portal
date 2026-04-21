@@ -39,10 +39,9 @@ public sealed class ClinicStaffGetAllPatientsHandler(ApplicationDbContext db)
             return new PagedResult<ClinicStaffPatientDto>([], totalCount, page, pageSize);
         }
 
-        var items = await q.Skip((int)skip)
-            .Take(pageSize)
-            .Select(ClinicStaffPatientDto.Projection)
-            .ToListAsync(ct);
+        var entities = await q.Skip((int)skip).Take(pageSize).ToListAsync(ct);
+
+        var items = entities.Select(ClinicStaffPatientDto.FromEntity).ToList();
 
         return new PagedResult<ClinicStaffPatientDto>(items, totalCount, page, pageSize);
     }
