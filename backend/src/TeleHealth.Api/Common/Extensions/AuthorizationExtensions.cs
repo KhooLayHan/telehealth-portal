@@ -23,6 +23,10 @@ public static class AuthorizationExtensions
                 AuthConstants.LabTechPolicy,
                 policy => policy.RequireRole("lab-tech")
             );
+            options.AddPolicy(
+                AuthConstants.ClinicStaffPolicy,
+                policy => policy.RequireRole("receptionist", "lab-tech")
+            );
         });
 
         return services;

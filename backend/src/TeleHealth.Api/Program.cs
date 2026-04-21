@@ -28,6 +28,7 @@ using TeleHealth.Api.Features.LabReports.Download;
 using TeleHealth.Api.Features.LabReports.InitializeUpload;
 using TeleHealth.Api.Features.Patients.CancelAppointment;
 using TeleHealth.Api.Features.Patients.GetAllAppointments;
+using TeleHealth.Api.Features.Patients.GetAllPatientsForClinicStaff;
 using TeleHealth.Api.Features.Patients.GetAllPatientsForReceptionist;
 using TeleHealth.Api.Features.Patients.GetAppointmentByIdOrSlug;
 using TeleHealth.Api.Features.Patients.GetPatientByIdForReceptionist;
@@ -233,6 +234,7 @@ api.MapDownloadLabReportEndpoint();
 api.MapReceptionistGetAllPatientsEndpoint();
 api.MapReceptionistGetPatientByIdEndpoint();
 api.MapReceptionistGetPatientHistoryEndpoint();
+api.MapClinicStaffGetAllPatientsEndpoint();
 api.MapGetDoctorPatientsEndpoint();
 api.MapGetDoctorPatientAppointmentsEndpoint();
 
