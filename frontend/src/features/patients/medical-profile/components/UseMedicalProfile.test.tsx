@@ -27,7 +27,7 @@ const mockProfile: PatientProfileDto = {
     relationship: "Spouse",
     phone: "+60123456789",
   },
-  allergies: [{ allergen: "Peanuts", severity: "severe", reaction: "Hives" }],
+  allergies: [{ allergen: "Peanuts", severity: "Severe", reaction: "Hives" }],
 };
 
 describe("useMedicalProfile", () => {
