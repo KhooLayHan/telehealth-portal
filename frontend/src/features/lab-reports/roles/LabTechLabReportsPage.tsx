@@ -1,6 +1,7 @@
 import { ChevronRight, Search, User, X } from "lucide-react";
 import { useState } from "react";
 import { useGetAllPatientsForClinicStaff } from "@/api/generated/patients/patients";
+import type { ClinicStaffPatientDto } from "@/api/model/ClinicStaffPatientDto";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,8 +20,10 @@ export function LabTechLabReportsPage() {
     PageSize: PAGE_SIZE,
   });
 
-  const patients = data?.data?.items ?? [];
-  const totalCount = data?.data?.totalCount ?? 0;
+  // Narrow the union — the generated response is success | error discriminated by status
+  const pagedResult = data?.status === 200 ? data.data : null;
+  const patients = pagedResult?.items ?? [];
+  const totalCount = Number(pagedResult?.totalCount ?? 0);
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
   const canGoPrevious = page > 1;
   const canGoNext = page < totalPages;
@@ -87,7 +90,7 @@ export function LabTechLabReportsPage() {
       ) : (
         <>
           <div className="grid gap-3">
-            {patients.map((patient) => (
+            {patients.map((patient: ClinicStaffPatientDto) => (
               <Card
                 key={patient.patientPublicId}
                 className="hover:border-primary/50 transition-colors"
@@ -99,9 +102,7 @@ export function LabTechLabReportsPage() {
                     </div>
                     <div>
                       <p className="font-medium">{patient.fullName}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {patient.gender} · {patient.age} yrs
-                      </p>
+                      <p className="text-sm text-muted-foreground">{patient.gender}</p>
                     </div>
                   </div>
                   <Button
@@ -119,17 +120,18 @@ export function LabTechLabReportsPage() {
               type="button"
               variant="outline"
               disabled={!canGoPrevious}
-              onClick={() => setPage((currentPage) => Math.max(1, currentPage - 1))}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
             >
               Previous
             </Button>
-            Page {page} of {totalPages}
-            <span className="text-muted-foreground text-sm" aria-live="polite"></span>
+            <span className="text-muted-foreground text-sm" aria-live="polite">
+              Page {page} of {totalPages}
+            </span>
             <Button
               type="button"
               variant="outline"
               disabled={!canGoNext}
-              onClick={() => setPage((currentPage) => Math.min(totalPages, currentPage + 1))}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             >
               Next
             </Button>
