@@ -22,8 +22,8 @@ public static class ClinicStaffGetAllPatientsEndpoint
                     return TypedResults.Ok(patients);
                 }
             )
-            .WithName("ClinicStaffGetAllPatients")
-            .WithTags("Patients")
+            .WithName(nameof(ApiEndpoints.Patients.GetAllPatientsForClinicStaff))
+            .WithTags(nameof(ApiEndpoints.Patients))
             .RequireAuthorization(AuthConstants.ClinicStaffPolicy)
             .ProducesProblem(StatusCodes.Status401Unauthorized);
     }

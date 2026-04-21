@@ -9,14 +9,6 @@ public sealed class ClinicStaffGetAllPatientsHandler(ApplicationDbContext db)
 {
     private const int MaxPageSize = 50;
 
-    private static readonly Dictionary<string, string> GenderMap = new()
-    {
-        { "M", "Male" },
-        { "F", "Female" },
-        { "O", "Other" },
-        { "N", "Not specified" },
-    };
-
     public async Task<PagedResult<ClinicStaffPatientDto>> HandleAsync(
         ClinicStaffGetAllPatientsQuery query,
         CancellationToken ct
@@ -47,23 +39,10 @@ public sealed class ClinicStaffGetAllPatientsHandler(ApplicationDbContext db)
             return new PagedResult<ClinicStaffPatientDto>([], totalCount, page, pageSize);
         }
 
-        var rawItems = await q.Skip((int)skip).Take(pageSize).ToListAsync(ct);
-
-        var items = rawItems
-            .Select(p => new ClinicStaffPatientDto
-            {
-                PatientPublicId = p.PublicId,
-                Slug = p.Slug,
-                FirstName = p.User.FirstName,
-                LastName = p.User.LastName,
-                DateOfBirth = p.User.DateOfBirth,
-                PhoneNumber = p.User.Phone ?? string.Empty,
-                BloodGroup = p.BloodGroup ?? string.Empty,
-                Gender = GenderMap.GetValueOrDefault(p.User.Gender.ToString(), "Not specified"),
-                Allergies = p.Allergies,
-                EmergencyContacts = p.EmergencyContact != null ? [p.EmergencyContact] : null,
-            })
-            .ToList();
+        var items = await q.Skip((int)skip)
+            .Take(pageSize)
+            .Select(ClinicStaffPatientDto.Projection)
+            .ToListAsync(ct);
 
         return new PagedResult<ClinicStaffPatientDto>(items, totalCount, page, pageSize);
     }
