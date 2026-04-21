@@ -1,8 +1,4 @@
-// TeleHealth DDAC — Pulumi Infrastructure
-// Run: pulumi up --stack dev
-// Prerequisites: pulumi config set telehealth:dbPassword <secret> --secret
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Pulumi;
 using Aws = Pulumi.Aws;
 
