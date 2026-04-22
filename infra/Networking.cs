@@ -10,6 +10,15 @@ using Aws = Pulumi.Aws;
 /// </summary>
 public static class Networking
 {
+    private static readonly string[] AvailabilityZones =
+    [
+        "us-east-1a",
+        "us-east-1b",
+        "us-east-1c",
+        "us-east-1d",
+        "us-east-1f",
+    ];
+
     public sealed class Result
     {
         public required Output<string> VpcId { get; init; }
@@ -33,6 +42,11 @@ public static class Networking
                         Name = "vpc-id",
                         Values = new[] { defaultVpc.Apply(v => v.Id) },
                     },
+                    new Aws.Ec2.Inputs.GetSubnetsFilterInputArgs
+                    {
+                        Name = "availability-zone",
+                        Values = AvailabilityZones,
+                    },
                 },
             }
         );
@@ -42,7 +56,7 @@ public static class Networking
             "eb-sg",
             new Aws.Ec2.SecurityGroupArgs
             {
-                Description = "TeleHealth API — Elastic Beanstalk instances",
+                Description = "TeleHealth API - Elastic Beanstalk instances",
                 VpcId = defaultVpc.Apply(v => v.Id),
                 Ingress = new[]
                 {
@@ -83,7 +97,7 @@ public static class Networking
             "db-sg",
             new Aws.Ec2.SecurityGroupArgs
             {
-                Description = "TeleHealth RDS — PostgreSQL accessible from EB only",
+                Description = "TeleHealth RDS - PostgreSQL accessible from EB only",
                 VpcId = defaultVpc.Apply(v => v.Id),
                 Ingress = new[]
                 {

@@ -91,7 +91,8 @@ public static class Observability
                 ResourceArn = "*",
                 Version = 1,
                 Tags = cfg.Tags,
-            }
+            },
+            new CustomResourceOptions { ImportId = "telehealth-api-sampling" }
         );
 
         var xrayGroup = new Aws.Xray.Group(
@@ -106,7 +107,8 @@ public static class Observability
                     NotificationsEnabled = false,
                 },
                 Tags = cfg.Tags,
-            }
+            },
+            new CustomResourceOptions { Id = "telehealth-api" }
         );
 
         return new Result { ApiLogGroup = apiLogGroup, XrayGroup = xrayGroup };

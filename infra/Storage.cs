@@ -23,15 +23,22 @@ public static class Storage
         // ── Frontend — S3 static website for TanStack Router SPA ──
         var frontendBucket = new Aws.S3.Bucket(
             "telehealth-frontend",
-            new Aws.S3.BucketArgs
+            new Aws.S3.BucketArgs { ForceDestroy = true, Tags = cfg.Tags }
+        );
+
+        var frontendWebsiteConfig = new Aws.S3.BucketWebsiteConfiguration(
+            "frontend-website-config",
+            new Aws.S3.BucketWebsiteConfigurationArgs
             {
-                Website = new Aws.S3.Inputs.BucketWebsiteArgs
+                Bucket = frontendBucket.Id,
+                IndexDocument = new Aws.S3.Inputs.BucketWebsiteConfigurationIndexDocumentArgs
                 {
-                    IndexDocument = "index.html",
-                    ErrorDocument = "index.html", // Required for TanStack Router SPA
+                    Suffix = "index.html",
                 },
-                ForceDestroy = true,
-                Tags = cfg.Tags,
+                ErrorDocument = new Aws.S3.Inputs.BucketWebsiteConfigurationErrorDocumentArgs
+                {
+                    Key = "index.html", // Required for TanStack Router SPA
+                },
             }
         );
 
