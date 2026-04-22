@@ -117,5 +117,7 @@ public static class ApiEndpoints
         private const string Base = "admins";
 
         public const string GetAllReceptionists = $"{Base}/receptionists";
+
+        public const string UpdateReceptionist = $"{Base}/receptionists/{{id:guid}}";
     }
 }

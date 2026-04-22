@@ -1,4 +1,5 @@
 ﻿import { useForm } from "@tanstack/react-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { motion } from "framer-motion";
@@ -6,8 +7,13 @@ import { ChevronLeft, ChevronRight, Eye, Pencil, Search, UserX } from "lucide-re
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { useAdminGetAllReceptionists } from "@/api/generated/admins/admins";
+import {
+  getAdminGetAllReceptionistsQueryKey,
+  useAdminGetAllReceptionists,
+  useAdminUpdateReceptionist,
+} from "@/api/generated/admins/admins";
 import type { AdminReceptionistDto } from "@/api/model/AdminReceptionistDto";
+import { ApiError } from "@/api/ofetch-mutator";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -120,8 +126,24 @@ function FormField({
   );
 }
 
-// Modal dialog that lets the admin edit a receptionist's details (frontend only)
+// Modal dialog that lets the admin edit a receptionist's details
 function EditReceptionistDialog({ receptionist, open, onOpenChange }: EditReceptionistDialogProps) {
+  const queryClient = useQueryClient();
+  const { mutate, isPending } = useAdminUpdateReceptionist({
+    mutation: {
+      onSuccess: () => {
+        toast.success("Receptionist updated successfully");
+        queryClient.invalidateQueries({ queryKey: getAdminGetAllReceptionistsQueryKey() });
+        onOpenChange(false);
+      },
+      onError: (error) => {
+        if (error instanceof ApiError) {
+          toast.error(error.data.title ?? "Failed to update receptionist");
+        }
+      },
+    },
+  });
+
   const form = useForm({
     defaultValues: {
       firstName: receptionist?.firstName ?? "",
@@ -139,10 +161,28 @@ function EditReceptionistDialog({ receptionist, open, onOpenChange }: EditRecept
     },
     validators: { onSubmit: editReceptionistSchema },
     onSubmit: async ({ value }) => {
-      // TODO: wire to backend mutation
-      console.log("Edit receptionist payload:", value);
-      toast.success("Receptionist updated successfully");
-      onOpenChange(false);
+      if (!receptionist?.publicId) return;
+      mutate({
+        id: receptionist.publicId,
+        data: {
+          firstName: value.firstName,
+          lastName: value.lastName,
+          username: value.username,
+          email: value.email,
+          phoneNumber: value.phoneNumber || null,
+          gender: value.gender,
+          dateOfBirth: value.dateOfBirth,
+          address: value.street
+            ? {
+                street: value.street,
+                city: value.city,
+                state: value.state,
+                postalCode: value.postalCode,
+                country: value.country,
+              }
+            : null,
+        },
+      });
     },
   });
 
@@ -428,11 +468,11 @@ function EditReceptionistDialog({ receptionist, open, onOpenChange }: EditRecept
               {(isSubmitting) => (
                 <Button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isPending}
                   style={{ background: ACCENT }}
                   className="text-white hover:opacity-90"
                 >
-                  {isSubmitting ? "Saving…" : "Save changes"}
+                  {isSubmitting || isPending ? "Saving…" : "Save changes"}
                 </Button>
               )}
             </form.Subscribe>

@@ -5,16 +5,20 @@
  * OpenAPI spec version: 1.0.0
  */
 import {
-  useQuery
+  useQuery,
+  useMutation,
 } from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
   DefinedUseQueryResult,
+  MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult
 } from '@tanstack/react-query';
@@ -22,6 +26,14 @@ import type {
 import type {
   AdminGetAllReceptionistsParams
 } from '../../model/AdminGetAllReceptionistsParams';
+
+import type {
+  AdminReceptionistDto
+} from '../../model/AdminReceptionistDto';
+
+import type {
+  AdminUpdateReceptionistCommand
+} from '../../model/AdminUpdateReceptionistCommand';
 
 import type {
   PagedResultOfAdminReceptionistDto
@@ -160,6 +172,99 @@ export function useAdminGetAllReceptionists<TData = Awaited<ReturnType<typeof ad
 
 
 
+export type adminUpdateReceptionistResponse200 = {
+  data: AdminReceptionistDto
+  status: 200
+}
+
+export type adminUpdateReceptionistResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type adminUpdateReceptionistResponse403 = {
+  data: ProblemDetails
+  status: 403
+}
+
+export type adminUpdateReceptionistResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type adminUpdateReceptionistResponse422 = {
+  data: ProblemDetails
+  status: 422
+}
+
+export type adminUpdateReceptionistResponseSuccess = (adminUpdateReceptionistResponse200) & {
+  headers: Headers;
+};
+export type adminUpdateReceptionistResponseError = (adminUpdateReceptionistResponse401 | adminUpdateReceptionistResponse403 | adminUpdateReceptionistResponse404 | adminUpdateReceptionistResponse422) & {
+  headers: Headers;
+};
+
+export type adminUpdateReceptionistResponse = (adminUpdateReceptionistResponseSuccess | adminUpdateReceptionistResponseError)
+
+export const getAdminUpdateReceptionistUrl = (id: string,) => {
+  return `http://localhost:5144/api/v1/admins/receptionists/${id}`
+}
+
+export const adminUpdateReceptionist = async (id: string,
+    adminUpdateReceptionistCommand: AdminUpdateReceptionistCommand, options?: RequestInit): Promise<adminUpdateReceptionistResponse> => {
+
+  return ofetchMutator<adminUpdateReceptionistResponse>(getAdminUpdateReceptionistUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      adminUpdateReceptionistCommand,)
+  }
+);}
+
+
+
+
+export const getAdminUpdateReceptionistMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateReceptionist>>, TError,{id: string;data: AdminUpdateReceptionistCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateReceptionist>>, TError,{id: string;data: AdminUpdateReceptionistCommand}, TContext> => {
+
+const mutationKey = ['adminUpdateReceptionist'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateReceptionist>>, {id: string;data: AdminUpdateReceptionistCommand}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  adminUpdateReceptionist(id,data,requestOptions)
+        }
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminUpdateReceptionistMutationResult = NonNullable<Awaited<ReturnType<typeof adminUpdateReceptionist>>>
+    export type AdminUpdateReceptionistMutationBody = AdminUpdateReceptionistCommand
+    export type AdminUpdateReceptionistMutationError = ProblemDetails
+
+    export const useAdminUpdateReceptionist = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateReceptionist>>, TError,{id: string;data: AdminUpdateReceptionistCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminUpdateReceptionist>>,
+        TError,
+        {id: string;data: AdminUpdateReceptionistCommand},
+        TContext
+      > => {
+      return useMutation(getAdminUpdateReceptionistMutationOptions(options), queryClient);
+    }
 
 
 
