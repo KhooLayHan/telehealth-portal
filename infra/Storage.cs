@@ -32,7 +32,8 @@ public static class Storage
                 },
                 ForceDestroy = true,
                 Tags = cfg.Tags,
-            });
+            }
+        );
 
         var frontendPublicAccessBlock = new Aws.S3.BucketPublicAccessBlock(
             "frontend-pab",
@@ -43,7 +44,8 @@ public static class Storage
                 BlockPublicPolicy = false,
                 IgnorePublicAcls = false,
                 RestrictPublicBuckets = false,
-            });
+            }
+        );
 
         _ = new Aws.S3.BucketPolicy(
             "frontend-policy",
@@ -62,18 +64,21 @@ public static class Storage
                     }}"
                 ),
             },
-            new CustomResourceOptions { DependsOn = frontendPublicAccessBlock });
+            new CustomResourceOptions { DependsOn = frontendPublicAccessBlock }
+        );
 
         // ── EB deployment artifacts (Dockerrun.aws.json) ──
         var artifactsBucket = new Aws.S3.Bucket(
             "telehealth-eb-artifacts",
-            new Aws.S3.BucketArgs { ForceDestroy = true, Tags = cfg.Tags });
+            new Aws.S3.BucketArgs { ForceDestroy = true, Tags = cfg.Tags }
+        );
 
         // ── Lab reports — private, protected, patient medical data ──
         var labReportsBucket = new Aws.S3.Bucket(
             "telehealth-lab-reports",
             new Aws.S3.BucketArgs { Tags = cfg.Tags },
-            new CustomResourceOptions { Protect = true });
+            new CustomResourceOptions { Protect = true }
+        );
 
         _ = new Aws.S3.BucketCorsConfiguration(
             "labReportsCors",
@@ -86,11 +91,12 @@ public static class Storage
                     {
                         AllowedHeaders = { "*" },
                         AllowedMethods = { "PUT", "POST", "GET" },
-                        AllowedOrigins = { "*" }, // TODO: Restrict to your domain in production
+                        AllowedOrigins = { cfg.FrontendOrigin },
                         MaxAgeSeconds = 3000,
                     },
                 },
-            });
+            }
+        );
 
         // Block ALL public access — lab reports contain sensitive patient data
         _ = new Aws.S3.BucketPublicAccessBlock(
@@ -102,7 +108,8 @@ public static class Storage
                 BlockPublicPolicy = true,
                 IgnorePublicAcls = true,
                 RestrictPublicBuckets = true,
-            });
+            }
+        );
 
         return new Result
         {

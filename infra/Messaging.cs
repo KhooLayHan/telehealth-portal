@@ -23,7 +23,8 @@ public static class Messaging
             {
                 KmsMasterKeyId = "alias/aws/sns", // Server-side encryption with AWS-managed key
                 Tags = cfg.Tags,
-            });
+            }
+        );
 
         var processingQueue = new Aws.Sqs.Queue(
             "report-processing-queue",
@@ -31,7 +32,8 @@ public static class Messaging
             {
                 SqsManagedSseEnabled = true, // Server-side encryption with SQS-managed keys
                 Tags = cfg.Tags,
-            });
+            }
+        );
 
         _ = new Aws.Sns.TopicSubscription(
             "queue-topic-sub",
@@ -40,7 +42,8 @@ public static class Messaging
                 Topic = medicalAlertsTopic.Arn,
                 Protocol = "sqs",
                 Endpoint = processingQueue.Arn,
-            });
+            }
+        );
 
         // Allow SNS to send messages to the SQS queue
         _ = new Aws.Sqs.QueuePolicy(
@@ -62,7 +65,8 @@ public static class Messaging
                             }}]
                         }}"
                     ),
-            });
+            }
+        );
 
         return new Result
         {

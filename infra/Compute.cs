@@ -26,7 +26,8 @@ public static class Compute
         Storage.Result storage,
         Database.Result db,
         Messaging.Result msg,
-        Observability.Result obs)
+        Observability.Result obs
+    )
     {
         // ── ECR — Docker image registry ──
         var ecrRepo = new Aws.Ecr.Repository(
@@ -35,12 +36,14 @@ public static class Compute
             {
                 Name = $"telehealth-api-{cfg.StackName}",
                 ImageTagMutability = "MUTABLE",
-                ImageScanningConfiguration = new Aws.Ecr.Inputs.RepositoryImageScanningConfigurationArgs
-                {
-                    ScanOnPush = true,
-                },
+                ImageScanningConfiguration =
+                    new Aws.Ecr.Inputs.RepositoryImageScanningConfigurationArgs
+                    {
+                        ScanOnPush = true,
+                    },
                 Tags = cfg.Tags,
-            });
+            }
+        );
 
         _ = new Aws.Ecr.LifecyclePolicy(
             "telehealth-api-lifecycle",
@@ -64,7 +67,8 @@ public static class Compute
                         }
                     ]
                 }",
-            });
+            }
+        );
 
         // ── IAM — EB EC2 instance role ──
         var ebRole = new Aws.Iam.Role(
@@ -81,7 +85,8 @@ public static class Compute
                     }]
                 }",
                 Tags = cfg.Tags,
-            });
+            }
+        );
 
         // Managed policies — only for broad AWS-service integration
         foreach (
@@ -90,11 +95,13 @@ public static class Compute
                 ("eb-web-tier", "arn:aws:iam::aws:policy/AWSElasticBeanstalkWebTier"),
                 ("eb-ecr-readonly", "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"),
                 ("eb-xray", "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"),
-            })
+            }
+        )
         {
             _ = new Aws.Iam.RolePolicyAttachment(
                 $"policy-{suffix}",
-                new Aws.Iam.RolePolicyAttachmentArgs { Role = ebRole.Name, PolicyArn = policyArn });
+                new Aws.Iam.RolePolicyAttachmentArgs { Role = ebRole.Name, PolicyArn = policyArn }
+            );
         }
 
         // Scoped inline policy: SQS — only the processing queue
@@ -113,7 +120,8 @@ public static class Compute
                         }}]
                     }}"
                 ),
-            });
+            }
+        );
 
         // Scoped inline policy: SNS — only the medical alerts topic
         _ = new Aws.Iam.RolePolicy(
@@ -131,7 +139,8 @@ public static class Compute
                         }}]
                     }}"
                 ),
-            });
+            }
+        );
 
         // Scoped inline policy: CloudWatch Logs — only the API log group
         _ = new Aws.Iam.RolePolicy(
@@ -149,7 +158,8 @@ public static class Compute
                         }}]
                     }}"
                 ),
-            });
+            }
+        );
 
         // Scoped inline policy: S3 — only the lab-reports bucket
         _ = new Aws.Iam.RolePolicy(
@@ -167,7 +177,8 @@ public static class Compute
                         }}]
                     }}"
                 ),
-            });
+            }
+        );
 
         // Scoped inline policy: Secrets Manager — only the DB secret
         _ = new Aws.Iam.RolePolicy(
@@ -185,16 +196,19 @@ public static class Compute
                         }}]
                     }}"
                 ),
-            });
+            }
+        );
 
         var instanceProfile = new Aws.Iam.InstanceProfile(
             "eb-instance-profile",
-            new Aws.Iam.InstanceProfileArgs { Role = ebRole.Name });
+            new Aws.Iam.InstanceProfileArgs { Role = ebRole.Name }
+        );
 
         // ── Elastic Beanstalk ──
         var ebApp = new Aws.ElasticBeanstalk.Application(
             "telehealth-api",
-            new Aws.ElasticBeanstalk.ApplicationArgs { Tags = cfg.Tags });
+            new Aws.ElasticBeanstalk.ApplicationArgs { Tags = cfg.Tags }
+        );
 
         var ebEnv = new Aws.ElasticBeanstalk.Environment(
             "telehealth-env",
@@ -205,30 +219,37 @@ public static class Compute
                 Settings = new[]
                 {
                     // -- Instance & networking --
-                    EbSetting("aws:autoscaling:launchconfiguration", "IamInstanceProfile", instanceProfile.Name),
+                    EbSetting(
+                        "aws:autoscaling:launchconfiguration",
+                        "IamInstanceProfile",
+                        instanceProfile.Name
+                    ),
                     EbSetting("aws:autoscaling:launchconfiguration", "InstanceType", "t3.micro"),
-                    EbSetting("aws:autoscaling:launchconfiguration", "SecurityGroups", net.EbSecurityGroup.Id),
-                    EbSetting("aws:elasticbeanstalk:environment", "EnvironmentType", "SingleInstance"),
-
+                    EbSetting(
+                        "aws:autoscaling:launchconfiguration",
+                        "SecurityGroups",
+                        net.EbSecurityGroup.Id
+                    ),
+                    EbSetting(
+                        "aws:elasticbeanstalk:environment",
+                        "EnvironmentType",
+                        "SingleInstance"
+                    ),
                     // -- CloudWatch log streaming --
                     EbSetting("aws:elasticbeanstalk:cloudwatch:logs", "StreamLogs", "true"),
                     EbSetting("aws:elasticbeanstalk:cloudwatch:logs", "DeleteOnTerminate", "false"),
                     EbSetting("aws:elasticbeanstalk:cloudwatch:logs", "RetentionInDays", "30"),
-
                     // -- X-Ray daemon --
                     EbSetting("aws:elasticbeanstalk:xray", "XRayEnabled", "true"),
-
                     // -- App environment variables --
                     EbEnvVar("ASPNETCORE_ENVIRONMENT", "Production"),
                     EbEnvVar("ASPNETCORE_HTTP_PORTS", "8080"),
-
                     // DB connection — app resolves password from Secrets Manager at runtime
                     EbEnvVar("RDS_HOST", db.Instance.Address),
                     EbEnvVar("RDS_PORT", "5432"),
                     EbEnvVar("RDS_DB", cfg.DbName),
                     EbEnvVar("RDS_USERNAME", cfg.DbUsername),
                     EbEnvVar("DB_SECRET_ARN", db.DbSecret.Arn),
-
                     // AWS service references
                     EbEnvVar("AWS_REGION", cfg.AwsRegion),
                     EbEnvVar("AWS_S3_LAB_REPORTS_BUCKET", storage.LabReportsBucket.BucketName),
@@ -236,7 +257,8 @@ public static class Compute
                     EbEnvVar("AWS_SQS_QUEUE_URL", msg.ProcessingQueue.Id),
                 },
                 Tags = cfg.Tags,
-            });
+            }
+        );
 
         return new Result
         {
@@ -248,10 +270,19 @@ public static class Compute
 
     // Helper to reduce EB setting boilerplate
     private static Aws.ElasticBeanstalk.Inputs.EnvironmentSettingArgs EbSetting(
-        string ns, string name, Input<string> value) =>
-        new() { Namespace = ns, Name = name, Value = value };
+        string ns,
+        string name,
+        Input<string> value
+    ) =>
+        new()
+        {
+            Namespace = ns,
+            Name = name,
+            Value = value,
+        };
 
     private static Aws.ElasticBeanstalk.Inputs.EnvironmentSettingArgs EbEnvVar(
-        string name, Input<string> value) =>
-        EbSetting("aws:elasticbeanstalk:application:environment", name, value);
+        string name,
+        Input<string> value
+    ) => EbSetting("aws:elasticbeanstalk:application:environment", name, value);
 }

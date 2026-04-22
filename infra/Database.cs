@@ -31,7 +31,8 @@ public static class Database
                 Description = $"RDS PostgreSQL password for TeleHealth {cfg.StackName} environment",
                 RecoveryWindowInDays = 0, // Immediate deletion — set >=7 for production
                 Tags = cfg.Tags,
-            });
+            }
+        );
 
         _ = new Aws.SecretsManager.SecretVersion(
             "telehealth-db-secret-version",
@@ -39,7 +40,8 @@ public static class Database
             {
                 SecretId = dbSecret.Id,
                 SecretString = cfg.DbPassword,
-            });
+            }
+        );
 
         // ── RDS enhanced monitoring IAM role ──
         var rdsMonitoringRole = new Aws.Iam.Role(
@@ -55,7 +57,8 @@ public static class Database
                         ""Effect"": ""Allow""
                     }]
                 }",
-            });
+            }
+        );
 
         _ = new Aws.Iam.RolePolicyAttachment(
             "rds-monitoring-policy",
@@ -63,7 +66,8 @@ public static class Database
             {
                 Role = rdsMonitoringRole.Name,
                 PolicyArn = "arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole",
-            });
+            }
+        );
 
         // ── RDS PostgreSQL instance ──
         var database = new Aws.Rds.Instance(
@@ -71,7 +75,7 @@ public static class Database
             new Aws.Rds.InstanceArgs
             {
                 Engine = "postgres",
-                EngineVersion = "18.0",
+                EngineVersion = "18.3",
                 InstanceClass = cfg.DbInstanceClass,
                 AllocatedStorage = 20,
                 DbName = cfg.DbName,
@@ -101,12 +105,9 @@ public static class Database
 
                 Tags = cfg.Tags,
             },
-            new CustomResourceOptions { Protect = true });
+            new CustomResourceOptions { Protect = true }
+        );
 
-        return new Result
-        {
-            DbSecret = dbSecret,
-            Instance = database,
-        };
+        return new Result { DbSecret = dbSecret, Instance = database };
     }
 }
