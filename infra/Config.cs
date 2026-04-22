@@ -45,7 +45,8 @@ public sealed class StackConfig
 
         // Dev stacks skip final snapshot by default; prod/staging do not
         var skipOverride = config.GetBoolean("skipFinalSnapshot");
-        SkipFinalSnapshot = skipOverride ?? StackName.Equals("dev", System.StringComparison.OrdinalIgnoreCase);
+        SkipFinalSnapshot =
+            skipOverride ?? StackName.Equals("dev", System.StringComparison.OrdinalIgnoreCase);
 
         Tags = new InputMap<string>
         {

@@ -15,10 +15,7 @@ public static class Observability
         public required Aws.Xray.Group XrayGroup { get; init; }
     }
 
-    public static Result Create(
-        StackConfig cfg,
-        Database.Result db,
-        Messaging.Result msg)
+    public static Result Create(StackConfig cfg, Database.Result db, Messaging.Result msg)
     {
         // ── CloudWatch log groups ──
         var apiLogGroup = new Aws.CloudWatch.LogGroup(
@@ -28,7 +25,8 @@ public static class Observability
                 Name = $"/telehealth/{cfg.StackName}/api",
                 RetentionInDays = 30,
                 Tags = cfg.Tags,
-            });
+            }
+        );
 
         // NOTE: RDS log groups (/aws/rds/instance/{id}/postgresql, /aws/rds/instance/{id}/upgrade)
         // are auto-created by AWS when EnabledCloudwatchLogsExports is set on the RDS instance.
@@ -49,14 +47,12 @@ public static class Observability
                 Statistic = "Average",
                 Threshold = 80,
                 AlarmDescription = "RDS CPU > 80% for 10 minutes",
-                Dimensions = new InputMap<string>
-                {
-                    { "DBInstanceIdentifier", db.Instance.Id },
-                },
+                Dimensions = new InputMap<string> { { "DBInstanceIdentifier", db.Instance.Id } },
                 AlarmActions = { msg.MedicalAlertsTopic.Arn },
                 OkActions = { msg.MedicalAlertsTopic.Arn },
                 Tags = cfg.Tags,
-            });
+            }
+        );
 
         // RDS free storage < 2 GiB
         _ = new Aws.CloudWatch.MetricAlarm(
@@ -71,14 +67,12 @@ public static class Observability
                 Statistic = "Average",
                 Threshold = 2_147_483_648, // 2 GiB in bytes
                 AlarmDescription = "RDS free storage below 2 GiB",
-                Dimensions = new InputMap<string>
-                {
-                    { "DBInstanceIdentifier", db.Instance.Id },
-                },
+                Dimensions = new InputMap<string> { { "DBInstanceIdentifier", db.Instance.Id } },
                 AlarmActions = { msg.MedicalAlertsTopic.Arn },
                 OkActions = { msg.MedicalAlertsTopic.Arn },
                 Tags = cfg.Tags,
-            });
+            }
+        );
 
         // ── X-Ray — tracing group + sampling rule ──
         _ = new Aws.Xray.SamplingRule(
@@ -97,7 +91,8 @@ public static class Observability
                 ResourceArn = "*",
                 Version = 1,
                 Tags = cfg.Tags,
-            });
+            }
+        );
 
         var xrayGroup = new Aws.Xray.Group(
             "telehealth-xray-group",
@@ -111,12 +106,9 @@ public static class Observability
                     NotificationsEnabled = false,
                 },
                 Tags = cfg.Tags,
-            });
+            }
+        );
 
-        return new Result
-        {
-            ApiLogGroup = apiLogGroup,
-            XrayGroup = xrayGroup,
-        };
+        return new Result { ApiLogGroup = apiLogGroup, XrayGroup = xrayGroup };
     }
 }

@@ -21,8 +21,7 @@ public static class Networking
 
     public static Result Create(StackConfig cfg)
     {
-        var defaultVpc = Aws.Ec2.GetVpc.Invoke(
-            new Aws.Ec2.GetVpcInvokeArgs { Default = true });
+        var defaultVpc = Aws.Ec2.GetVpc.Invoke(new Aws.Ec2.GetVpcInvokeArgs { Default = true });
 
         var defaultSubnets = Aws.Ec2.GetSubnets.Invoke(
             new Aws.Ec2.GetSubnetsInvokeArgs
@@ -35,7 +34,8 @@ public static class Networking
                         Values = new[] { defaultVpc.Apply(v => v.Id) },
                     },
                 },
-            });
+            }
+        );
 
         // Elastic Beanstalk instances — HTTP/HTTPS from the internet
         var ebSecurityGroup = new Aws.Ec2.SecurityGroup(
@@ -75,7 +75,8 @@ public static class Networking
                     },
                 },
                 Tags = cfg.Tags,
-            });
+            }
+        );
 
         // RDS — port 5432 only from the EB security group, NOT the internet
         var dbSecurityGroup = new Aws.Ec2.SecurityGroup(
@@ -106,7 +107,8 @@ public static class Networking
                     },
                 },
                 Tags = cfg.Tags,
-            });
+            }
+        );
 
         var dbSubnetGroup = new Aws.Rds.SubnetGroup(
             "telehealth-db-subnet-group",
@@ -114,7 +116,8 @@ public static class Networking
             {
                 SubnetIds = defaultSubnets.Apply(s => s.Ids),
                 Tags = cfg.Tags,
-            });
+            }
+        );
 
         return new Result
         {
