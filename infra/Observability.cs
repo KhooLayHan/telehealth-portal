@@ -99,7 +99,7 @@ public static class Observability
             "telehealth-xray-group",
             new Aws.Xray.GroupArgs
             {
-                GroupName = "telehealth-api",
+                GroupName = $"telehealth-api-{cfg.StackName}",
                 FilterExpression = "service(\"telehealth-api\")",
                 InsightsConfiguration = new Aws.Xray.Inputs.GroupInsightsConfigurationArgs
                 {
