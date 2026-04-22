@@ -10,6 +10,15 @@ using Aws = Pulumi.Aws;
 /// </summary>
 public static class Networking
 {
+    private static readonly string[] AvailabilityZones =
+    [
+        "us-east-1a",
+        "us-east-1b",
+        "us-east-1c",
+        "us-east-1d",
+        "us-east-1f",
+    ];
+
     public sealed class Result
     {
         public required Output<string> VpcId { get; init; }
@@ -32,6 +41,11 @@ public static class Networking
                     {
                         Name = "vpc-id",
                         Values = new[] { defaultVpc.Apply(v => v.Id) },
+                    },
+                    new Aws.Ec2.Inputs.GetSubnetsFilterInputArgs
+                    {
+                        Name = "availability-zone",
+                        Values = AvailabilityZones,
                     },
                 },
             }

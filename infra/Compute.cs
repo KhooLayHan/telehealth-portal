@@ -215,7 +215,7 @@ public static class Compute
             new Aws.ElasticBeanstalk.EnvironmentArgs
             {
                 Application = ebApp.Name,
-                SolutionStackName = "64bit Amazon Linux 2023 v4.3.0 running Docker",
+                SolutionStackName = "64bit Amazon Linux 2023 v4.12.1 running Docker",
                 Settings = new[]
                 {
                     // -- Instance & networking --
@@ -255,6 +255,13 @@ public static class Compute
                     EbEnvVar("AWS_S3_LAB_REPORTS_BUCKET", storage.LabReportsBucket.BucketName),
                     EbEnvVar("AWS_SNS_TOPIC_ARN", msg.MedicalAlertsTopic.Arn),
                     EbEnvVar("AWS_SQS_QUEUE_URL", msg.ProcessingQueue.Id),
+                    // -- VPC placement --
+                    EbSetting("aws:ec2:vpc", "VPCId", net.VpcId),
+                    EbSetting(
+                        "aws:ec2:vpc",
+                        "Subnets",
+                        net.SubnetIds.Apply(ids => string.Join(",", ids))
+                    ),
                 },
                 Tags = cfg.Tags,
             }
