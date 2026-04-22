@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { useAuthStore } from "@/store/useAuthStore";
 import { ReceptionistPatientsPage } from "./roles/ReceptionistPatientsPage";
+import { AdminPatientsPage } from "../admins/AdminPatientsPage";
 
 export function PatientsListingPage() {
   const { user } = useAuthStore();
@@ -22,7 +23,7 @@ export function PatientsListingPage() {
       case "doctor":
         return "";
       case "admin":
-        return "Do something";
+        return <AdminPatientsPage />;
       case "lab-tech":
         return "Do something";
       default:
