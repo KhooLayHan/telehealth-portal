@@ -42,7 +42,7 @@ public static class Networking
             "eb-sg",
             new Aws.Ec2.SecurityGroupArgs
             {
-                Description = "TeleHealth API — Elastic Beanstalk instances",
+                Description = "TeleHealth API - Elastic Beanstalk instances",
                 VpcId = defaultVpc.Apply(v => v.Id),
                 Ingress = new[]
                 {
@@ -83,7 +83,7 @@ public static class Networking
             "db-sg",
             new Aws.Ec2.SecurityGroupArgs
             {
-                Description = "TeleHealth RDS — PostgreSQL accessible from EB only",
+                Description = "TeleHealth RDS - PostgreSQL accessible from EB only",
                 VpcId = defaultVpc.Apply(v => v.Id),
                 Ingress = new[]
                 {
