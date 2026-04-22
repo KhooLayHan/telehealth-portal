@@ -5,8 +5,8 @@
  * OpenAPI spec version: 1.0.0
  */
 import {
-  useQuery,
   useMutation,
+  useQuery
 } from '@tanstack/react-query';
 import type {
   DataTag,
@@ -22,6 +22,10 @@ import type {
   UseQueryOptions,
   UseQueryResult
 } from '@tanstack/react-query';
+
+import type {
+  AdminCreateReceptionistCommand
+} from '../../model/AdminCreateReceptionistCommand';
 
 import type {
   AdminGetAllReceptionistsParams
@@ -172,7 +176,113 @@ export function useAdminGetAllReceptionists<TData = Awaited<ReturnType<typeof ad
 
 
 
-export type adminUpdateReceptionistResponse200 = {
+
+
+
+export type adminCreateReceptionistResponse201 = {
+  data: AdminReceptionistDto
+  status: 201
+}
+
+export type adminCreateReceptionistResponse400 = {
+  data: ProblemDetails
+  status: 400
+}
+
+export type adminCreateReceptionistResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type adminCreateReceptionistResponse403 = {
+  data: ProblemDetails
+  status: 403
+}
+
+export type adminCreateReceptionistResponse409 = {
+  data: ProblemDetails
+  status: 409
+}
+
+export type adminCreateReceptionistResponse422 = {
+  data: ProblemDetails
+  status: 422
+}
+
+export type adminCreateReceptionistResponseSuccess = (adminCreateReceptionistResponse201) & {
+  headers: Headers;
+};
+export type adminCreateReceptionistResponseError = (adminCreateReceptionistResponse400 | adminCreateReceptionistResponse401 | adminCreateReceptionistResponse403 | adminCreateReceptionistResponse409 | adminCreateReceptionistResponse422) & {
+  headers: Headers;
+};
+
+export type adminCreateReceptionistResponse = (adminCreateReceptionistResponseSuccess | adminCreateReceptionistResponseError)
+
+export const getAdminCreateReceptionistUrl = () => {
+
+
+
+
+  return `http://localhost:5144/api/v1/admins/receptionists`
+}
+
+export const adminCreateReceptionist = async (adminCreateReceptionistCommand: AdminCreateReceptionistCommand, options?: RequestInit): Promise<adminCreateReceptionistResponse> => {
+
+  return ofetchMutator<adminCreateReceptionistResponse>(getAdminCreateReceptionistUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      adminCreateReceptionistCommand,)
+  }
+);}
+
+
+
+
+export const getAdminCreateReceptionistMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCreateReceptionist>>, TError,{data: AdminCreateReceptionistCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminCreateReceptionist>>, TError,{data: AdminCreateReceptionistCommand}, TContext> => {
+
+const mutationKey = ['adminCreateReceptionist'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCreateReceptionist>>, {data: AdminCreateReceptionistCommand}> = (props) => {
+          const {data} = props ?? {};
+
+          return  adminCreateReceptionist(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminCreateReceptionistMutationResult = NonNullable<Awaited<ReturnType<typeof adminCreateReceptionist>>>
+    export type AdminCreateReceptionistMutationBody = AdminCreateReceptionistCommand
+    export type AdminCreateReceptionistMutationError = ProblemDetails
+
+    export const useAdminCreateReceptionist = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCreateReceptionist>>, TError,{data: AdminCreateReceptionistCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminCreateReceptionist>>,
+        TError,
+        {data: AdminCreateReceptionistCommand},
+        TContext
+      > => {
+      return useMutation(getAdminCreateReceptionistMutationOptions(options), queryClient);
+    }
+    export type adminUpdateReceptionistResponse200 = {
   data: AdminReceptionistDto
   status: 200
 }
@@ -207,6 +317,10 @@ export type adminUpdateReceptionistResponseError = (adminUpdateReceptionistRespo
 export type adminUpdateReceptionistResponse = (adminUpdateReceptionistResponseSuccess | adminUpdateReceptionistResponseError)
 
 export const getAdminUpdateReceptionistUrl = (id: string,) => {
+
+
+
+
   return `http://localhost:5144/api/v1/admins/receptionists/${id}`
 }
 
@@ -249,6 +363,8 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
+
+
   return  { mutationFn, ...mutationOptions }}
 
     export type AdminUpdateReceptionistMutationResult = NonNullable<Awaited<ReturnType<typeof adminUpdateReceptionist>>>
@@ -265,6 +381,3 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getAdminUpdateReceptionistMutationOptions(options), queryClient);
     }
-
-
-

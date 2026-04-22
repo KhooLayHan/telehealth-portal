@@ -4,7 +4,7 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { DoctorPatientDto } from "./DoctorPatientDto";
+import type { DoctorPatientDto } from './DoctorPatientDto';
 
 export interface GetDoctorPatientsResponse {
   items?: DoctorPatientDto[];

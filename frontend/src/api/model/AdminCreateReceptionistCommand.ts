@@ -7,11 +7,12 @@
 import type { Address } from './Address';
 import type { LocalDate } from './LocalDate';
 
-export interface AdminUpdateReceptionistCommand {
+export interface AdminCreateReceptionistCommand {
   firstName: string;
   lastName: string;
   username: string;
   email: string;
+  password: string;
   /** @nullable */
   phoneNumber: string | null;
   /**
@@ -20,5 +21,6 @@ export interface AdminUpdateReceptionistCommand {
      */
   gender: string;
   dateOfBirth: LocalDate;
+  icNumber: string;
   address: null | Address;
 }
