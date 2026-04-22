@@ -9,7 +9,11 @@ namespace TeleHealth.Api.Features.Doctors.UpdateDoctor;
 
 public sealed class UpdateDoctorHandler(ApplicationDbContext db)
 {
-    public async Task HandleAsync(Guid doctorPublicId, UpdateDoctorCommand cmd, CancellationToken ct)
+    public async Task HandleAsync(
+        Guid doctorPublicId,
+        UpdateDoctorCommand cmd,
+        CancellationToken ct
+    )
     {
         var doctor = await db
             .Doctors.Include(d => d.User)
@@ -65,8 +69,8 @@ public sealed class UpdateDoctorHandler(ApplicationDbContext db)
             db.Entry(doctor).Property(nameof(Doctor.DepartmentId)).CurrentValue = department.Id;
 
         // Replace qualifications
-        doctor.Qualifications = cmd.Qualifications
-            .Select(q => new Qualification(q.Degree, q.Institution, q.Year))
+        doctor.Qualifications = cmd
+            .Qualifications.Select(q => new Qualification(q.Degree, q.Institution, q.Year))
             .ToList();
 
         await db.SaveChangesAsync(ct);

@@ -27,8 +27,4 @@ public sealed record UpdateDoctorAddressCommand(
     string Country
 );
 
-public sealed record UpdateDoctorQualificationCommand(
-    string Degree,
-    string Institution,
-    int Year
-);
+public sealed record UpdateDoctorQualificationCommand(string Degree, string Institution, int Year);
