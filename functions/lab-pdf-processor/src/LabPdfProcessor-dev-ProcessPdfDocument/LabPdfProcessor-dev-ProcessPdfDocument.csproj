@@ -8,5 +8,9 @@
     <PackageReference Include="Amazon.Lambda.Serialization.SystemTextJson" />
     <PackageReference Include="Amazon.Lambda.SQSEvents" />
     <PackageReference Include="AWSSDK.S3" />
+    <PackageReference Include="NodaTime.Serialization.SystemTextJson" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\TeleHealth.Contracts\TeleHealth.Contracts.csproj" />
   </ItemGroup>
 </Project>

@@ -8,4 +8,7 @@
     <PackageReference Include="Amazon.Lambda.Serialization.SystemTextJson" />
     <PackageReference Include="AWSSDK.SimpleNotificationService" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\TeleHealth.Contracts\TeleHealth.Contracts.csproj" />
+  </ItemGroup>
 </Project>
