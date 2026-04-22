@@ -91,7 +91,7 @@ public static class Storage
                     {
                         AllowedHeaders = { "*" },
                         AllowedMethods = { "PUT", "POST", "GET" },
-                        AllowedOrigins = { "*" }, // TODO: Restrict to your domain in production
+                        AllowedOrigins = { cfg.FrontendOrigin },
                         MaxAgeSeconds = 3000,
                     },
                 },
