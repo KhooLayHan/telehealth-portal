@@ -6,6 +6,7 @@ using Aws = Pulumi.Aws;
 /// <summary>
 /// SNS topic and SQS queue for the lab-report processing pipeline.
 /// SNS fans out medical alerts; SQS buffers reports for async processing.
+/// A dead-letter queue captures messages that fail processing after 3 attempts.
 /// </summary>
 public static class Messaging
 {
@@ -13,6 +14,7 @@ public static class Messaging
     {
         public required Aws.Sns.Topic MedicalAlertsTopic { get; init; }
         public required Aws.Sqs.Queue ProcessingQueue { get; init; }
+        public required Aws.Sqs.Queue DeadLetterQueue { get; init; }
     }
 
     public static Result Create(StackConfig cfg)
@@ -25,11 +27,24 @@ public static class Messaging
                 Tags = cfg.Tags,
             });
 
+        // Dead-letter queue — captures messages that fail processing after 3 attempts
+        var deadLetterQueue = new Aws.Sqs.Queue(
+            "report-processing-dlq",
+            new Aws.Sqs.QueueArgs
+            {
+                SqsManagedSseEnabled = true,
+                MessageRetentionSeconds = 1_209_600, // 14 days (max) to allow investigation
+                Tags = cfg.Tags,
+            });
+
         var processingQueue = new Aws.Sqs.Queue(
             "report-processing-queue",
             new Aws.Sqs.QueueArgs
             {
                 SqsManagedSseEnabled = true, // Server-side encryption with SQS-managed keys
+                RedrivePolicy = deadLetterQueue.Arn.Apply(dlqArn =>
+                    $@"{{""deadLetterTargetArn"":""{dlqArn}"",""maxReceiveCount"":3}}"
+                ),
                 Tags = cfg.Tags,
             });
 
@@ -68,6 +83,7 @@ public static class Messaging
         {
             MedicalAlertsTopic = medicalAlertsTopic,
             ProcessingQueue = processingQueue,
+            DeadLetterQueue = deadLetterQueue,
         };
     }
 }
