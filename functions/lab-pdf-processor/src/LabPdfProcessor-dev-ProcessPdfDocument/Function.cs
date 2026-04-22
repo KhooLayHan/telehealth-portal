@@ -67,12 +67,12 @@ public class Function
 
                 context.Logger.LogInformation("===============================================");
                 context.Logger.LogInformation("NOTIFICATION MICROSERVICE TRIGGERED");
-                context.Logger.LogInformation($"To: {labEvent.PatientEmail}");
+                context.Logger.LogInformation($"To: {labEvent.PatientPublicId}");
                 context.Logger.LogInformation(
                     $"Subject: Your {labEvent.ReportType} Results are Ready!"
                 );
                 context.Logger.LogInformation(
-                    $"Body: Hello {labEvent.PatientName}, your lab results have been processed and are now securely available in your TeleHealth portal."
+                    $"Body: your lab {labEvent.LabReportPublicId} results have been processed and are now securely available in your TeleHealth portal."
                 );
                 context.Logger.LogInformation("===============================================");
             }
