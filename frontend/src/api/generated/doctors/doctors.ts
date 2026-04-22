@@ -5,19 +5,27 @@
  * OpenAPI spec version: 1.0.0
  */
 import {
+  useMutation,
   useQuery
 } from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
   DefinedUseQueryResult,
+  MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult
 } from '@tanstack/react-query';
+
+import type {
+  CreateDoctorCommand
+} from '../../model/CreateDoctorCommand';
 
 import type {
   DoctorListDto
@@ -47,6 +55,10 @@ import type {
   ProblemDetails
 } from '../../model/ProblemDetails';
 
+import type {
+  UpdateDoctorCommand
+} from '../../model/UpdateDoctorCommand';
+
 import { ofetchMutator } from '../../ofetch-mutator';
 
 
@@ -54,7 +66,105 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-export type getAllResponse200 = {
+export type createDoctorResponse201 = {
+  data: void
+  status: 201
+}
+
+export type createDoctorResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type createDoctorResponse403 = {
+  data: ProblemDetails
+  status: 403
+}
+
+export type createDoctorResponse409 = {
+  data: ProblemDetails
+  status: 409
+}
+
+export type createDoctorResponse422 = {
+  data: ProblemDetails
+  status: 422
+}
+
+export type createDoctorResponseSuccess = (createDoctorResponse201) & {
+  headers: Headers;
+};
+export type createDoctorResponseError = (createDoctorResponse401 | createDoctorResponse403 | createDoctorResponse409 | createDoctorResponse422) & {
+  headers: Headers;
+};
+
+export type createDoctorResponse = (createDoctorResponseSuccess | createDoctorResponseError)
+
+export const getCreateDoctorUrl = () => {
+
+
+
+
+  return `http://localhost:5144/api/v1/doctors`
+}
+
+export const createDoctor = async (createDoctorCommand: CreateDoctorCommand, options?: RequestInit): Promise<createDoctorResponse> => {
+
+  return ofetchMutator<createDoctorResponse>(getCreateDoctorUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      createDoctorCommand,)
+  }
+);}
+
+
+
+
+export const getCreateDoctorMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createDoctor>>, TError,{data: CreateDoctorCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof createDoctor>>, TError,{data: CreateDoctorCommand}, TContext> => {
+
+const mutationKey = ['createDoctor'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createDoctor>>, {data: CreateDoctorCommand}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createDoctor(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateDoctorMutationResult = NonNullable<Awaited<ReturnType<typeof createDoctor>>>
+    export type CreateDoctorMutationBody = CreateDoctorCommand
+    export type CreateDoctorMutationError = ProblemDetails
+
+    export const useCreateDoctor = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createDoctor>>, TError,{data: CreateDoctorCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createDoctor>>,
+        TError,
+        {data: CreateDoctorCommand},
+        TContext
+      > => {
+      return useMutation(getCreateDoctorMutationOptions(options), queryClient);
+    }
+    export type getAllResponse200 = {
   data: DoctorListDto[]
   status: 200
 }
@@ -167,7 +277,198 @@ export function useGetAll<TData = Awaited<ReturnType<typeof getAll>>, TError = P
 
 
 
-export type getDoctorScheduleResponse200 = {
+export type updateDoctorByIdResponse204 = {
+  data: void
+  status: 204
+}
+
+export type updateDoctorByIdResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type updateDoctorByIdResponse403 = {
+  data: ProblemDetails
+  status: 403
+}
+
+export type updateDoctorByIdResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type updateDoctorByIdResponse422 = {
+  data: ProblemDetails
+  status: 422
+}
+
+export type updateDoctorByIdResponseSuccess = (updateDoctorByIdResponse204) & {
+  headers: Headers;
+};
+export type updateDoctorByIdResponseError = (updateDoctorByIdResponse401 | updateDoctorByIdResponse403 | updateDoctorByIdResponse404 | updateDoctorByIdResponse422) & {
+  headers: Headers;
+};
+
+export type updateDoctorByIdResponse = (updateDoctorByIdResponseSuccess | updateDoctorByIdResponseError)
+
+export const getUpdateDoctorByIdUrl = (id: string,) => {
+
+
+
+
+  return `http://localhost:5144/api/v1/doctors/${id}`
+}
+
+export const updateDoctorById = async (id: string,
+    updateDoctorCommand: UpdateDoctorCommand, options?: RequestInit): Promise<updateDoctorByIdResponse> => {
+
+  return ofetchMutator<updateDoctorByIdResponse>(getUpdateDoctorByIdUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      updateDoctorCommand,)
+  }
+);}
+
+
+
+
+export const getUpdateDoctorByIdMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateDoctorById>>, TError,{id: string;data: UpdateDoctorCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateDoctorById>>, TError,{id: string;data: UpdateDoctorCommand}, TContext> => {
+
+const mutationKey = ['updateDoctorById'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateDoctorById>>, {id: string;data: UpdateDoctorCommand}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateDoctorById(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateDoctorByIdMutationResult = NonNullable<Awaited<ReturnType<typeof updateDoctorById>>>
+    export type UpdateDoctorByIdMutationBody = UpdateDoctorCommand
+    export type UpdateDoctorByIdMutationError = ProblemDetails
+
+    export const useUpdateDoctorById = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateDoctorById>>, TError,{id: string;data: UpdateDoctorCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateDoctorById>>,
+        TError,
+        {id: string;data: UpdateDoctorCommand},
+        TContext
+      > => {
+      return useMutation(getUpdateDoctorByIdMutationOptions(options), queryClient);
+    }
+    export type deleteDoctorByIdResponse204 = {
+  data: void
+  status: 204
+}
+
+export type deleteDoctorByIdResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type deleteDoctorByIdResponse403 = {
+  data: ProblemDetails
+  status: 403
+}
+
+export type deleteDoctorByIdResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type deleteDoctorByIdResponseSuccess = (deleteDoctorByIdResponse204) & {
+  headers: Headers;
+};
+export type deleteDoctorByIdResponseError = (deleteDoctorByIdResponse401 | deleteDoctorByIdResponse403 | deleteDoctorByIdResponse404) & {
+  headers: Headers;
+};
+
+export type deleteDoctorByIdResponse = (deleteDoctorByIdResponseSuccess | deleteDoctorByIdResponseError)
+
+export const getDeleteDoctorByIdUrl = (id: string,) => {
+
+
+
+
+  return `http://localhost:5144/api/v1/doctors/${id}/deactivate`
+}
+
+export const deleteDoctorById = async (id: string, options?: RequestInit): Promise<deleteDoctorByIdResponse> => {
+
+  return ofetchMutator<deleteDoctorByIdResponse>(getDeleteDoctorByIdUrl(id),
+  {
+    ...options,
+    method: 'PATCH'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteDoctorByIdMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDoctorById>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteDoctorById>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['deleteDoctorById'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteDoctorById>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteDoctorById(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteDoctorByIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteDoctorById>>>
+
+    export type DeleteDoctorByIdMutationError = ProblemDetails
+
+    export const useDeleteDoctorById = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDoctorById>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteDoctorById>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getDeleteDoctorByIdMutationOptions(options), queryClient);
+    }
+    export type getDoctorScheduleResponse200 = {
   data: DoctorScheduleResponse
   status: 200
 }

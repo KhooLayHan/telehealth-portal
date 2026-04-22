@@ -82,6 +82,10 @@ public static class ApiEndpoints
         public const string GetByIdOrSlug = $"{Base}/{{idOrSlug}}";
 
         public const string GetAll = Base;
+
+        public const string UpdateById = $"{Base}/{{id:guid}}";
+
+        public const string SoftDeleteById = $"{Base}/{{id:guid}}/deactivate";
     }
 
     public static class Schedules

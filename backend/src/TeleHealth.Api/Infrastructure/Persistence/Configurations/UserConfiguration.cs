@@ -74,11 +74,20 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             u => u.Address,
             c =>
             {
-                c.Property(a => a.Street).HasMaxLength(100).IsRequired();
-                c.Property(a => a.City).HasMaxLength(50).IsRequired();
-                c.Property(a => a.State).HasMaxLength(50).IsRequired();
-                c.Property(a => a.PostalCode).HasMaxLength(50).IsRequired();
-                c.Property(a => a.Country).HasMaxLength(50).IsRequired();
+                c.Property(a => a.Street)
+                    .HasMaxLength(100)
+                    .IsRequired()
+                    .HasJsonPropertyName("street");
+                c.Property(a => a.City).HasMaxLength(50).IsRequired().HasJsonPropertyName("city");
+                c.Property(a => a.State).HasMaxLength(50).IsRequired().HasJsonPropertyName("state");
+                c.Property(a => a.PostalCode)
+                    .HasMaxLength(50)
+                    .IsRequired()
+                    .HasJsonPropertyName("postal_code");
+                c.Property(a => a.Country)
+                    .HasMaxLength(50)
+                    .IsRequired()
+                    .HasJsonPropertyName("country");
                 c.ToJson();
             }
         );
