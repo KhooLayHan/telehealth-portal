@@ -43,6 +43,8 @@ public static class ApiEndpoints
             $"{Base}/{{id:guid}}/appointments";
 
         public const string GetAllPatientsForReceptionist = Base;
+
+        public const string GetAllPatientsForClinicStaff = $"{Base}/staff";
     }
 
     public static class Appointments

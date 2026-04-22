@@ -31,6 +31,7 @@ using TeleHealth.Api.Features.LabReports.Download;
 using TeleHealth.Api.Features.LabReports.InitializeUpload;
 using TeleHealth.Api.Features.Patients.CancelAppointment;
 using TeleHealth.Api.Features.Patients.GetAllAppointments;
+using TeleHealth.Api.Features.Patients.GetAllPatientsForClinicStaff;
 using TeleHealth.Api.Features.Patients.GetAllPatientsForReceptionist;
 using TeleHealth.Api.Features.Patients.GetAppointmentByIdOrSlug;
 using TeleHealth.Api.Features.Patients.GetPatientByIdForReceptionist;
@@ -178,6 +179,7 @@ builder.Services.AddScoped<ReceptionistGetPatientByIdHandler>();
 builder.Services.AddScoped<ReceptionistGetPatientHistoryHandler>();
 builder.Services.AddScoped<GetDoctorPatientsHandler>();
 builder.Services.AddScoped<GetDoctorPatientAppointmentsHandler>();
+builder.Services.AddScoped<ClinicStaffGetAllPatientsHandler>();
 
 builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonS3>();
@@ -242,6 +244,7 @@ api.MapDownloadLabReportEndpoint();
 api.MapReceptionistGetAllPatientsEndpoint();
 api.MapReceptionistGetPatientByIdEndpoint();
 api.MapReceptionistGetPatientHistoryEndpoint();
+api.MapClinicStaffGetAllPatientsEndpoint();
 api.MapGetDoctorPatientsEndpoint();
 api.MapGetDoctorPatientAppointmentsEndpoint();
 

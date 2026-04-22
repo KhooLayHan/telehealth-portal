@@ -30,3 +30,5 @@ coverage/**
 
 frontend/src/api/generated/
 frontend/src/api/model
+
+.tanstack/**
