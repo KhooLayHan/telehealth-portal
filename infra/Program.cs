@@ -13,6 +13,7 @@ return await Deployment.RunAsync(() =>
     var db = Database.Create(cfg, net);
     var obs = Observability.Create(cfg, db, msg);
     var compute = Compute.Create(cfg, net, storage, db, msg, obs);
+    var serverless = Serverless.Create(cfg, msg, storage);
 
     // Stack outputs — used by GitHub Actions CD workflow
     return new Dictionary<string, object?>
@@ -25,6 +26,7 @@ return await Deployment.RunAsync(() =>
         ["S3ArtifactsBucket"] = storage.ArtifactsBucket.BucketName,
         ["SnsTopicArn"] = msg.MedicalAlertsTopic.Arn,
         ["SqsQueueUrl"] = msg.ProcessingQueue.Id,
+        ["DlqUrl"] = msg.DeadLetterQueue.Id,
         ["FrontendBucketName"] = storage.FrontendBucket.BucketName,
         ["EbAppName"] = compute.EbApp.Name,
         ["EbEnvName"] = compute.EbEnv.Name,
@@ -32,5 +34,6 @@ return await Deployment.RunAsync(() =>
         ["DbSecretArn"] = db.DbSecret.Arn,
         ["XRayGroupArn"] = obs.XrayGroup.Arn,
         ["ApiLogGroupName"] = obs.ApiLogGroup.Name,
+        ["LambdaFunctionName"] = serverless.PdfProcessorLambda.Name,
     };
 });
