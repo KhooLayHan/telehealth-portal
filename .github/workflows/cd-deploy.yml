@@ -1,10 +1,5 @@
 name: CD — Deploy to AWS
 
-# Triggers on pushes to main that touch infra, backend, or frontend.
-# Requires these GitHub secrets/variables to be set in your repo:
-#   Secrets : AWS_DEPLOY_ROLE_ARN, PULUMI_ACCESS_TOKEN
-#   Variables: AWS_REGION (default: us-east-1)
-
 on:
   push:
     branches: ["main"]
@@ -35,11 +30,12 @@ jobs:
       id-token: write   # Required for OIDC → AWS
       contents: read
     outputs:
-      frontend-bucket:   ${{ steps.pulumi.outputs.FrontendBucketName }}
-      artifacts-bucket:  ${{ steps.pulumi.outputs.S3ArtifactsBucket }}
-      eb-app-name:       ${{ steps.pulumi.outputs.EbAppName }}
-      eb-env-name:       ${{ steps.pulumi.outputs.EbEnvName }}
-      ecr-url:           ${{ steps.pulumi.outputs.EcrRepositoryUrl }}
+      frontend-bucket:      ${{ steps.pulumi.outputs.FrontendBucketName }}
+      artifacts-bucket:     ${{ steps.pulumi.outputs.S3ArtifactsBucket }}
+      eb-app-name:          ${{ steps.pulumi.outputs.EbAppName }}
+      eb-env-name:          ${{ steps.pulumi.outputs.EbEnvName }}
+      ecr-url:              ${{ steps.pulumi.outputs.EcrRepositoryUrl }}
+      lambda-function-name: ${{ steps.pulumi.outputs.LambdaFunctionName }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -237,3 +233,52 @@ jobs:
             --environment-names "$EB_ENV_NAME" \
             --query 'Environments[0].CNAME' \
             --output text)"
+
+  # ──────────────────────────────────────────────────────────────
+  # JOB 4 — Build & Deploy AWS Lambda (Task 2 Microservice)
+  # ──────────────────────────────────────────────────────────────
+  deploy-lambda:
+    name: Lambda — Build Native AOT & Deploy
+    runs-on: ubuntu-latest
+    needs: deploy-infra
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      # ── Build the Lambda function using Native AOT for Amazon Linux 2023 ──
+      - name: Publish Lambda (Native AOT)
+        working-directory: functions/lab-pdf-processor
+        run: |
+          # Publish for Linux ARM64 (Graviton) or x64 depending on your preference. 
+          # Assuming x64 here to match standard Lambda provided.al2023
+          dotnet publish -c Release -r linux-x64 --self-contained true -o ./publish
+          
+          # Zip the output (The Native AOT binary is named 'bootstrap')
+          cd publish
+          zip -r ../function.zip *
+
+      # ── Update the Lambda function code directly via AWS CLI ──
+      - name: Deploy to AWS Lambda
+        env:
+          LAMBDA_NAME: ${{ needs.deploy-infra.outputs.lambda-function-name }}
+        run: |
+          aws lambda update-function-code \
+            --function-name "$LAMBDA_NAME" \
+            --zip-file fileb://functions/lab-pdf-processor/function.zip
+            
+          echo "✅ Lambda deployment complete."
