@@ -11,6 +11,6 @@
     <PackageReference Include="NodaTime.Serialization.SystemTextJson" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\TeleHealth.Contracts\TeleHealth.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\..\backend\src\TeleHealth.Contracts\TeleHealth.Contracts.csproj" />
   </ItemGroup>
 </Project>

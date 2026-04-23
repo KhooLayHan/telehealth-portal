@@ -7,7 +7,6 @@ using NodaTime;
 using NodaTime.Serialization.SystemTextJson;
 using TeleHealth.Contracts;
 
-// Assembly attribute must be on its own line
 [assembly: LambdaSerializer(
     typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer)
 )]
