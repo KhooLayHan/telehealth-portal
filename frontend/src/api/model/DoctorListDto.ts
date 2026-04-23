@@ -4,10 +4,35 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
+import type { AddressDoctorDto } from "./AddressDoctorDto";
+import type { Instant } from "./Instant";
+import type { LocalDate } from "./LocalDate";
+import type { QualificationDoctorDto } from "./QualificationDoctorDto";
 
 export interface DoctorListDto {
-  firstName: string;
-  lastName: string;
-  doctorPublicId: string;
-  specialization: string;
+  doctorPublicId?: string;
+  firstName?: string;
+  lastName?: string;
+  username?: string;
+  email?: string;
+  specialization?: string;
+  departmentName?: string;
+  licenseNumber?: string;
+  /**
+   * @nullable
+   * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+   */
+  consultationFee?: number | string | null;
+  /** @nullable */
+  phoneNumber?: string | null;
+  slug?: string;
+  gender?: string;
+  dateOfBirth?: LocalDate;
+  /** @nullable */
+  avatarUrl?: string | null;
+  address?: null | AddressDoctorDto;
+  qualifications?: QualificationDoctorDto[];
+  /** @nullable */
+  bio?: string | null;
+  createdAt?: Instant;
 }

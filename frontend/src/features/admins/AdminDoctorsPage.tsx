@@ -1,22 +1,34 @@
+import { useForm } from "@tanstack/react-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { motion } from "framer-motion";
 import {
-  BadgeCheck,
   ChevronLeft,
   ChevronRight,
   Eye,
+  EyeOff,
   GraduationCap,
-  Mail,
   Pencil,
-  Phone,
+  Plus,
   Search,
   Stethoscope,
-  UserCheck,
-  UserX,
+  Trash2,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { Badge } from "@/components/ui/badge";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
+import { z } from "zod";
+import {
+  getGetAllQueryKey,
+  useCreateDoctor,
+  useDeleteDoctorById,
+  useGetAll,
+  useUpdateDoctorById,
+} from "@/api/generated/doctors/doctors";
+import type { CreateDoctorCommand } from "@/api/model/CreateDoctorCommand";
+import type { DoctorListDto } from "@/api/model/DoctorListDto";
+import type { UpdateDoctorCommand } from "@/api/model/UpdateDoctorCommand";
+import { ApiError } from "@/api/ofetch-mutator";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -33,7 +45,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import {
   Table,
@@ -43,432 +63,71 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 
 const ACCENT = "#0d9488";
 const PAGE_SIZE = 10;
 
-// Shape of a single academic or professional qualification
-interface Qualification {
-  degree: string;
-  institution: string;
-  year: number;
+// Zod schema that validates every field in the edit-doctor dialog form
+const editDoctorSchema = z.object({
+  firstName: z.string().min(1, "Required"),
+  lastName: z.string().min(1, "Required"),
+  username: z.string().min(1, "Required"),
+  email: z.string().email("Invalid email"),
+  phoneNumber: z.string(),
+  gender: z.string().min(1, "Required"),
+  dateOfBirth: z.string().min(1, "Required"),
+  bio: z.string(),
+  specialization: z.string().min(1, "Required"),
+  licenseNumber: z.string().min(1, "Required"),
+  consultationFee: z.number().nonnegative("Must be ≥ 0").nullable(),
+  departmentName: z.string().min(1, "Required"),
+  addressStreet: z.string(),
+  addressCity: z.string(),
+  addressState: z.string(),
+  addressPostalCode: z.string(),
+  addressCountry: z.string(),
+  qualifications: z.array(
+    z.object({
+      degree: z.string().min(1, "Required"),
+      institution: z.string().min(1, "Required"),
+      year: z.number().int().min(1900, "Min 1900").max(2100, "Max 2100"),
+    }),
+  ),
+});
+
+// Converts a DoctorListDto into the flat default-values shape used by the edit form
+function buildEditDefaultValues(doctor: DoctorListDto) {
+  return {
+    firstName: doctor.firstName,
+    lastName: doctor.lastName,
+    username: doctor.username,
+    email: doctor.email,
+    phoneNumber: doctor.phoneNumber ?? "",
+    gender: doctor.gender,
+    dateOfBirth: String(doctor.dateOfBirth),
+    bio: doctor.bio ?? "",
+    specialization: doctor.specialization,
+    licenseNumber: doctor.licenseNumber,
+    consultationFee: doctor.consultationFee,
+    departmentName: doctor.departmentName,
+    addressStreet: doctor.address?.street ?? "",
+    addressCity: doctor.address?.city ?? "",
+    addressState: doctor.address?.state ?? "",
+    addressPostalCode: doctor.address?.postalCode ?? "",
+    addressCountry: doctor.address?.country ?? "",
+    qualifications: doctor.qualifications.map((q) => ({
+      degree: q.degree,
+      institution: q.institution,
+      year: q.year,
+    })),
+  };
 }
 
-// Address in JSONB form as stored in the database
-interface Address {
-  street: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  country: string;
-}
-
-// Full doctor row including extra fields shown only in the detail dialog
-interface DoctorRow {
-  publicId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  specialty: string;
-  department: string;
-  licenseNumber: string;
-  consultationFee: number;
-  phoneNumber: string;
-  slug: string;
-  isActive: boolean;
-  // Extended fields (from users + doctors tables, not shown in table columns)
-  gender: "M" | "F" | "O" | "N";
-  dateOfBirth: string;
-  avatarUrl?: string;
-  address: Address;
-  qualifications: Qualification[];
-  bio: string;
-  languages: string[];
-}
-
-const DEMO_DOCTORS: DoctorRow[] = [
-  {
-    publicId: "d1a2b3c4-0001-0000-0000-000000000001",
-    firstName: "Aisha",
-    lastName: "Rahman",
-    email: "aisha.rahman@telehealth.dev",
-    specialty: "Cardiology",
-    department: "Cardiology",
-    licenseNumber: "MMC-10021",
-    consultationFee: 150,
-    phoneNumber: "+60 11-1234 5678",
-    slug: "aisha-rahman",
-    isActive: true,
-    gender: "F",
-    dateOfBirth: "1982-04-15",
-    address: {
-      street: "12 Jalan Ampang",
-      city: "Kuala Lumpur",
-      state: "Wilayah Persekutuan",
-      postalCode: "50450",
-      country: "MY",
-    },
-    qualifications: [
-      { degree: "MBBS", institution: "University of Malaya", year: 2007 },
-      { degree: "Fellowship in Cardiology", institution: "National Heart Institute", year: 2013 },
-    ],
-    bio: "Dr. Aisha Rahman is a board-certified cardiologist with over 15 years of experience in interventional cardiology. She specialises in complex coronary interventions and heart failure management. Fluent in English and Bahasa Malaysia.",
-    languages: ["English", "Bahasa Malaysia"],
-  },
-  {
-    publicId: "d1a2b3c4-0001-0000-0000-000000000002",
-    firstName: "Benjamin",
-    lastName: "Tan",
-    email: "benjamin.tan@telehealth.dev",
-    specialty: "Neurology",
-    department: "Neurology",
-    licenseNumber: "MMC-10022",
-    consultationFee: 180,
-    phoneNumber: "+60 12-9876 5432",
-    slug: "benjamin-tan",
-    isActive: true,
-    gender: "M",
-    dateOfBirth: "1978-09-22",
-    address: {
-      street: "88 Jalan Bukit Bintang",
-      city: "Kuala Lumpur",
-      state: "Wilayah Persekutuan",
-      postalCode: "55100",
-      country: "MY",
-    },
-    qualifications: [
-      { degree: "MD", institution: "Universiti Kebangsaan Malaysia", year: 2003 },
-      { degree: "PhD Neuroscience", institution: "Imperial College London", year: 2009 },
-    ],
-    bio: "Dr. Benjamin Tan is a consultant neurologist specialising in stroke management and epilepsy. He leads the neurology department's research programme and has published over 30 peer-reviewed articles. Fluent in English, Malay, and Mandarin.",
-    languages: ["English", "Bahasa Malaysia", "Mandarin"],
-  },
-  {
-    publicId: "d1a2b3c4-0001-0000-0000-000000000003",
-    firstName: "Chitra",
-    lastName: "Subramaniam",
-    email: "chitra.subramaniam@telehealth.dev",
-    specialty: "Dermatology",
-    department: "Dermatology",
-    licenseNumber: "MMC-10023",
-    consultationFee: 120,
-    phoneNumber: "+60 16-3344 5566",
-    slug: "chitra-subramaniam",
-    isActive: false,
-    gender: "F",
-    dateOfBirth: "1985-11-30",
-    address: {
-      street: "3 Lorong Masjid India",
-      city: "Kuala Lumpur",
-      state: "Wilayah Persekutuan",
-      postalCode: "50100",
-      country: "MY",
-    },
-    qualifications: [
-      { degree: "MBBS", institution: "Manipal University", year: 2010 },
-      { degree: "Diploma in Dermatology", institution: "Cardiff University", year: 2014 },
-    ],
-    bio: "Dr. Chitra Subramaniam focuses on medical and cosmetic dermatology, with expertise in acne, eczema, and skin cancer screening. She is passionate about patient education and preventive skincare. Speaks English, Tamil, and Bahasa Malaysia.",
-    languages: ["English", "Tamil", "Bahasa Malaysia"],
-  },
-  {
-    publicId: "d1a2b3c4-0001-0000-0000-000000000004",
-    firstName: "David",
-    lastName: "Lim",
-    email: "david.lim@telehealth.dev",
-    specialty: "Orthopaedics",
-    department: "Orthopedics",
-    licenseNumber: "MMC-10024",
-    consultationFee: 200,
-    phoneNumber: "+60 17-2233 4455",
-    slug: "david-lim",
-    isActive: true,
-    gender: "M",
-    dateOfBirth: "1975-06-08",
-    address: {
-      street: "45 Jalan Duta",
-      city: "Kuala Lumpur",
-      state: "Wilayah Persekutuan",
-      postalCode: "50480",
-      country: "MY",
-    },
-    qualifications: [
-      { degree: "MBBS", institution: "University of Malaya", year: 2000 },
-      { degree: "Masters in Orthopaedic Surgery", institution: "University of Malaya", year: 2006 },
-      {
-        degree: "Fellowship in Sports Medicine",
-        institution: "University of Melbourne",
-        year: 2009,
-      },
-    ],
-    bio: "Dr. David Lim is a consultant orthopaedic surgeon with 20+ years of experience in joint replacement, arthroscopy, and sports injury rehabilitation. He is the team physician for several national sports associations.",
-    languages: ["English", "Bahasa Malaysia", "Cantonese"],
-  },
-  {
-    publicId: "d1a2b3c4-0001-0000-0000-000000000005",
-    firstName: "Elena",
-    lastName: "Wong",
-    email: "elena.wong@telehealth.dev",
-    specialty: "Paediatrics",
-    department: "Pediatrics",
-    licenseNumber: "MMC-10025",
-    consultationFee: 130,
-    phoneNumber: "+60 18-6677 8899",
-    slug: "elena-wong",
-    isActive: true,
-    gender: "F",
-    dateOfBirth: "1988-02-14",
-    address: {
-      street: "9 Jalan Semantan",
-      city: "Petaling Jaya",
-      state: "Selangor",
-      postalCode: "47301",
-      country: "MY",
-    },
-    qualifications: [
-      { degree: "MBBS", institution: "International Medical University", year: 2013 },
-      {
-        degree: "MRCPCH",
-        institution: "Royal College of Paediatrics and Child Health",
-        year: 2017,
-      },
-    ],
-    bio: "Dr. Elena Wong is a paediatric specialist dedicated to the health and wellbeing of children from birth through adolescence. She has a special interest in developmental paediatrics and childhood immunisation programmes.",
-    languages: ["English", "Mandarin", "Hokkien"],
-  },
-  {
-    publicId: "d1a2b3c4-0001-0000-0000-000000000006",
-    firstName: "Farid",
-    lastName: "Abdullah",
-    email: "farid.abdullah@telehealth.dev",
-    specialty: "General Practice",
-    department: "General Practice",
-    licenseNumber: "MMC-10026",
-    consultationFee: 80,
-    phoneNumber: "+60 19-5544 3322",
-    slug: "farid-abdullah",
-    isActive: true,
-    gender: "M",
-    dateOfBirth: "1990-07-25",
-    address: {
-      street: "22 Taman Tun Dr Ismail",
-      city: "Kuala Lumpur",
-      state: "Wilayah Persekutuan",
-      postalCode: "60000",
-      country: "MY",
-    },
-    qualifications: [
-      { degree: "MBBS", institution: "Universiti Sains Malaysia", year: 2015 },
-      {
-        degree: "Certificate in Family Medicine",
-        institution: "Academy of Family Physicians Malaysia",
-        year: 2019,
-      },
-    ],
-    bio: "Dr. Farid Abdullah is a family medicine physician committed to holistic, patient-centred primary care. He manages chronic diseases, preventive health, and minor surgical procedures with a warm bedside manner.",
-    languages: ["English", "Bahasa Malaysia"],
-  },
-  {
-    publicId: "d1a2b3c4-0001-0000-0000-000000000007",
-    firstName: "Grace",
-    lastName: "Ng",
-    email: "grace.ng@telehealth.dev",
-    specialty: "Psychiatry",
-    department: "General Practice",
-    licenseNumber: "MMC-10027",
-    consultationFee: 160,
-    phoneNumber: "+60 11-8877 6655",
-    slug: "grace-ng",
-    isActive: false,
-    gender: "F",
-    dateOfBirth: "1983-12-03",
-    address: {
-      street: "6 Jalan Imbi",
-      city: "Kuala Lumpur",
-      state: "Wilayah Persekutuan",
-      postalCode: "55100",
-      country: "MY",
-    },
-    qualifications: [
-      { degree: "MBBS", institution: "University of Malaya", year: 2008 },
-      { degree: "MMed Psychiatry", institution: "University of Malaya", year: 2013 },
-    ],
-    bio: "Dr. Grace Ng is a consultant psychiatrist with a special interest in mood disorders, anxiety, and trauma-informed care. She provides evidence-based therapy and pharmacological management with a compassionate, integrative approach.",
-    languages: ["English", "Bahasa Malaysia", "Mandarin"],
-  },
-  {
-    publicId: "d1a2b3c4-0001-0000-0000-000000000008",
-    firstName: "Hassan",
-    lastName: "Malik",
-    email: "hassan.malik@telehealth.dev",
-    specialty: "Ophthalmology",
-    department: "General Practice",
-    licenseNumber: "MMC-10028",
-    consultationFee: 140,
-    phoneNumber: "+60 12-1122 3344",
-    slug: "hassan-malik",
-    isActive: true,
-    gender: "M",
-    dateOfBirth: "1980-03-17",
-    address: {
-      street: "100 Jalan Raja Chulan",
-      city: "Kuala Lumpur",
-      state: "Wilayah Persekutuan",
-      postalCode: "50200",
-      country: "MY",
-    },
-    qualifications: [
-      { degree: "MBBS", institution: "Universiti Kebangsaan Malaysia", year: 2005 },
-      {
-        degree: "Masters in Ophthalmology",
-        institution: "Universiti Kebangsaan Malaysia",
-        year: 2011,
-      },
-    ],
-    bio: "Dr. Hassan Malik is an ophthalmologist specialising in cataract surgery, glaucoma management, and refractive surgery. He has performed over 5,000 cataract operations and is trained in advanced phacoemulsification techniques.",
-    languages: ["English", "Bahasa Malaysia", "Urdu"],
-  },
-  {
-    publicId: "d1a2b3c4-0001-0000-0000-000000000009",
-    firstName: "Irene",
-    lastName: "Chan",
-    email: "irene.chan@telehealth.dev",
-    specialty: "Oncology",
-    department: "General Practice",
-    licenseNumber: "MMC-10029",
-    consultationFee: 220,
-    phoneNumber: "+60 16-9988 7766",
-    slug: "irene-chan",
-    isActive: true,
-    gender: "F",
-    dateOfBirth: "1977-08-19",
-    address: {
-      street: "25 Jalan Parlimen",
-      city: "Kuala Lumpur",
-      state: "Wilayah Persekutuan",
-      postalCode: "50480",
-      country: "MY",
-    },
-    qualifications: [
-      { degree: "MBBS", institution: "University of Malaya", year: 2002 },
-      {
-        degree: "Fellowship in Medical Oncology",
-        institution: "National Cancer Institute Singapore",
-        year: 2008,
-      },
-      {
-        degree: "Sub-speciality in Breast Oncology",
-        institution: "MD Anderson Cancer Center",
-        year: 2010,
-      },
-    ],
-    bio: "Dr. Irene Chan is a senior consultant oncologist with expertise in breast and gynaecological cancers. She leads the multidisciplinary tumour board and is involved in several international clinical trials focusing on targeted therapy.",
-    languages: ["English", "Mandarin", "Cantonese"],
-  },
-  {
-    publicId: "d1a2b3c4-0001-0000-0000-000000000010",
-    firstName: "Johan",
-    lastName: "Ibrahim",
-    email: "johan.ibrahim@telehealth.dev",
-    specialty: "Endocrinology",
-    department: "General Practice",
-    licenseNumber: "MMC-10030",
-    consultationFee: 170,
-    phoneNumber: "+60 17-4455 6677",
-    slug: "johan-ibrahim",
-    isActive: true,
-    gender: "M",
-    dateOfBirth: "1981-01-11",
-    address: {
-      street: "7 Jalan Cochrane",
-      city: "Kuala Lumpur",
-      state: "Wilayah Persekutuan",
-      postalCode: "55100",
-      country: "MY",
-    },
-    qualifications: [
-      { degree: "MBBS", institution: "Universiti Putra Malaysia", year: 2006 },
-      { degree: "MMed Internal Medicine", institution: "Universiti Putra Malaysia", year: 2012 },
-      {
-        degree: "Fellowship in Endocrinology",
-        institution: "Singapore General Hospital",
-        year: 2015,
-      },
-    ],
-    bio: "Dr. Johan Ibrahim is an endocrinologist specialising in diabetes management, thyroid disorders, and osteoporosis. He runs a dedicated diabetes education clinic and works closely with dietitians and diabetes nurse educators.",
-    languages: ["English", "Bahasa Malaysia"],
-  },
-  {
-    publicId: "d1a2b3c4-0001-0000-0000-000000000011",
-    firstName: "Karen",
-    lastName: "Yap",
-    email: "karen.yap@telehealth.dev",
-    specialty: "Rheumatology",
-    department: "General Practice",
-    licenseNumber: "MMC-10031",
-    consultationFee: 190,
-    phoneNumber: "+60 18-3322 1100",
-    slug: "karen-yap",
-    isActive: true,
-    gender: "F",
-    dateOfBirth: "1984-05-27",
-    address: {
-      street: "50 Jalan Tun Razak",
-      city: "Kuala Lumpur",
-      state: "Wilayah Persekutuan",
-      postalCode: "50400",
-      country: "MY",
-    },
-    qualifications: [
-      { degree: "MBBS", institution: "MAHSA University", year: 2009 },
-      { degree: "MRCP Rheumatology", institution: "Royal College of Physicians", year: 2014 },
-    ],
-    bio: "Dr. Karen Yap is a rheumatologist with expertise in autoimmune and musculoskeletal diseases including rheumatoid arthritis, lupus, and gout. She is an advocate for biologic therapy access and runs patient support groups.",
-    languages: ["English", "Mandarin", "Hakka"],
-  },
-  {
-    publicId: "d1a2b3c4-0001-0000-0000-000000000012",
-    firstName: "Luqman",
-    lastName: "Hakim",
-    email: "luqman.hakim@telehealth.dev",
-    specialty: "Gastroenterology",
-    department: "General Practice",
-    licenseNumber: "MMC-10032",
-    consultationFee: 155,
-    phoneNumber: "+60 19-6677 8800",
-    slug: "luqman-hakim",
-    isActive: false,
-    gender: "M",
-    dateOfBirth: "1986-10-04",
-    address: {
-      street: "14 Jalan P. Ramlee",
-      city: "Kuala Lumpur",
-      state: "Wilayah Persekutuan",
-      postalCode: "50250",
-      country: "MY",
-    },
-    qualifications: [
-      { degree: "MBBS", institution: "Universiti Teknologi MARA", year: 2011 },
-      {
-        degree: "Fellowship in Gastroenterology",
-        institution: "University of Queensland",
-        year: 2017,
-      },
-    ],
-    bio: "Dr. Luqman Hakim is a consultant gastroenterologist specialising in inflammatory bowel disease, liver conditions, and advanced therapeutic endoscopy. He is trained in ERCP and EUS procedures.",
-    languages: ["English", "Bahasa Malaysia"],
-  },
-];
-
-// Maps gender code to a readable label
-function genderLabel(code: "M" | "F" | "O" | "N"): string {
-  const map: Record<string, string> = { M: "Male", F: "Female", O: "Other", N: "Not specified" };
-  return map[code] ?? code;
-}
-
-// Formats a YYYY-MM-DD date string as "15 Apr 1982"
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-GB", {
+// Formats a date string or NodaTime Instant as "15 Apr 1982"
+function formatDate(iso: unknown): string {
+  return new Date(String(iso)).toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -493,7 +152,7 @@ function DetailRow({ label, value }: DetailRowProps) {
 }
 
 interface DoctorDetailsDialogProps {
-  doctor: DoctorRow | null;
+  doctor: DoctorListDto | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -503,7 +162,9 @@ function DoctorDetailsDialog({ doctor, open, onOpenChange }: DoctorDetailsDialog
   if (!doctor) return null;
 
   const initials = `${doctor.firstName[0]}${doctor.lastName[0]}`;
-  const fullAddress = `${doctor.address.street}, ${doctor.address.city}, ${doctor.address.state} ${doctor.address.postalCode}, ${doctor.address.country}`;
+  const fullAddress = doctor.address
+    ? `${doctor.address.street}, ${doctor.address.city}, ${doctor.address.state} ${doctor.address.postalCode}, ${doctor.address.country}`
+    : "—";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -526,14 +187,11 @@ function DoctorDetailsDialog({ doctor, open, onOpenChange }: DoctorDetailsDialog
                 <DialogTitle className="text-xl font-semibold leading-none">
                   Dr. {doctor.firstName} {doctor.lastName}
                 </DialogTitle>
-                <Badge variant={doctor.isActive ? "default" : "secondary"} className="shrink-0">
-                  {doctor.isActive ? "Active" : "Inactive"}
-                </Badge>
               </div>
               <DialogDescription className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
                 <span className="flex items-center gap-1">
                   <Stethoscope className="size-3.5 shrink-0" />
-                  {doctor.specialty}
+                  {doctor.specialization}
                 </span>
                 <span className="text-muted-foreground/40">·</span>
                 <span className="font-mono text-xs">{doctor.licenseNumber}</span>
@@ -559,28 +217,12 @@ function DoctorDetailsDialog({ doctor, open, onOpenChange }: DoctorDetailsDialog
             Personal Information
           </p>
           <div className="mb-5 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
-            <DetailRow label="Gender" value={genderLabel(doctor.gender)} />
+            <DetailRow label="Gender" value={doctor.gender} />
             <DetailRow label="Date of Birth" value={formatDate(doctor.dateOfBirth)} />
-            <DetailRow label="Consultation Fee" value={`RM ${doctor.consultationFee.toFixed(2)}`} />
+            <DetailRow label="Username" value={doctor.username} />
           </div>
 
-          {/* Contact details */}
-          <p
-            className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em]"
-            style={{ color: ACCENT }}
-          >
-            Contact Details
-          </p>
-          <div className="mb-5 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
-            <div className="flex items-center gap-2">
-              <Mail className="size-3.5 shrink-0 text-muted-foreground" />
-              <span className="truncate text-sm">{doctor.email}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Phone className="size-3.5 shrink-0 text-muted-foreground" />
-              <span className="font-mono text-sm">{doctor.phoneNumber || "—"}</span>
-            </div>
-          </div>
+          {/* Address */}
           <div className="mb-5 rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm text-foreground/80">
             {fullAddress}
           </div>
@@ -608,33 +250,1233 @@ function DoctorDetailsDialog({ doctor, open, onOpenChange }: DoctorDetailsDialog
               </div>
             ))}
           </div>
-
-          {/* Languages */}
-          <p
-            className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em]"
-            style={{ color: ACCENT }}
-          >
-            Languages Spoken
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {doctor.languages.map((lang) => (
-              <span
-                key={lang}
-                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium"
-                style={{ background: `${ACCENT}18`, color: ACCENT }}
-              >
-                <BadgeCheck className="size-3 shrink-0" />
-                {lang}
-              </span>
-            ))}
-          </div>
         </div>
       </DialogContent>
     </Dialog>
   );
 }
 
-const columns: ColumnDef<DoctorRow>[] = [
+interface EditDoctorDialogProps {
+  doctor: DoctorListDto | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+// Guard that prevents the inner form from mounting until a doctor is selected
+function EditDoctorDialog({ doctor, open, onOpenChange }: EditDoctorDialogProps) {
+  if (!doctor) return null;
+  return <EditDoctorForm doctor={doctor} open={open} onOpenChange={onOpenChange} />;
+}
+
+// Inner form component; keeps the TanStack Form instance alive for a single doctor
+function EditDoctorForm({
+  doctor,
+  open,
+  onOpenChange,
+}: {
+  doctor: DoctorListDto;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const queryClient = useQueryClient();
+  const { mutateAsync, isPending } = useUpdateDoctorById();
+  const initials = `${doctor.firstName[0]}${doctor.lastName[0]}`;
+
+  // Stable UUID keys so qualification rows keep their identity when items are added/removed
+  const qualKeysRef = useRef<string[]>(doctor.qualifications.map(() => crypto.randomUUID()));
+
+  const form = useForm({
+    defaultValues: buildEditDefaultValues(doctor),
+    validators: { onSubmit: editDoctorSchema },
+    onSubmit: async ({ value }) => {
+      const payload: UpdateDoctorCommand = {
+        firstName: value.firstName,
+        lastName: value.lastName,
+        username: value.username,
+        email: value.email,
+        phoneNumber: value.phoneNumber || null,
+        gender: value.gender[0] ?? "N",
+        dateOfBirth: value.dateOfBirth,
+        bio: value.bio || null,
+        specialization: value.specialization,
+        licenseNumber: value.licenseNumber,
+        consultationFee: value.consultationFee,
+        departmentName: value.departmentName,
+        address: value.addressStreet
+          ? {
+              street: value.addressStreet,
+              city: value.addressCity,
+              state: value.addressState,
+              postalCode: value.addressPostalCode,
+              country: value.addressCountry,
+            }
+          : null,
+        qualifications: value.qualifications.map((q) => ({
+          degree: q.degree,
+          institution: q.institution,
+          year: q.year,
+        })),
+      };
+
+      try {
+        await mutateAsync({ id: String(doctor.doctorPublicId), data: payload });
+        toast.success(`Dr. ${doctor.firstName} ${doctor.lastName}'s profile updated.`);
+        await queryClient.invalidateQueries({ queryKey: getGetAllQueryKey() });
+        onOpenChange(false);
+      } catch (error) {
+        if (error instanceof ApiError) {
+          toast.error(error.data?.title ?? "Failed to update doctor.");
+        } else {
+          toast.error("Failed to update doctor.");
+        }
+      }
+    },
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl gap-0 overflow-hidden p-0">
+        {/* Accent bar */}
+        <div className="absolute inset-x-0 top-0 h-1" style={{ background: ACCENT }} />
+
+        <DialogHeader className="px-6 pb-4 pt-7">
+          <div className="flex items-start gap-4">
+            <div
+              className="flex size-14 shrink-0 items-center justify-center rounded-full text-lg font-bold text-white"
+              style={{ background: ACCENT }}
+            >
+              {initials}
+            </div>
+            <div className="min-w-0 flex-1">
+              <DialogTitle className="text-xl font-semibold leading-none">
+                Edit Dr. {doctor.firstName} {doctor.lastName}
+              </DialogTitle>
+              <DialogDescription className="mt-1 text-sm text-muted-foreground">
+                Update profile details. Changes are front-end only — not yet connected to the
+                backend.
+              </DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
+          className="flex flex-col"
+        >
+          <Tabs defaultValue="personal" className="flex-1 px-6 pb-2">
+            <TabsList className="mb-5 grid w-full grid-cols-4">
+              <TabsTrigger value="personal">Personal</TabsTrigger>
+              <TabsTrigger value="professional">Professional</TabsTrigger>
+              <TabsTrigger value="address">Address</TabsTrigger>
+              <TabsTrigger value="qualifications">Qualifications</TabsTrigger>
+            </TabsList>
+
+            {/* ── Personal ─────────────────────────────────────────────── */}
+            <TabsContent
+              value="personal"
+              className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
+            >
+              <div className="grid grid-cols-2 gap-4">
+                <form.Field name="firstName">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>First Name</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+                <form.Field name="lastName">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Last Name</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <form.Field name="username">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Username</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+                <form.Field name="email">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Email</FieldLabel>
+                      <Input
+                        type="email"
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <form.Field name="phoneNumber">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Phone Number</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="+601x-xxxxxxx"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+
+                {/* Gender select */}
+                <form.Field name="gender">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Gender</FieldLabel>
+                      <Select
+                        value={field.state.value}
+                        onValueChange={(v) => field.handleChange(v ?? "")}
+                      >
+                        <SelectTrigger className="w-full" onBlur={field.handleBlur}>
+                          <SelectValue placeholder="Select gender" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Male">Male</SelectItem>
+                          <SelectItem value="Female">Female</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                          <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+
+              <form.Field name="dateOfBirth">
+                {(field) => (
+                  <Field>
+                    <FieldLabel>Date of Birth</FieldLabel>
+                    <Input
+                      type="date"
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                    />
+                    <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                  </Field>
+                )}
+              </form.Field>
+
+              {/* Bio textarea */}
+              <form.Field name="bio">
+                {(field) => (
+                  <Field>
+                    <FieldLabel>Bio</FieldLabel>
+                    <Textarea
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      rows={3}
+                      placeholder="Brief professional bio…"
+                    />
+                    <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                  </Field>
+                )}
+              </form.Field>
+            </TabsContent>
+
+            {/* ── Professional ─────────────────────────────────────────── */}
+            <TabsContent
+              value="professional"
+              className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
+            >
+              <div className="grid grid-cols-2 gap-4">
+                <form.Field name="specialization">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Specialization</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. Cardiology"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+                <form.Field name="departmentName">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Department</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. Cardiology Department"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <form.Field name="licenseNumber">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>License Number</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. MMC12345"
+                        className="font-mono"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+
+                {/* Consultation fee — nullable number */}
+                <form.Field name="consultationFee">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Consultation Fee (MYR)</FieldLabel>
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={field.state.value ?? ""}
+                        onChange={(e) =>
+                          field.handleChange(e.target.value === "" ? null : Number(e.target.value))
+                        }
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. 150.00"
+                        className="font-mono"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+            </TabsContent>
+
+            {/* ── Address ──────────────────────────────────────────────── */}
+            <TabsContent
+              value="address"
+              className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
+            >
+              <form.Field name="addressStreet">
+                {(field) => (
+                  <Field>
+                    <FieldLabel>Street</FieldLabel>
+                    <Input
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      placeholder="e.g. 123 Jalan Ampang"
+                    />
+                    <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                  </Field>
+                )}
+              </form.Field>
+              <div className="grid grid-cols-2 gap-4">
+                <form.Field name="addressCity">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>City</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. Kuala Lumpur"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+                <form.Field name="addressState">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>State</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. Wilayah Persekutuan"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <form.Field name="addressPostalCode">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Postal Code</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. 50450"
+                        className="font-mono"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+                <form.Field name="addressCountry">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Country</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. Malaysia"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+            </TabsContent>
+
+            {/* ── Qualifications ───────────────────────────────────────── */}
+            <TabsContent
+              value="qualifications"
+              className="mt-0 max-h-[52vh] overflow-y-auto pb-2 pr-1"
+            >
+              <form.Field name="qualifications" mode="array">
+                {(field) => (
+                  <div className="space-y-3">
+                    {field.state.value.map((_, i) => (
+                      <div
+                        key={qualKeysRef.current[i]}
+                        className="relative rounded-lg border border-border bg-muted/30 p-4"
+                      >
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-2 top-2 h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                          title="Remove qualification"
+                          onClick={() => {
+                            qualKeysRef.current.splice(i, 1);
+                            field.removeValue(i);
+                          }}
+                        >
+                          <Trash2 className="size-3.5" />
+                        </Button>
+
+                        <div className="grid grid-cols-3 gap-3">
+                          <form.Field name={`qualifications[${i}].degree`}>
+                            {(degreeField) => (
+                              <Field>
+                                <FieldLabel>Degree</FieldLabel>
+                                <Input
+                                  value={degreeField.state.value}
+                                  onChange={(e) => degreeField.handleChange(e.target.value)}
+                                  onBlur={degreeField.handleBlur}
+                                  placeholder="e.g. MBBS"
+                                />
+                                <FieldError
+                                  errors={
+                                    degreeField.state.meta.errors as Array<{ message?: string }>
+                                  }
+                                />
+                              </Field>
+                            )}
+                          </form.Field>
+
+                          <form.Field name={`qualifications[${i}].institution`}>
+                            {(instField) => (
+                              <Field>
+                                <FieldLabel>Institution</FieldLabel>
+                                <Input
+                                  value={instField.state.value}
+                                  onChange={(e) => instField.handleChange(e.target.value)}
+                                  onBlur={instField.handleBlur}
+                                  placeholder="e.g. University of Malaya"
+                                />
+                                <FieldError
+                                  errors={
+                                    instField.state.meta.errors as Array<{ message?: string }>
+                                  }
+                                />
+                              </Field>
+                            )}
+                          </form.Field>
+
+                          <form.Field name={`qualifications[${i}].year`}>
+                            {(yearField) => (
+                              <Field>
+                                <FieldLabel>Year</FieldLabel>
+                                <Input
+                                  type="number"
+                                  value={yearField.state.value}
+                                  onChange={(e) => yearField.handleChange(Number(e.target.value))}
+                                  onBlur={yearField.handleBlur}
+                                  placeholder="e.g. 2010"
+                                  className="font-mono"
+                                />
+                                <FieldError
+                                  errors={
+                                    yearField.state.meta.errors as Array<{ message?: string }>
+                                  }
+                                />
+                              </Field>
+                            )}
+                          </form.Field>
+                        </div>
+                      </div>
+                    ))}
+
+                    {field.state.value.length === 0 && (
+                      <p className="py-4 text-center text-sm text-muted-foreground">
+                        No qualifications added yet.
+                      </p>
+                    )}
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => {
+                        qualKeysRef.current.push(crypto.randomUUID());
+                        field.pushValue({
+                          degree: "",
+                          institution: "",
+                          year: new Date().getFullYear(),
+                        });
+                      }}
+                    >
+                      <Plus className="mr-1.5 size-3.5" />
+                      Add Qualification
+                    </Button>
+                  </div>
+                )}
+              </form.Field>
+            </TabsContent>
+          </Tabs>
+
+          {/* Footer actions */}
+          <div className="flex justify-end gap-2 border-t border-border px-6 py-4">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting] as const}>
+              {([canSubmit, isSubmitting]) => (
+                <Button
+                  type="submit"
+                  disabled={!canSubmit || isSubmitting || isPending}
+                  style={{ background: ACCENT }}
+                >
+                  {isSubmitting || isPending ? "Saving…" : "Save Changes"}
+                </Button>
+              )}
+            </form.Subscribe>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+interface DeleteDoctorDialogProps {
+  doctor: DoctorListDto | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+// Confirmation dialog shown before a doctor record is soft-deleted
+function DeleteDoctorDialog({ doctor, open, onOpenChange }: DeleteDoctorDialogProps) {
+  const queryClient = useQueryClient();
+  const { mutateAsync, isPending } = useDeleteDoctorById();
+
+  if (!doctor) return null;
+
+  const handleConfirm = async () => {
+    try {
+      await mutateAsync({ id: String(doctor.doctorPublicId) });
+      toast.success(`Dr. ${doctor.firstName} ${doctor.lastName} has been removed.`);
+      await queryClient.invalidateQueries({ queryKey: getGetAllQueryKey() });
+      onOpenChange(false);
+    } catch (error) {
+      if (error instanceof ApiError) {
+        toast.error(error.data?.title ?? "Failed to delete doctor.");
+      } else {
+        toast.error("Failed to delete doctor.");
+      }
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md gap-0 overflow-hidden p-0">
+        <div className="absolute inset-x-0 top-0 h-1 bg-destructive" />
+        <DialogHeader className="px-6 pb-4 pt-7">
+          <DialogTitle className="text-lg font-semibold">Delete Doctor</DialogTitle>
+          <DialogDescription className="mt-1 text-sm text-muted-foreground">
+            Are you sure you want to delete{" "}
+            <span className="font-medium text-foreground">
+              Dr. {doctor.firstName} {doctor.lastName}
+            </span>
+            ? This action cannot be undone.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex justify-end gap-2 border-t border-border px-6 py-4">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button variant="destructive" disabled={isPending} onClick={handleConfirm}>
+            {isPending ? "Deleting…" : "Delete"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// Zod schema for add-doctor form — extends edit schema with password + IC number fields
+const addDoctorSchema = editDoctorSchema.extend({
+  password: z
+    .string()
+    .min(8, "Min 8 characters")
+    .regex(/[A-Z]/, "Must contain an uppercase letter")
+    .regex(/[0-9]/, "Must contain a number"),
+  icNumber: z.string().min(1, "Required"),
+});
+
+// Default values for the add-doctor form — all fields start empty
+const addDoctorDefaultValues = {
+  firstName: "",
+  lastName: "",
+  username: "",
+  email: "",
+  password: "",
+  icNumber: "",
+  phoneNumber: "",
+  gender: "",
+  dateOfBirth: "",
+  bio: "",
+  specialization: "",
+  licenseNumber: "",
+  consultationFee: null as number | null,
+  departmentName: "",
+  addressStreet: "",
+  addressCity: "",
+  addressState: "",
+  addressPostalCode: "",
+  addressCountry: "",
+  qualifications: [] as Array<{ degree: string; institution: string; year: number }>,
+};
+
+interface AddDoctorDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+// Dialog form for registering a new doctor
+function AddDoctorDialog({ open, onOpenChange }: AddDoctorDialogProps) {
+  // Stable UUID keys for qualification rows
+  const qualKeysRef = useRef<string[]>([]);
+  const [showPassword, setShowPassword] = useState(false);
+  const queryClient = useQueryClient();
+  const { mutateAsync, isPending } = useCreateDoctor();
+
+  const form = useForm({
+    defaultValues: addDoctorDefaultValues,
+    validators: { onSubmit: addDoctorSchema },
+    onSubmit: async ({ value }) => {
+      const payload: CreateDoctorCommand = {
+        firstName: value.firstName,
+        lastName: value.lastName,
+        username: value.username,
+        email: value.email,
+        password: value.password,
+        icNumber: value.icNumber,
+        phoneNumber: value.phoneNumber || null,
+        gender: value.gender[0] ?? "N",
+        dateOfBirth: value.dateOfBirth,
+        bio: value.bio || null,
+        specialization: value.specialization,
+        licenseNumber: value.licenseNumber,
+        consultationFee: value.consultationFee,
+        departmentName: value.departmentName,
+        address: value.addressStreet
+          ? {
+              street: value.addressStreet,
+              city: value.addressCity,
+              state: value.addressState,
+              postalCode: value.addressPostalCode,
+              country: value.addressCountry,
+            }
+          : null,
+        qualifications: value.qualifications.map((q) => ({
+          degree: q.degree,
+          institution: q.institution,
+          year: q.year,
+        })),
+      };
+
+      try {
+        await mutateAsync({ data: payload });
+        toast.success(`Dr. ${value.firstName} ${value.lastName} has been added.`);
+        await queryClient.invalidateQueries({ queryKey: getGetAllQueryKey() });
+        onOpenChange(false);
+      } catch (error) {
+        if (error instanceof ApiError) {
+          toast.error(error.data?.title ?? "Failed to add doctor.");
+        } else {
+          toast.error("Failed to add doctor.");
+        }
+      }
+    },
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl gap-0 overflow-hidden p-0">
+        {/* Accent bar */}
+        <div className="absolute inset-x-0 top-0 h-1" style={{ background: ACCENT }} />
+
+        <DialogHeader className="px-6 pb-4 pt-7">
+          <div className="flex items-start gap-4">
+            <div
+              className="flex size-14 shrink-0 items-center justify-center rounded-full text-lg font-bold text-white"
+              style={{ background: ACCENT }}
+            >
+              <Plus className="size-6" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <DialogTitle className="text-xl font-semibold leading-none">
+                Add New Doctor
+              </DialogTitle>
+              <DialogDescription className="mt-1 text-sm text-muted-foreground">
+                Fill in the doctor&apos;s details to register them in the system.
+              </DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
+          className="flex flex-col"
+        >
+          <Tabs defaultValue="personal" className="flex-1 px-6 pb-2">
+            <TabsList className="mb-5 grid w-full grid-cols-4">
+              <TabsTrigger value="personal">Personal</TabsTrigger>
+              <TabsTrigger value="professional">Professional</TabsTrigger>
+              <TabsTrigger value="address">Address</TabsTrigger>
+              <TabsTrigger value="qualifications">Qualifications</TabsTrigger>
+            </TabsList>
+
+            {/* ── Personal ─────────────────────────────────────────────── */}
+            <TabsContent
+              value="personal"
+              className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
+            >
+              <div className="grid grid-cols-2 gap-4">
+                <form.Field name="firstName">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>First Name</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. Ahmad"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+                <form.Field name="lastName">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Last Name</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. Rahman"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <form.Field name="username">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Username</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. dr.ahmad"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+                <form.Field name="email">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Email</FieldLabel>
+                      <Input
+                        type="email"
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. dr.ahmad@hospital.com"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+              <form.Field name="password">
+                {(field) => (
+                  <Field>
+                    <FieldLabel>Password</FieldLabel>
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="Min 8 chars, 1 uppercase, 1 number"
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((v) => !v)}
+                        className="absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-foreground"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                      >
+                        {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                      </button>
+                    </div>
+                    <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                  </Field>
+                )}
+              </form.Field>
+              <form.Field name="icNumber">
+                {(field) => (
+                  <Field>
+                    <FieldLabel>IC Number</FieldLabel>
+                    <Input
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      placeholder="e.g. 820101-14-5678"
+                      className="font-mono"
+                    />
+                    <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                  </Field>
+                )}
+              </form.Field>
+              <div className="grid grid-cols-2 gap-4">
+                <form.Field name="phoneNumber">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Phone Number</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="+601x-xxxxxxx"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+                <form.Field name="gender">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Gender</FieldLabel>
+                      <Select
+                        value={field.state.value}
+                        onValueChange={(v) => field.handleChange(v ?? "")}
+                      >
+                        <SelectTrigger className="w-full" onBlur={field.handleBlur}>
+                          <SelectValue placeholder="Select gender" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Male">Male</SelectItem>
+                          <SelectItem value="Female">Female</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                          <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+              <form.Field name="dateOfBirth">
+                {(field) => (
+                  <Field>
+                    <FieldLabel>Date of Birth</FieldLabel>
+                    <Input
+                      type="date"
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                    />
+                    <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                  </Field>
+                )}
+              </form.Field>
+              <form.Field name="bio">
+                {(field) => (
+                  <Field>
+                    <FieldLabel>Bio</FieldLabel>
+                    <Textarea
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      rows={3}
+                      placeholder="Brief professional bio…"
+                    />
+                    <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                  </Field>
+                )}
+              </form.Field>
+            </TabsContent>
+
+            {/* ── Professional ─────────────────────────────────────────── */}
+            <TabsContent
+              value="professional"
+              className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
+            >
+              <div className="grid grid-cols-2 gap-4">
+                <form.Field name="specialization">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Specialization</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. Cardiology"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+                <form.Field name="departmentName">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Department</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. Cardiology Department"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <form.Field name="licenseNumber">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>License Number</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. MMC12345"
+                        className="font-mono"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+                <form.Field name="consultationFee">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Consultation Fee (MYR)</FieldLabel>
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={field.state.value ?? ""}
+                        onChange={(e) =>
+                          field.handleChange(e.target.value === "" ? null : Number(e.target.value))
+                        }
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. 150.00"
+                        className="font-mono"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+            </TabsContent>
+
+            {/* ── Address ──────────────────────────────────────────────── */}
+            <TabsContent
+              value="address"
+              className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
+            >
+              <form.Field name="addressStreet">
+                {(field) => (
+                  <Field>
+                    <FieldLabel>Street</FieldLabel>
+                    <Input
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      placeholder="e.g. 123 Jalan Ampang"
+                    />
+                    <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                  </Field>
+                )}
+              </form.Field>
+              <div className="grid grid-cols-2 gap-4">
+                <form.Field name="addressCity">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>City</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. Kuala Lumpur"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+                <form.Field name="addressState">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>State</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. Wilayah Persekutuan"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <form.Field name="addressPostalCode">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Postal Code</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. 50450"
+                        className="font-mono"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+                <form.Field name="addressCountry">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Country</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. Malaysia"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+            </TabsContent>
+
+            {/* ── Qualifications ───────────────────────────────────────── */}
+            <TabsContent
+              value="qualifications"
+              className="mt-0 max-h-[52vh] overflow-y-auto pb-2 pr-1"
+            >
+              <form.Field name="qualifications" mode="array">
+                {(field) => (
+                  <div className="space-y-3">
+                    {field.state.value.map((_, i) => (
+                      <div
+                        key={qualKeysRef.current[i]}
+                        className="relative rounded-lg border border-border bg-muted/30 p-4"
+                      >
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-2 top-2 h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                          title="Remove qualification"
+                          onClick={() => {
+                            qualKeysRef.current.splice(i, 1);
+                            field.removeValue(i);
+                          }}
+                        >
+                          <Trash2 className="size-3.5" />
+                        </Button>
+
+                        <div className="grid grid-cols-3 gap-3">
+                          <form.Field name={`qualifications[${i}].degree`}>
+                            {(degreeField) => (
+                              <Field>
+                                <FieldLabel>Degree</FieldLabel>
+                                <Input
+                                  value={degreeField.state.value}
+                                  onChange={(e) => degreeField.handleChange(e.target.value)}
+                                  onBlur={degreeField.handleBlur}
+                                  placeholder="e.g. MBBS"
+                                />
+                                <FieldError
+                                  errors={
+                                    degreeField.state.meta.errors as Array<{ message?: string }>
+                                  }
+                                />
+                              </Field>
+                            )}
+                          </form.Field>
+
+                          <form.Field name={`qualifications[${i}].institution`}>
+                            {(instField) => (
+                              <Field>
+                                <FieldLabel>Institution</FieldLabel>
+                                <Input
+                                  value={instField.state.value}
+                                  onChange={(e) => instField.handleChange(e.target.value)}
+                                  onBlur={instField.handleBlur}
+                                  placeholder="e.g. University of Malaya"
+                                />
+                                <FieldError
+                                  errors={
+                                    instField.state.meta.errors as Array<{ message?: string }>
+                                  }
+                                />
+                              </Field>
+                            )}
+                          </form.Field>
+
+                          <form.Field name={`qualifications[${i}].year`}>
+                            {(yearField) => (
+                              <Field>
+                                <FieldLabel>Year</FieldLabel>
+                                <Input
+                                  type="number"
+                                  value={yearField.state.value}
+                                  onChange={(e) => yearField.handleChange(Number(e.target.value))}
+                                  onBlur={yearField.handleBlur}
+                                  placeholder="e.g. 2010"
+                                  className="font-mono"
+                                />
+                                <FieldError
+                                  errors={
+                                    yearField.state.meta.errors as Array<{ message?: string }>
+                                  }
+                                />
+                              </Field>
+                            )}
+                          </form.Field>
+                        </div>
+                      </div>
+                    ))}
+
+                    {field.state.value.length === 0 && (
+                      <p className="py-4 text-center text-sm text-muted-foreground">
+                        No qualifications added yet.
+                      </p>
+                    )}
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => {
+                        qualKeysRef.current.push(crypto.randomUUID());
+                        field.pushValue({
+                          degree: "",
+                          institution: "",
+                          year: new Date().getFullYear(),
+                        });
+                      }}
+                    >
+                      <Plus className="mr-1.5 size-3.5" />
+                      Add Qualification
+                    </Button>
+                  </div>
+                )}
+              </form.Field>
+            </TabsContent>
+          </Tabs>
+
+          {/* Footer actions */}
+          <div className="flex justify-end gap-2 border-t border-border px-6 py-4">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting] as const}>
+              {([canSubmit, isSubmitting]) => (
+                <Button
+                  type="submit"
+                  disabled={!canSubmit || isSubmitting || isPending}
+                  style={{ background: ACCENT }}
+                >
+                  {isSubmitting || isPending ? "Adding…" : "Add Doctor"}
+                </Button>
+              )}
+            </form.Subscribe>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+const columns: ColumnDef<DoctorListDto>[] = [
   {
     accessorKey: "firstName",
     header: "Name",
@@ -645,19 +1487,19 @@ const columns: ColumnDef<DoctorRow>[] = [
     ),
   },
   {
-    accessorKey: "department",
+    accessorKey: "departmentName",
     header: "Department",
-    cell: ({ row }) => <span className="text-sm">{row.getValue("department")}</span>,
+    cell: ({ row }) => <span className="text-sm">{row.getValue("departmentName")}</span>,
   },
   {
-    accessorKey: "specialty",
+    accessorKey: "specialization",
     header: "Specialty",
     cell: ({ row }) => (
       <span
         className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold"
         style={{ borderColor: ACCENT, color: ACCENT, backgroundColor: `${ACCENT}12` }}
       >
-        {row.getValue("specialty")}
+        {row.getValue("specialization")}
       </span>
     ),
   },
@@ -671,7 +1513,7 @@ const columns: ColumnDef<DoctorRow>[] = [
     header: "Fee (MYR)",
     cell: ({ row }) => (
       <span className="font-mono text-xs">
-        RM {row.getValue<number>("consultationFee").toFixed(2)}
+        RM {(row.getValue<number | null>("consultationFee") ?? 0).toFixed(2)}
       </span>
     ),
   },
@@ -690,64 +1532,67 @@ const columns: ColumnDef<DoctorRow>[] = [
     ),
   },
   {
-    accessorKey: "isActive",
-    header: "Status",
-    cell: ({ row }) => {
-      const active = row.getValue<boolean>("isActive");
-      return (
-        <Badge variant={active ? "default" : "secondary"}>{active ? "Active" : "Inactive"}</Badge>
-      );
-    },
+    accessorKey: "createdAt",
+    header: "Joined",
+    cell: ({ row }) => (
+      <span className="text-xs text-muted-foreground">{formatDate(row.getValue("createdAt"))}</span>
+    ),
   },
   {
     id: "actions",
     header: "Actions",
-    cell: ({ row, table }) => (
-      <div className="flex items-center gap-1">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
-          title="View details"
-          onClick={() =>
-            (table.options.meta as { onView: (d: DoctorRow) => void }).onView(row.original)
-          }
-        >
-          <Eye className="size-3.5" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
-          title="Edit doctor"
-        >
-          <Pencil className="size-3.5" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className={`h-8 w-8 p-0 ${row.original.isActive ? "text-muted-foreground hover:text-destructive" : "text-muted-foreground hover:text-emerald-600"}`}
-          title={row.original.isActive ? "Deactivate doctor" : "Reactivate doctor"}
-        >
-          {row.original.isActive ? (
-            <UserX className="size-3.5" />
-          ) : (
-            <UserCheck className="size-3.5" />
-          )}
-        </Button>
-      </div>
-    ),
+    cell: ({ row, table }) => {
+      const meta = table.options.meta as {
+        onView: (d: DoctorListDto) => void;
+        onEdit: (d: DoctorListDto) => void;
+        onDelete: (d: DoctorListDto) => void;
+      };
+      return (
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+            title="View details"
+            onClick={() => meta.onView(row.original)}
+          >
+            <Eye className="size-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+            title="Edit doctor"
+            onClick={() => meta.onEdit(row.original)}
+          >
+            <Pencil className="size-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+            title="Delete doctor"
+            onClick={() => meta.onDelete(row.original)}
+          >
+            <Trash2 className="size-3.5" />
+          </Button>
+        </div>
+      );
+    },
   },
 ];
 
 interface DataTableProps {
-  data: DoctorRow[];
+  data: DoctorListDto[];
   page: number;
   totalPages: number;
   onPageChange: (page: number) => void;
   search: string;
   onSearchChange: (value: string) => void;
-  onView: (doctor: DoctorRow) => void;
+  onView: (doctor: DoctorListDto) => void;
+  onEdit: (doctor: DoctorListDto) => void;
+  onDelete: (doctor: DoctorListDto) => void;
+  onAdd: () => void;
 }
 
 function DataTable({
@@ -758,26 +1603,39 @@ function DataTable({
   search,
   onSearchChange,
   onView,
+  onEdit,
+  onDelete,
+  onAdd,
 }: DataTableProps) {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    meta: { onView },
+    meta: { onView, onEdit, onDelete },
   });
 
   const rows = table.getRowModel().rows;
 
   return (
     <div className="space-y-4">
-      <div className="relative w-72">
-        <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Search by name, email, specialty or license…"
-          value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="h-9 pl-9 text-sm"
-        />
+      <div className="flex items-center justify-between gap-4">
+        <div className="relative w-72">
+          <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search by name, username, email, specialty or license…"
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="h-9 pl-9 text-sm"
+          />
+        </div>
+        <Button
+          size="sm"
+          onClick={onAdd}
+          className="bg-foreground text-background hover:bg-foreground/90"
+        >
+          <Plus className="mr-1.5 size-3.5" />
+          Add New Doctor
+        </Button>
       </div>
 
       <div className="overflow-hidden rounded-lg border border-border">
@@ -894,12 +1752,36 @@ export function AdminDoctorsPage() {
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
-  const [selectedDoctor, setSelectedDoctor] = useState<DoctorRow | null>(null);
+  const [selectedDoctor, setSelectedDoctor] = useState<DoctorListDto | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedDoctorForEdit, setSelectedDoctorForEdit] = useState<DoctorListDto | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedDoctorForDelete, setSelectedDoctorForDelete] = useState<DoctorListDto | null>(
+    null,
+  );
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
 
-  const handleView = (doctor: DoctorRow) => {
+  const { data, isLoading } = useGetAll();
+  const allDoctors = data?.status === 200 ? data.data : [];
+
+  const handleView = (doctor: DoctorListDto) => {
     setSelectedDoctor(doctor);
     setDialogOpen(true);
+  };
+
+  const handleEdit = (doctor: DoctorListDto) => {
+    setSelectedDoctorForEdit(doctor);
+    setEditDialogOpen(true);
+  };
+
+  const handleDelete = (doctor: DoctorListDto) => {
+    setSelectedDoctorForDelete(doctor);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleAdd = () => {
+    setAddDialogOpen(true);
   };
 
   useEffect(() => {
@@ -911,17 +1793,18 @@ export function AdminDoctorsPage() {
   }, [searchInput]);
 
   const filtered = useMemo(() => {
-    if (!search) return DEMO_DOCTORS;
+    if (!search) return allDoctors;
     const q = search.toLowerCase();
-    return DEMO_DOCTORS.filter(
-      (d) =>
+    return allDoctors.filter(
+      (d: DoctorListDto) =>
         `${d.firstName} ${d.lastName}`.toLowerCase().includes(q) ||
         d.email.toLowerCase().includes(q) ||
-        d.specialty.toLowerCase().includes(q) ||
-        d.department.toLowerCase().includes(q) ||
+        d.username.toLowerCase().includes(q) ||
+        d.specialization.toLowerCase().includes(q) ||
+        d.departmentName.toLowerCase().includes(q) ||
         d.licenseNumber.toLowerCase().includes(q),
     );
-  }, [search]);
+  }, [search, allDoctors]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -965,8 +1848,14 @@ export function AdminDoctorsPage() {
             </div>
 
             <p className="text-sm text-muted-foreground">
-              <span className="font-semibold text-foreground">{filtered.length}</span>{" "}
-              {filtered.length === 1 ? "doctor" : "doctors"} found
+              {isLoading ? (
+                "Loading…"
+              ) : (
+                <>
+                  <span className="font-semibold text-foreground">{filtered.length}</span>{" "}
+                  {filtered.length === 1 ? "doctor" : "doctors"} found
+                </>
+              )}
             </p>
           </div>
 
@@ -981,12 +1870,30 @@ export function AdminDoctorsPage() {
               search={searchInput}
               onSearchChange={setSearchInput}
               onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onAdd={handleAdd}
             />
           </div>
         </div>
       </motion.div>
 
       <DoctorDetailsDialog doctor={selectedDoctor} open={dialogOpen} onOpenChange={setDialogOpen} />
+
+      <EditDoctorDialog
+        key={selectedDoctorForEdit?.doctorPublicId}
+        doctor={selectedDoctorForEdit}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+      />
+
+      <DeleteDoctorDialog
+        doctor={selectedDoctorForDelete}
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+      />
+
+      <AddDoctorDialog open={addDialogOpen} onOpenChange={setAddDialogOpen} />
     </>
   );
 }
