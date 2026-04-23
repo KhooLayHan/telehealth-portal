@@ -1,4 +1,5 @@
 import { useForm } from "@tanstack/react-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { motion } from "framer-motion";
 import {
@@ -15,9 +16,15 @@ import {
   Trash2,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { z } from "zod";
-import { useGetAllPatientsForClinicStaff } from "@/api/generated/patients/patients";
+import {
+  getGetAllPatientsForClinicStaffQueryKey,
+  useGetAllPatientsForClinicStaff,
+  useUpdatePatientRecord,
+} from "@/api/generated/patients/patients";
 import type { ClinicStaffPatientDto } from "@/api/model/ClinicStaffPatientDto";
+import { ApiError } from "@/api/ofetch-mutator";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -52,11 +59,15 @@ const PAGE_SIZE = 10;
 
 // Maps allergy severity strings to their indicator colours
 const SEVERITY_COLORS: Record<string, string> = {
+  Severe: "#ef4444",
   severe: "#ef4444",
   high: "#ef4444",
+  Moderate: "#f59e0b",
   moderate: "#f59e0b",
   medium: "#f59e0b",
+  Low: "#22c55e",
   low: "#22c55e",
+  Mild: "#22c55e",
   mild: "#22c55e",
 };
 
@@ -292,9 +303,30 @@ interface EditPatientFormProps {
 // Inner form — keeps the TanStack Form instance alive for a single patient
 function EditPatientForm({ patient, open, onOpenChange, onSave }: EditPatientFormProps) {
   const initials = `${patient.firstName[0]}${patient.lastName[0]}`;
+  const queryClient = useQueryClient();
 
   // Stable UUID keys so allergy rows keep their identity when items are added / removed
   const allergyKeysRef = useRef<string[]>((patient.allergies ?? []).map(() => crypto.randomUUID()));
+
+  // Mutation to update the patient record on the backend
+  const { mutate: updateRecord, isPending } = useUpdatePatientRecord({
+    mutation: {
+      onSuccess: (response) => {
+        if (response.status === 200) {
+          toast.success("Patient record updated successfully");
+          queryClient.invalidateQueries({ queryKey: getGetAllPatientsForClinicStaffQueryKey() });
+          onOpenChange(false);
+        }
+      },
+      onError: (error) => {
+        if (error instanceof ApiError) {
+          toast.error(error.data.title ?? "Failed to update patient record");
+        } else {
+          toast.error("Failed to update patient record");
+        }
+      },
+    },
+  });
 
   const form = useForm({
     defaultValues: {
@@ -306,7 +338,7 @@ function EditPatientForm({ patient, open, onOpenChange, onSave }: EditPatientFor
       gender: patient.gender ?? "",
       allergies: (patient.allergies ?? []).map((a) => ({
         allergen: a.allergen,
-        severity: a.severity,
+        severity: a.severity.charAt(0).toUpperCase() + a.severity.slice(1).toLowerCase(),
         reaction: a.reaction,
       })),
       emergencyContactName: patient.emergencyContact?.name ?? "",
@@ -316,7 +348,29 @@ function EditPatientForm({ patient, open, onOpenChange, onSave }: EditPatientFor
     validators: { onSubmit: editPatientSchema },
     onSubmit: async ({ value }) => {
       onSave?.(value);
-      onOpenChange(false);
+      updateRecord({
+        patientPublicId: patient.patientPublicId,
+        data: {
+          firstName: value.firstName,
+          lastName: value.lastName,
+          dateOfBirth: value.dateOfBirth,
+          phoneNumber: value.phoneNumber || null,
+          gender: value.gender || "N",
+          bloodGroup: value.bloodGroup || null,
+          emergencyContact: value.emergencyContactName
+            ? {
+                name: value.emergencyContactName,
+                relationship: value.emergencyContactRelationship,
+                phone: value.emergencyContactPhone,
+              }
+            : null,
+          allergies: value.allergies.map((a) => ({
+            allergen: a.allergen,
+            severity: a.severity,
+            reaction: a.reaction,
+          })),
+        },
+      });
     },
   });
 
@@ -341,8 +395,7 @@ function EditPatientForm({ patient, open, onOpenChange, onSave }: EditPatientFor
                 Edit {patient.firstName} {patient.lastName}
               </DialogTitle>
               <DialogDescription className="mt-1 text-sm text-muted-foreground">
-                Update patient profile details. Changes are front-end only — not yet connected to
-                the backend.
+                Update patient profile details.
               </DialogDescription>
             </div>
           </div>
@@ -543,9 +596,9 @@ function EditPatientForm({ patient, open, onOpenChange, onSave }: EditPatientFor
                                     <SelectValue placeholder="Select" />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="mild">Mild</SelectItem>
-                                    <SelectItem value="moderate">Moderate</SelectItem>
-                                    <SelectItem value="severe">Severe</SelectItem>
+                                    <SelectItem value="Mild">Mild</SelectItem>
+                                    <SelectItem value="Moderate">Moderate</SelectItem>
+                                    <SelectItem value="Severe">Severe</SelectItem>
                                   </SelectContent>
                                 </Select>
                                 <FieldError
@@ -596,7 +649,7 @@ function EditPatientForm({ patient, open, onOpenChange, onSave }: EditPatientFor
                       className="w-full"
                       onClick={() => {
                         allergyKeysRef.current.push(crypto.randomUUID());
-                        field.pushValue({ allergen: "", severity: "mild", reaction: "" });
+                        field.pushValue({ allergen: "", severity: "Mild", reaction: "" });
                       }}
                     >
                       <Plus className="mr-1.5 size-3.5" />
@@ -670,10 +723,10 @@ function EditPatientForm({ patient, open, onOpenChange, onSave }: EditPatientFor
               {([canSubmit, isSubmitting]) => (
                 <Button
                   type="submit"
-                  disabled={!canSubmit || isSubmitting}
+                  disabled={!canSubmit || isSubmitting || isPending}
                   style={{ background: ACCENT }}
                 >
-                  {isSubmitting ? "Saving…" : "Save Changes"}
+                  {isSubmitting || isPending ? "Saving…" : "Save Changes"}
                 </Button>
               )}
             </form.Subscribe>

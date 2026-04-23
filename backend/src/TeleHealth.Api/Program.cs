@@ -39,6 +39,7 @@ using TeleHealth.Api.Features.Patients.GetPatientHistoryForReceptionist;
 using TeleHealth.Api.Features.Patients.GetProfile;
 using TeleHealth.Api.Features.Patients.RescheduleAppointment;
 using TeleHealth.Api.Features.Patients.UpdateMedicalRecord;
+using TeleHealth.Api.Features.Patients.UpdatePatientRecord;
 using TeleHealth.Api.Features.Schedules.GetAllAvailableSchedules;
 using TeleHealth.Api.Features.Schedules.GetDailySchedulesForReceptionist;
 using TeleHealth.Api.Features.Users.Create;
@@ -180,6 +181,7 @@ builder.Services.AddScoped<ReceptionistGetPatientHistoryHandler>();
 builder.Services.AddScoped<GetDoctorPatientsHandler>();
 builder.Services.AddScoped<GetDoctorPatientAppointmentsHandler>();
 builder.Services.AddScoped<ClinicStaffGetAllPatientsHandler>();
+builder.Services.AddScoped<UpdatePatientRecordHandler>();
 
 builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonS3>();
@@ -245,6 +247,7 @@ api.MapReceptionistGetAllPatientsEndpoint();
 api.MapReceptionistGetPatientByIdEndpoint();
 api.MapReceptionistGetPatientHistoryEndpoint();
 api.MapClinicStaffGetAllPatientsEndpoint();
+api.MapUpdatePatientRecordEndpoint();
 api.MapGetDoctorPatientsEndpoint();
 api.MapGetDoctorPatientAppointmentsEndpoint();
 

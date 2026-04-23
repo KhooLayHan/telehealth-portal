@@ -32,6 +32,10 @@ import type {
 } from '../../model/CancelAppointmentCommand';
 
 import type {
+  ClinicStaffPatientDto
+} from '../../model/ClinicStaffPatientDto';
+
+import type {
   GetAllAppointmentsParams
 } from '../../model/GetAllAppointmentsParams';
 
@@ -78,6 +82,10 @@ import type {
 import type {
   UpdateMedicalRecordCommand
 } from '../../model/UpdateMedicalRecordCommand';
+
+import type {
+  UpdatePatientRecordCommand
+} from '../../model/UpdatePatientRecordCommand';
 
 import { ofetchMutator } from '../../ofetch-mutator';
 
@@ -1199,3 +1207,92 @@ export function useGetAllPatientsForClinicStaff<TData = Awaited<ReturnType<typeo
 
 
 
+export type updatePatientRecordResponse200 = {
+  data: ClinicStaffPatientDto
+  status: 200
+}
+
+export type updatePatientRecordResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type updatePatientRecordResponse422 = {
+  data: ProblemDetails
+  status: 422
+}
+
+export type updatePatientRecordResponseSuccess = (updatePatientRecordResponse200) & {
+  headers: Headers;
+};
+export type updatePatientRecordResponseError = (updatePatientRecordResponse404 | updatePatientRecordResponse422) & {
+  headers: Headers;
+};
+
+export type updatePatientRecordResponse = (updatePatientRecordResponseSuccess | updatePatientRecordResponseError)
+
+export const getUpdatePatientRecordUrl = (patientPublicId: string,) => {
+
+
+
+
+  return `http://localhost:5144/api/v1/patients/${patientPublicId}/record`
+}
+
+export const updatePatientRecord = async (patientPublicId: string,
+    updatePatientRecordCommand: UpdatePatientRecordCommand, options?: RequestInit): Promise<updatePatientRecordResponse> => {
+
+  return ofetchMutator<updatePatientRecordResponse>(getUpdatePatientRecordUrl(patientPublicId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      updatePatientRecordCommand,)
+  }
+);}
+
+
+
+
+export const getUpdatePatientRecordMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePatientRecord>>, TError,{patientPublicId: string;data: UpdatePatientRecordCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof updatePatientRecord>>, TError,{patientPublicId: string;data: UpdatePatientRecordCommand}, TContext> => {
+
+const mutationKey = ['updatePatientRecord'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updatePatientRecord>>, {patientPublicId: string;data: UpdatePatientRecordCommand}> = (props) => {
+          const {patientPublicId,data} = props ?? {};
+
+          return  updatePatientRecord(patientPublicId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdatePatientRecordMutationResult = NonNullable<Awaited<ReturnType<typeof updatePatientRecord>>>
+    export type UpdatePatientRecordMutationBody = UpdatePatientRecordCommand
+    export type UpdatePatientRecordMutationError = ProblemDetails
+
+    export const useUpdatePatientRecord = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePatientRecord>>, TError,{patientPublicId: string;data: UpdatePatientRecordCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updatePatientRecord>>,
+        TError,
+        {patientPublicId: string;data: UpdatePatientRecordCommand},
+        TContext
+      > => {
+      return useMutation(getUpdatePatientRecordMutationOptions(options), queryClient);
+    }
