@@ -8,6 +8,9 @@ import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react-swc";
 import { defineConfig, searchForWorkspaceRoot } from "vite";
 
+// How to connect frontend to AWS S3?
+// const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:5000";
+
 const dirname =
   typeof import.meta.dirname !== "undefined"
     ? import.meta.dirname
