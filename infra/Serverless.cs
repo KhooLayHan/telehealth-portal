@@ -106,9 +106,16 @@ public static class Serverless
                     },
                 },
                 Tags = cfg.Tags,
-            });
+            },
+            // Ignore code changes — CI/CD (Job 4) deploys the real artifact via
+            // `aws lambda update-function-code`. Without this, every `pulumi up`
+            // would revert the deployed code back to the dummy placeholder.
+            new CustomResourceOptions { IgnoreChanges = { "sourceCodeHash" } });
 
         // ── SQS event source mapping (triggers Lambda from the processing queue) ──
+        // ReportBatchItemFailures enables partial batch reporting: only failed
+        // messages are retried, not the entire batch. Requires the Lambda handler
+        // to return SQSBatchResponse with failed message IDs.
         _ = new Aws.Lambda.EventSourceMapping(
             "sqs-to-lambda-mapping",
             new Aws.Lambda.EventSourceMappingArgs
@@ -117,6 +124,7 @@ public static class Serverless
                 FunctionName = pdfProcessorLambda.Arn,
                 BatchSize = 10,
                 Enabled = true,
+                FunctionResponseTypes = { "ReportBatchItemFailures" },
             });
 
         return new Result { PdfProcessorLambda = pdfProcessorLambda };
