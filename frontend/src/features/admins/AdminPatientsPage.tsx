@@ -1,30 +1,9 @@
-import { Link } from "@tanstack/react-router";
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { motion } from "framer-motion";
-import {
-  AlertCircle,
-  ChevronLeft,
-  ChevronRight,
-  Eye,
-  Heart,
-  Loader2,
-  Phone,
-  Search,
-  ShieldAlert,
-} from "lucide-react";
+import { AlertCircle, ChevronLeft, ChevronRight, Eye, Heart, Loader2, Pencil, Search, ShieldAlert, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useGetAllPatientsForClinicStaff } from "@/api/generated/patients/patients";
-import type { AllergyDto } from "@/api/model/AllergyDto";
 import type { ClinicStaffPatientDto } from "@/api/model/ClinicStaffPatientDto";
-import type { EmergencyContactDto } from "@/api/model/EmergencyContactDto";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -48,12 +27,14 @@ import {
 const ACCENT = "#0d9488";
 const PAGE_SIZE = 10;
 
-// Allergy severity colour mapping for badges
+// Maps allergy severity strings to their indicator colours
 const SEVERITY_COLORS: Record<string, string> = {
-  mild: "#10b981",
-  moderate: "#f59e0b",
   severe: "#ef4444",
-  critical: "#7c3aed",
+  high: "#ef4444",
+  moderate: "#f59e0b",
+  medium: "#f59e0b",
+  low: "#22c55e",
+  mild: "#22c55e",
 };
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -267,64 +248,9 @@ const columns: ColumnDef<ClinicStaffPatientDto>[] = [
     ),
   },
   {
-    accessorKey: "bloodGroup",
-    header: "Blood Group",
-    cell: ({ row }) => {
-      const bg = row.getValue<string>("bloodGroup");
-      return bg ? (
-        <span
-          className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold"
-          style={{ borderColor: ACCENT, color: ACCENT, backgroundColor: `${ACCENT}12` }}
-        >
-          <Heart className="size-2.5" />
-          {bg}
-        </span>
-      ) : (
-        <span className="text-xs text-muted-foreground">—</span>
-      );
-    },
-  },
-  {
-    accessorKey: "allergies",
-    header: "Allergies",
-    cell: ({ row }) => {
-      const allergies = row.getValue<AllergyDto[] | null>("allergies");
-      if (!allergies || allergies.length === 0) {
-        return <span className="text-xs text-muted-foreground">None</span>;
-      }
-      const severityOrder = ["mild", "moderate", "severe", "critical"];
-      const highestSeverity = allergies.reduce((acc, a) => {
-        return severityOrder.indexOf(a.severity) > severityOrder.indexOf(acc) ? a.severity : acc;
-      }, "mild");
-      return (
-        <div className="flex items-center gap-1.5">
-          <AlertCircle
-            className="size-3.5 shrink-0"
-            style={{ color: SEVERITY_COLORS[highestSeverity] ?? "#6b7280" }}
-          />
-          <span className="text-xs">
-            {allergies.length} {allergies.length === 1 ? "allergy" : "allergies"}
-          </span>
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "emergencyContact",
-    header: "Emergency Contact",
-    cell: ({ row }) => {
-      const ec = row.getValue<EmergencyContactDto | null>("emergencyContact");
-      if (!ec) return <span className="text-xs text-muted-foreground">—</span>;
-      return (
-        <div className="flex items-center gap-1.5">
-          <Phone className="size-3 shrink-0 text-muted-foreground" />
-          <div className="flex flex-col">
-            <span className="text-xs font-medium">{ec.name}</span>
-            <span className="text-[11px] text-muted-foreground">{ec.relationship}</span>
-          </div>
-        </div>
-      );
-    },
+    accessorKey: "joinedAt",
+    header: "Joined At",
+    cell: ({ row }) => <span className="text-xs">{formatDate(row.getValue("joinedAt"))}</span>,
   },
   {
     id: "actions",
@@ -332,17 +258,39 @@ const columns: ColumnDef<ClinicStaffPatientDto>[] = [
     cell: ({ row, table }) => {
       const meta = table.options.meta as {
         onView: (p: ClinicStaffPatientDto) => void;
+        onEdit: (p: ClinicStaffPatientDto) => void;
+        onRemove: (p: ClinicStaffPatientDto) => void;
       };
       return (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
-          title="View patient details"
-          onClick={() => meta.onView(row.original)}
-        >
-          <Eye className="size-3.5" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+            title="View patient details"
+            onClick={() => meta.onView(row.original)}
+          >
+            <Eye className="size-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+            title="Edit patient"
+            onClick={() => meta.onEdit(row.original)}
+          >
+            <Pencil className="size-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+            title="Remove patient record"
+            onClick={() => meta.onRemove(row.original)}
+          >
+            <Trash2 className="size-3.5" />
+          </Button>
+        </div>
       );
     },
   },
@@ -359,6 +307,8 @@ interface DataTableProps {
   search: string;
   onSearchChange: (value: string) => void;
   onView: (patient: ClinicStaffPatientDto) => void;
+  onEdit: (patient: ClinicStaffPatientDto) => void;
+  onRemove: (patient: ClinicStaffPatientDto) => void;
 }
 
 // Renders the paginated, searchable patient records table
@@ -371,12 +321,14 @@ function DataTable({
   search,
   onSearchChange,
   onView,
+  onEdit,
+  onRemove,
 }: DataTableProps) {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    meta: { onView },
+    meta: { onView, onEdit, onRemove },
   });
 
   const rows = table.getRowModel().rows;
@@ -549,26 +501,16 @@ export function AdminPatientsPage() {
     setDetailsOpen(true);
   };
 
+  const handleEdit = (patient: ClinicStaffPatientDto) => {
+    setSelectedPatient(patient);
+  };
+
+  const handleRemove = (patient: ClinicStaffPatientDto) => {
+    setSelectedPatient(patient);
+  };
+
   return (
     <>
-      {/* Breadcrumb + subtitle */}
-      <div className="mb-6">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink render={<Link to="/dashboard" />}>Dashboard</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Patient Records</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-        <p className="mt-0.5 text-sm text-muted-foreground">
-          View all registered patient user records
-        </p>
-      </div>
-
       {/* Page card */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
@@ -610,6 +552,8 @@ export function AdminPatientsPage() {
               search={searchInput}
               onSearchChange={setSearchInput}
               onView={handleView}
+              onEdit={handleEdit}
+              onRemove={handleRemove}
             />
           </div>
         </div>
