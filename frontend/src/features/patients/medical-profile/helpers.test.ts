@@ -44,7 +44,7 @@ describe("helpers", () => {
     });
 
     it("maps allergy to AllergyFormItem with correct fields", () => {
-      const allergies = [{ allergen: "Peanuts", severity: "severe", reaction: "hives" }];
+      const allergies = [{ allergen: "Peanuts", severity: "Severe", reaction: "hives" }];
       const result = toFormAllergies(allergies);
 
       expect(result).toHaveLength(1);
