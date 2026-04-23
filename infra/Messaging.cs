@@ -44,6 +44,7 @@ public static class Messaging
             new Aws.Sqs.QueueArgs
             {
                 SqsManagedSseEnabled = true, // Server-side encryption with SQS-managed keys
+                VisibilityTimeoutSeconds = 180,
                 RedrivePolicy = deadLetterQueue.Arn.Apply(dlqArn =>
                     $@"{{""deadLetterTargetArn"":""{dlqArn}"",""maxReceiveCount"":3}}"
                 ),
