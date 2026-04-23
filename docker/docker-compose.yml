@@ -18,8 +18,8 @@ services:
         condition: service_healthy
       seq:
         condition: service_started
-      localstack:
-        condition: service_started
+      # localstack:
+      #   condition: service_started
     restart: unless-stopped
 
   db:
@@ -41,22 +41,22 @@ services:
       start_period: 30s
     restart: unless-stopped
 
-  localstack:
-    container_name: "telehealth_awslocal"
-    image: localstack/localstack-pro
-    ports:
-      - "127.0.0.1:4566:4566"            # LocalStack Gateway
-      - "127.0.0.1:4510-4559:4510-4559"  # External services port range
-    environment:
-      DEBUG: ${DEBUG:-0}
-      SERVICES: "s3,sqs,sns"
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-      LOCALSTACK_AUTH_TOKEN: ${LOCALSTACK_AUTH_TOKEN}
-    volumes:
-      - localstack-data:/var/lib/localstack
-      - "/var/run/docker.sock:/var/run/docker.sock"
-    restart: unless-stopped
+  # localstack:
+    # container_name: "telehealth_awslocal"
+    # image: localstack/localstack-pro
+    # ports:
+    #   - "127.0.0.1:4566:4566"            # LocalStack Gateway
+    #   - "127.0.0.1:4510-4559:4510-4559"  # External services port range
+    # environment:
+    #   DEBUG: ${DEBUG:-0}
+    #   SERVICES: "s3,sqs,sns"
+    #   AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+    #   AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+    #   LOCALSTACK_AUTH_TOKEN: ${LOCALSTACK_AUTH_TOKEN}
+    # volumes:
+    #   - localstack-data:/var/lib/localstack
+    #   - "/var/run/docker.sock:/var/run/docker.sock"
+    # restart: unless-stopped
 
   seq:
     image: datalust/seq:2025
@@ -73,5 +73,5 @@ services:
 
 volumes:
   db-data:
-  localstack-data:
+  # localstack-data:
   seq-data:

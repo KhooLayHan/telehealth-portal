@@ -12,7 +12,8 @@ public sealed class S3Service(IAmazonS3 s3Client, IConfiguration configuration) 
     )
     {
         var bucketName =
-            configuration["Aws:S3:BucketName"]
+            configuration["AWS_S3_LAB_REPORTS_BUCKET"]
+            ?? configuration["Aws:S3:BucketName"]
             ?? throw new InvalidOperationException("S3 Bucket Name missing");
 
         var request = new GetPreSignedUrlRequest()
@@ -30,7 +31,8 @@ public sealed class S3Service(IAmazonS3 s3Client, IConfiguration configuration) 
     public string GeneratePreSignedDownloadUrl(string objectKey, int expireMinutes = 15)
     {
         var bucketName =
-            configuration["Aws:S3BucketName"]
+            configuration["AWS_S3_LAB_REPORTS_BUCKET"]
+            ?? configuration["Aws:S3:BucketName"]
             ?? throw new InvalidOperationException("S3 Bucket Name missing");
 
         var request = new GetPreSignedUrlRequest

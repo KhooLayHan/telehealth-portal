@@ -211,6 +211,7 @@ app.UseCors("AllowFrontend");
 
 app.UseHttpsRedirection();
 
+app.UseSerilogRequestLogging();
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 
@@ -253,8 +254,6 @@ api.MapReceptionistGetPatientHistoryEndpoint();
 api.MapClinicStaffGetAllPatientsEndpoint();
 api.MapGetDoctorPatientsEndpoint();
 api.MapGetDoctorPatientAppointmentsEndpoint();
-
-app.UseSerilogRequestLogging();
 
 Log.Information("TeleHealth API successfully started.");
 
