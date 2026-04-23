@@ -113,7 +113,7 @@ public static class ApiEndpoints
 
         public const string Create = $"{Base}/initialize";
 
-        public const string GetAll = Base;
+        public const string GetAllLabReports = Base;
 
         public const string GetAllPatients = $"{Base}/patients";
 

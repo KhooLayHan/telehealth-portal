@@ -11,7 +11,7 @@ public static class GetAllLabReportsEndpoint
     {
         group
             .MapGet(
-                ApiEndpoints.LabReports.GetAll,
+                ApiEndpoints.LabReports.GetAllLabReports,
                 async Task<Ok<PagedResult<LabReportDto>>> (
                     [AsParameters] GetAllLabReportsQuery query,
                     GetAllLabReportsHandler handler,
@@ -22,7 +22,7 @@ public static class GetAllLabReportsEndpoint
                     return TypedResults.Ok(reports);
                 }
             )
-            .WithName(nameof(ApiEndpoints.LabReports.GetAll))
+            .WithName(nameof(ApiEndpoints.LabReports.GetAllLabReports))
             .WithTags(nameof(ApiEndpoints.LabReports))
             .RequireAuthorization(AuthConstants.LabTechPolicy)
             .ProducesProblem(StatusCodes.Status401Unauthorized);
