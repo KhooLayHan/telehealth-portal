@@ -1,7 +1,21 @@
+import { useForm } from "@tanstack/react-form";
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { motion } from "framer-motion";
-import { AlertCircle, ChevronLeft, ChevronRight, Eye, Heart, Loader2, Pencil, Search, ShieldAlert, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import {
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  Heart,
+  Loader2,
+  Pencil,
+  Plus,
+  Search,
+  ShieldAlert,
+  Trash2,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { z } from "zod";
 import { useGetAllPatientsForClinicStaff } from "@/api/generated/patients/patients";
 import type { ClinicStaffPatientDto } from "@/api/model/ClinicStaffPatientDto";
 import { Button } from "@/components/ui/button";
@@ -12,7 +26,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import {
   Table,
@@ -22,6 +44,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Teal accent colour shared with the doctors page
 const ACCENT = "#0d9488";
@@ -210,6 +233,452 @@ function PatientDetailsDialog({ patient, open, onOpenChange }: PatientDetailsDia
             </p>
           )}
         </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ── Edit patient dialog ────────────────────────────────────────────────────────
+
+// Blood group options presented in the select
+const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"] as const;
+
+// Zod schema for a single allergy entry
+const allergySchema = z.object({
+  allergen: z.string().min(1, "Allergen is required"),
+  severity: z.string().min(1, "Severity is required"),
+  reaction: z.string().min(1, "Reaction is required"),
+});
+
+// Zod schema for the complete edit-patient form
+const editPatientSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  dateOfBirth: z.string().min(1, "Date of birth is required"),
+  phoneNumber: z.string(),
+  bloodGroup: z.string(),
+  gender: z.string(),
+  allergies: z.array(allergySchema),
+  emergencyContactName: z.string(),
+  emergencyContactRelationship: z.string(),
+  emergencyContactPhone: z.string(),
+});
+
+// Shape of values produced by a successful form submission
+export type EditPatientFormValues = z.infer<typeof editPatientSchema>;
+
+interface EditPatientDialogProps {
+  patient: ClinicStaffPatientDto | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSave?: (values: EditPatientFormValues) => void;
+}
+
+// Guard that prevents the inner form from mounting until a patient is selected
+function EditPatientDialog({ patient, open, onOpenChange, onSave }: EditPatientDialogProps) {
+  if (!patient) return null;
+  return (
+    <EditPatientForm patient={patient} open={open} onOpenChange={onOpenChange} onSave={onSave} />
+  );
+}
+
+interface EditPatientFormProps {
+  patient: ClinicStaffPatientDto;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSave?: (values: EditPatientFormValues) => void;
+}
+
+// Inner form — keeps the TanStack Form instance alive for a single patient
+function EditPatientForm({ patient, open, onOpenChange, onSave }: EditPatientFormProps) {
+  const initials = `${patient.firstName[0]}${patient.lastName[0]}`;
+
+  // Stable UUID keys so allergy rows keep their identity when items are added / removed
+  const allergyKeysRef = useRef<string[]>((patient.allergies ?? []).map(() => crypto.randomUUID()));
+
+  const form = useForm({
+    defaultValues: {
+      firstName: patient.firstName,
+      lastName: patient.lastName,
+      dateOfBirth: String(patient.dateOfBirth),
+      phoneNumber: patient.phoneNumber ?? "",
+      bloodGroup: patient.bloodGroup ?? "",
+      gender: patient.gender ?? "",
+      allergies: (patient.allergies ?? []).map((a) => ({
+        allergen: a.allergen,
+        severity: a.severity,
+        reaction: a.reaction,
+      })),
+      emergencyContactName: patient.emergencyContact?.name ?? "",
+      emergencyContactRelationship: patient.emergencyContact?.relationship ?? "",
+      emergencyContactPhone: patient.emergencyContact?.phone ?? "",
+    } satisfies EditPatientFormValues,
+    validators: { onSubmit: editPatientSchema },
+    onSubmit: async ({ value }) => {
+      onSave?.(value);
+      onOpenChange(false);
+    },
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl gap-0 overflow-hidden p-0">
+        {/* Accent top bar */}
+        <div className="absolute inset-x-0 top-0 h-1" style={{ background: ACCENT }} />
+
+        <DialogHeader className="px-6 pb-4 pt-7">
+          <div className="flex items-start gap-4">
+            {/* Avatar initials */}
+            <div
+              className="flex size-14 shrink-0 items-center justify-center rounded-full text-lg font-bold text-white"
+              style={{ background: ACCENT }}
+            >
+              {initials}
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <DialogTitle className="text-xl font-semibold leading-none">
+                Edit {patient.firstName} {patient.lastName}
+              </DialogTitle>
+              <DialogDescription className="mt-1 text-sm text-muted-foreground">
+                Update patient profile details. Changes are front-end only — not yet connected to
+                the backend.
+              </DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
+          className="flex flex-col"
+        >
+          <Tabs defaultValue="personal" className="flex-1 px-6 pb-2">
+            <TabsList className="mb-5 grid w-full grid-cols-3">
+              <TabsTrigger value="personal">Personal</TabsTrigger>
+              <TabsTrigger value="allergies">Allergies</TabsTrigger>
+              <TabsTrigger value="emergency">Emergency Contact</TabsTrigger>
+            </TabsList>
+
+            {/* ── Personal Info ─────────────────────────────────────────── */}
+            <TabsContent
+              value="personal"
+              className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
+            >
+              <div className="grid grid-cols-2 gap-4">
+                <form.Field name="firstName">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>First Name</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+
+                <form.Field name="lastName">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Last Name</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <form.Field name="dateOfBirth">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Date of Birth</FieldLabel>
+                      <Input
+                        type="date"
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+
+                <form.Field name="phoneNumber">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Phone Number</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="+601x-xxxxxxx"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                {/* Blood group select */}
+                <form.Field name="bloodGroup">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Blood Group</FieldLabel>
+                      <Select
+                        value={field.state.value}
+                        onValueChange={(v) => field.handleChange(v ?? "")}
+                      >
+                        <SelectTrigger className="w-full" onBlur={field.handleBlur}>
+                          <SelectValue placeholder="Select blood group" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {BLOOD_GROUPS.map((bg) => (
+                            <SelectItem key={bg} value={bg}>
+                              {bg}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+
+                {/* Gender select */}
+                <form.Field name="gender">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Gender</FieldLabel>
+                      <Select
+                        value={field.state.value}
+                        onValueChange={(v) => field.handleChange(v ?? "")}
+                      >
+                        <SelectTrigger className="w-full" onBlur={field.handleBlur}>
+                          <SelectValue placeholder="Select gender" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="M">Male</SelectItem>
+                          <SelectItem value="F">Female</SelectItem>
+                          <SelectItem value="O">Other</SelectItem>
+                          <SelectItem value="N">Not Specified</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+            </TabsContent>
+
+            {/* ── Allergies ─────────────────────────────────────────────── */}
+            <TabsContent value="allergies" className="mt-0 max-h-[52vh] overflow-y-auto pb-2 pr-1">
+              <form.Field name="allergies" mode="array">
+                {(field) => (
+                  <div className="space-y-3">
+                    {field.state.value.map((_, i) => (
+                      <div
+                        key={allergyKeysRef.current[i]}
+                        className="relative rounded-lg border border-border bg-muted/30 p-4"
+                      >
+                        {/* Remove button */}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-2 top-2 h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                          title="Remove allergy"
+                          onClick={() => {
+                            allergyKeysRef.current.splice(i, 1);
+                            field.removeValue(i);
+                          }}
+                        >
+                          <Trash2 className="size-3.5" />
+                        </Button>
+
+                        <div className="grid grid-cols-3 gap-3">
+                          <form.Field name={`allergies[${i}].allergen`}>
+                            {(allergenField) => (
+                              <Field>
+                                <FieldLabel>Allergen</FieldLabel>
+                                <Input
+                                  value={allergenField.state.value}
+                                  onChange={(e) => allergenField.handleChange(e.target.value)}
+                                  onBlur={allergenField.handleBlur}
+                                  placeholder="e.g. Penicillin"
+                                />
+                                <FieldError
+                                  errors={
+                                    allergenField.state.meta.errors as Array<{
+                                      message?: string;
+                                    }>
+                                  }
+                                />
+                              </Field>
+                            )}
+                          </form.Field>
+
+                          <form.Field name={`allergies[${i}].severity`}>
+                            {(severityField) => (
+                              <Field>
+                                <FieldLabel>Severity</FieldLabel>
+                                <Select
+                                  value={severityField.state.value}
+                                  onValueChange={(v) => severityField.handleChange(v ?? "")}
+                                >
+                                  <SelectTrigger
+                                    className="w-full"
+                                    onBlur={severityField.handleBlur}
+                                  >
+                                    <SelectValue placeholder="Select" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="mild">Mild</SelectItem>
+                                    <SelectItem value="moderate">Moderate</SelectItem>
+                                    <SelectItem value="severe">Severe</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FieldError
+                                  errors={
+                                    severityField.state.meta.errors as Array<{
+                                      message?: string;
+                                    }>
+                                  }
+                                />
+                              </Field>
+                            )}
+                          </form.Field>
+
+                          <form.Field name={`allergies[${i}].reaction`}>
+                            {(reactionField) => (
+                              <Field>
+                                <FieldLabel>Reaction</FieldLabel>
+                                <Input
+                                  value={reactionField.state.value}
+                                  onChange={(e) => reactionField.handleChange(e.target.value)}
+                                  onBlur={reactionField.handleBlur}
+                                  placeholder="e.g. Rash, swelling"
+                                />
+                                <FieldError
+                                  errors={
+                                    reactionField.state.meta.errors as Array<{
+                                      message?: string;
+                                    }>
+                                  }
+                                />
+                              </Field>
+                            )}
+                          </form.Field>
+                        </div>
+                      </div>
+                    ))}
+
+                    {field.state.value.length === 0 && (
+                      <p className="py-6 text-center text-sm text-muted-foreground">
+                        No allergies recorded. Add one below.
+                      </p>
+                    )}
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => {
+                        allergyKeysRef.current.push(crypto.randomUUID());
+                        field.pushValue({ allergen: "", severity: "mild", reaction: "" });
+                      }}
+                    >
+                      <Plus className="mr-1.5 size-3.5" />
+                      Add Allergy
+                    </Button>
+                  </div>
+                )}
+              </form.Field>
+            </TabsContent>
+
+            {/* ── Emergency Contact ─────────────────────────────────────── */}
+            <TabsContent
+              value="emergency"
+              className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
+            >
+              <form.Field name="emergencyContactName">
+                {(field) => (
+                  <Field>
+                    <FieldLabel>Full Name</FieldLabel>
+                    <Input
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      placeholder="e.g. Jane Doe"
+                    />
+                    <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                  </Field>
+                )}
+              </form.Field>
+
+              <div className="grid grid-cols-2 gap-4">
+                <form.Field name="emergencyContactRelationship">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Relationship</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. Spouse, Parent"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+
+                <form.Field name="emergencyContactPhone">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Phone Number</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="+601x-xxxxxxx"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          {/* Footer actions */}
+          <div className="flex justify-end gap-2 border-t border-border px-6 py-4">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting] as const}>
+              {([canSubmit, isSubmitting]) => (
+                <Button
+                  type="submit"
+                  disabled={!canSubmit || isSubmitting}
+                  style={{ background: ACCENT }}
+                >
+                  {isSubmitting ? "Saving…" : "Save Changes"}
+                </Button>
+              )}
+            </form.Subscribe>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );
@@ -474,6 +943,8 @@ export function AdminPatientsPage() {
   const [search, setSearch] = useState("");
   const [selectedPatient, setSelectedPatient] = useState<ClinicStaffPatientDto | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [editPatient, setEditPatient] = useState<ClinicStaffPatientDto | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
 
   // Debounce the search input by 400 ms and reset to page 1
   useEffect(() => {
@@ -502,7 +973,8 @@ export function AdminPatientsPage() {
   };
 
   const handleEdit = (patient: ClinicStaffPatientDto) => {
-    setSelectedPatient(patient);
+    setEditPatient(patient);
+    setEditOpen(true);
   };
 
   const handleRemove = (patient: ClinicStaffPatientDto) => {
@@ -565,6 +1037,9 @@ export function AdminPatientsPage() {
         open={detailsOpen}
         onOpenChange={setDetailsOpen}
       />
+
+      {/* Edit patient dialog */}
+      <EditPatientDialog patient={editPatient} open={editOpen} onOpenChange={setEditOpen} />
     </>
   );
 }

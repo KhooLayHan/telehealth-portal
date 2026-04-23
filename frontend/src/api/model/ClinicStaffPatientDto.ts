@@ -21,11 +21,10 @@ export interface ClinicStaffPatientDto {
   /**
    * @minLength 1
    * @maxLength 1
-   * @nullable
    */
-  gender: string | null;
+  gender: string;
   /** @nullable */
   allergies: AllergyDto[] | null;
-  emergencyContact: EmergencyContactDto;
+  emergencyContact: null | EmergencyContactDto;
   joinedAt: Instant;
 }
