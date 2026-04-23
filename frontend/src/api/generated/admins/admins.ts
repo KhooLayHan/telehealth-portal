@@ -381,3 +381,76 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getAdminUpdateReceptionistMutationOptions(options), queryClient);
     }
+
+export type adminDeactivateReceptionistResponse204 = {
+  data: void
+  status: 204
+}
+
+export type adminDeactivateReceptionistResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type adminDeactivateReceptionistResponse403 = {
+  data: ProblemDetails
+  status: 403
+}
+
+export type adminDeactivateReceptionistResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type adminDeactivateReceptionistResponseSuccess = (adminDeactivateReceptionistResponse204) & {
+  headers: Headers;
+};
+export type adminDeactivateReceptionistResponseError = (adminDeactivateReceptionistResponse401 | adminDeactivateReceptionistResponse403 | adminDeactivateReceptionistResponse404) & {
+  headers: Headers;
+};
+
+export type adminDeactivateReceptionistResponse = (adminDeactivateReceptionistResponseSuccess | adminDeactivateReceptionistResponseError)
+
+export const getAdminDeactivateReceptionistUrl = (id: string) => {
+  return `http://localhost:5144/api/v1/admins/receptionists/${id}/deactivate`
+}
+
+export const adminDeactivateReceptionist = async (id: string, options?: RequestInit): Promise<adminDeactivateReceptionistResponse> => {
+  return ofetchMutator<adminDeactivateReceptionistResponse>(getAdminDeactivateReceptionistUrl(id), {
+    ...options,
+    method: 'PATCH',
+  });
+}
+
+export const getAdminDeactivateReceptionistMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDeactivateReceptionist>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminDeactivateReceptionist>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['adminDeactivateReceptionist'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminDeactivateReceptionist>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return adminDeactivateReceptionist(id, requestOptions)
+        }
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminDeactivateReceptionistMutationResult = NonNullable<Awaited<ReturnType<typeof adminDeactivateReceptionist>>>
+    export type AdminDeactivateReceptionistMutationError = ProblemDetails
+
+    export const useAdminDeactivateReceptionist = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDeactivateReceptionist>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminDeactivateReceptionist>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getAdminDeactivateReceptionistMutationOptions(options), queryClient);
+    }

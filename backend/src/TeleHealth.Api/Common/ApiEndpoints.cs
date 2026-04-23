@@ -121,5 +121,7 @@ public static class ApiEndpoints
         public const string CreateReceptionist = $"{Base}/receptionists";
 
         public const string UpdateReceptionist = $"{Base}/receptionists/{{id:guid}}";
+
+        public const string DeleteReceptionist = $"{Base}/receptionists/{{id:guid}}/deactivate";
     }
 }
