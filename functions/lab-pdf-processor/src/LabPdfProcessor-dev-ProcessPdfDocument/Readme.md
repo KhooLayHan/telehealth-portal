@@ -1,14 +1,15 @@
 # AWS Lambda Empty Function Project
 
 This starter project consists of:
+
 * Function.cs - class file containing a class with a single function handler method
 * aws-lambda-tools-defaults.json - default argument settings for use with Visual Studio and command line deployment tools for AWS
 
 You may also have a test project depending on the options selected.
 
-The generated function handler is a simple method accepting a string argument that returns the uppercase equivalent of the input string. Replace the body of this method, and parameters, to suit your needs. 
+The generated function handler is a simple method accepting a string argument that returns the uppercase equivalent of the input string. Replace the body of this method, and parameters, to suit your needs.
 
-## Here are some steps to follow from Visual Studio:
+## Here are some steps to follow from Visual Studio
 
 To deploy your function to AWS Lambda, right click the project in Solution Explorer and select *Publish to AWS Lambda*.
 
@@ -22,28 +23,32 @@ To update the runtime configuration of your deployed function use the Configurat
 
 To view execution logs of invocations of your function use the Logs tab in the opened Function View window.
 
-## Here are some steps to follow to get started from the command line:
+## Here are some steps to follow to get started from the command line
 
 Once you have edited your template and code you can deploy your application using the [Amazon.Lambda.Tools Global Tool](https://github.com/aws/aws-extensions-for-dotnet-cli#aws-lambda-amazonlambdatools) from the command line.
 
 Install Amazon.Lambda.Tools Global Tools if not already installed.
-```
+
+```bash
     dotnet tool install -g Amazon.Lambda.Tools
 ```
 
 If already installed check if new version is available.
-```
+
+```bash
     dotnet tool update -g Amazon.Lambda.Tools
 ```
 
 Execute unit tests
-```
+
+```bash
     cd "LabPdfProcessor-dev-ProcessPdfDocument/test/LabPdfProcessor-dev-ProcessPdfDocument.Tests"
     dotnet test
 ```
 
 Deploy function to AWS Lambda
-```
+
+```bash
     cd "LabPdfProcessor-dev-ProcessPdfDocument/src/LabPdfProcessor-dev-ProcessPdfDocument"
     dotnet lambda deploy-function
 ```
