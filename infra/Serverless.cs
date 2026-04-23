@@ -1,10 +1,18 @@
-// START OF FILE Serverless.cs
 namespace TeleHealth.Infra;
 
-using System.Collections.Generic;
 using Pulumi;
 using Aws = Pulumi.Aws;
 
+/// <summary>
+/// Lambda function for processing lab report PDFs.
+/// Triggered by SQS messages from the lab-report processing queue.
+///
+/// Fixes applied:
+///   - Runtime: dotnet10 (managed .NET 10 runtime, GA since Jan 2026)
+///   - Scoped S3 read permission for lab reports bucket
+///   - ReservedConcurrentExecutions to prevent overwhelming RDS
+///   - Dummy zip placeholder for initial Pulumi creation (CI/CD overwrites)
+/// </summary>
 public static class Serverless
 {
     public sealed class Result
@@ -14,25 +22,25 @@ public static class Serverless
 
     public static Result Create(StackConfig cfg, Messaging.Result msg, Storage.Result storage)
     {
-        // 1. IAM Role for Lambda
+        // ── IAM role for Lambda ──
         var lambdaRole = new Aws.Iam.Role(
             "lambda-pdf-processor-role",
             new Aws.Iam.RoleArgs
             {
                 AssumeRolePolicy =
                     @"{
-                ""Version"": ""2012-10-17"",
-                ""Statement"":[{
-                    ""Action"": ""sts:AssumeRole"",
-                    ""Principal"": { ""Service"": ""lambda.amazonaws.com"" },
-                    ""Effect"": ""Allow""
-                }]
-            }",
+                    ""Version"": ""2012-10-17"",
+                    ""Statement"": [{
+                        ""Action"": ""sts:AssumeRole"",
+                        ""Principal"": { ""Service"": ""lambda.amazonaws.com"" },
+                        ""Effect"": ""Allow""
+                    }]
+                }",
                 Tags = cfg.Tags,
             }
         );
 
-        // AWS Managed Policies for Lambda (Basic Execution & SQS Polling)
+        // Managed policies: basic execution (CloudWatch Logs) + SQS polling
         _ = new Aws.Iam.RolePolicyAttachment(
             "lambda-basic-execution",
             new Aws.Iam.RolePolicyAttachmentArgs
@@ -51,31 +59,65 @@ public static class Serverless
             }
         );
 
-        // 2. The Lambda Function
+        // Scoped inline policy: S3 read access for lab reports bucket only
+        _ = new Aws.Iam.RolePolicy(
+            "lambda-s3-lab-reports",
+            new Aws.Iam.RolePolicyArgs
+            {
+                Role = lambdaRole.Name,
+                Policy = storage.LabReportsBucket.Arn.Apply(arn =>
+                    $@"{{
+                        ""Version"": ""2012-10-17"",
+                        ""Statement"": [{{
+                            ""Effect"": ""Allow"",
+                            ""Action"": [""s3:GetObject""],
+                            ""Resource"": ""{arn}/*""
+                        }}]
+                    }}"
+                ),
+            }
+        );
+
+        // ── Lambda function ──
         var pdfProcessorLambda = new Aws.Lambda.Function(
             "lab-pdf-processor",
             new Aws.Lambda.FunctionArgs
             {
                 Name = $"telehealth-lab-pdf-processor-{cfg.StackName}",
                 Role = lambdaRole.Arn,
-                Runtime = "provided.al2023", // 🚀 Required for .NET 10 Native AOT!
-                Handler = "bootstrap", // 🚀 Required for Native AOT!
+                Runtime = "dotnet10",
+                Handler =
+                    "LabPdfProcessor-dev-ProcessPdfDocument::LabPdfProcessor_dev_ProcessPdfDocument.Function::FunctionHandler",
                 MemorySize = 256,
                 Timeout = 30,
 
-                // Provide a dummy deployment package so Pulumi can create the resource.
-                // Our GitHub Actions CI/CD will overwrite this with the real code!
-                Code = new FileArchive("./dummy-lambda.zip"),
+                // Limit concurrency to prevent overwhelming RDS with connections
+                ReservedConcurrentExecutions = 5,
+
+                // Dummy deployment package — CI/CD overwrites with the real build.
+                // This file must exist for Pulumi to create the Lambda resource.
+                Code = new FileArchive("./dummy-lambda"),
 
                 Environment = new Aws.Lambda.Inputs.FunctionEnvironmentArgs
                 {
-                    Variables = new InputMap<string> { { "ENVIRONMENT", cfg.StackName } },
+                    Variables = new InputMap<string>
+                    {
+                        { "ENVIRONMENT", cfg.StackName },
+                        { "S3_LAB_REPORTS_BUCKET", storage.LabReportsBucket.BucketName },
+                    },
                 },
                 Tags = cfg.Tags,
-            }
+            },
+            // Ignore code changes — CI/CD (Job 4) deploys the real artifact via
+            // `aws lambda update-function-code`. Without this, every `pulumi up`
+            // would revert the deployed code back to the dummy placeholder.
+            new CustomResourceOptions { IgnoreChanges = { "sourceCodeHash" } }
         );
 
-        // 3. The Event Source Mapping (Tells SQS to trigger this Lambda)
+        // ── SQS event source mapping (triggers Lambda from the processing queue) ──
+        // ReportBatchItemFailures enables partial batch reporting: only failed
+        // messages are retried, not the entire batch. Requires the Lambda handler
+        // to return SQSBatchResponse with failed message IDs.
         _ = new Aws.Lambda.EventSourceMapping(
             "sqs-to-lambda-mapping",
             new Aws.Lambda.EventSourceMappingArgs
@@ -84,6 +126,7 @@ public static class Serverless
                 FunctionName = pdfProcessorLambda.Arn,
                 BatchSize = 10,
                 Enabled = true,
+                FunctionResponseTypes = { "ReportBatchItemFailures" },
             }
         );
 
