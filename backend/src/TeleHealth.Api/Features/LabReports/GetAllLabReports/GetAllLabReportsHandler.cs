@@ -41,8 +41,8 @@ public sealed class GetAllLabReportsHandler(ApplicationDbContext db)
         }
 
         q = string.Equals(query.SortOrder, "desc", StringComparison.OrdinalIgnoreCase)
-            ? q.OrderByDescending(r => r.CreatedAt)
-            : q.OrderBy(r => r.CreatedAt);
+            ? q.OrderByDescending(r => r.CreatedAt).ThenByDescending(r => r.PublicId)
+            : q.OrderBy(r => r.CreatedAt).ThenBy(r => r.PublicId);
 
         var totalCount = await q.CountAsync(ct);
 

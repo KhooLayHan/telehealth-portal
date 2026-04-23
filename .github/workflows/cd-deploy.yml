@@ -95,10 +95,19 @@ jobs:
           key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
           restore-keys: ${{ runner.os }}-bun-
 
+      - name: Resolve API URL
+        env:
+          EB_ENV_NAME: ${{ needs.deploy-infra.outputs.eb-env-name }}
+        run: |
+          API_HOST="$(aws elasticbeanstalk describe-environments \
+            --region "${AWS_REGION}" \
+            --environment-names "$EB_ENV_NAME" \
+            --query 'Environments[0].CNAME' \
+            --output text)"
+          test -n "$API_HOST" && test "$API_HOST" != "None"
+          echo "VITE_API_URL=http://${API_HOST}" >> "$GITHUB_ENV"
       - name: Install & Build
         working-directory: frontend
-        env:
-          VITE_API_URL: http://${{ needs.deploy-infra.outputs.eb-env-name }}.us-east-1.elasticbeanstalk.com
         run: |
           bun install --frozen-lockfile
           bun run build
