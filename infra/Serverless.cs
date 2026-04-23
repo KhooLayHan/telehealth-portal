@@ -20,10 +20,7 @@ public static class Serverless
         public required Aws.Lambda.Function PdfProcessorLambda { get; init; }
     }
 
-    public static Result Create(
-        StackConfig cfg,
-        Messaging.Result msg,
-        Storage.Result storage)
+    public static Result Create(StackConfig cfg, Messaging.Result msg, Storage.Result storage)
     {
         // ── IAM role for Lambda ──
         var lambdaRole = new Aws.Iam.Role(
@@ -40,7 +37,8 @@ public static class Serverless
                     }]
                 }",
                 Tags = cfg.Tags,
-            });
+            }
+        );
 
         // Managed policies: basic execution (CloudWatch Logs) + SQS polling
         _ = new Aws.Iam.RolePolicyAttachment(
@@ -49,7 +47,8 @@ public static class Serverless
             {
                 Role = lambdaRole.Name,
                 PolicyArn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-            });
+            }
+        );
 
         _ = new Aws.Iam.RolePolicyAttachment(
             "lambda-sqs-execution",
@@ -57,7 +56,8 @@ public static class Serverless
             {
                 Role = lambdaRole.Name,
                 PolicyArn = "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole",
-            });
+            }
+        );
 
         // Scoped inline policy: S3 read access for lab reports bucket only
         _ = new Aws.Iam.RolePolicy(
@@ -75,7 +75,8 @@ public static class Serverless
                         }}]
                     }}"
                 ),
-            });
+            }
+        );
 
         // ── Lambda function ──
         var pdfProcessorLambda = new Aws.Lambda.Function(
@@ -110,7 +111,8 @@ public static class Serverless
             // Ignore code changes — CI/CD (Job 4) deploys the real artifact via
             // `aws lambda update-function-code`. Without this, every `pulumi up`
             // would revert the deployed code back to the dummy placeholder.
-            new CustomResourceOptions { IgnoreChanges = { "sourceCodeHash" } });
+            new CustomResourceOptions { IgnoreChanges = { "sourceCodeHash" } }
+        );
 
         // ── SQS event source mapping (triggers Lambda from the processing queue) ──
         // ReportBatchItemFailures enables partial batch reporting: only failed
@@ -125,7 +127,8 @@ public static class Serverless
                 BatchSize = 10,
                 Enabled = true,
                 FunctionResponseTypes = { "ReportBatchItemFailures" },
-            });
+            }
+        );
 
         return new Result { PdfProcessorLambda = pdfProcessorLambda };
     }

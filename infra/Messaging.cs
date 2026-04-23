@@ -36,7 +36,8 @@ public static class Messaging
                 SqsManagedSseEnabled = true,
                 MessageRetentionSeconds = 1_209_600, // 14 days (max) to allow investigation
                 Tags = cfg.Tags,
-            });
+            }
+        );
 
         var processingQueue = new Aws.Sqs.Queue(
             "report-processing-queue",
