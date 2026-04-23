@@ -117,4 +117,17 @@ public static class ApiEndpoints
 
         public const string UpdateBySlug = $"{Base}/{{slug}}/complete";
     }
+
+    public static class Admins
+    {
+        private const string Base = "admins";
+
+        public const string GetAllReceptionists = $"{Base}/receptionists";
+
+        public const string CreateReceptionist = $"{Base}/receptionists";
+
+        public const string UpdateReceptionist = $"{Base}/receptionists/{{id:guid}}";
+
+        public const string DeleteReceptionist = $"{Base}/receptionists/{{id:guid}}/deactivate";
+    }
 }
