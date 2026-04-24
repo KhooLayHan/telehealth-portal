@@ -31,8 +31,8 @@ export function PatientLabReportsView({
   onUploadNew,
   onViewReport,
 }: PatientLabReportsViewProps) {
-  const pendingCount = reports.filter((r) => r.status.slug === "pending").length;
-  const completedCount = reports.filter((r) => r.status.slug === "completed").length;
+  const pendingCount = reports.filter((r) => r.status.slug?.toLowerCase() === "pending").length;
+  const completedCount = reports.filter((r) => r.status.slug?.toLowerCase() === "completed").length;
 
   return (
     <div className="space-y-6">

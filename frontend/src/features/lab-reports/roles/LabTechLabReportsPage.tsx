@@ -50,12 +50,16 @@ export function LabTechLabReportsPage() {
     Math.ceil(Number(reportsResult?.totalCount ?? 0) / REPORT_PAGE_SIZE),
   );
 
-  // Compute stats from all reports (not just current page)
+  // Compute page-level counts; totalCount uses server total
   const { pendingCount, completedCount, totalCount } = useMemo(() => {
     const pending = allReports.filter((r) => r.status.slug === "pending").length;
     const completed = allReports.filter((r) => r.status.slug === "completed").length;
-    return { pendingCount: pending, completedCount: completed, totalCount: allReports.length };
-  }, [allReports]);
+    return {
+      pendingCount: pending,
+      completedCount: completed,
+      totalCount: Number(reportsResult?.totalCount ?? 0),
+    };
+  }, [allReports, reportsResult]);
 
   // Fetch patients for upload tab
   const { data: patientsData, isLoading: patientsLoading } = useGetAllPatientsForClinicStaff({
@@ -223,8 +227,7 @@ export function LabTechLabReportsPage() {
                 {patients.map((patient: ClinicStaffPatientDto) => (
                   <Card
                     key={patient.patientPublicId}
-                    className="hover:border-primary/50 transition-colors cursor-pointer"
-                    onClick={() => handleSelectPatient(patient.patientPublicId ?? "")}
+                    className="hover:border-primary/50 transition-colors"
                   >
                     <CardContent className="p-4 flex items-center justify-between">
                       <div className="flex items-center gap-3">

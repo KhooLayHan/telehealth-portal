@@ -161,7 +161,10 @@ function LabOrdersTable() {
           )}
         </div>
         {/* Status pills */}
-        <div className="flex items-center gap-1 rounded-lg border border-border overflow-hidden h-9">
+        <fieldset
+          aria-label="Filter by status"
+          className="flex items-center gap-1 rounded-lg border border-border overflow-hidden h-9"
+        >
           <button
             type="button"
             aria-pressed={!statusFilter}
@@ -187,7 +190,7 @@ function LabOrdersTable() {
               {s.name}
             </button>
           ))}
-        </div>
+        </fieldset>
         {/* Clear */}
         {hasFilters && (
           <Button
