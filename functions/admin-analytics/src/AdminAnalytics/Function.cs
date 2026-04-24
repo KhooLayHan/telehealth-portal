@@ -12,7 +12,8 @@ public class Function
 {
     public APIGatewayHttpApiV2ProxyResponse FunctionHandler(
         APIGatewayHttpApiV2ProxyRequest request,
-        ILambdaContext context)
+        ILambdaContext context
+    )
     {
         context.Logger.LogInformation("Admin analytics request received.");
 
@@ -20,10 +21,7 @@ public class Function
         {
             StatusCode = 200,
             Body = "{\"message\": \"Admin analytics OK\"}",
-            Headers = new Dictionary<string, string>
-            {
-                { "Content-Type", "application/json" }
-            }
+            Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } },
         };
     }
 }
