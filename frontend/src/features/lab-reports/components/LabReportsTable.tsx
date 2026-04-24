@@ -98,7 +98,7 @@ export function LabReportsTable({
                     <td className="p-3 text-right">
                       <Button size="sm" variant="ghost" onClick={() => onViewReport(report)}>
                         <Eye className="size-4 mr-1" aria-hidden="true" />
-                        View
+                        View PDF
                       </Button>
                     </td>
                   </tr>

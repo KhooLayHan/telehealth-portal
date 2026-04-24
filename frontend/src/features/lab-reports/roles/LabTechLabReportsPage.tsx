@@ -1,6 +1,6 @@
 import { Search, User, X } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useGetAllLabReports } from "@/api/generated/lab-reports/lab-reports";
+import { getBySlug, useGetAllLabReports } from "@/api/generated/lab-reports/lab-reports";
 import { useGetAllPatientsForClinicStaff } from "@/api/generated/patients/patients";
 import type { ClinicStaffPatientDto } from "@/api/model/ClinicStaffPatientDto";
 import type { LabReportDto } from "@/api/model/LabReportDto";
@@ -98,9 +98,18 @@ export function LabTechLabReportsPage() {
     setShowWizard(false);
   };
 
-  const handleViewReport = (report: LabReportDto) => {
-    setSelectedPatientId(report.patientPublicId);
-    setShowWizard(false);
+  const handleViewReport = async (report: LabReportDto) => {
+    try {
+      const response = await getBySlug(report.slug);
+      if (response.status === 200) {
+        const url = (response.data as unknown as { downloadUrl: string }).downloadUrl;
+        if (url) {
+          window.open(url, "_blank", "noopener,noreferrer");
+        }
+      }
+    } catch {
+      // Error fetching download URL — silently fail or could show toast
+    }
   };
 
   const handleSelectPatient = (patientId: string) => {
