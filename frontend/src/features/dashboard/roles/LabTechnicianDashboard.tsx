@@ -32,7 +32,10 @@ const LAB_STATUSES = [
   { slug: "rejected", name: "Rejected", colorCode: "#EF4444" },
 ] as const;
 function formatDate(iso: unknown): string {
-  return new Date(String(iso)).toLocaleDateString("en-GB", {
+  if (iso == null) return "—";
+  const d = new Date(String(iso));
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString("en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -148,11 +151,12 @@ function LabOrdersTable() {
           />
           {search && (
             <button
+              aria-label="Clear search"
               type="button"
               onClick={() => setSearch("")}
               className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
             >
-              <X className="size-3.5" />
+              <X className="size-3.5" aria-hidden="true" />
             </button>
           )}
         </div>

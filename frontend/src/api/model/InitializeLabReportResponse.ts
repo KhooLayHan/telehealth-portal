@@ -7,5 +7,6 @@
 
 export interface InitializeLabReportResponse {
   publicId: string;
+  slug: string;
   uploadUrl: string;
 }

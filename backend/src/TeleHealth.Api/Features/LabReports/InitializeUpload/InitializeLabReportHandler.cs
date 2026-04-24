@@ -9,7 +9,7 @@ using TeleHealth.Api.Infrastructure.Persistence;
 
 namespace TeleHealth.Api.Features.LabReports.InitializeUpload;
 
-public sealed record InitializeLabReportResponse(Guid PublicId, string UploadUrl);
+public sealed record InitializeLabReportResponse(Guid PublicId, string Slug, string UploadUrl);
 
 public sealed class InitializeLabReportHandler(ApplicationDbContext db, IS3Service s3Service)
 {
@@ -55,6 +55,6 @@ public sealed class InitializeLabReportHandler(ApplicationDbContext db, IS3Servi
 
         Log.Information("Generated S3 Upload URL for LabReport {PublicId}", publicId);
 
-        return new InitializeLabReportResponse(publicId, uploadUrl);
+        return new InitializeLabReportResponse(publicId, slug, uploadUrl);
     }
 }

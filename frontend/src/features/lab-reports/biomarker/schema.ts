@@ -1,4 +1,3 @@
-import { useId } from "react";
 import { z } from "zod";
 
 export const biomarkerSchema = z.object({
@@ -18,7 +17,7 @@ export type FlagValue = "normal" | "high" | "low";
 export type BiomarkersFormValues = z.infer<typeof reportSchema>;
 
 export type BiomarkersFormProps = {
-  labReportId: string;
+  labReportSlug: string;
   onBack: () => void;
   onSuccess: () => void;
 };
@@ -26,7 +25,7 @@ export type BiomarkersFormProps = {
 export const defaultValues: BiomarkersFormValues = { biomarkers: [] };
 
 export const createEmptyBiomarkerRow = (): Biomarker => ({
-  _id: useId(),
+  _id: crypto.randomUUID(),
   name: "",
   value: "",
   unit: "",

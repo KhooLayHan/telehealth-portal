@@ -7,9 +7,9 @@ import type { Biomarker, BiomarkersFormProps } from "./schema";
 
 export type { BiomarkersFormProps, BiomarkersFormValues } from "./schema";
 
-export function BiomarkersForm({ labReportId, onBack, onSuccess }: BiomarkersFormProps) {
+export function BiomarkersForm({ labReportSlug, onBack, onSuccess }: BiomarkersFormProps) {
   const { form, completeMutation, submitError, biomarkerSchema, createEmptyBiomarkerRow } =
-    useBiomarkersForm({ labReportId, onBack, onSuccess });
+    useBiomarkersForm({ labReportSlug, onBack, onSuccess });
 
   return (
     <form

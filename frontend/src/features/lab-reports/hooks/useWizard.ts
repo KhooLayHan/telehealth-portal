@@ -3,17 +3,17 @@ import type { ReportType, WizardStep } from "../schema";
 
 export function useWizard() {
   const [step, setStep] = useState<WizardStep>(1);
-  const [labReportId, setLabReportId] = useState<string | null>(null);
+  const [labReportSlug, setLabReportSlug] = useState<string | null>(null);
   const [reportType, setReportType] = useState<ReportType>("Full Blood Count");
 
-  const handlePdfUploaded = (id: string) => {
-    setLabReportId(id);
+  const handlePdfUploaded = (slug: string) => {
+    setLabReportSlug(slug);
     setStep(2);
   };
 
   const handleReset = () => {
     setStep(1);
-    setLabReportId(null);
+    setLabReportSlug(null);
     setReportType("Full Blood Count");
   };
 
@@ -27,7 +27,7 @@ export function useWizard() {
 
   return {
     step,
-    labReportId,
+    labReportSlug,
     reportType,
     setReportType,
     handlePdfUploaded,
