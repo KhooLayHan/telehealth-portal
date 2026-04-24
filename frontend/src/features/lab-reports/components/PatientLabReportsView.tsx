@@ -1,4 +1,4 @@
-import { ChevronLeft, Eye, FileText, Upload, User } from "lucide-react";
+import { ChevronLeft, FileText, Upload, User } from "lucide-react";
 import type { ClinicStaffPatientDto } from "@/api/model/ClinicStaffPatientDto";
 import type { LabReportDto } from "@/api/model/LabReportDto";
 import { Badge } from "@/components/ui/badge";
@@ -121,8 +121,7 @@ export function PatientLabReportsView({
                       {report.status.name}
                     </Badge>
                     <Button size="sm" variant="ghost" onClick={() => onViewReport(report)}>
-                      <Eye className="size-4 mr-1" aria-hidden="true" />
-                      View PDF
+                      View
                     </Button>
                   </div>
                 </CardContent>

@@ -164,6 +164,7 @@ function LabOrdersTable() {
         <div className="flex items-center gap-1 rounded-lg border border-border overflow-hidden h-9">
           <button
             type="button"
+            aria-pressed={!statusFilter}
             onClick={() => setStatusFilter("")}
             className="h-full px-3 text-xs font-medium transition-colors cursor-pointer capitalize"
             style={!statusFilter ? { background: ACCENT, color: "white" } : undefined}
@@ -174,6 +175,7 @@ function LabOrdersTable() {
             <button
               type="button"
               key={s.slug}
+              aria-pressed={statusFilter === s.slug}
               onClick={() => setStatusFilter(statusFilter === s.slug ? "" : s.slug)}
               className="h-full px-3 text-xs font-medium transition-colors cursor-pointer"
               style={
