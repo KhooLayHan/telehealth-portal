@@ -47,6 +47,8 @@ public static class ApiEndpoints
         public const string GetAllPatientsForClinicStaff = $"{Base}/staff";
 
         public const string UpdatePatientRecord = $"{Base}/{{patientPublicId:guid}}/record";
+
+        public const string SoftDeleteById = $"{Base}/{{patientPublicId:guid}}/deactivate";
     }
 
     public static class Appointments
