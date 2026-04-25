@@ -1444,6 +1444,10 @@ export function AdminDoctorsPage() {
 
   const { data, isLoading, isError } = useGetAll();
   const allDoctors = data?.status === 200 ? data.data : [];
+  const departmentCount = useMemo(
+    () => new Set(allDoctors.map((d: DoctorListDto) => d.departmentName).filter(Boolean)).size,
+    [allDoctors],
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -1497,7 +1501,7 @@ export function AdminDoctorsPage() {
         <p className="mt-1 text-sm text-muted-foreground">
           {isLoading
             ? "Loading…"
-            : `Manage ${filtered.length} registered medical professional${filtered.length === 1 ? "" : "s"}.`}
+            : `Manage ${filtered.length} registered medical professional${filtered.length === 1 ? "" : "s"} across ${departmentCount} department${departmentCount === 1 ? "" : "s"}.`}
         </p>
       </div>
 
