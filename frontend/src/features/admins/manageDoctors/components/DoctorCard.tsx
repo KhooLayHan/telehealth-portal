@@ -1,5 +1,15 @@
 import { motion } from "framer-motion";
-import { CalendarClock, CalendarDays, Eye, Mail, MoreVertical, Pencil, Phone, Trash2, Wallet } from "lucide-react";
+import {
+  CalendarClock,
+  CalendarDays,
+  Eye,
+  Mail,
+  MoreVertical,
+  Pencil,
+  Phone,
+  Trash2,
+  Wallet,
+} from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -57,7 +67,13 @@ function formatJoinedDate(dateStr: string): string {
 }
 
 // Card that displays a doctor's profile, contact info, and admin actions
-export function DoctorCard({ doctor, onViewDetails, onRemove, onEditProfile, onSchedule }: DoctorCardProps) {
+export function DoctorCard({
+  doctor,
+  onViewDetails,
+  onRemove,
+  onEditProfile,
+  onSchedule,
+}: DoctorCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -175,43 +191,3 @@ export function DoctorCard({ doctor, onViewDetails, onRemove, onEditProfile, onS
     </motion.div>
   );
 }
-
-// Demo data for development — remove once wired to the API
-export const demoDoctors: Doctor[] = [
-  {
-    publicId: "a1b2c3d4-0001-0000-0000-000000000001",
-    name: "Dr. James Wilson",
-    specialty: "Orthopedics",
-    department: "Surgery",
-    email: "j.wilson@clinicos.com",
-    phone: "+1 (555) 012-1122",
-    joinedDate: "2021-03-15",
-    feePerSessionMyr: 250,
-    isOnDuty: true,
-    licenseNo: "MMC-2021-001234",
-  },
-  {
-    publicId: "a1b2c3d4-0001-0000-0000-000000000002",
-    name: "Dr. Aisha Rahman",
-    specialty: "Cardiology",
-    department: "Internal Medicine",
-    email: "a.rahman@clinicos.com",
-    phone: "+60 12-345 6789",
-    joinedDate: "2019-08-01",
-    feePerSessionMyr: 320,
-    isOnDuty: false,
-    licenseNo: "MMC-2019-005678",
-  },
-  {
-    publicId: "a1b2c3d4-0001-0000-0000-000000000003",
-    name: "Dr. Lim Wei Jie",
-    specialty: "Dermatology",
-    department: "Outpatient",
-    email: "lim.weijie@clinicos.com",
-    phone: "+60 11-888 9900",
-    joinedDate: "2023-01-10",
-    feePerSessionMyr: 180,
-    isOnDuty: true,
-    licenseNo: "MMC-2023-009012",
-  },
-];
