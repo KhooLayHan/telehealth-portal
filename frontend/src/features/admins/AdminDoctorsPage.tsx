@@ -114,9 +114,9 @@ function DoctorDetailsDialog({ doctor, open, onOpenChange }: DoctorDetailsDialog
             Personal Information
           </p>
           <div className="mb-5 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
-            <DetailRow label="Gender" value={doctor.gender} />
+            <DetailRow label="Gender" value={doctor.gender ?? ""} />
             <DetailRow label="Date of Birth" value={formatDate(doctor.dateOfBirth)} />
-            <DetailRow label="Username" value={doctor.username} />
+            <DetailRow label="Username" value={doctor.username ?? ""} />
           </div>
 
           <div className="mb-5 rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm text-foreground/80">
