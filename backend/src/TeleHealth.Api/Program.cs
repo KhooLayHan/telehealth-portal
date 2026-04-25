@@ -32,6 +32,8 @@ using TeleHealth.Api.Features.Doctors.GetSchedule;
 using TeleHealth.Api.Features.Doctors.UpdateDoctor;
 using TeleHealth.Api.Features.LabReports.Complete;
 using TeleHealth.Api.Features.LabReports.Download;
+using TeleHealth.Api.Features.LabReports.GetAllLabReports;
+using TeleHealth.Api.Features.LabReports.GetAllPatients;
 using TeleHealth.Api.Features.LabReports.InitializeUpload;
 using TeleHealth.Api.Features.Patients.CancelAppointment;
 using TeleHealth.Api.Features.Patients.DeletePatient;
@@ -184,6 +186,8 @@ builder.Services.AddScoped<GetDoctorScheduleHandler>();
 builder.Services.AddScoped<InitializeLabReportHandler>();
 builder.Services.AddScoped<CompleteLabReportHandler>();
 builder.Services.AddScoped<DownloadLabReportHandler>();
+builder.Services.AddScoped<LabTechGetAllPatientsHandler>();
+builder.Services.AddScoped<GetAllLabReportsHandler>();
 builder.Services.AddScoped<ReceptionistGetAllPatientsHandler>();
 builder.Services.AddScoped<ReceptionistGetPatientByIdHandler>();
 builder.Services.AddScoped<ReceptionistGetPatientHistoryHandler>();
@@ -219,6 +223,7 @@ app.UseCors("AllowFrontend");
 
 app.UseHttpsRedirection();
 
+app.UseSerilogRequestLogging();
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 
@@ -257,6 +262,8 @@ api.MapGetDoctorScheduleEndpoint();
 api.MapInitializeLabReportEndpoint();
 api.MapCompleteLabReportsEndpoint();
 api.MapDownloadLabReportEndpoint();
+api.MapGetAllLabReportsEndpoint();
+api.MapLabTechGetAllPatientsEndpoint();
 api.MapReceptionistGetAllPatientsEndpoint();
 api.MapReceptionistGetPatientByIdEndpoint();
 api.MapReceptionistGetPatientHistoryEndpoint();
@@ -265,8 +272,6 @@ api.MapUpdatePatientRecordEndpoint();
 api.MapDeletePatientEndpoint();
 api.MapGetDoctorPatientsEndpoint();
 api.MapGetDoctorPatientAppointmentsEndpoint();
-
-app.UseSerilogRequestLogging();
 
 Log.Information("TeleHealth API successfully started.");
 

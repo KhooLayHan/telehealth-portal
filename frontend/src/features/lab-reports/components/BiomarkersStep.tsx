@@ -2,12 +2,12 @@ import { CardContent, CardDescription, CardHeader, CardTitle } from "@/component
 import { BiomarkersForm } from "../biomarker/BiomarkersForm";
 
 type BiomarkersStepProps = {
-  labReportId: string;
+  labReportSlug: string;
   onBack: () => void;
   onSuccess: () => void;
 };
 
-export function BiomarkersStep({ labReportId, onBack, onSuccess }: BiomarkersStepProps) {
+export function BiomarkersStep({ labReportSlug, onBack, onSuccess }: BiomarkersStepProps) {
   return (
     <>
       <CardHeader>
@@ -17,7 +17,7 @@ export function BiomarkersStep({ labReportId, onBack, onSuccess }: BiomarkersSte
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <BiomarkersForm labReportId={labReportId} onBack={onBack} onSuccess={onSuccess} />
+        <BiomarkersForm labReportSlug={labReportSlug} onBack={onBack} onSuccess={onSuccess} />
       </CardContent>
     </>
   );

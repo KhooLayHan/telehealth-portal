@@ -24,12 +24,16 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  AnonymousTypeOfstring
-} from '../../model/AnonymousTypeOfstring';
-
-import type {
   CompleteLabReportCommand
 } from '../../model/CompleteLabReportCommand';
+
+import type {
+  GetAllLabReportsParams
+} from '../../model/GetAllLabReportsParams';
+
+import type {
+  GetAllPatientsParams
+} from '../../model/GetAllPatientsParams';
 
 import type {
   InitializeLabReportCommand
@@ -38,6 +42,18 @@ import type {
 import type {
   InitializeLabReportResponse
 } from '../../model/InitializeLabReportResponse';
+
+import type {
+  LabReportDownloadResponse
+} from '../../model/LabReportDownloadResponse';
+
+import type {
+  PagedResultOfLabReportDto
+} from '../../model/PagedResultOfLabReportDto';
+
+import type {
+  PagedResultOfLabTechPatientDto
+} from '../../model/PagedResultOfLabTechPatientDto';
 
 import type {
   ProblemDetails
@@ -248,7 +264,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getUpdateBySlugMutationOptions(options), queryClient);
     }
     export type getBySlugResponse200 = {
-  data: AnonymousTypeOfstring
+  data: LabReportDownloadResponse
   status: 200
 }
 
@@ -354,6 +370,246 @@ export function useGetBySlug<TData = Awaited<ReturnType<typeof getBySlug>>, TErr
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetBySlugQueryOptions(slug,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export type getAllLabReportsResponse200 = {
+  data: PagedResultOfLabReportDto
+  status: 200
+}
+
+export type getAllLabReportsResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type getAllLabReportsResponseSuccess = (getAllLabReportsResponse200) & {
+  headers: Headers;
+};
+export type getAllLabReportsResponseError = (getAllLabReportsResponse401) & {
+  headers: Headers;
+};
+
+export type getAllLabReportsResponse = (getAllLabReportsResponseSuccess | getAllLabReportsResponseError)
+
+export const getGetAllLabReportsUrl = (params?: GetAllLabReportsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `http://localhost:5144/api/v1/lab-reports?${stringifiedParams}` : `http://localhost:5144/api/v1/lab-reports`
+}
+
+export const getAllLabReports = async (params?: GetAllLabReportsParams, options?: RequestInit): Promise<getAllLabReportsResponse> => {
+
+  return ofetchMutator<getAllLabReportsResponse>(getGetAllLabReportsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAllLabReportsQueryKey = (params?: GetAllLabReportsParams,) => {
+    return [
+    `http://localhost:5144/api/v1/lab-reports`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetAllLabReportsQueryOptions = <TData = Awaited<ReturnType<typeof getAllLabReports>>, TError = ProblemDetails>(params?: GetAllLabReportsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllLabReports>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAllLabReportsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAllLabReports>>> = ({ signal }) => getAllLabReports(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAllLabReports>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetAllLabReportsQueryResult = NonNullable<Awaited<ReturnType<typeof getAllLabReports>>>
+export type GetAllLabReportsQueryError = ProblemDetails
+
+
+export function useGetAllLabReports<TData = Awaited<ReturnType<typeof getAllLabReports>>, TError = ProblemDetails>(
+ params: undefined |  GetAllLabReportsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllLabReports>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAllLabReports>>,
+          TError,
+          Awaited<ReturnType<typeof getAllLabReports>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAllLabReports<TData = Awaited<ReturnType<typeof getAllLabReports>>, TError = ProblemDetails>(
+ params?: GetAllLabReportsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllLabReports>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAllLabReports>>,
+          TError,
+          Awaited<ReturnType<typeof getAllLabReports>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAllLabReports<TData = Awaited<ReturnType<typeof getAllLabReports>>, TError = ProblemDetails>(
+ params?: GetAllLabReportsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllLabReports>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetAllLabReports<TData = Awaited<ReturnType<typeof getAllLabReports>>, TError = ProblemDetails>(
+ params?: GetAllLabReportsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllLabReports>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetAllLabReportsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export type getAllPatientsResponse200 = {
+  data: PagedResultOfLabTechPatientDto
+  status: 200
+}
+
+export type getAllPatientsResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type getAllPatientsResponseSuccess = (getAllPatientsResponse200) & {
+  headers: Headers;
+};
+export type getAllPatientsResponseError = (getAllPatientsResponse401) & {
+  headers: Headers;
+};
+
+export type getAllPatientsResponse = (getAllPatientsResponseSuccess | getAllPatientsResponseError)
+
+export const getGetAllPatientsUrl = (params?: GetAllPatientsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `http://localhost:5144/api/v1/lab-reports/patients?${stringifiedParams}` : `http://localhost:5144/api/v1/lab-reports/patients`
+}
+
+export const getAllPatients = async (params?: GetAllPatientsParams, options?: RequestInit): Promise<getAllPatientsResponse> => {
+
+  return ofetchMutator<getAllPatientsResponse>(getGetAllPatientsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAllPatientsQueryKey = (params?: GetAllPatientsParams,) => {
+    return [
+    `http://localhost:5144/api/v1/lab-reports/patients`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetAllPatientsQueryOptions = <TData = Awaited<ReturnType<typeof getAllPatients>>, TError = ProblemDetails>(params?: GetAllPatientsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllPatients>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAllPatientsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAllPatients>>> = ({ signal }) => getAllPatients(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAllPatients>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetAllPatientsQueryResult = NonNullable<Awaited<ReturnType<typeof getAllPatients>>>
+export type GetAllPatientsQueryError = ProblemDetails
+
+
+export function useGetAllPatients<TData = Awaited<ReturnType<typeof getAllPatients>>, TError = ProblemDetails>(
+ params: undefined |  GetAllPatientsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllPatients>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAllPatients>>,
+          TError,
+          Awaited<ReturnType<typeof getAllPatients>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAllPatients<TData = Awaited<ReturnType<typeof getAllPatients>>, TError = ProblemDetails>(
+ params?: GetAllPatientsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllPatients>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAllPatients>>,
+          TError,
+          Awaited<ReturnType<typeof getAllPatients>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAllPatients<TData = Awaited<ReturnType<typeof getAllPatients>>, TError = ProblemDetails>(
+ params?: GetAllPatientsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllPatients>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetAllPatients<TData = Awaited<ReturnType<typeof getAllPatients>>, TError = ProblemDetails>(
+ params?: GetAllPatientsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllPatients>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetAllPatientsQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

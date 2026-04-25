@@ -14,7 +14,7 @@ export function LabReportUploadWizard({
 }: LabReportUploadWizardProps) {
   const {
     step,
-    labReportId,
+    labReportSlug,
     reportType,
     setReportType,
     handlePdfUploaded,
@@ -42,8 +42,8 @@ export function LabReportUploadWizard({
           />
         )}
 
-        {step === 2 && labReportId !== null && (
-          <BiomarkersStep labReportId={labReportId} onBack={goBack} onSuccess={handleSuccess} />
+        {step === 2 && labReportSlug !== null && (
+          <BiomarkersStep labReportSlug={labReportSlug} onBack={goBack} onSuccess={handleSuccess} />
         )}
       </Card>
     </div>

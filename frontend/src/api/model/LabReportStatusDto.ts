@@ -5,8 +5,9 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface InitializeLabReportResponse {
-  publicId: string;
+export interface LabReportStatusDto {
   slug: string;
-  uploadUrl: string;
+  name: string;
+  /** @nullable */
+  colorCode: string | null;
 }

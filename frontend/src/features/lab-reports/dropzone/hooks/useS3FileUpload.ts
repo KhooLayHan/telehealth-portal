@@ -55,7 +55,7 @@ export function useS3FileUpload({
         throw new Error("Failed to initialize lab report record.");
       }
 
-      const { publicId, uploadUrl } = apiResponse.data;
+      const { slug, uploadUrl } = apiResponse.data;
 
       if (!uploadUrl) {
         throw new Error("Failed to generate secure upload link.");
@@ -74,7 +74,7 @@ export function useS3FileUpload({
       }
 
       setUploadState("success");
-      onUploadComplete(publicId);
+      onUploadComplete(slug);
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "An unexpected error occurred during upload.";

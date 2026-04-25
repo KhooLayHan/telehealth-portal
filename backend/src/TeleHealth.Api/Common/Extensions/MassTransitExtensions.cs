@@ -22,45 +22,26 @@ public static class MassTransitExtensions
                 o.QueryDelay = TimeSpan.FromSeconds(1);
             });
 
-            // Dev
-            if (environment.IsDevelopment())
-            {
-                x.UsingAmazonSqs(
-                    (ctx, cfg) =>
-                    {
-                        cfg.LocalstackHost();
+            // Prod
+            x.UsingAmazonSqs(
+                (ctx, cfg) =>
+                {
+                    cfg.Host(
+                        configuration["Aws:Region"]!,
+                        h =>
+                        {
+                            h.AccessKey(configuration["Aws:AccessKey"]!);
+                            h.SecretKey(configuration["Aws:SecretKey"]!);
+                        }
+                    );
 
-                        cfg.ConfigureJsonSerializerOptions(options =>
-                            options.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb)
-                        );
+                    cfg.ConfigureJsonSerializerOptions(options =>
+                        options.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb)
+                    );
 
-                        cfg.ConfigureEndpoints(ctx);
-                    }
-                );
-            }
-            else
-            {
-                // Prod
-                x.UsingAmazonSqs(
-                    (ctx, cfg) =>
-                    {
-                        cfg.Host(
-                            configuration["Aws:Region"]!,
-                            h =>
-                            {
-                                h.AccessKey(configuration["Aws:AccessKey"]!);
-                                h.SecretKey(configuration["Aws:SecretKey"]!);
-                            }
-                        );
-
-                        cfg.ConfigureJsonSerializerOptions(options =>
-                            options.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb)
-                        );
-
-                        cfg.ConfigureEndpoints(ctx);
-                    }
-                );
-            }
+                    cfg.ConfigureEndpoints(ctx);
+                }
+            );
         });
 
         return services;

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -14,9 +15,11 @@ using TeleHealth.Api.Infrastructure.Persistence;
 namespace TeleHealth.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260425025339_SomethingMigrated")]
+    partial class SomethingMigrated
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -212,6 +215,11 @@ namespace TeleHealth.Api.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("outbox_id");
 
+                    b.Property<string>("BusName")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("bus_name");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created");
@@ -239,6 +247,9 @@ namespace TeleHealth.Api.Migrations
 
                     b.HasIndex("Created")
                         .HasDatabaseName("ix_outbox_state_created");
+
+                    b.HasIndex("BusName", "Created")
+                        .HasDatabaseName("ix_outbox_state_bus_name_created");
 
                     b.ToTable("outbox_state", (string)null);
                 });

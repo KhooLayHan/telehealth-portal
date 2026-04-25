@@ -11,8 +11,8 @@ export function toFormAllergies(allergies: Allergy[] | null | undefined): Allerg
     id: generateId(),
     allergen: a.allergen,
     reaction: a.reaction,
-    severity: (SEVERITY_OPTIONS as readonly string[]).includes(a.severity)
-      ? (a.severity as Severity)
+    severity: (SEVERITY_OPTIONS as readonly string[]).includes(a.severity.toLowerCase())
+      ? (a.severity.toLowerCase() as Severity)
       : "mild",
   }));
 }

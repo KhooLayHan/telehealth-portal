@@ -31,11 +31,7 @@ export function BiomarkerRow({ index, form, onRemove, biomarkerSchema }: Biomark
           {(sub: AnyFieldApi) => {
             const id = `biomarkers-${index}-name`;
             return (
-              <BiomarkerField
-                label="Metric (e.g. Hemoglobin)"
-                htmlFor={id}
-                error={sub.state.meta.errors[0]?.message}
-              >
+              <BiomarkerField label="Metric" htmlFor={id} error={sub.state.meta.errors[0]?.message}>
                 <Input
                   id={id}
                   value={sub.state.value}

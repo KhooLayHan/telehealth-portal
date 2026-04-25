@@ -117,6 +117,10 @@ public static class ApiEndpoints
 
         public const string Create = $"{Base}/initialize";
 
+        public const string GetAllLabReports = Base;
+
+        public const string GetAllPatients = $"{Base}/patients";
+
         public const string GetBySlug = $"{Base}/{{slug}}/download";
 
         public const string UpdateBySlug = $"{Base}/{{slug}}/complete";

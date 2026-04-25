@@ -10,7 +10,7 @@ import {
 
 export type UseBiomarkersFormReturn = ReturnType<typeof useBiomarkersForm>;
 
-export function useBiomarkersForm({ labReportId, onSuccess }: BiomarkersFormProps) {
+export function useBiomarkersForm({ labReportSlug, onSuccess }: BiomarkersFormProps) {
   const completeMutation = useUpdateBySlug();
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -19,7 +19,7 @@ export function useBiomarkersForm({ labReportId, onSuccess }: BiomarkersFormProp
     onSubmit: async ({ value }) => {
       try {
         await completeMutation.mutateAsync({
-          slug: labReportId,
+          slug: labReportSlug,
           data: { biomarkers: value.biomarkers },
         });
         onSuccess();

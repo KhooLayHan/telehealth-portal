@@ -5,8 +5,10 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface InitializeLabReportResponse {
-  publicId: string;
+export interface LabTechPatientDto {
+  patientPublicId: string;
   slug: string;
-  uploadUrl: string;
+  firstName: string;
+  lastName: string;
+  fullName: string;
 }
