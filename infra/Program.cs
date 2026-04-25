@@ -13,7 +13,7 @@ return await Deployment.RunAsync(() =>
     var db = Database.Create(cfg, net);
     var obs = Observability.Create(cfg, db, msg);
     var compute = Compute.Create(cfg, net, storage, db, msg, obs);
-    var serverless = Serverless.Create(cfg, msg, storage);
+    // var serverless = Serverless.Create(cfg, msg, storage);
 
     // Stack outputs — used by GitHub Actions CD workflow
     return new Dictionary<string, object?>
@@ -34,6 +34,6 @@ return await Deployment.RunAsync(() =>
         ["DbSecretArn"] = db.DbSecret.Arn,
         ["XRayGroupArn"] = obs.XrayGroup.Arn,
         ["ApiLogGroupName"] = obs.ApiLogGroup.Name,
-        ["LambdaFunctionName"] = serverless.PdfProcessorLambda.Name,
+        // ["LambdaFunctionName"] = serverless.PdfProcessorLambda.Name,
     };
 });
