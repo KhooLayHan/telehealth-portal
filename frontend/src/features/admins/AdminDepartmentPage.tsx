@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { FileDown, Plus } from "lucide-react";
 
 import {
   Breadcrumb,
@@ -34,13 +34,16 @@ export function AdminDepartmentPage() {
               Manage registered departments and staff coverage across the platform.
             </p>
           </div>
-          <Button
-            type="button"
-            className="h-9 gap-1.5 bg-black text-white hover:bg-black/85 sm:ml-auto"
-          >
-            <Plus className="size-4" />
-            Add New Department
-          </Button>
+          <div className="flex flex-col gap-2 sm:ml-auto sm:flex-row sm:items-center">
+            <Button type="button" variant="outline" className="h-9 gap-1.5 bg-background">
+              <FileDown className="size-4" />
+              Export CSV
+            </Button>
+            <Button type="button" className="h-9 gap-1.5 bg-black text-white hover:bg-black/85">
+              <Plus className="size-4" />
+              Add New Department
+            </Button>
+          </div>
         </div>
       </header>
 
