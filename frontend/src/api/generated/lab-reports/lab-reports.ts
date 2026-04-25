@@ -100,7 +100,7 @@ export const getCreateUrl = () => {
 
 
 
-  return `http://localhost:5144/api/v1/lab-reports/initialize`
+  return `/api/v1/lab-reports/initialize`
 }
 
 export const create = async (initializeLabReportCommand: InitializeLabReportCommand, options?: RequestInit): Promise<createResponse> => {
@@ -203,7 +203,7 @@ export const getUpdateBySlugUrl = (slug: string,) => {
 
 
 
-  return `http://localhost:5144/api/v1/lab-reports/${slug}/complete`
+  return `/api/v1/lab-reports/${slug}/complete`
 }
 
 export const updateBySlug = async (slug: string,
@@ -292,7 +292,7 @@ export const getGetBySlugUrl = (slug: string,) => {
 
 
 
-  return `http://localhost:5144/api/v1/lab-reports/${slug}/download`
+  return `/api/v1/lab-reports/${slug}/download`
 }
 
 export const getBySlug = async (slug: string, options?: RequestInit): Promise<getBySlugResponse> => {
@@ -312,7 +312,7 @@ export const getBySlug = async (slug: string, options?: RequestInit): Promise<ge
 
 export const getGetBySlugQueryKey = (slug: string,) => {
     return [
-    `http://localhost:5144/api/v1/lab-reports/${slug}/download`
+    `/api/v1/lab-reports/${slug}/download`
     ] as const;
     }
 
@@ -412,7 +412,7 @@ export const getGetAllLabReportsUrl = (params?: GetAllLabReportsParams,) => {
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `http://localhost:5144/api/v1/lab-reports?${stringifiedParams}` : `http://localhost:5144/api/v1/lab-reports`
+  return stringifiedParams.length > 0 ? `/api/v1/lab-reports?${stringifiedParams}` : `/api/v1/lab-reports`
 }
 
 export const getAllLabReports = async (params?: GetAllLabReportsParams, options?: RequestInit): Promise<getAllLabReportsResponse> => {
@@ -432,7 +432,7 @@ export const getAllLabReports = async (params?: GetAllLabReportsParams, options?
 
 export const getGetAllLabReportsQueryKey = (params?: GetAllLabReportsParams,) => {
     return [
-    `http://localhost:5144/api/v1/lab-reports`, ...(params ? [params] : [])
+    `/api/v1/lab-reports`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -532,7 +532,7 @@ export const getGetAllPatientsUrl = (params?: GetAllPatientsParams,) => {
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `http://localhost:5144/api/v1/lab-reports/patients?${stringifiedParams}` : `http://localhost:5144/api/v1/lab-reports/patients`
+  return stringifiedParams.length > 0 ? `/api/v1/lab-reports/patients?${stringifiedParams}` : `/api/v1/lab-reports/patients`
 }
 
 export const getAllPatients = async (params?: GetAllPatientsParams, options?: RequestInit): Promise<getAllPatientsResponse> => {
@@ -552,7 +552,7 @@ export const getAllPatients = async (params?: GetAllPatientsParams, options?: Re
 
 export const getGetAllPatientsQueryKey = (params?: GetAllPatientsParams,) => {
     return [
-    `http://localhost:5144/api/v1/lab-reports/patients`, ...(params ? [params] : [])
+    `/api/v1/lab-reports/patients`, ...(params ? [params] : [])
     ] as const;
     }
 

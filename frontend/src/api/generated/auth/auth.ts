@@ -65,7 +65,7 @@ export const getLoginUrl = () => {
 
 
 
-  return `http://localhost:5144/api/v1/auth/login`
+  return `/api/v1/auth/login`
 }
 
 export const login = async (loginCommand: LoginCommand, options?: RequestInit): Promise<loginResponse> => {
@@ -153,7 +153,7 @@ export const getSignUpPatientUrl = () => {
 
 
 
-  return `http://localhost:5144/api/v1/auth/signup-patient`
+  return `/api/v1/auth/signup-patient`
 }
 
 export const signUpPatient = async (registerPatientCommand: RegisterPatientCommand, options?: RequestInit): Promise<signUpPatientResponse> => {

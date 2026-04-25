@@ -6,16 +6,16 @@
  */
 
 export type GetDoctorScheduleParams = {
-  Date?: string;
-  Status?: string;
-  Search?: string;
-  /**
-   * @pattern ^-?(?:0|[1-9]\d*)$
-   */
-  Page?: number | string;
-  /**
-   * @pattern ^-?(?:0|[1-9]\d*)$
-   */
-  PageSize?: number | string;
-  SortOrder?: string;
+Date?: string;
+Status?: string;
+Search?: string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+Page?: number | string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+PageSize?: number | string;
+SortOrder?: string;
 };
