@@ -19,9 +19,9 @@ export interface ClinicStaffPatientDto {
   phoneNumber: string;
   bloodGroup: string;
   /**
-   * @minLength 1
-   * @maxLength 1
-   */
+     * @minLength 1
+     * @maxLength 1
+     */
   gender: string;
   /** @nullable */
   allergies: AllergyDto[] | null;
