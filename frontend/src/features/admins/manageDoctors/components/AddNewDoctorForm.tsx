@@ -4,10 +4,7 @@ import { Eye, EyeOff, Plus, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import {
-  getGetAllQueryKey,
-  useCreateDoctor,
-} from "@/api/generated/doctors/doctors";
+import { getGetAllQueryKey, useCreateDoctor } from "@/api/generated/doctors/doctors";
 import type { CreateDoctorCommand } from "@/api/model/CreateDoctorCommand";
 import { ApiError } from "@/api/ofetch-mutator";
 import { Button } from "@/components/ui/button";
@@ -29,8 +26,6 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-
-const ACCENT = "#0d9488";
 
 const addDoctorSchema = z.object({
   firstName: z.string().min(1, "Required"),
@@ -152,14 +147,11 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl gap-0 overflow-hidden p-0">
-        <div className="absolute inset-x-0 top-0 h-1" style={{ background: ACCENT }} />
+        <div className="absolute inset-x-0 top-0 h-px bg-border" />
 
         <DialogHeader className="px-6 pb-4 pt-7">
           <div className="flex items-start gap-4">
-            <div
-              className="flex size-14 shrink-0 items-center justify-center rounded-full text-lg font-bold text-white"
-              style={{ background: ACCENT }}
-            >
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-muted text-lg font-bold text-foreground">
               <Plus className="size-6" />
             </div>
             <div className="min-w-0 flex-1">
@@ -644,7 +636,7 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                 <Button
                   type="submit"
                   disabled={!canSubmit || isSubmitting || isPending}
-                  style={{ background: ACCENT }}
+                  className="bg-black text-white hover:bg-black/85"
                 >
                   {isSubmitting || isPending ? "Adding…" : "Add Doctor"}
                 </Button>
