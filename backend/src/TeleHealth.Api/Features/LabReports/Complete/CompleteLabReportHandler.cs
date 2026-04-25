@@ -41,8 +41,8 @@ public class CompleteLabReportHandler(ApplicationDbContext db, IPublishEndpoint 
             SystemClock.Instance.GetCurrentInstant()
         );
 
-        await db.SaveChangesAsync(ct);
         await publishEndpoint.Publish(completedEvent, ct);
+        await db.SaveChangesAsync(ct);
 
         Log.Information("LabReport {Slug} marked as completed. MassTransit event queued.", slug);
     }
