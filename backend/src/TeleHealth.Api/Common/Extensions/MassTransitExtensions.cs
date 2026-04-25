@@ -2,6 +2,7 @@ using MassTransit;
 using NodaTime;
 using NodaTime.Serialization.SystemTextJson;
 using TeleHealth.Api.Infrastructure.Persistence;
+using TeleHealth.Contracts;
 
 namespace TeleHealth.Api.Common.Extensions;
 
@@ -38,6 +39,9 @@ public static class MassTransitExtensions
                     cfg.ConfigureJsonSerializerOptions(options =>
                         options.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb)
                     );
+
+                    var topicArn = configuration["AWS_SNS_TOPIC_ARN"]!;
+                    cfg.Message<LabReportCompletedEvent>(x => x.SetEntityName(topicArn));
 
                     cfg.ConfigureEndpoints(ctx);
                 }

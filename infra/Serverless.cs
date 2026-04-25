@@ -91,7 +91,8 @@ public static class Serverless
                 MemorySize = 256,
                 Timeout = 30,
 
-                // Limit concurrency to prevent overwhelming RDS with connections
+                // Removed ReservedConcurrentExecutions — account lacks headroom.
+                // Use RDS Proxy or connection pooling to protect the database instead.
                 ReservedConcurrentExecutions = 5,
 
                 // Dummy deployment package — CI/CD overwrites with the real build.
@@ -127,6 +128,11 @@ public static class Serverless
                 BatchSize = 10,
                 Enabled = true,
                 FunctionResponseTypes = { "ReportBatchItemFailures" },
+            },
+            new CustomResourceOptions
+            {
+                DependsOn = { pdfProcessorLambda },
+                DeleteBeforeReplace = true,
             }
         );
 
