@@ -1,21 +1,10 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import {
-  ChevronLeft,
-  ChevronRight,
-  GraduationCap,
-  Plus,
-  Search,
-  Stethoscope,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, GraduationCap, Plus, Search, Stethoscope } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import {
-  getGetAllQueryKey,
-  useDeleteDoctorById,
-  useGetAll,
-} from "@/api/generated/doctors/doctors";
+import { getGetAllQueryKey, useDeleteDoctorById, useGetAll } from "@/api/generated/doctors/doctors";
 import type { DoctorListDto } from "@/api/model/DoctorListDto";
 import { ApiError } from "@/api/ofetch-mutator";
 import {

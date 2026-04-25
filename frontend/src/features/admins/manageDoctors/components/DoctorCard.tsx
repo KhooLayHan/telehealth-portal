@@ -87,16 +87,18 @@ export function DoctorCard({
           {/* Three-dot menu */}
           <div className="absolute top-3 right-3">
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-8 text-muted-foreground"
-                  aria-label="Doctor options"
-                >
-                  <MoreVertical className="size-4" />
-                </Button>
-              </DropdownMenuTrigger>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 text-muted-foreground"
+                    aria-label="Doctor options"
+                  >
+                    <MoreVertical className="size-4" />
+                  </Button>
+                }
+              />
               <DropdownMenuContent align="end" side="bottom">
                 <DropdownMenuItem onSelect={() => onViewDetails(doctor.publicId)}>
                   <Eye className="mr-2 size-4" />
