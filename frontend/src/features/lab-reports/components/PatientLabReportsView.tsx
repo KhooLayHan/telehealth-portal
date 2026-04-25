@@ -111,7 +111,7 @@ export function PatientLabReportsView({
                       <p className="font-medium">{report.reportType}</p>
                       <p className="text-sm text-muted-foreground">
                         {report.createdAt
-                          ? new Date(report.createdAt as unknown as string).toLocaleDateString()
+                          ? new Date(String(report.createdAt)).toLocaleDateString()
                           : "—"}
                       </p>
                     </div>
