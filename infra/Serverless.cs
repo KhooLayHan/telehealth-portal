@@ -91,8 +91,8 @@ public static class Serverless
                 MemorySize = 256,
                 Timeout = 30,
 
-                // Limit concurrency to prevent overwhelming RDS with connections
-                ReservedConcurrentExecutions = 5,
+                // Removed ReservedConcurrentExecutions — account lacks headroom.
+                // Use RDS Proxy or connection pooling to protect the database instead.
 
                 // Dummy deployment package — CI/CD overwrites with the real build.
                 // This file must exist for Pulumi to create the Lambda resource.
