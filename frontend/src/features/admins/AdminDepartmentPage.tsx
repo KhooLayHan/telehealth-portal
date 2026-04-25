@@ -1,3 +1,5 @@
+import { Plus } from "lucide-react";
+
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -5,6 +7,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
 import { DepartmentsTable } from "@/features/admins/manageDepartments/DepartmentsTable";
 
 // Displays the admin department management page with a header and department table.
@@ -24,11 +27,20 @@ export function AdminDepartmentPage() {
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div className="space-y-1">
-          <h1 className="font-semibold text-3xl tracking-tight">Manage Departments</h1>
-          <p className="text-lg text-muted-foreground">
-            Manage registered departments and staff coverage across the platform.
-          </p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-1">
+            <h1 className="font-semibold text-3xl tracking-tight">Manage Departments</h1>
+            <p className="text-lg text-muted-foreground">
+              Manage registered departments and staff coverage across the platform.
+            </p>
+          </div>
+          <Button
+            type="button"
+            className="h-9 gap-1.5 bg-black text-white hover:bg-black/85 sm:ml-auto"
+          >
+            <Plus className="size-4" />
+            Add New Department
+          </Button>
         </div>
       </header>
 
