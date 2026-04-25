@@ -62,6 +62,15 @@ export function LabTechLabReportsPage() {
     };
   }, [allReports, reportsResult]);
 
+  // Fetch full report history for selected patient
+  const { data: patientReportsData } = useGetAllLabReports({
+    PatientPublicId: selectedPatientId ?? undefined,
+    PageSize: PAGE_SIZE,
+  });
+
+  const patientReports =
+    patientReportsData?.status === 200 ? (patientReportsData.data.items ?? []) : [];
+
   // Fetch patients for upload tab
   const { data: patientsData, isLoading: patientsLoading } = useGetAllPatientsForClinicStaff({
     Search: patientSearch.trim() || undefined,
@@ -78,11 +87,6 @@ export function LabTechLabReportsPage() {
   const selectedPatient = useMemo(() => {
     return patients.find((p) => p.patientPublicId === selectedPatientId) ?? null;
   }, [patients, selectedPatientId]);
-
-  // Find reports for selected patient
-  const selectedPatientReports = useMemo(() => {
-    return allReports.filter((r) => r.patientPublicId === selectedPatientId);
-  }, [allReports, selectedPatientId]);
 
   const handleReportSearchChange = (value: string) => {
     setReportSearch(value);
@@ -112,8 +116,7 @@ export function LabTechLabReportsPage() {
           window.open(url, "_blank", "noopener,noreferrer");
         }
       }
-    } catch (error) {
-      console.error("Failed to fetch download URL:", error);
+    } catch {
       toast.error("Unable to open report. Please try again.");
     }
   };
@@ -148,7 +151,7 @@ export function LabTechLabReportsPage() {
     return (
       <PatientLabReportsView
         patient={selectedPatient}
-        reports={selectedPatientReports}
+        reports={patientReports}
         onBack={handleBackToList}
         onUploadNew={handleUploadNew}
         onViewReport={handleViewReport}

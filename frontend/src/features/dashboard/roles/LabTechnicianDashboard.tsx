@@ -31,6 +31,7 @@ const LAB_STATUSES = [
   { slug: "completed", name: "Completed", colorCode: "#10B981" },
   { slug: "rejected", name: "Rejected", colorCode: "#EF4444" },
 ] as const;
+
 function formatDate(iso: unknown): string {
   if (iso == null) return "—";
   const d = new Date(String(iso));
@@ -41,6 +42,7 @@ function formatDate(iso: unknown): string {
     year: "numeric",
   });
 }
+
 const columns: ColumnDef<LabReportDto>[] = [
   {
     accessorKey: "patientFullName",
@@ -124,7 +126,7 @@ function LabOrdersTable() {
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
-  const hasFilters = !!search || !!statusFilter;
+  const hasFilters = !!debouncedSearch || !!statusFilter;
   if (isLoading) {
     return (
       <div className="space-y-2 p-6">
