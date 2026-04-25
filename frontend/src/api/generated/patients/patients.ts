@@ -32,6 +32,10 @@ import type {
 } from '../../model/CancelAppointmentCommand';
 
 import type {
+  ClinicStaffPatientDto
+} from '../../model/ClinicStaffPatientDto';
+
+import type {
   GetAllAppointmentsParams
 } from '../../model/GetAllAppointmentsParams';
 
@@ -78,6 +82,10 @@ import type {
 import type {
   UpdateMedicalRecordCommand
 } from '../../model/UpdateMedicalRecordCommand';
+
+import type {
+  UpdatePatientRecordCommand
+} from '../../model/UpdatePatientRecordCommand';
 
 import { ofetchMutator } from '../../ofetch-mutator';
 
@@ -1199,3 +1207,184 @@ export function useGetAllPatientsForClinicStaff<TData = Awaited<ReturnType<typeo
 
 
 
+export type updatePatientRecordResponse200 = {
+  data: ClinicStaffPatientDto
+  status: 200
+}
+
+export type updatePatientRecordResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type updatePatientRecordResponse422 = {
+  data: ProblemDetails
+  status: 422
+}
+
+export type updatePatientRecordResponseSuccess = (updatePatientRecordResponse200) & {
+  headers: Headers;
+};
+export type updatePatientRecordResponseError = (updatePatientRecordResponse404 | updatePatientRecordResponse422) & {
+  headers: Headers;
+};
+
+export type updatePatientRecordResponse = (updatePatientRecordResponseSuccess | updatePatientRecordResponseError)
+
+export const getUpdatePatientRecordUrl = (patientPublicId: string,) => {
+
+
+
+
+  return `http://localhost:5144/api/v1/patients/${patientPublicId}/record`
+}
+
+export const updatePatientRecord = async (patientPublicId: string,
+    updatePatientRecordCommand: UpdatePatientRecordCommand, options?: RequestInit): Promise<updatePatientRecordResponse> => {
+
+  return ofetchMutator<updatePatientRecordResponse>(getUpdatePatientRecordUrl(patientPublicId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      updatePatientRecordCommand,)
+  }
+);}
+
+
+
+
+export const getUpdatePatientRecordMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePatientRecord>>, TError,{patientPublicId: string;data: UpdatePatientRecordCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof updatePatientRecord>>, TError,{patientPublicId: string;data: UpdatePatientRecordCommand}, TContext> => {
+
+const mutationKey = ['updatePatientRecord'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updatePatientRecord>>, {patientPublicId: string;data: UpdatePatientRecordCommand}> = (props) => {
+          const {patientPublicId,data} = props ?? {};
+
+          return  updatePatientRecord(patientPublicId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdatePatientRecordMutationResult = NonNullable<Awaited<ReturnType<typeof updatePatientRecord>>>
+    export type UpdatePatientRecordMutationBody = UpdatePatientRecordCommand
+    export type UpdatePatientRecordMutationError = ProblemDetails
+
+    export const useUpdatePatientRecord = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePatientRecord>>, TError,{patientPublicId: string;data: UpdatePatientRecordCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updatePatientRecord>>,
+        TError,
+        {patientPublicId: string;data: UpdatePatientRecordCommand},
+        TContext
+      > => {
+      return useMutation(getUpdatePatientRecordMutationOptions(options), queryClient);
+    }
+    export type softDeleteByIdResponse204 = {
+  data: void
+  status: 204
+}
+
+export type softDeleteByIdResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type softDeleteByIdResponse403 = {
+  data: ProblemDetails
+  status: 403
+}
+
+export type softDeleteByIdResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type softDeleteByIdResponseSuccess = (softDeleteByIdResponse204) & {
+  headers: Headers;
+};
+export type softDeleteByIdResponseError = (softDeleteByIdResponse401 | softDeleteByIdResponse403 | softDeleteByIdResponse404) & {
+  headers: Headers;
+};
+
+export type softDeleteByIdResponse = (softDeleteByIdResponseSuccess | softDeleteByIdResponseError)
+
+export const getSoftDeleteByIdUrl = (patientPublicId: string,) => {
+
+
+
+
+  return `http://localhost:5144/api/v1/patients/${patientPublicId}/deactivate`
+}
+
+export const softDeleteById = async (patientPublicId: string, options?: RequestInit): Promise<softDeleteByIdResponse> => {
+
+  return ofetchMutator<softDeleteByIdResponse>(getSoftDeleteByIdUrl(patientPublicId),
+  {
+    ...options,
+    method: 'PATCH'
+
+
+  }
+);}
+
+
+
+
+export const getSoftDeleteByIdMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof softDeleteById>>, TError,{patientPublicId: string}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof softDeleteById>>, TError,{patientPublicId: string}, TContext> => {
+
+const mutationKey = ['softDeleteById'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof softDeleteById>>, {patientPublicId: string}> = (props) => {
+          const {patientPublicId} = props ?? {};
+
+          return  softDeleteById(patientPublicId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SoftDeleteByIdMutationResult = NonNullable<Awaited<ReturnType<typeof softDeleteById>>>
+
+    export type SoftDeleteByIdMutationError = ProblemDetails
+
+    export const useSoftDeleteById = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof softDeleteById>>, TError,{patientPublicId: string}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof softDeleteById>>,
+        TError,
+        {patientPublicId: string},
+        TContext
+      > => {
+      return useMutation(getSoftDeleteByIdMutationOptions(options), queryClient);
+    }

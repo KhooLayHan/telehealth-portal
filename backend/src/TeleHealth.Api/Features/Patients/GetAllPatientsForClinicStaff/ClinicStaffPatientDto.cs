@@ -18,7 +18,8 @@ public sealed record ClinicStaffPatientDto(
     string BloodGroup,
     char Gender,
     List<AllergyDto>? Allergies,
-    EmergencyContactDto? EmergencyContact
+    EmergencyContactDto? EmergencyContact,
+    Instant JoinedAt
 )
 {
     public static ClinicStaffPatientDto FromEntity(Patient p) =>
@@ -35,6 +36,7 @@ public sealed record ClinicStaffPatientDto(
             p.Allergies?.Select(a => new AllergyDto(a.Allergen, a.Severity, a.Reaction)).ToList(),
             p.EmergencyContact is { } ec
                 ? new EmergencyContactDto(ec.Name, ec.Relationship, ec.Phone)
-                : null
+                : null,
+            p.User.CreatedAt
         );
 }

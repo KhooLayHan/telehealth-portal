@@ -17,7 +17,13 @@ public sealed class ClinicStaffGetAllPatientsHandler(ApplicationDbContext db)
         var page = Math.Max(query.Page, 1);
         var pageSize = Math.Clamp(query.PageSize, 1, MaxPageSize);
 
-        IQueryable<Patient> q = db.Patients.AsNoTracking().Include(p => p.User);
+        // Explicitly filter soft-deleted users: EF Core optimises away the Include JOIN
+        // when executing CountAsync, so the User's global query filter would not be applied
+        // to the count — this WHERE forces the JOIN for both count and data queries.
+        IQueryable<Patient> q = db
+            .Patients.AsNoTracking()
+            .Include(p => p.User)
+            .Where(p => p.User.DeletedAt == null);
 
         if (!string.IsNullOrWhiteSpace(query.Search))
         {

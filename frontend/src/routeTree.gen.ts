@@ -20,6 +20,7 @@ import { Route as ProtectedLabReportsRouteImport } from './routes/_protected/lab
 import { Route as ProtectedDoctorsRouteImport } from './routes/_protected/doctors'
 import { Route as ProtectedDashboardRouteImport } from './routes/_protected/dashboard'
 import { Route as ProtectedAppointmentsRouteImport } from './routes/_protected/appointments_'
+import { Route as ProtectedAdminPatientsRouteImport } from './routes/_protected/admin-patients'
 import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as ProtectedPatientsIdRouteImport } from './routes/_protected/patients.$id'
@@ -82,6 +83,11 @@ const ProtectedAppointmentsRoute = ProtectedAppointmentsRouteImport.update({
   path: '/appointments',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ProtectedAdminPatientsRoute = ProtectedAdminPatientsRouteImport.update({
+  id: '/admin-patients',
+  path: '/admin-patients',
+  getParentRoute: () => ProtectedRoute,
+} as any)
 const AuthRegisterRoute = AuthRegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -131,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
+  '/admin-patients': typeof ProtectedAdminPatientsRoute
   '/appointments': typeof ProtectedAppointmentsRoute
   '/dashboard': typeof ProtectedDashboardRoute
   '/doctors': typeof ProtectedDoctorsRoute
@@ -150,6 +157,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
+  '/admin-patients': typeof ProtectedAdminPatientsRoute
   '/appointments': typeof ProtectedAppointmentsRoute
   '/dashboard': typeof ProtectedDashboardRoute
   '/doctors': typeof ProtectedDoctorsRoute
@@ -172,6 +180,7 @@ export interface FileRoutesById {
   '/_protected': typeof ProtectedRouteWithChildren
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/register': typeof AuthRegisterRoute
+  '/_protected/admin-patients': typeof ProtectedAdminPatientsRoute
   '/_protected/appointments_': typeof ProtectedAppointmentsRoute
   '/_protected/dashboard': typeof ProtectedDashboardRoute
   '/_protected/doctors': typeof ProtectedDoctorsRoute
@@ -193,6 +202,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/register'
+    | '/admin-patients'
     | '/appointments'
     | '/dashboard'
     | '/doctors'
@@ -212,6 +222,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/register'
+    | '/admin-patients'
     | '/appointments'
     | '/dashboard'
     | '/doctors'
@@ -233,6 +244,7 @@ export interface FileRouteTypes {
     | '/_protected'
     | '/_auth/login'
     | '/_auth/register'
+    | '/_protected/admin-patients'
     | '/_protected/appointments_'
     | '/_protected/dashboard'
     | '/_protected/doctors'
@@ -334,6 +346,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedAppointmentsRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/admin-patients': {
+      id: '/_protected/admin-patients'
+      path: '/admin-patients'
+      fullPath: '/admin-patients'
+      preLoaderRoute: typeof ProtectedAdminPatientsRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
     '/_auth/register': {
       id: '/_auth/register'
       path: '/register'
@@ -420,6 +439,7 @@ const ProtectedPatientsIdRouteWithChildren =
   ProtectedPatientsIdRoute._addFileChildren(ProtectedPatientsIdRouteChildren)
 
 interface ProtectedRouteChildren {
+  ProtectedAdminPatientsRoute: typeof ProtectedAdminPatientsRoute
   ProtectedAppointmentsRoute: typeof ProtectedAppointmentsRoute
   ProtectedDashboardRoute: typeof ProtectedDashboardRoute
   ProtectedDoctorsRoute: typeof ProtectedDoctorsRoute
@@ -435,6 +455,7 @@ interface ProtectedRouteChildren {
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
+  ProtectedAdminPatientsRoute: ProtectedAdminPatientsRoute,
   ProtectedAppointmentsRoute: ProtectedAppointmentsRoute,
   ProtectedDashboardRoute: ProtectedDashboardRoute,
   ProtectedDoctorsRoute: ProtectedDoctorsRoute,
