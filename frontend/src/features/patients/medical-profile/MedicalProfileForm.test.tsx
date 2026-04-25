@@ -104,9 +104,9 @@ describe("PatientMedicalProfileForm", () => {
     });
 
     render(<PatientMedicalProfileForm />);
-    expect(screen.getByDisplayValue("Alice")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("Smith")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("alice@example.com")).toBeInTheDocument();
+    expect(screen.getByText(/Alice/)).toBeInTheDocument();
+    expect(screen.getByText(/Smith/)).toBeInTheDocument();
+    expect(screen.getByText("alice@example.com")).toBeInTheDocument();
   });
 
   it("renders error state when response status is not 200", () => {

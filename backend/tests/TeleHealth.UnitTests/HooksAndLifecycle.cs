@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 
 [assembly: ExcludeFromCodeCoverage]
 
-namespace Telehealth.UnitTests;
+namespace TeleHealth.UnitTests;
 
 public class GlobalHooks
 {

@@ -7,7 +7,6 @@ export default defineConfig({
     },
     output: {
       baseUrl: "/api/v1",
-      biome: true,
       clean: true,
       client: "react-query",
       httpClient: "fetch",

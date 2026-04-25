@@ -1,4 +1,4 @@
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, ShieldAlert, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,9 @@ export function EmergencyContactForm({ form }: EmergencyContactFormProps) {
       {(field) => (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-sm">Emergency Contact</h3>
+            <h3 className="flex items-center gap-1.5 font-semibold text-sm">
+              <ShieldAlert className="size-4 text-primary" /> Emergency Contact
+            </h3>
             {field.state.value === null ? (
               <Button
                 type="button"
@@ -35,7 +37,11 @@ export function EmergencyContactForm({ form }: EmergencyContactFormProps) {
           </div>
 
           {field.state.value === null ? (
-            <p className="text-sm text-muted-foreground italic">No emergency contact on record.</p>
+            <div className="rounded-lg border border-dashed border-border bg-muted/20 px-4 py-3">
+              <p className="text-sm text-muted-foreground italic">
+                No emergency contact on record.
+              </p>
+            </div>
           ) : (
             <div className="grid gap-3 sm:grid-cols-3">
               <form.Field name="emergencyContact.name">

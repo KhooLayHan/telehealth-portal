@@ -1,6 +1,6 @@
 using TUnit.Core.Interfaces;
 
-namespace Telehealth.UnitTests;
+namespace TeleHealth.UnitTests;
 
 public class InMemoryDb : IAsyncInitializer, IAsyncDisposable
 {
@@ -29,6 +29,7 @@ public class InMemoryDb : IAsyncInitializer, IAsyncDisposable
     {
         // Simulate async teardown - e.g. closing connections, removing containers
         _store.Clear();
+        GC.SuppressFinalize(this);
         return ValueTask.CompletedTask;
     }
 }
