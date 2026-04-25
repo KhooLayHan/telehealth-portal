@@ -6,7 +6,6 @@
  */
 import type { AllergyDto } from "./AllergyDto";
 import type { EmergencyContactDto } from "./EmergencyContactDto";
-import type { Instant } from "./Instant";
 import type { LocalDate } from "./LocalDate";
 
 export interface ClinicStaffPatientDto {
