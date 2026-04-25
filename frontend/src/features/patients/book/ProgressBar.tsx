@@ -35,7 +35,7 @@ export function ProgressBar({ step }: { step: WizardStep }) {
 
               {idx < STEPS.length - 1 && (
                 <div
-                  className={`mx-3 mt-[-12px] h-0.5 flex-1 rounded-full transition-colors ${
+                  className={`mx-3 -mt-3 h-0.5 flex-1 rounded-full transition-colors ${
                     step > s.number ? "bg-primary" : "bg-muted"
                   }`}
                 />

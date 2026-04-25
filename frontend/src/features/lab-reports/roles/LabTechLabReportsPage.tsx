@@ -8,13 +8,10 @@ import type { LabReportDto } from "@/api/model/LabReportDto";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import logger from "../../../../logger.ts";
 import { LabReportsStats } from "../components/LabReportsStats";
 import { LabReportsTable } from "../components/LabReportsTable";
 import { PatientLabReportsView } from "../components/PatientLabReportsView";
 import { LabReportUploadWizard } from "../LabReportUploadWizard";
-
-logger.info("Hello, world!");
 
 const PAGE_SIZE = 15;
 const REPORT_PAGE_SIZE = 10;

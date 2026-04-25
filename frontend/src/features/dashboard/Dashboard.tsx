@@ -33,7 +33,14 @@ export function Dashboard() {
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="font-semibold text-2xl">Good morning, {user?.firstName ?? "User"}</h1>
+            <h1 className="font-semibold text-2xl">
+              {(() => {
+                const h = new Date().getHours();
+                const greeting =
+                  h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
+                return `${greeting}, ${user?.firstName ?? "User"}`;
+              })()}
+            </h1>
             <p className="mt-0.5 text-muted-foreground text-sm">
               Here's what's happening at the clinic today.
             </p>

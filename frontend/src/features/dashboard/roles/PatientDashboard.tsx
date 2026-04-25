@@ -43,7 +43,7 @@ export function PatientDashboard() {
       icon: Calendar,
       iconBg: "bg-teal-100 dark:bg-teal-900/30",
       iconColor: "text-teal-600 dark:text-teal-400",
-      onClick: () => navigate({ to: "/appointments" }),
+      onClick: () => navigate({ to: "/appointments", search: { today: true } }),
     },
     {
       title: "Completed Visits",
@@ -52,7 +52,7 @@ export function PatientDashboard() {
       icon: CheckCircle2,
       iconBg: "bg-green-100 dark:bg-green-900/30",
       iconColor: "text-green-600 dark:text-green-400",
-      onClick: () => navigate({ to: "/appointments" }),
+      onClick: () => navigate({ to: "/appointments", search: { today: true } }),
     },
     {
       title: "Lab Reports",
@@ -70,7 +70,7 @@ export function PatientDashboard() {
       icon: Clock,
       iconBg: "bg-purple-100 dark:bg-purple-900/30",
       iconColor: "text-purple-600 dark:text-purple-400",
-      onClick: () => navigate({ to: "/appointments" }),
+      onClick: () => navigate({ to: "/appointments", search: { today: true } }),
     },
   ];
 
@@ -108,7 +108,11 @@ export function PatientDashboard() {
               Your upcoming schedule at a glance
             </p>
           </div>
-          <Button size="sm" variant="outline" onClick={() => navigate({ to: "/appointments" })}>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => navigate({ to: "/appointments", search: { today: true } })}
+          >
             View all
           </Button>
         </div>

@@ -33,7 +33,9 @@ function BookAppointmentRouteComponent() {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink render={<Link to="/appointments" />}>Appointments</BreadcrumbLink>
+              <BreadcrumbLink render={<Link to="/appointments" search={{ today: true }} />}>
+                Appointments
+              </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>

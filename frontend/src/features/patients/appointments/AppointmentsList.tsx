@@ -32,18 +32,20 @@ export function PatientAppointmentsList() {
 
         <div className="flex items-center gap-3">
           <Tabs value={view} onValueChange={handleViewChange}>
-            <TabsList className="grid w-[200px] grid-cols-2">
+            <TabsList className="grid w-50 grid-cols-2">
               <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
               <TabsTrigger value="past">Past</TabsTrigger>
             </TabsList>
           </Tabs>
 
-          <Button asChild>
-            <Link to="/appointments/book">
-              <Plus className="mr-2 size-4" />
-              Book New Appointment
-            </Link>
-          </Button>
+          <Button
+            render={
+              <Link to="/appointments/book">
+                <Plus className="mr-2 size-4" />
+                Book New Appointment
+              </Link>
+            }
+          />
         </div>
       </CardHeader>
 
