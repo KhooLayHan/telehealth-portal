@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   Bell,
+  Building2,
   Calendar,
   ClipboardList,
   FileText,
@@ -62,6 +63,12 @@ const navItems = [
     icon: UserCog,
     label: "Doctor List",
     href: "/doctors",
+    allowedRoles: ["admin"],
+  },
+  {
+    icon: Building2,
+    label: "Departments",
+    href: "/departments",
     allowedRoles: ["admin"],
   },
   {
