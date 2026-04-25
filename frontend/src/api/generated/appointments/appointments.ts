@@ -108,7 +108,7 @@ export const getCreateAppointmentUrl = () => {
 
 
 
-  return `http://localhost:5144/api/v1/appointments`
+  return `/api/v1/api/v1/appointments`
 }
 
 export const createAppointment = async (bookAppointmentCommand: BookAppointmentCommand, options?: RequestInit): Promise<createAppointmentResponse> => {
@@ -198,7 +198,7 @@ export const getGetAllAppointmentsForReceptionistUrl = (params?: GetAllAppointme
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `http://localhost:5144/api/v1/appointments?${stringifiedParams}` : `http://localhost:5144/api/v1/appointments`
+  return stringifiedParams.length > 0 ? `/api/v1/api/v1/appointments?${stringifiedParams}` : `/api/v1/api/v1/appointments`
 }
 
 export const getAllAppointmentsForReceptionist = async (params?: GetAllAppointmentsForReceptionistParams, options?: RequestInit): Promise<getAllAppointmentsForReceptionistResponse> => {
@@ -218,7 +218,7 @@ export const getAllAppointmentsForReceptionist = async (params?: GetAllAppointme
 
 export const getGetAllAppointmentsForReceptionistQueryKey = (params?: GetAllAppointmentsForReceptionistParams,) => {
     return [
-    `http://localhost:5144/api/v1/appointments`, ...(params ? [params] : [])
+    `/api/v1/api/v1/appointments`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -316,7 +316,7 @@ export const getGetAppointmentByIdForReceptionistUrl = (id: string,) => {
 
 
 
-  return `http://localhost:5144/api/v1/appointments/${id}`
+  return `/api/v1/api/v1/appointments/${id}`
 }
 
 export const getAppointmentByIdForReceptionist = async (id: string, options?: RequestInit): Promise<getAppointmentByIdForReceptionistResponse> => {
@@ -336,7 +336,7 @@ export const getAppointmentByIdForReceptionist = async (id: string, options?: Re
 
 export const getGetAppointmentByIdForReceptionistQueryKey = (id: string,) => {
     return [
-    `http://localhost:5144/api/v1/appointments/${id}`
+    `/api/v1/api/v1/appointments/${id}`
     ] as const;
     }
 
@@ -449,7 +449,7 @@ export const getUpdateByIdUrl = (id: string,) => {
 
 
 
-  return `http://localhost:5144/api/v1/appointments/${id}`
+  return `/api/v1/api/v1/appointments/${id}`
 }
 
 export const updateById = async (id: string,
@@ -533,7 +533,7 @@ export const getGetAllStatusesUrl = () => {
 
 
 
-  return `http://localhost:5144/api/v1/appointments/statuses`
+  return `/api/v1/api/v1/appointments/statuses`
 }
 
 export const getAllStatuses = async ( options?: RequestInit): Promise<getAllStatusesResponse> => {
@@ -553,7 +553,7 @@ export const getAllStatuses = async ( options?: RequestInit): Promise<getAllStat
 
 export const getGetAllStatusesQueryKey = () => {
     return [
-    `http://localhost:5144/api/v1/appointments/statuses`
+    `/api/v1/api/v1/appointments/statuses`
     ] as const;
     }
 
@@ -651,7 +651,7 @@ export const getGetAppointmentByIdForDoctorUrl = (id: string,) => {
 
 
 
-  return `http://localhost:5144/api/v1/appointments/${id}/doctor`
+  return `/api/v1/api/v1/appointments/${id}/doctor`
 }
 
 export const getAppointmentByIdForDoctor = async (id: string, options?: RequestInit): Promise<getAppointmentByIdForDoctorResponse> => {
@@ -671,7 +671,7 @@ export const getAppointmentByIdForDoctor = async (id: string, options?: RequestI
 
 export const getGetAppointmentByIdForDoctorQueryKey = (id: string,) => {
     return [
-    `http://localhost:5144/api/v1/appointments/${id}/doctor`
+    `/api/v1/api/v1/appointments/${id}/doctor`
     ] as const;
     }
 
@@ -774,7 +774,7 @@ export const getSubmitConsultationUrl = (id: string,) => {
 
 
 
-  return `http://localhost:5144/api/v1/appointments/${id}/consultation`
+  return `/api/v1/api/v1/appointments/${id}/consultation`
 }
 
 export const submitConsultation = async (id: string,

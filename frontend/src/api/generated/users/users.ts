@@ -67,7 +67,7 @@ export const getCreateUserUrl = () => {
 
 
 
-  return `http://localhost:5144/api/v1/patients`
+  return `/api/v1/api/v1/patients`
 }
 
 export const createUser = async (createUserCommand: CreateUserCommand, options?: RequestInit): Promise<createUserResponse> => {
@@ -143,7 +143,7 @@ export const getGetMeUrl = () => {
 
 
 
-  return `http://localhost:5144/api/v1/me`
+  return `/api/v1/api/v1/me`
 }
 
 export const getMe = async ( options?: RequestInit): Promise<getMeResponse> => {
@@ -163,7 +163,7 @@ export const getMe = async ( options?: RequestInit): Promise<getMeResponse> => {
 
 export const getGetMeQueryKey = () => {
     return [
-    `http://localhost:5144/api/v1/me`
+    `/api/v1/api/v1/me`
     ] as const;
     }
 

@@ -90,7 +90,7 @@ export const getAdminGetAllReceptionistsUrl = (params?: AdminGetAllReceptionists
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `http://localhost:5144/api/v1/admins/receptionists?${stringifiedParams}` : `http://localhost:5144/api/v1/admins/receptionists`
+  return stringifiedParams.length > 0 ? `/api/v1/api/v1/admins/receptionists?${stringifiedParams}` : `/api/v1/api/v1/admins/receptionists`
 }
 
 export const adminGetAllReceptionists = async (params?: AdminGetAllReceptionistsParams, options?: RequestInit): Promise<adminGetAllReceptionistsResponse> => {
@@ -110,7 +110,7 @@ export const adminGetAllReceptionists = async (params?: AdminGetAllReceptionists
 
 export const getAdminGetAllReceptionistsQueryKey = (params?: AdminGetAllReceptionistsParams,) => {
     return [
-    `http://localhost:5144/api/v1/admins/receptionists`, ...(params ? [params] : [])
+    `/api/v1/api/v1/admins/receptionists`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -223,7 +223,7 @@ export const getAdminCreateReceptionistUrl = () => {
 
 
 
-  return `http://localhost:5144/api/v1/admins/receptionists`
+  return `/api/v1/api/v1/admins/receptionists`
 }
 
 export const adminCreateReceptionist = async (adminCreateReceptionistCommand: AdminCreateReceptionistCommand, options?: RequestInit): Promise<adminCreateReceptionistResponse> => {
@@ -321,7 +321,7 @@ export const getAdminUpdateReceptionistUrl = (id: string,) => {
 
 
 
-  return `http://localhost:5144/api/v1/admins/receptionists/${id}`
+  return `/api/v1/api/v1/admins/receptionists/${id}`
 }
 
 export const adminUpdateReceptionist = async (id: string,
@@ -381,8 +381,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getAdminUpdateReceptionistMutationOptions(options), queryClient);
     }
-
-export type adminDeactivateReceptionistResponse204 = {
+    export type adminDeactivateReceptionistResponse204 = {
   data: void
   status: 204
 }
@@ -411,16 +410,27 @@ export type adminDeactivateReceptionistResponseError = (adminDeactivateReception
 
 export type adminDeactivateReceptionistResponse = (adminDeactivateReceptionistResponseSuccess | adminDeactivateReceptionistResponseError)
 
-export const getAdminDeactivateReceptionistUrl = (id: string) => {
-  return `http://localhost:5144/api/v1/admins/receptionists/${id}/deactivate`
+export const getAdminDeactivateReceptionistUrl = (id: string,) => {
+
+
+
+
+  return `/api/v1/api/v1/admins/receptionists/${id}/deactivate`
 }
 
 export const adminDeactivateReceptionist = async (id: string, options?: RequestInit): Promise<adminDeactivateReceptionistResponse> => {
-  return ofetchMutator<adminDeactivateReceptionistResponse>(getAdminDeactivateReceptionistUrl(id), {
+
+  return ofetchMutator<adminDeactivateReceptionistResponse>(getAdminDeactivateReceptionistUrl(id),
+  {
     ...options,
-    method: 'PATCH',
-  });
-}
+    method: 'PATCH'
+
+
+  }
+);}
+
+
+
 
 export const getAdminDeactivateReceptionistMutationOptions = <TError = ProblemDetails,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDeactivateReceptionist>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
@@ -433,15 +443,24 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       : {...options, mutation: {...options.mutation, mutationKey}}
       : {mutation: { mutationKey, }, request: undefined};
 
+
+
+
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminDeactivateReceptionist>>, {id: string}> = (props) => {
           const {id} = props ?? {};
 
-          return adminDeactivateReceptionist(id, requestOptions)
+          return  adminDeactivateReceptionist(id,requestOptions)
         }
+
+
+
+
+
 
   return  { mutationFn, ...mutationOptions }}
 
     export type AdminDeactivateReceptionistMutationResult = NonNullable<Awaited<ReturnType<typeof adminDeactivateReceptionist>>>
+
     export type AdminDeactivateReceptionistMutationError = ProblemDetails
 
     export const useAdminDeactivateReceptionist = <TError = ProblemDetails,
