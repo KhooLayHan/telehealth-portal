@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -14,9 +15,11 @@ using TeleHealth.Api.Infrastructure.Persistence;
 namespace TeleHealth.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260419091419_FixAddressJsonPropertyNames")]
+    partial class FixAddressJsonPropertyNames
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1597,28 +1600,23 @@ namespace TeleHealth.Api.Migrations
                         {
                             b1.Property<string>("City")
                                 .IsRequired()
-                                .HasMaxLength(50)
-                                .HasJsonPropertyName("city");
+                                .HasMaxLength(50);
 
                             b1.Property<string>("Country")
                                 .IsRequired()
-                                .HasMaxLength(50)
-                                .HasJsonPropertyName("country");
+                                .HasMaxLength(50);
 
                             b1.Property<string>("PostalCode")
                                 .IsRequired()
-                                .HasMaxLength(50)
-                                .HasJsonPropertyName("postal_code");
+                                .HasMaxLength(50);
 
                             b1.Property<string>("State")
                                 .IsRequired()
-                                .HasMaxLength(50)
-                                .HasJsonPropertyName("state");
+                                .HasMaxLength(50);
 
                             b1.Property<string>("Street")
                                 .IsRequired()
-                                .HasMaxLength(100)
-                                .HasJsonPropertyName("street");
+                                .HasMaxLength(100);
 
                             b1
                                 .ToJson("address")

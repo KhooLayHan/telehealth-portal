@@ -45,6 +45,10 @@ public static class ApiEndpoints
         public const string GetAllPatientsForReceptionist = Base;
 
         public const string GetAllPatientsForClinicStaff = $"{Base}/staff";
+
+        public const string UpdatePatientRecord = $"{Base}/{{patientPublicId:guid}}/record";
+
+        public const string SoftDeleteById = $"{Base}/{{patientPublicId:guid}}/deactivate";
     }
 
     public static class Appointments
@@ -120,5 +124,18 @@ public static class ApiEndpoints
         public const string GetBySlug = $"{Base}/{{slug}}/download";
 
         public const string UpdateBySlug = $"{Base}/{{slug}}/complete";
+    }
+
+    public static class Admins
+    {
+        private const string Base = "admins";
+
+        public const string GetAllReceptionists = $"{Base}/receptionists";
+
+        public const string CreateReceptionist = $"{Base}/receptionists";
+
+        public const string UpdateReceptionist = $"{Base}/receptionists/{{id:guid}}";
+
+        public const string DeleteReceptionist = $"{Base}/receptionists/{{id:guid}}/deactivate";
     }
 }

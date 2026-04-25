@@ -1,8 +1,8 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { AdminReceptionistsPage } from "@/features/admins/AdminReceptionistsPage";
+import { AdminPatientsPage } from "@/features/admins/AdminPatientsPage";
 import { useAuthStore } from "@/store/useAuthStore";
 
-export const Route = createFileRoute("/_protected/receptionists")({
+export const Route = createFileRoute("/_protected/admin-patients")({
   beforeLoad: () => {
     const user = useAuthStore.getState().user;
     const role = user?.role?.toLowerCase();
@@ -11,5 +11,5 @@ export const Route = createFileRoute("/_protected/receptionists")({
       throw redirect({ to: "/dashboard" });
     }
   },
-  component: AdminReceptionistsPage,
+  component: AdminPatientsPage,
 });

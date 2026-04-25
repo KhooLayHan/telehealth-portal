@@ -8,6 +8,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { useAuthStore } from "@/store/useAuthStore";
+import { AdminPatientsPage } from "../admins/AdminPatientsPage";
 import { ReceptionistPatientsPage } from "./roles/ReceptionistPatientsPage";
 
 export function PatientsListingPage() {
@@ -22,7 +23,7 @@ export function PatientsListingPage() {
       case "doctor":
         return "";
       case "admin":
-        return "Do something";
+        return <AdminPatientsPage />;
       case "lab-tech":
         return "Do something";
       default:
