@@ -130,6 +130,8 @@ public static class ApiEndpoints
     {
         private const string Base = "admins";
 
+        public const string GetAllDepartments = $"{Base}/departments";
+
         public const string GetAllReceptionists = $"{Base}/receptionists";
 
         public const string CreateReceptionist = $"{Base}/receptionists";

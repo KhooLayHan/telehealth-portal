@@ -1,4 +1,7 @@
 import { Pencil, Trash2 } from "lucide-react";
+import { useMemo } from "react";
+import { useAdminGetAllDepartments } from "@/api/generated/admins/admins";
+import type { AdminDepartmentDto } from "@/api/model/AdminDepartmentDto";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -17,47 +20,30 @@ export interface DepartmentTableRow {
   staffMembers: number;
 }
 
-// Props for the department table while the feature is still frontend-only.
+// Props for department table row actions.
 interface DepartmentsTableProps {
-  departments?: DepartmentTableRow[];
   onEditDepartment?: (department: DepartmentTableRow) => void;
   onDeleteDepartment?: (department: DepartmentTableRow) => void;
 }
 
-// Local placeholder departments used until the backend endpoint is connected.
-const sampleDepartments: DepartmentTableRow[] = [
-  {
-    id: "cardiology",
-    name: "Cardiology",
-    description: "Heart care, diagnostics, and long-term cardiac treatment plans.",
-    staffMembers: 18,
-  },
-  {
-    id: "dermatology",
-    name: "Dermatology",
-    description: "Skin, hair, and nail consultation services for patients.",
-    staffMembers: 9,
-  },
-  {
-    id: "pediatrics",
-    name: "Pediatrics",
-    description: "Primary care and specialist support for children and adolescents.",
-    staffMembers: 14,
-  },
-  {
-    id: "radiology",
-    name: "Radiology",
-    description: "Medical imaging review, reporting, and diagnostic support.",
-    staffMembers: 7,
-  },
-];
+// Converts the API department response into the row shape used by the table.
+function toDepartmentTableRow(department: AdminDepartmentDto): DepartmentTableRow {
+  return {
+    id: department.slug,
+    name: department.name,
+    description: department.description ?? "No description provided.",
+    staffMembers: Number(department.staffMembers ?? 0),
+  };
+}
 
-// Displays the admin-facing departments table with local placeholder data.
-export function DepartmentsTable({
-  departments = sampleDepartments,
-  onEditDepartment,
-  onDeleteDepartment,
-}: DepartmentsTableProps) {
+// Displays the admin-facing departments table with backend data.
+export function DepartmentsTable({ onEditDepartment, onDeleteDepartment }: DepartmentsTableProps) {
+  const { data, isError, isLoading } = useAdminGetAllDepartments();
+  const departments = useMemo(
+    () => (data?.status === 200 ? data.data.map(toDepartmentTableRow) : []),
+    [data],
+  );
+
   return (
     <div className="overflow-hidden rounded-lg border border-border">
       <Table>
@@ -122,10 +108,20 @@ export function DepartmentsTable({
           ) : (
             <TableRow>
               <TableCell colSpan={4} className="h-32 text-center">
-                <p className="text-sm text-muted-foreground">No departments found.</p>
-                <p className="mt-1 text-xs text-muted-foreground/60">
-                  Add a department to start tracking staff coverage.
-                </p>
+                {isError ? (
+                  <p className="text-sm text-destructive">Failed to load departments.</p>
+                ) : (
+                  <>
+                    <p className="text-sm text-muted-foreground">
+                      {isLoading ? "Loading departments..." : "No departments found."}
+                    </p>
+                    {!isLoading && (
+                      <p className="mt-1 text-xs text-muted-foreground/60">
+                        Add a department to start tracking staff coverage.
+                      </p>
+                    )}
+                  </>
+                )}
               </TableCell>
             </TableRow>
           )}

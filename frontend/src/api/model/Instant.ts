@@ -5,4 +5,4 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type Instant = {};
+export type Instant = Record<string, never>;
