@@ -18,7 +18,7 @@ return await Deployment.RunAsync(() =>
     // Stack outputs — used by GitHub Actions CD workflow
     return new Dictionary<string, object?>
     {
-        ["FrontendUrl"] = storage.FrontendBucket.WebsiteEndpoint,
+        ["FrontendUrl"] = storage.FrontendWebsiteConfig.WebsiteEndpoint,
         ["ApiUrl"] = compute.EbEnv.EndpointUrl,
         ["DatabaseEndpoint"] = db.Instance.Endpoint,
         ["DatabaseAddress"] = db.Instance.Address,
