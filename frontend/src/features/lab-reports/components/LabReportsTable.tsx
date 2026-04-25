@@ -77,7 +77,7 @@ export function LabReportsTable({
                   <th className="text-left font-medium p-3">Report Type</th>
                   <th className="text-left font-medium p-3">Status</th>
                   <th className="text-left font-medium p-3">Date</th>
-                  <th className="text-right font-medium p-3">Action</th>
+                  <th className="text-left font-medium p-3">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -90,12 +90,12 @@ export function LabReportsTable({
                         {report.status.name}
                       </Badge>
                     </td>
-                    <td className="p-3 text-muted-foreground">
+                    <td className="font-mono text-xs p-3 text-muted-foreground">
                       {report.createdAt
                         ? new Date(report.createdAt as unknown as string).toLocaleDateString()
                         : "—"}
                     </td>
-                    <td className="p-3 text-right">
+                    <td className="p-3 text-muted-foreground">
                       <Button size="sm" variant="ghost" onClick={() => onViewReport(report)}>
                         <Eye className="size-4 mr-1" aria-hidden="true" />
                         View PDF

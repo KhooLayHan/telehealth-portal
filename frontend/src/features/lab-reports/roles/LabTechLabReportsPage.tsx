@@ -1,4 +1,4 @@
-import { Search, User, X } from "lucide-react";
+import { ChevronLeft, Search, User, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { getBySlug, useGetAllLabReports } from "@/api/generated/lab-reports/lab-reports";
@@ -141,6 +141,7 @@ export function LabTechLabReportsPage() {
       return (
         <div className="space-y-4">
           <Button variant="ghost" onClick={() => setShowWizard(false)}>
+            <ChevronLeft className="size-4 mr-1" aria-hidden="true" />
             Back to Patient
           </Button>
           <LabReportUploadWizard patientPublicId={selectedPatientId} consultationPublicId={null} />
