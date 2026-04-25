@@ -23,7 +23,6 @@ public static class Messaging
             "medical-alerts-topic",
             new Aws.Sns.TopicArgs
             {
-                Name = "telehealth-medical-alerts",
                 KmsMasterKeyId = "alias/aws/sns", // Server-side encryption with AWS-managed key
                 Tags = cfg.Tags,
             }
@@ -34,7 +33,6 @@ public static class Messaging
             "report-processing-dlq",
             new Aws.Sqs.QueueArgs
             {
-                Name = "telehealth-report-processing-dlq",
                 SqsManagedSseEnabled = true,
                 MessageRetentionSeconds = 1_209_600, // 14 days (max) to allow investigation
                 Tags = cfg.Tags,
@@ -45,15 +43,13 @@ public static class Messaging
             "report-processing-queue",
             new Aws.Sqs.QueueArgs
             {
-                Name = "telehealth-report-processing-queue",
                 SqsManagedSseEnabled = true, // Server-side encryption with SQS-managed keys
                 VisibilityTimeoutSeconds = 180,
                 RedrivePolicy = deadLetterQueue.Arn.Apply(dlqArn =>
                     $@"{{""deadLetterTargetArn"":""{dlqArn}"",""maxReceiveCount"":3}}"
                 ),
                 Tags = cfg.Tags,
-            },
-            new CustomResourceOptions { DeleteBeforeReplace = true }
+            }
         );
 
         _ = new Aws.Sns.TopicSubscription(

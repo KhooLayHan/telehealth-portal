@@ -114,27 +114,6 @@ public static class Serverless
             new CustomResourceOptions { IgnoreChanges = { "sourceCodeHash" } }
         );
 
-        // ── SQS event source mapping (triggers Lambda from the processing queue) ──
-        // ReportBatchItemFailures enables partial batch reporting: only failed
-        // messages are retried, not the entire batch. Requires the Lambda handler
-        // to return SQSBatchResponse with failed message IDs.
-        _ = new Aws.Lambda.EventSourceMapping(
-            "sqs-to-lambda-mapping",
-            new Aws.Lambda.EventSourceMappingArgs
-            {
-                EventSourceArn = msg.ProcessingQueue.Arn,
-                FunctionName = pdfProcessorLambda.Arn,
-                BatchSize = 10,
-                Enabled = true,
-                FunctionResponseTypes = { "ReportBatchItemFailures" },
-            },
-            new CustomResourceOptions
-            {
-                DependsOn = { pdfProcessorLambda },
-                DeleteBeforeReplace = true,
-            }
-        );
-
         return new Result { PdfProcessorLambda = pdfProcessorLambda };
     }
 }
