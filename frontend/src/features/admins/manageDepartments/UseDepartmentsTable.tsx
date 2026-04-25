@@ -17,7 +17,7 @@ function toDepartmentTableRow(department: AdminDepartmentDto): DepartmentTableRo
   return {
     id: department.slug,
     name: department.name,
-    description: department.description ?? "No description provided.",
+    description: department.description ?? "",
     staffMembers: Number(department.staffMembers ?? 0),
   };
 }

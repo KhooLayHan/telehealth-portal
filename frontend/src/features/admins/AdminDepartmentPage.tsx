@@ -10,11 +10,40 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { AddNewDepartmentForm } from "@/features/admins/manageDepartments/AddNewDepartmentForm";
-import { DepartmentsTable } from "@/features/admins/manageDepartments/DepartmentsTable";
+import {
+  DepartmentsTable,
+  type DepartmentTableDrafts,
+} from "@/features/admins/manageDepartments/DepartmentsTable";
+import {
+  type EditDepartmentDetails,
+  EditDepartmentForm,
+} from "@/features/admins/manageDepartments/EditDepartmentForm";
+import type { DepartmentTableRow } from "@/features/admins/manageDepartments/UseDepartmentsTable";
 
 // Displays the admin department management page with a header and department table.
 export function AdminDepartmentPage() {
   const [addDepartmentOpen, setAddDepartmentOpen] = useState(false);
+  const [editDepartmentOpen, setEditDepartmentOpen] = useState(false);
+  const [editingDepartment, setEditingDepartment] = useState<DepartmentTableRow | null>(null);
+  const [departmentDrafts, setDepartmentDrafts] = useState<DepartmentTableDrafts>({});
+
+  const handleEditDepartment = (department: DepartmentTableRow) => {
+    setEditingDepartment({
+      ...department,
+      ...departmentDrafts[department.id],
+    });
+    setEditDepartmentOpen(true);
+  };
+
+  const handleSaveDepartment = (department: EditDepartmentDetails) => {
+    setDepartmentDrafts((currentDrafts) => ({
+      ...currentDrafts,
+      [department.id]: {
+        name: department.name,
+        description: department.description,
+      },
+    }));
+  };
 
   return (
     <div className="space-y-6">
@@ -55,8 +84,17 @@ export function AdminDepartmentPage() {
         </div>
       </header>
 
-      <DepartmentsTable />
+      <DepartmentsTable
+        departmentDrafts={departmentDrafts}
+        onEditDepartment={handleEditDepartment}
+      />
       <AddNewDepartmentForm open={addDepartmentOpen} onOpenChange={setAddDepartmentOpen} />
+      <EditDepartmentForm
+        department={editingDepartment}
+        open={editDepartmentOpen}
+        onOpenChange={setEditDepartmentOpen}
+        onSave={handleSaveDepartment}
+      />
     </div>
   );
 }
