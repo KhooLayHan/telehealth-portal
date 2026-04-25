@@ -1,7 +1,15 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, GraduationCap, Plus, Search, Stethoscope } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  GraduationCap,
+  Plus,
+  Search,
+  Stethoscope,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { getGetAllQueryKey, useDeleteDoctorById, useGetAll } from "@/api/generated/doctors/doctors";
@@ -278,13 +286,19 @@ export function AdminDoctorsPage() {
         </Breadcrumb>
         <div className="mt-3 flex items-center justify-between gap-4">
           <h1 className="text-2xl font-bold tracking-tight">Doctor Directory</h1>
-          <Button
-            className="shrink-0 gap-1.5 bg-black text-white hover:bg-black/85"
-            onClick={() => setAddOpen(true)}
-          >
-            <Plus className="size-4" />
-            Add New Doctor
-          </Button>
+          <div className="flex shrink-0 items-center gap-2">
+            <Button variant="outline" className="gap-1.5 bg-white text-black hover:bg-muted">
+              <Download className="size-4" />
+              Export CSV
+            </Button>
+            <Button
+              className="gap-1.5 bg-black text-white hover:bg-black/85"
+              onClick={() => setAddOpen(true)}
+            >
+              <Plus className="size-4" />
+              Add New Doctor
+            </Button>
+          </div>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
           {isLoading
