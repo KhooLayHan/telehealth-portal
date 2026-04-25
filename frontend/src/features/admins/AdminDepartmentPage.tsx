@@ -1,4 +1,5 @@
 import { FileDown, Plus } from "lucide-react";
+import { useState } from "react";
 
 import {
   Breadcrumb,
@@ -8,10 +9,13 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
+import { AddNewDepartmentForm } from "@/features/admins/manageDepartments/AddNewDepartmentForm";
 import { DepartmentsTable } from "@/features/admins/manageDepartments/DepartmentsTable";
 
 // Displays the admin department management page with a header and department table.
 export function AdminDepartmentPage() {
+  const [addDepartmentOpen, setAddDepartmentOpen] = useState(false);
+
   return (
     <div className="space-y-6">
       <header className="space-y-2">
@@ -39,7 +43,11 @@ export function AdminDepartmentPage() {
               <FileDown className="size-4" />
               Export CSV
             </Button>
-            <Button type="button" className="h-9 gap-1.5 bg-black text-white hover:bg-black/85">
+            <Button
+              type="button"
+              className="h-9 gap-1.5 bg-black text-white hover:bg-black/85"
+              onClick={() => setAddDepartmentOpen(true)}
+            >
               <Plus className="size-4" />
               Add New Department
             </Button>
@@ -48,6 +56,7 @@ export function AdminDepartmentPage() {
       </header>
 
       <DepartmentsTable />
+      <AddNewDepartmentForm open={addDepartmentOpen} onOpenChange={setAddDepartmentOpen} />
     </div>
   );
 }
