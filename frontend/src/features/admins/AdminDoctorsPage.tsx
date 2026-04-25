@@ -37,6 +37,64 @@ import { EditDoctorForm } from "./manageDoctors/components/EditDoctorForm";
 
 const ACCENT = "#0d9488";
 const PAGE_SIZE = 10;
+const CSV_FORMULA_PREFIX_PATTERN = /^\s*[=+\-@]/;
+
+// Defines one exported doctor CSV column and how its value is read.
+interface DoctorCsvColumn {
+  header: string;
+  getValue: (doctor: DoctorListDto) => unknown;
+}
+
+// Lists the doctor fields exported by the CSV download.
+const DOCTOR_CSV_COLUMNS: DoctorCsvColumn[] = [
+  { header: "Doctor Public ID", getValue: (doctor) => doctor.doctorPublicId },
+  { header: "First Name", getValue: (doctor) => doctor.firstName },
+  { header: "Last Name", getValue: (doctor) => doctor.lastName },
+  { header: "Username", getValue: (doctor) => doctor.username },
+  { header: "Email", getValue: (doctor) => doctor.email },
+  { header: "Phone Number", getValue: (doctor) => doctor.phoneNumber },
+  { header: "Gender", getValue: (doctor) => doctor.gender },
+  { header: "Date of Birth", getValue: (doctor) => doctor.dateOfBirth },
+  { header: "Specialization", getValue: (doctor) => doctor.specialization },
+  { header: "Department", getValue: (doctor) => doctor.departmentName },
+  { header: "License Number", getValue: (doctor) => doctor.licenseNumber },
+  { header: "Consultation Fee MYR", getValue: (doctor) => doctor.consultationFee },
+  { header: "Slug", getValue: (doctor) => doctor.slug },
+  { header: "Address Street", getValue: (doctor) => doctor.address?.street },
+  { header: "Address City", getValue: (doctor) => doctor.address?.city },
+  { header: "Address State", getValue: (doctor) => doctor.address?.state },
+  { header: "Address Postal Code", getValue: (doctor) => doctor.address?.postalCode },
+  { header: "Address Country", getValue: (doctor) => doctor.address?.country },
+  {
+    header: "Qualifications",
+    getValue: (doctor) =>
+      (doctor.qualifications ?? [])
+        .map((qualification) =>
+          [qualification.degree, qualification.institution, qualification.year]
+            .filter(Boolean)
+            .join(" - "),
+        )
+        .join("; "),
+  },
+  { header: "Bio", getValue: (doctor) => doctor.bio },
+  { header: "Created At", getValue: (doctor) => doctor.createdAt },
+];
+
+// Converts a single value to a safe CSV cell.
+function formatCsvCell(value: unknown): string {
+  const text = value === null || value === undefined ? "" : String(value);
+  const safeText = CSV_FORMULA_PREFIX_PATTERN.test(text) ? `'${text}` : text;
+  return `"${safeText.replaceAll('"', '""')}"`;
+}
+
+// Builds the full doctors CSV document from the loaded records.
+function buildDoctorsCsv(doctors: DoctorListDto[]): string {
+  const header = DOCTOR_CSV_COLUMNS.map((column) => formatCsvCell(column.header)).join(",");
+  const rows = doctors.map((doctor) =>
+    DOCTOR_CSV_COLUMNS.map((column) => formatCsvCell(column.getValue(doctor))).join(","),
+  );
+  return [header, ...rows].join("\r\n");
+}
 
 function formatDate(iso: unknown): string {
   return new Date(String(iso)).toLocaleDateString("en-GB", {
@@ -270,6 +328,30 @@ export function AdminDoctorsPage() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
+  const handleExportCsv = () => {
+    if (allDoctors.length === 0) {
+      toast.info("No doctor records available to export.");
+      return;
+    }
+
+    const csv = buildDoctorsCsv(allDoctors);
+    const blob = new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const today = new Date().toISOString().slice(0, 10);
+
+    link.href = url;
+    link.download = `doctors-${today}.csv`;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+
+    toast.success(
+      `Exported ${allDoctors.length} doctor record${allDoctors.length === 1 ? "" : "s"}.`,
+    );
+  };
+
   return (
     <>
       <div className="mb-6">
@@ -287,7 +369,12 @@ export function AdminDoctorsPage() {
         <div className="mt-3 flex items-center justify-between gap-4">
           <h1 className="text-2xl font-bold tracking-tight">Doctor Directory</h1>
           <div className="flex shrink-0 items-center gap-2">
-            <Button variant="outline" className="gap-1.5 bg-white text-black hover:bg-muted">
+            <Button
+              variant="outline"
+              className="gap-1.5 bg-white text-black hover:bg-muted"
+              disabled={isLoading || isError}
+              onClick={handleExportCsv}
+            >
               <Download className="size-4" />
               Export CSV
             </Button>
