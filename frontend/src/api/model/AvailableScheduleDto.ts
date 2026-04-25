@@ -9,7 +9,7 @@ import type { LocalTime } from "./LocalTime";
 
 export interface AvailableScheduleDto {
   publicId?: string;
-  date?: LocalDate;
-  startTime?: LocalTime;
-  endTime?: LocalTime;
+  date: LocalDate;
+  startTime: LocalTime;
+  endTime: LocalTime;
 }

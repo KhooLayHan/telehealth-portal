@@ -1,5 +1,6 @@
 import { Search, User, X } from "lucide-react";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { getBySlug, useGetAllLabReports } from "@/api/generated/lab-reports/lab-reports";
 import { useGetAllPatientsForClinicStaff } from "@/api/generated/patients/patients";
 import type { ClinicStaffPatientDto } from "@/api/model/ClinicStaffPatientDto";
@@ -106,13 +107,14 @@ export function LabTechLabReportsPage() {
     try {
       const response = await getBySlug(report.slug);
       if (response.status === 200) {
-        const url = (response.data as unknown as { downloadUrl: string }).downloadUrl;
+        const url = response.data.downloadUrl; // typed, no assertion
         if (url) {
           window.open(url, "_blank", "noopener,noreferrer");
         }
       }
-    } catch {
-      // Error fetching download URL — silently fail or could show toast
+    } catch (error) {
+      console.error("Failed to fetch download URL:", error);
+      toast.error("Unable to open report. Please try again.");
     }
   };
 

@@ -24,10 +24,6 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  AnonymousTypeOfstring
-} from '../../model/AnonymousTypeOfstring';
-
-import type {
   CompleteLabReportCommand
 } from '../../model/CompleteLabReportCommand';
 
@@ -46,6 +42,10 @@ import type {
 import type {
   InitializeLabReportResponse
 } from '../../model/InitializeLabReportResponse';
+
+import type {
+  LabReportDownloadResponse
+} from '../../model/LabReportDownloadResponse';
 
 import type {
   PagedResultOfLabReportDto
@@ -264,7 +264,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getUpdateBySlugMutationOptions(options), queryClient);
     }
     export type getBySlugResponse200 = {
-  data: AnonymousTypeOfstring
+  data: LabReportDownloadResponse
   status: 200
 }
 

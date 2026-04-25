@@ -40,6 +40,11 @@ public sealed class GetAllLabReportsHandler(ApplicationDbContext db)
             q = q.Where(r => r.LabReportStatus.Slug == query.Status);
         }
 
+        if (query.PatientPublicId.HasValue)
+        {
+            q = q.Where(r => r.Patient.PublicId == query.PatientPublicId.Value);
+        }
+
         q = string.Equals(query.SortOrder, "desc", StringComparison.OrdinalIgnoreCase)
             ? q.OrderByDescending(r => r.CreatedAt).ThenByDescending(r => r.PublicId)
             : q.OrderBy(r => r.CreatedAt).ThenBy(r => r.PublicId);

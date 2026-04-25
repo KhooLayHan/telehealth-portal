@@ -17,6 +17,6 @@ export interface ReceptionistAppointmentDto {
   startTime?: LocalTime;
   endTime?: LocalTime;
   publicId?: string;
-  slug?: string;
-  visitReason?: string;
+  slug: string;
+  visitReason: string;
 }

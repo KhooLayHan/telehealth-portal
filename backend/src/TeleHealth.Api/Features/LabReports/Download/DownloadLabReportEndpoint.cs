@@ -4,6 +4,8 @@ using TeleHealth.Api.Common.Exceptions.Auth;
 
 namespace TeleHealth.Api.Features.LabReports.Download;
 
+public sealed record LabReportDownloadResponse(string DownloadUrl);
+
 public static class DownloadLabReportEndpoint
 {
     public static void MapDownloadLabReportEndpoint(this RouteGroupBuilder group)
@@ -28,7 +30,7 @@ public static class DownloadLabReportEndpoint
 
                     var downloadUrl = await handler.HandleAsync(slug, publicId, role, ct);
 
-                    return TypedResults.Ok(new { DownloadUrl = downloadUrl });
+                    return TypedResults.Ok(new LabReportDownloadResponse(downloadUrl));
                 }
             )
             .WithName(nameof(ApiEndpoints.LabReports.GetBySlug))

@@ -17,4 +17,5 @@ export type GetAllLabReportsParams = {
    */
   PageSize?: number | string;
   SortOrder?: string;
+  PatientPublicId?: string;
 };
