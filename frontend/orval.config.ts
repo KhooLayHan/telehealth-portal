@@ -6,7 +6,7 @@ export default defineConfig({
       target: "http://localhost:5144/openapi/v1.json",
     },
     output: {
-      baseUrl: "/api/v1",
+      baseUrl: "",
       clean: true,
       client: "react-query",
       httpClient: "fetch",

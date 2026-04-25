@@ -105,7 +105,7 @@ export const getCreateDoctorUrl = () => {
 
 
 
-  return `/api/v1/api/v1/doctors`
+  return `/api/v1/doctors`
 }
 
 export const createDoctor = async (createDoctorCommand: CreateDoctorCommand, options?: RequestInit): Promise<createDoctorResponse> => {
@@ -188,7 +188,7 @@ export const getGetAllUrl = () => {
 
 
 
-  return `/api/v1/api/v1/doctors`
+  return `/api/v1/doctors`
 }
 
 export const getAll = async ( options?: RequestInit): Promise<getAllResponse> => {
@@ -208,7 +208,7 @@ export const getAll = async ( options?: RequestInit): Promise<getAllResponse> =>
 
 export const getGetAllQueryKey = () => {
     return [
-    `/api/v1/api/v1/doctors`
+    `/api/v1/doctors`
     ] as const;
     }
 
@@ -316,7 +316,7 @@ export const getUpdateDoctorByIdUrl = (id: string,) => {
 
 
 
-  return `/api/v1/api/v1/doctors/${id}`
+  return `/api/v1/doctors/${id}`
 }
 
 export const updateDoctorById = async (id: string,
@@ -410,7 +410,7 @@ export const getDeleteDoctorByIdUrl = (id: string,) => {
 
 
 
-  return `/api/v1/api/v1/doctors/${id}/deactivate`
+  return `/api/v1/doctors/${id}/deactivate`
 }
 
 export const deleteDoctorById = async (id: string, options?: RequestInit): Promise<deleteDoctorByIdResponse> => {
@@ -504,7 +504,7 @@ export const getGetDoctorScheduleUrl = (params?: GetDoctorScheduleParams,) => {
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/api/v1/api/v1/doctors/me/schedule?${stringifiedParams}` : `/api/v1/api/v1/doctors/me/schedule`
+  return stringifiedParams.length > 0 ? `/api/v1/doctors/me/schedule?${stringifiedParams}` : `/api/v1/doctors/me/schedule`
 }
 
 export const getDoctorSchedule = async (params?: GetDoctorScheduleParams, options?: RequestInit): Promise<getDoctorScheduleResponse> => {
@@ -524,7 +524,7 @@ export const getDoctorSchedule = async (params?: GetDoctorScheduleParams, option
 
 export const getGetDoctorScheduleQueryKey = (params?: GetDoctorScheduleParams,) => {
     return [
-    `/api/v1/api/v1/doctors/me/schedule`, ...(params ? [params] : [])
+    `/api/v1/doctors/me/schedule`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -629,7 +629,7 @@ export const getGetDoctorPatientsUrl = (params?: GetDoctorPatientsParams,) => {
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/api/v1/api/v1/doctors/me/patients?${stringifiedParams}` : `/api/v1/api/v1/doctors/me/patients`
+  return stringifiedParams.length > 0 ? `/api/v1/doctors/me/patients?${stringifiedParams}` : `/api/v1/doctors/me/patients`
 }
 
 export const getDoctorPatients = async (params?: GetDoctorPatientsParams, options?: RequestInit): Promise<getDoctorPatientsResponse> => {
@@ -649,7 +649,7 @@ export const getDoctorPatients = async (params?: GetDoctorPatientsParams, option
 
 export const getGetDoctorPatientsQueryKey = (params?: GetDoctorPatientsParams,) => {
     return [
-    `/api/v1/api/v1/doctors/me/patients`, ...(params ? [params] : [])
+    `/api/v1/doctors/me/patients`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -747,7 +747,7 @@ export const getGetDoctorPatientAppointmentsUrl = (patientPublicId: string,) => 
 
 
 
-  return `/api/v1/api/v1/doctors/me/patients/${patientPublicId}/appointments`
+  return `/api/v1/doctors/me/patients/${patientPublicId}/appointments`
 }
 
 export const getDoctorPatientAppointments = async (patientPublicId: string, options?: RequestInit): Promise<getDoctorPatientAppointmentsResponse> => {
@@ -767,7 +767,7 @@ export const getDoctorPatientAppointments = async (patientPublicId: string, opti
 
 export const getGetDoctorPatientAppointmentsQueryKey = (patientPublicId: string,) => {
     return [
-    `/api/v1/api/v1/doctors/me/patients/${patientPublicId}/appointments`
+    `/api/v1/doctors/me/patients/${patientPublicId}/appointments`
     ] as const;
     }
 

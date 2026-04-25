@@ -77,7 +77,7 @@ export const getGetAllAvailableUrl = (params: GetAllAvailableParams,) => {
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/api/v1/api/v1/schedules/available?${stringifiedParams}` : `/api/v1/api/v1/schedules/available`
+  return stringifiedParams.length > 0 ? `/api/v1/schedules/available?${stringifiedParams}` : `/api/v1/schedules/available`
 }
 
 export const getAllAvailable = async (params: GetAllAvailableParams, options?: RequestInit): Promise<getAllAvailableResponse> => {
@@ -97,7 +97,7 @@ export const getAllAvailable = async (params: GetAllAvailableParams, options?: R
 
 export const getGetAllAvailableQueryKey = (params?: GetAllAvailableParams,) => {
     return [
-    `/api/v1/api/v1/schedules/available`, ...(params ? [params] : [])
+    `/api/v1/schedules/available`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -197,7 +197,7 @@ export const getGetDailySchedulesForReceptionistUrl = (params: GetDailySchedules
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/api/v1/api/v1/schedules/daily?${stringifiedParams}` : `/api/v1/api/v1/schedules/daily`
+  return stringifiedParams.length > 0 ? `/api/v1/schedules/daily?${stringifiedParams}` : `/api/v1/schedules/daily`
 }
 
 export const getDailySchedulesForReceptionist = async (params: GetDailySchedulesForReceptionistParams, options?: RequestInit): Promise<getDailySchedulesForReceptionistResponse> => {
@@ -217,7 +217,7 @@ export const getDailySchedulesForReceptionist = async (params: GetDailySchedules
 
 export const getGetDailySchedulesForReceptionistQueryKey = (params?: GetDailySchedulesForReceptionistParams,) => {
     return [
-    `/api/v1/api/v1/schedules/daily`, ...(params ? [params] : [])
+    `/api/v1/schedules/daily`, ...(params ? [params] : [])
     ] as const;
     }
 
