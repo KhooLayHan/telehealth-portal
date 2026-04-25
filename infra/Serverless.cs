@@ -127,6 +127,11 @@ public static class Serverless
                 BatchSize = 10,
                 Enabled = true,
                 FunctionResponseTypes = { "ReportBatchItemFailures" },
+            },
+            new CustomResourceOptions
+            {
+                DependsOn = { pdfProcessorLambda },
+                DeleteBeforeReplace = true,
             }
         );
 
