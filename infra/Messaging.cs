@@ -49,7 +49,8 @@ public static class Messaging
                     $@"{{""deadLetterTargetArn"":""{dlqArn}"",""maxReceiveCount"":3}}"
                 ),
                 Tags = cfg.Tags,
-            }
+            },
+            new CustomResourceOptions { DeleteBeforeReplace = true }
         );
 
         _ = new Aws.Sns.TopicSubscription(

@@ -93,6 +93,7 @@ public static class Serverless
 
                 // Removed ReservedConcurrentExecutions — account lacks headroom.
                 // Use RDS Proxy or connection pooling to protect the database instead.
+                ReservedConcurrentExecutions = 5,
 
                 // Dummy deployment package — CI/CD overwrites with the real build.
                 // This file must exist for Pulumi to create the Lambda resource.
@@ -112,6 +113,27 @@ public static class Serverless
             // `aws lambda update-function-code`. Without this, every `pulumi up`
             // would revert the deployed code back to the dummy placeholder.
             new CustomResourceOptions { IgnoreChanges = { "sourceCodeHash" } }
+        );
+
+        // ── SQS event source mapping (triggers Lambda from the processing queue) ──
+        // ReportBatchItemFailures enables partial batch reporting: only failed
+        // messages are retried, not the entire batch. Requires the Lambda handler
+        // to return SQSBatchResponse with failed message IDs.
+        _ = new Aws.Lambda.EventSourceMapping(
+            "sqs-to-lambda-mapping",
+            new Aws.Lambda.EventSourceMappingArgs
+            {
+                EventSourceArn = msg.ProcessingQueue.Arn,
+                FunctionName = pdfProcessorLambda.Arn,
+                BatchSize = 10,
+                Enabled = true,
+                FunctionResponseTypes = { "ReportBatchItemFailures" },
+            },
+            new CustomResourceOptions
+            {
+                DependsOn = { pdfProcessorLambda },
+                DeleteBeforeReplace = true,
+            }
         );
 
         return new Result { PdfProcessorLambda = pdfProcessorLambda };
