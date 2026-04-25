@@ -24,6 +24,10 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AdminCreateDepartmentCommand
+} from '../../model/AdminCreateDepartmentCommand';
+
+import type {
   AdminCreateReceptionistCommand
 } from '../../model/AdminCreateReceptionistCommand';
 
@@ -477,7 +481,111 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getAdminDeactivateReceptionistMutationOptions(options), queryClient);
     }
-    export type adminGetAllDepartmentsResponse200 = {
+export type adminCreateDepartmentResponse201 = {
+  data: AdminDepartmentDto
+  status: 201
+}
+
+export type adminCreateDepartmentResponse400 = {
+  data: ProblemDetails
+  status: 400
+}
+
+export type adminCreateDepartmentResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type adminCreateDepartmentResponse403 = {
+  data: ProblemDetails
+  status: 403
+}
+
+export type adminCreateDepartmentResponse409 = {
+  data: ProblemDetails
+  status: 409
+}
+
+export type adminCreateDepartmentResponse422 = {
+  data: ProblemDetails
+  status: 422
+}
+
+export type adminCreateDepartmentResponseSuccess = (adminCreateDepartmentResponse201) & {
+  headers: Headers;
+};
+export type adminCreateDepartmentResponseError = (adminCreateDepartmentResponse400 | adminCreateDepartmentResponse401 | adminCreateDepartmentResponse403 | adminCreateDepartmentResponse409 | adminCreateDepartmentResponse422) & {
+  headers: Headers;
+};
+
+export type adminCreateDepartmentResponse = (adminCreateDepartmentResponseSuccess | adminCreateDepartmentResponseError)
+
+export const getAdminCreateDepartmentUrl = () => {
+
+
+
+
+  return `http://localhost:5144/api/v1/admins/departments`
+}
+
+export const adminCreateDepartment = async (adminCreateDepartmentCommand: AdminCreateDepartmentCommand, options?: RequestInit): Promise<adminCreateDepartmentResponse> => {
+
+  return ofetchMutator<adminCreateDepartmentResponse>(getAdminCreateDepartmentUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      adminCreateDepartmentCommand,)
+  }
+);}
+
+
+
+
+export const getAdminCreateDepartmentMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCreateDepartment>>, TError,{data: AdminCreateDepartmentCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminCreateDepartment>>, TError,{data: AdminCreateDepartmentCommand}, TContext> => {
+
+const mutationKey = ['adminCreateDepartment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCreateDepartment>>, {data: AdminCreateDepartmentCommand}> = (props) => {
+          const {data} = props ?? {};
+
+          return  adminCreateDepartment(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminCreateDepartmentMutationResult = NonNullable<Awaited<ReturnType<typeof adminCreateDepartment>>>
+    export type AdminCreateDepartmentMutationBody = AdminCreateDepartmentCommand
+    export type AdminCreateDepartmentMutationError = ProblemDetails
+
+    export const useAdminCreateDepartment = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCreateDepartment>>, TError,{data: AdminCreateDepartmentCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminCreateDepartment>>,
+        TError,
+        {data: AdminCreateDepartmentCommand},
+        TContext
+      > => {
+      return useMutation(getAdminCreateDepartmentMutationOptions(options), queryClient);
+    }
+
+export type adminGetAllDepartmentsResponse200 = {
   data: AdminDepartmentDto[]
   status: 200
 }
@@ -589,8 +697,6 @@ export function useAdminGetAllDepartments<TData = Awaited<ReturnType<typeof admi
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
-
-
 
 
 

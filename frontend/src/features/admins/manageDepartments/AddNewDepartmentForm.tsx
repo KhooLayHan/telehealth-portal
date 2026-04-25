@@ -1,8 +1,14 @@
 import { useForm } from "@tanstack/react-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { Building2, Check } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import {
+  getAdminGetAllDepartmentsQueryKey,
+  useAdminCreateDepartment,
+} from "@/api/generated/admins/admins";
+import { ApiError } from "@/api/ofetch-mutator";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,7 +25,7 @@ import { Textarea } from "@/components/ui/textarea";
 const MAX_DEPARTMENT_NAME_LENGTH = 100;
 const MAX_DEPARTMENT_DESCRIPTION_LENGTH = 500;
 
-// Validates the frontend-only department form before a backend endpoint exists.
+// Validates the add-department form before it is submitted to the backend.
 const addDepartmentSchema = z.object({
   name: z
     .string()
@@ -54,18 +60,43 @@ function toFieldErrors(errors: unknown[]): Array<{ message: string }> {
   }));
 }
 
-// Renders a frontend-only dialog form for collecting new department details.
+// Renders a dialog form for creating departments from the admin page.
 export function AddNewDepartmentForm({ open, onOpenChange }: AddNewDepartmentFormProps) {
+  const queryClient = useQueryClient();
+  const { mutateAsync, isPending } = useAdminCreateDepartment({
+    mutation: {
+      onSuccess: async () => {
+        toast.success("Department created successfully");
+        await queryClient.invalidateQueries({ queryKey: getAdminGetAllDepartmentsQueryKey() });
+        onOpenChange(false);
+      },
+      onError: (error) => {
+        if (error instanceof ApiError) {
+          toast.error(error.data.title ?? "Failed to create department");
+          return;
+        }
+
+        toast.error("Failed to create department");
+      },
+    },
+  });
+
   const form = useForm({
     defaultValues: {
       name: "",
       description: "",
     } satisfies AddDepartmentFormValues,
     validators: { onSubmit: addDepartmentSchema },
-    onSubmit: async () => {
-      toast.info("Department form is ready. Backend save is not connected yet.");
+    onSubmit: async ({ value }) => {
+      const description = value.description.trim();
+
+      await mutateAsync({
+        data: {
+          name: value.name.trim(),
+          description: description.length > 0 ? description : null,
+        },
+      });
       form.reset();
-      onOpenChange(false);
     },
   });
 
@@ -90,7 +121,7 @@ export function AddNewDepartmentForm({ open, onOpenChange }: AddNewDepartmentFor
             <div className="min-w-0 space-y-1">
               <DialogTitle className="text-xl font-semibold">Add New Department</DialogTitle>
               <DialogDescription>
-                Create the department profile now; backend saving will be connected later.
+                Create a department profile for staff assignment and coverage tracking.
               </DialogDescription>
             </div>
           </div>
@@ -162,10 +193,14 @@ export function AddNewDepartmentForm({ open, onOpenChange }: AddNewDepartmentFor
             <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" className="gap-1.5">
-              <Check className="size-4" />
-              Create Department
-            </Button>
+            <form.Subscribe selector={(state) => state.isSubmitting}>
+              {(isSubmitting) => (
+                <Button type="submit" className="gap-1.5" disabled={isSubmitting || isPending}>
+                  <Check className="size-4" />
+                  {isPending ? "Creating..." : "Create Department"}
+                </Button>
+              )}
+            </form.Subscribe>
           </DialogFooter>
         </form>
       </DialogContent>
