@@ -52,8 +52,15 @@ export function PatientAppointmentsList() {
       <CardContent>
         {/* Search input */}
         <div className="relative mb-4 w-72">
-          <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <label htmlFor="appointment-search" className="sr-only">
+            Search appointments by doctor name
+          </label>
+          <Search
+            aria-hidden="true"
+            className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground"
+          />
           <Input
+            id="appointment-search"
             placeholder="Search by doctor name…"
             value={searchTerm}
             onChange={(e) => handleSearchChange(e.target.value)}
@@ -62,10 +69,11 @@ export function PatientAppointmentsList() {
           {searchTerm && (
             <button
               type="button"
+              aria-label="Clear search"
               onClick={() => handleSearchChange("")}
               className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             >
-              <X className="size-3.5" />
+              <X className="size-3.5" aria-hidden="true" />
             </button>
           )}
         </div>
