@@ -31,121 +31,41 @@ export function ScheduleForm({ form, onNext }: ScheduleStepProps) {
     form.setFieldValue("schedulePublicId", "");
   };
 
-  if (!selectedDate) {
+  const renderSlotSection = () => {
+    if (!selectedDate) {
+      return <p className="text-sm text-muted-foreground italic">Please select a date first.</p>;
+    }
+    if (isLoading) {
+      return <p className="text-sm text-muted-foreground italic">Loading available slots…</p>;
+    }
+    if (isError) {
+      return (
+        <p className="text-sm text-destructive" role="alert">
+          Could not load available slots. Please try again.
+        </p>
+      );
+    }
+    if (availableSchedules.length === 0) {
+      return (
+        <p className="text-sm text-muted-foreground italic">
+          No slots available for this date. Try another day.
+        </p>
+      );
+    }
     return (
       <>
-        <CardHeader>
-          <CardTitle className="text-2xl">Choose a Time</CardTitle>
-          <CardDescription>
-            Select your preferred doctor, date, and available time slot.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="doctor-select">Select Doctor</Label>
-              <DoctorSelect
-                doctors={doctors}
-                selectedId={selectedDoctorId}
-                isLoading={isLoadingDoctors}
-                onChange={handleDoctorChange}
-              />
-            </div>
-            <DatePicker value={selectedDate} minDate={minDate} onChange={handleDateChange} />
-          </div>
-          <p className="text-sm text-muted-foreground italic">Please select a date first.</p>
-        </CardContent>
+        <ScheduleTimeSlotField
+          form={form}
+          availableSchedules={availableSchedules}
+          isLoading={isLoading}
+          isError={isError}
+        />
+        <div className="flex justify-end border-t pt-6">
+          <NextButton form={form} onNext={onNext} />
+        </div>
       </>
     );
-  }
-
-  if (isLoading) {
-    return (
-      <>
-        <CardHeader>
-          <CardTitle className="text-2xl">Choose a Time</CardTitle>
-          <CardDescription>
-            Select your preferred doctor, date, and available time slot.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="doctor-select">Select Doctor</Label>
-              <DoctorSelect
-                doctors={doctors}
-                selectedId={selectedDoctorId}
-                isLoading={isLoadingDoctors}
-                onChange={handleDoctorChange}
-              />
-            </div>
-            <DatePicker value={selectedDate} minDate={minDate} onChange={handleDateChange} />
-          </div>
-          <p className="text-sm text-muted-foreground italic">Loading available slots…</p>
-        </CardContent>
-      </>
-    );
-  }
-
-  if (isError) {
-    return (
-      <>
-        <CardHeader>
-          <CardTitle className="text-2xl">Choose a Time</CardTitle>
-          <CardDescription>
-            Select your preferred doctor, date, and available time slot.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="doctor-select">Select Doctor</Label>
-              <DoctorSelect
-                doctors={doctors}
-                selectedId={selectedDoctorId}
-                isLoading={isLoadingDoctors}
-                onChange={handleDoctorChange}
-              />
-            </div>
-            <DatePicker value={selectedDate} minDate={minDate} onChange={handleDateChange} />
-          </div>
-          <p className="text-sm text-destructive" role="alert">
-            Could not load available slots. Please try again.
-          </p>
-        </CardContent>
-      </>
-    );
-  }
-
-  if (availableSchedules.length === 0) {
-    return (
-      <>
-        <CardHeader>
-          <CardTitle className="text-2xl">Choose a Time</CardTitle>
-          <CardDescription>
-            Select your preferred doctor, date, and available time slot.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="doctor-select">Select Doctor</Label>
-              <DoctorSelect
-                doctors={doctors}
-                selectedId={selectedDoctorId}
-                isLoading={isLoadingDoctors}
-                onChange={handleDoctorChange}
-              />
-            </div>
-            <DatePicker value={selectedDate} minDate={minDate} onChange={handleDateChange} />
-          </div>
-          <p className="text-sm text-muted-foreground italic">
-            No slots available for this date. Try another day.
-          </p>
-        </CardContent>
-      </>
-    );
-  }
+  };
 
   return (
     <>
@@ -170,16 +90,7 @@ export function ScheduleForm({ form, onNext }: ScheduleStepProps) {
           <DatePicker value={selectedDate} minDate={minDate} onChange={handleDateChange} />
         </div>
 
-        <ScheduleTimeSlotField
-          form={form}
-          availableSchedules={availableSchedules}
-          isLoading={isLoading}
-          isError={isError}
-        />
-
-        <div className="flex justify-end pt-6 border-t">
-          <NextButton form={form} onNext={onNext} />
-        </div>
+        {renderSlotSection()}
       </CardContent>
     </>
   );

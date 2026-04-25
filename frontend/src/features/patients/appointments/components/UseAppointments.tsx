@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { useGetAllAppointments } from "@/api/generated/patients/patients";
+import type { AppointmentDto } from "@/api/model/AppointmentDto";
 import type { PagedResultOfAppointmentDto } from "@/api/model/PagedResultOfAppointmentDto";
 
 export type AppointmentView = "upcoming" | "past";
@@ -9,11 +10,14 @@ const PAGE_SIZE = 5;
 
 export type UseAppointmentsReturn = {
   pagedResult: PagedResultOfAppointmentDto | undefined;
+  filteredItems: AppointmentDto[];
   isLoading: boolean;
   isError: boolean;
   page: number;
   view: AppointmentView;
+  searchTerm: string;
   handleViewChange: (v: string) => void;
+  handleSearchChange: (v: string) => void;
   handlePreviousPage: () => void;
   handleNextPage: () => void;
 };
@@ -21,6 +25,7 @@ export type UseAppointmentsReturn = {
 export function useAppointments(): UseAppointmentsReturn {
   const [page, setPage] = useState(1);
   const [view, setView] = useState<AppointmentView>("upcoming");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const {
     data: response,
@@ -34,6 +39,10 @@ export function useAppointments(): UseAppointmentsReturn {
 
   const pagedResult = response?.status === 200 ? response.data : undefined;
 
+  const filteredItems = (pagedResult?.items ?? []).filter((appt) =>
+    searchTerm ? appt.doctorName.toLowerCase().includes(searchTerm.toLowerCase()) : true,
+  );
+
   const isAppointmentView = (value: string): value is AppointmentView =>
     value === "upcoming" || value === "past";
 
@@ -41,6 +50,11 @@ export function useAppointments(): UseAppointmentsReturn {
     if (!isAppointmentView(v)) return;
     setView(v);
     setPage(1);
+    setSearchTerm("");
+  };
+
+  const handleSearchChange = (v: string) => {
+    setSearchTerm(v);
   };
 
   const handlePreviousPage = () => setPage((p) => Math.max(1, p - 1));
@@ -48,11 +62,14 @@ export function useAppointments(): UseAppointmentsReturn {
 
   return {
     pagedResult,
+    filteredItems,
     isLoading,
     isError,
     page,
     view,
+    searchTerm,
     handleViewChange,
+    handleSearchChange,
     handlePreviousPage,
     handleNextPage,
   };

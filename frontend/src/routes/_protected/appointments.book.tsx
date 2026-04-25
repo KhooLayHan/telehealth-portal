@@ -1,4 +1,12 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { BookAppointmentForm } from "@/features/patients/book/BookAppointmentForm";
 import { useAuthStore } from "@/store/useAuthStore";
 
@@ -16,9 +24,25 @@ export const Route = createFileRoute("/_protected/appointments/book")({
 
 function BookAppointmentRouteComponent() {
   return (
-    <div className="mx-auto max-w-3xl">
-      <h1 className="mb-6 font-bold text-2xl">Book Appointment</h1>
+    <>
+      <div className="mb-6">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink render={<Link to="/dashboard" />}>Dashboard</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink render={<Link to="/appointments" />}>Appointments</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Book Appointment</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
       <BookAppointmentForm />
-    </div>
+    </>
   );
 }

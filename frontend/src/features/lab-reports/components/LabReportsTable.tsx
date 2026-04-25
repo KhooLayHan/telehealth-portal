@@ -96,7 +96,12 @@ export function LabReportsTable({
                         : "—"}
                     </td>
                     <td className="p-3 text-muted-foreground">
-                      <Button size="sm" variant="ghost" onClick={() => onViewReport(report)}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="p-0"
+                        onClick={() => onViewReport(report)}
+                      >
                         <Eye className="size-4 mr-1" aria-hidden="true" />
                         View PDF
                       </Button>
