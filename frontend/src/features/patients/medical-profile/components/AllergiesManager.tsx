@@ -1,4 +1,4 @@
-import { Plus, Trash2 } from "lucide-react";
+import { AlertTriangle, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,13 +12,25 @@ import { generateId } from "../helpers";
 import { type AllergiesManagerProps, SEVERITY_OPTIONS, type Severity } from "../types";
 import { FormField } from "./FormField";
 
+const SEVERITY_BORDER: Record<string, string> = {
+  mild: "border-l-green-400",
+  moderate: "border-l-amber-400",
+  severe: "border-l-red-400",
+};
+
+function capitalizeSeverity(s: string): string {
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : "Select severity";
+}
+
 export function AllergiesManager({ form }: AllergiesManagerProps) {
   return (
     <form.Field name="allergies">
       {(field) => (
         <>
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-sm">Allergies</h3>
+            <h3 className="flex items-center gap-1.5 font-semibold text-sm">
+              <AlertTriangle className="size-4 text-primary" /> Allergies
+            </h3>
             <Button
               className="cursor-pointer"
               type="button"
@@ -39,12 +51,14 @@ export function AllergiesManager({ form }: AllergiesManagerProps) {
 
           <div className="space-y-3">
             {field.state.value.length === 0 ? (
-              <p className="text-sm text-muted-foreground italic">No allergies recorded.</p>
+              <div className="rounded-lg border border-dashed border-border bg-muted/20 px-4 py-3">
+                <p className="text-sm text-muted-foreground italic">No allergies recorded.</p>
+              </div>
             ) : (
               field.state.value.map((allergy, i) => (
                 <div
                   key={allergy.id}
-                  className="flex items-start gap-2 bg-muted/30 p-3 rounded-lg border border-border"
+                  className={`flex items-start gap-2 rounded-lg border border-border border-l-4 bg-muted/30 p-3 ${SEVERITY_BORDER[allergy.severity] ?? "border-l-border"}`}
                 >
                   <div className="grid flex-1 gap-3 sm:grid-cols-3">
                     <form.Field name={`allergies[${i}].allergen`}>
@@ -76,20 +90,7 @@ export function AllergiesManager({ form }: AllergiesManagerProps) {
                             onValueChange={(value) => subField.handleChange(value as Severity)}
                           >
                             <SelectTrigger id={`${subField.name}-input`} className="w-full">
-                              <SelectValue>
-                                {(() => {
-                                  const selectedSeverity = SEVERITY_OPTIONS.find(
-                                    (s) => s === subField.state.value,
-                                  );
-                                  if (selectedSeverity) {
-                                    return (
-                                      selectedSeverity.charAt(0).toUpperCase() +
-                                      selectedSeverity.slice(1)
-                                    );
-                                  }
-                                  return "Select severity";
-                                })()}
-                              </SelectValue>
+                              <SelectValue>{capitalizeSeverity(subField.state.value)}</SelectValue>
                             </SelectTrigger>
                             <SelectContent>
                               {SEVERITY_OPTIONS.map((s) => (

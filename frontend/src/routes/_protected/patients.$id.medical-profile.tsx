@@ -1,12 +1,31 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
-
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { PatientMedicalProfileForm } from "@/features/patients/medical-profile/MedicalProfileForm";
 import { useAuthStore } from "@/store/useAuthStore";
 
 function MedicalProfileRouteComponent() {
   return (
     <div className="mx-auto max-w-3xl">
-      <h1 className="mb-6 font-bold text-2xl">Medical Profile</h1>
+      <div className="mb-6">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink render={<Link to="/dashboard" />}>Dashboard</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Medical Profile</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
       <PatientMedicalProfileForm />
     </div>
   );
