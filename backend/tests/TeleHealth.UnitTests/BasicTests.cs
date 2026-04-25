@@ -1,4 +1,4 @@
-namespace Telehealth.UnitTests;
+namespace TeleHealth.UnitTests;
 
 public class BasicTests
 {
