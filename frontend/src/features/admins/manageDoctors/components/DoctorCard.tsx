@@ -168,18 +168,16 @@ export function DoctorCard({
           {/* Action buttons */}
           <div className="mt-4 flex gap-2">
             <Button
-              variant="outline"
               size="sm"
-              className="flex-1"
+              className="flex-1 bg-black text-white hover:bg-black/85"
               onClick={() => onEditProfile(doctor.publicId)}
             >
               <Pencil className="mr-2 size-4" />
               Edit Profile
             </Button>
             <Button
-              variant="outline"
               size="sm"
-              className="flex-1"
+              className="flex-1 bg-black text-white hover:bg-black/85"
               onClick={() => onSchedule(doctor.publicId)}
             >
               <CalendarClock className="mr-2 size-4" />
