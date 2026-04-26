@@ -12,10 +12,12 @@ public sealed record ReceptionistAppointmentDetailDto
 
     // Patient
     public string PatientName { get; init; } = string.Empty;
+    public string? PatientAvatarUrl { get; init; }
 
     // Doctor
     public Guid DoctorPublicId { get; init; }
     public string DoctorName { get; init; } = string.Empty;
+    public string? DoctorAvatarUrl { get; init; }
     public string Specialization { get; init; } = string.Empty;
 
     // Schedule

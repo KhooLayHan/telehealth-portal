@@ -10,6 +10,7 @@ public sealed record ReceptionistPatientsDto
     public string Slug { get; init; } = string.Empty;
     public string LastName { get; init; } = string.Empty;
     public string FirstName { get; init; } = string.Empty;
+    public string? AvatarUrl { get; init; }
     public string PatientEmail { get; init; } = string.Empty;
     public LocalDate DateOfBirth { get; init; }
     public string PhoneNumber { get; init; } = string.Empty;

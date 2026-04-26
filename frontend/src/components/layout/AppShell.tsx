@@ -63,7 +63,7 @@ const navItems = [
     icon: User,
     label: "Profile",
     href: "/profile",
-    allowedRoles: ["doctor"],
+    allowedRoles: ["doctor", "receptionist"],
   },
   {
     icon: UserCog,
@@ -155,6 +155,14 @@ export function AppShell({ children }: { children: ReactNode }) {
                       </Link>
                     </DropdownMenuItem>
                   ) : null}
+                  {normalizedRole === "doctor" || normalizedRole === "receptionist" ? (
+                    <DropdownMenuItem className="cursor-pointer p-0">
+                      <Link to="/profile" className="flex w-full items-center gap-1.5 px-2 py-1.5">
+                        <User className="size-3 shrink-0" />
+                        Manage Profile
+                      </Link>
+                    </DropdownMenuItem>
+                  ) : null}
                   <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
                     <LogOut className="size-3 shrink-0" />
                     Log out
@@ -207,6 +215,14 @@ export function AppShell({ children }: { children: ReactNode }) {
                       >
                         <User className="size-3 shrink-0" />
                         My Profile
+                      </Link>
+                    </DropdownMenuItem>
+                  ) : null}
+                  {normalizedRole === "doctor" || normalizedRole === "receptionist" ? (
+                    <DropdownMenuItem className="cursor-pointer p-0">
+                      <Link to="/profile" className="flex w-full items-center gap-1.5 px-2 py-1.5">
+                        <User className="size-3 shrink-0" />
+                        Manage Profile
                       </Link>
                     </DropdownMenuItem>
                   ) : null}

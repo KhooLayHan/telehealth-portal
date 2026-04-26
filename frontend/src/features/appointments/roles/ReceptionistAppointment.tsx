@@ -93,14 +93,57 @@ const columns: ColumnDef<ReceptionistAppointmentDto>[] = [
   {
     accessorKey: "patientName",
     header: "Patient",
-    cell: ({ row }) => <span className="font-medium">{row.getValue("patientName")}</span>,
+    cell: ({ row }) => {
+      const name = (row.original.patientName ?? "") as string;
+      const avatarUrl = row.original.patientAvatarUrl;
+      const initials = name
+        .split(" ")
+        .slice(0, 2)
+        .map((n) => n.charAt(0).toUpperCase())
+        .join("");
+      return (
+        <div className="flex items-center gap-2.5">
+          <div className="flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-[10px] font-semibold text-primary-foreground">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt={name} className="size-full object-cover" />
+            ) : (
+              initials
+            )}
+          </div>
+          <span className="font-medium">{name}</span>
+        </div>
+      );
+    },
   },
   {
-    accessorKey: "specialization",
-    header: "Specialization",
-    cell: ({ row }) => (
-      <span className="text-muted-foreground">{row.getValue("specialization")}</span>
-    ),
+    accessorKey: "doctorName",
+    header: "Doctor",
+    cell: ({ row }) => {
+      const name = (row.original.doctorName ?? "") as string;
+      const avatarUrl = row.original.doctorAvatarUrl;
+      const initials = name
+        .split(" ")
+        .slice(0, 2)
+        .map((n) => n.charAt(0).toUpperCase())
+        .join("");
+      return (
+        <div className="flex items-center gap-2.5">
+          <div className="flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-[10px] font-semibold text-foreground">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt={name} className="size-full object-cover" />
+            ) : (
+              initials
+            )}
+          </div>
+          <div className="flex flex-col">
+            <span className="font-medium text-sm leading-none">{name}</span>
+            <span className="text-[11px] text-muted-foreground mt-0.5">
+              {row.original.specialization}
+            </span>
+          </div>
+        </div>
+      );
+    },
   },
   {
     accessorKey: "date",
