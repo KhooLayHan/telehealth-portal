@@ -5,6 +5,8 @@ import { useGetAllPatientsForClinicStaff } from "@/api/generated/patients/patien
 import type { ClinicStaffPatientDto } from "@/api/model/ClinicStaffPatientDto";
 import { Button } from "@/components/ui/button";
 import { AddNewPatientForm } from "@/features/admins/managePatients/AddNewPatientForm";
+import { DeletePatientDialog } from "@/features/admins/managePatients/DeletePatientDialog";
+import { EditPatientForm } from "@/features/admins/managePatients/EditPatientForm";
 import { PatientTable } from "@/features/admins/managePatients/PatientTable";
 import { usePatientsCsvExport } from "@/features/admins/managePatients/UsePatientsCsvExport";
 import { ViewPatientDetailDialog } from "@/features/admins/managePatients/ViewPatientDetailDialog";
@@ -16,6 +18,10 @@ export function AdminPatientsPage() {
   const [addPatientOpen, setAddPatientOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<ClinicStaffPatientDto | null>(null);
   const [viewPatientOpen, setViewPatientOpen] = useState(false);
+  const [editingPatient, setEditingPatient] = useState<ClinicStaffPatientDto | null>(null);
+  const [editPatientOpen, setEditPatientOpen] = useState(false);
+  const [deletingPatient, setDeletingPatient] = useState<ClinicStaffPatientDto | null>(null);
+  const [deletePatientOpen, setDeletePatientOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
@@ -44,6 +50,16 @@ export function AdminPatientsPage() {
   const handleViewPatient = (patient: ClinicStaffPatientDto) => {
     setSelectedPatient(patient);
     setViewPatientOpen(true);
+  };
+
+  const handleEditPatient = (patient: ClinicStaffPatientDto) => {
+    setEditingPatient(patient);
+    setEditPatientOpen(true);
+  };
+
+  const handleRemovePatient = (patient: ClinicStaffPatientDto) => {
+    setDeletingPatient(patient);
+    setDeletePatientOpen(true);
   };
 
   return (
@@ -89,9 +105,21 @@ export function AdminPatientsPage() {
         search={searchInput}
         onSearchChange={setSearchInput}
         onView={handleViewPatient}
+        onEdit={handleEditPatient}
+        onRemove={handleRemovePatient}
       />
 
       <AddNewPatientForm open={addPatientOpen} onOpenChange={setAddPatientOpen} />
+      <EditPatientForm
+        patient={editingPatient}
+        open={editPatientOpen}
+        onOpenChange={setEditPatientOpen}
+      />
+      <DeletePatientDialog
+        patient={deletingPatient}
+        open={deletePatientOpen}
+        onOpenChange={setDeletePatientOpen}
+      />
       <ViewPatientDetailDialog
         patient={selectedPatient}
         open={viewPatientOpen}
