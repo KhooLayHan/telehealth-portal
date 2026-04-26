@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { AdminReceptionistsPage } from "@/features/admins/AdminReceptionistsPage";
+import { AdminReceptionistsPage } from "@/features/admins/AdminReceptionistsPageOld";
 import { useAuthStore } from "@/store/useAuthStore";
 
 export const Route = createFileRoute("/_protected/receptionists")({
