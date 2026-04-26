@@ -91,6 +91,7 @@ Immutable lookup for medical departments.
 | name | VARCHAR(100) | NOT NULL | Display name |
 | description | VARCHAR(500) | | Department details |
 | created_at | TIMESTAMPTZ | NOT NULL, DEFAULT NOW() | Immutable timestamp |
+| deleted_at | TIMESTAMPTZ | | Soft delete timestamp |
 
 **Seed Data:**
 
