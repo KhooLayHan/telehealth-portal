@@ -2,7 +2,25 @@ import { toast } from "sonner";
 
 import type { AdminReceptionistDto } from "@/api/model/AdminReceptionistDto";
 
-const RECEPTIONISTS_CSV_HEADERS = ["Name", "Username", "Email", "Phone", "Joined"] as const;
+const RECEPTIONISTS_CSV_HEADERS = [
+  "Public ID",
+  "Slug",
+  "First Name",
+  "Last Name",
+  "Full Name",
+  "Username",
+  "Email",
+  "Phone",
+  "IC Number",
+  "Gender",
+  "Date of Birth",
+  "Street",
+  "City",
+  "State",
+  "Postal Code",
+  "Country",
+  "Joined",
+] as const;
 const CSV_SPECIAL_CHARACTERS_PATTERN = /[",\n]/;
 const WINDOWS_NEWLINES_PATTERN = /\r\n/g;
 const CARRIAGE_RETURN_PATTERN = /\r/g;
@@ -22,12 +40,22 @@ interface UseReceptionistsCsvExportReturn {
 }
 
 // Formats a date string as "15 Apr 1982".
-function formatDate(iso: string): string {
+function formatDate(iso: string | undefined): string {
+  if (!iso) {
+    return "";
+  }
+
   return new Date(iso).toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",
     year: "numeric",
   });
+}
+
+// Maps gender code to a readable label.
+function genderLabel(code: string): string {
+  const map: Record<string, string> = { M: "Male", F: "Female", O: "Other", N: "Not specified" };
+  return map[code] ?? code;
 }
 
 // Escapes one cell so commas, quotes, and line breaks remain valid CSV content.
@@ -47,13 +75,30 @@ function escapeCsvCell(value: string | null | undefined): string {
 function buildReceptionistsCsv(receptionists: AdminReceptionistDto[]): string {
   const rows = [
     RECEPTIONISTS_CSV_HEADERS,
-    ...receptionists.map((receptionist) => [
-      `${receptionist.firstName} ${receptionist.lastName}`,
-      receptionist.username,
-      receptionist.email,
-      receptionist.phoneNumber ?? "",
-      receptionist.createdAt ? formatDate(String(receptionist.createdAt)) : "",
-    ]),
+    ...receptionists.map((receptionist) => {
+      const fullName = `${receptionist.firstName} ${receptionist.lastName}`;
+      const address = receptionist.address;
+
+      return [
+        receptionist.publicId ?? "",
+        receptionist.slug,
+        receptionist.firstName,
+        receptionist.lastName,
+        fullName,
+        receptionist.username,
+        receptionist.email,
+        receptionist.phoneNumber ?? "",
+        receptionist.icNumber,
+        genderLabel(receptionist.gender),
+        formatDate(receptionist.dateOfBirth),
+        address?.street ?? "",
+        address?.city ?? "",
+        address?.state ?? "",
+        address?.postalCode ?? "",
+        address?.country ?? "",
+        formatDate(receptionist.createdAt ? String(receptionist.createdAt) : undefined),
+      ];
+    }),
   ];
 
   return `${rows.map((row) => row.map(escapeCsvCell).join(",")).join("\r\n")}\r\n`;
