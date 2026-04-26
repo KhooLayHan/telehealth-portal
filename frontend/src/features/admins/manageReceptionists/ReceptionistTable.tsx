@@ -11,8 +11,38 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
 const ACCENT = "#0d9488";
+
+// Keeps receptionist table columns stable across different data lengths.
+const COLUMN_STYLES: Record<string, { cell: string; header: string }> = {
+  firstName: {
+    header: "min-w-56 w-[28%]",
+    cell: "min-w-56 w-[28%]",
+  },
+  email: {
+    header: "min-w-64 w-[30%]",
+    cell: "min-w-64 w-[30%]",
+  },
+  phoneNumber: {
+    header: "w-40",
+    cell: "w-40",
+  },
+  createdAt: {
+    header: "w-36",
+    cell: "w-36",
+  },
+  actions: {
+    header: "w-32 text-right",
+    cell: "w-32",
+  },
+};
+
+// Returns the width and alignment classes for a table column.
+function getColumnStyle(columnId: string, part: "cell" | "header"): string {
+  return COLUMN_STYLES[columnId]?.[part] ?? "";
+}
 
 // Formats a date string as "15 Apr 1982"
 function formatDate(iso: string): string {
@@ -41,7 +71,7 @@ const columns: ColumnDef<AdminReceptionistDto>[] = [
     accessorKey: "email",
     header: "Email",
     cell: ({ row }) => (
-      <span className="text-muted-foreground text-xs">{row.getValue("email")}</span>
+      <span className="block truncate text-muted-foreground text-xs">{row.getValue("email")}</span>
     ),
   },
   {
@@ -62,8 +92,9 @@ const columns: ColumnDef<AdminReceptionistDto>[] = [
     id: "actions",
     header: "Actions",
     cell: ({ row, table }) => (
-      <div className="flex items-center gap-1">
+      <div className="flex items-center justify-end gap-1">
         <Button
+          type="button"
           variant="ghost"
           size="sm"
           className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
@@ -80,6 +111,7 @@ const columns: ColumnDef<AdminReceptionistDto>[] = [
           <Eye className="size-3.5" />
         </Button>
         <Button
+          type="button"
           variant="ghost"
           size="sm"
           className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
@@ -96,6 +128,7 @@ const columns: ColumnDef<AdminReceptionistDto>[] = [
           <Pencil className="size-3.5" />
         </Button>
         <Button
+          type="button"
           variant="ghost"
           size="sm"
           className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
@@ -169,7 +202,7 @@ export function ReceptionistTable({
       </div>
 
       <div className="overflow-hidden rounded-lg border border-border">
-        <Table>
+        <Table className="min-w-[52rem]">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow
@@ -179,7 +212,10 @@ export function ReceptionistTable({
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
-                    className="px-5 py-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-background/70"
+                    className={cn(
+                      "px-5 py-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-background/70",
+                      getColumnStyle(header.column.id, "header"),
+                    )}
                   >
                     {header.isPlaceholder
                       ? null
@@ -198,7 +234,10 @@ export function ReceptionistTable({
                   style={{ animationDelay: `${i * 30}ms` }}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="px-5 py-3.5 text-sm">
+                    <TableCell
+                      key={cell.id}
+                      className={cn("px-5 py-3.5 text-sm", getColumnStyle(cell.column.id, "cell"))}
+                    >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
