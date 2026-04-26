@@ -14,31 +14,18 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { AddNewReceptionistForm } from "@/features/admins/manageReceptionists/AddNewReceptionistForm";
 import { DeleteReceptionistDialog } from "@/features/admins/manageReceptionists/DeleteReceptionistDialog";
 import { EditReceptionistForm } from "@/features/admins/manageReceptionists/EditReceptionistForm";
 import { ReceptionistTable } from "@/features/admins/manageReceptionists/ReceptionistTable";
+import { ViewReceptionistDetailDialog } from "@/features/admins/manageReceptionists/ViewReceptionistDetailDialog";
 
-const ACCENT = "#0d9488";
 const PAGE_SIZE = 10;
 const RECEPTIONISTS_CSV_HEADERS = ["Name", "Username", "Email", "Phone", "Joined"] as const;
 const CSV_SPECIAL_CHARACTERS_PATTERN = /[",\n]/;
 const WINDOWS_NEWLINES_PATTERN = /\r\n/g;
 const CARRIAGE_RETURN_PATTERN = /\r/g;
 const DOUBLE_QUOTE_PATTERN = /"/g;
-
-// Maps gender code to a readable label
-function genderLabel(code: string): string {
-  const map: Record<string, string> = { M: "Male", F: "Female", O: "Other", N: "Not specified" };
-  return map[code] ?? code;
-}
 
 // Formats a date string as "15 Apr 1982"
 function formatDate(iso: string): string {
@@ -90,116 +77,6 @@ function downloadCsvFile(fileName: string, csvContent: string): void {
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
-}
-
-interface DetailRowProps {
-  label: string;
-  value: string;
-}
-
-// A single labelled row inside the detail dialog
-function DetailRow({ label, value }: DetailRowProps) {
-  return (
-    <div className="flex flex-col gap-0.5">
-      <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-        {label}
-      </span>
-      <span className="text-sm text-foreground">{value}</span>
-    </div>
-  );
-}
-
-// Describes the open state controls for the receptionist details dialog
-interface ReceptionistDetailsDialogProps {
-  receptionist: AdminReceptionistDto | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-// Modal dialog that shows full receptionist profile not visible in the table
-function ReceptionistDetailsDialog({
-  receptionist,
-  open,
-  onOpenChange,
-}: ReceptionistDetailsDialogProps) {
-  if (!receptionist) return null;
-
-  const initials = `${receptionist.firstName[0]}${receptionist.lastName[0]}`;
-  const fullAddress = receptionist.address
-    ? `${receptionist.address.street}, ${receptionist.address.city}, ${receptionist.address.state} ${receptionist.address.postalCode}, ${receptionist.address.country}`
-    : "—";
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl gap-0 overflow-hidden p-0">
-        {/* Header accent band */}
-        <div className="absolute inset-x-0 top-0 h-1" style={{ background: ACCENT }} />
-
-        <DialogHeader className="px-6 pb-4 pt-7">
-          <div className="flex items-start gap-4">
-            {/* Avatar with S3 image or initials fallback */}
-            {receptionist.avatarUrl ? (
-              <img
-                src={receptionist.avatarUrl}
-                alt={`${receptionist.firstName} ${receptionist.lastName}`}
-                className="size-14 shrink-0 rounded-full object-cover"
-              />
-            ) : (
-              <div
-                className="flex size-14 shrink-0 items-center justify-center rounded-full text-lg font-bold text-white"
-                style={{ background: ACCENT }}
-              >
-                {initials}
-              </div>
-            )}
-
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <DialogTitle className="text-xl font-semibold leading-none">
-                  {receptionist.firstName} {receptionist.lastName}
-                </DialogTitle>
-              </div>
-              <DialogDescription className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-                <span className="font-mono text-xs text-muted-foreground">
-                  @{receptionist.username}
-                </span>
-              </DialogDescription>
-            </div>
-          </div>
-        </DialogHeader>
-
-        {/* Scrollable body */}
-        <div className="max-h-[60vh] overflow-y-auto px-6 pb-6">
-          {/* Personal details */}
-          <p
-            className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em]"
-            style={{ color: ACCENT }}
-          >
-            Personal Information
-          </p>
-          <div className="mb-5 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
-            <DetailRow label="IC Number" value={receptionist.icNumber} />
-            <DetailRow label="Gender" value={genderLabel(receptionist.gender)} />
-            <DetailRow
-              label="Date of Birth"
-              value={receptionist.dateOfBirth ? formatDate(receptionist.dateOfBirth) : "—"}
-            />
-          </div>
-
-          {/* Contact details */}
-          <p
-            className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em]"
-            style={{ color: ACCENT }}
-          >
-            Address
-          </p>
-          <div className="mb-5 rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm text-foreground/80">
-            {fullAddress}
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
 }
 
 // Admin page displaying a paginated, searchable list of all receptionists
@@ -340,7 +217,7 @@ export function AdminReceptionistsPage() {
         )}
       </motion.div>
 
-      <ReceptionistDetailsDialog
+      <ViewReceptionistDetailDialog
         receptionist={selectedReceptionist}
         open={dialogOpen}
         onOpenChange={setDialogOpen}
