@@ -1,5 +1,4 @@
 import { ChevronLeft, ChevronRight, Pencil, Trash2 } from "lucide-react";
-import { useMemo } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,35 +11,16 @@ import {
 } from "@/components/ui/table";
 import { type DepartmentTableRow, useDepartmentsTable } from "./UseDepartmentsTable";
 
-// Describes local-only department edits that override fetched table rows.
-export type DepartmentTableDrafts = Record<
-  string,
-  Pick<DepartmentTableRow, "name" | "description">
->;
-
 // Props for department table row actions.
 interface DepartmentsTableProps {
-  departmentDrafts?: DepartmentTableDrafts;
   onEditDepartment?: (department: DepartmentTableRow) => void;
   onDeleteDepartment?: (department: DepartmentTableRow) => void;
 }
 
 // Displays the admin-facing departments table with backend data.
-export function DepartmentsTable({
-  departmentDrafts,
-  onEditDepartment,
-  onDeleteDepartment,
-}: DepartmentsTableProps) {
+export function DepartmentsTable({ onEditDepartment, onDeleteDepartment }: DepartmentsTableProps) {
   const { departments, isError, isLoading, page, totalCount, totalPages, onPageChange } =
     useDepartmentsTable();
-  const visibleDepartments = useMemo(
-    () =>
-      departments.map((department) => ({
-        ...department,
-        ...departmentDrafts?.[department.id],
-      })),
-    [departments, departmentDrafts],
-  );
 
   return (
     <div className="space-y-4">
@@ -63,8 +43,8 @@ export function DepartmentsTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {visibleDepartments.length > 0 ? (
-              visibleDepartments.map((department) => (
+            {departments.length > 0 ? (
+              departments.map((department) => (
                 <TableRow
                   key={department.id}
                   className="border-b border-border transition-colors duration-100 hover:bg-muted/50"

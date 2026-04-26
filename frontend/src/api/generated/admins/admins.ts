@@ -44,6 +44,10 @@ import type {
 } from '../../model/AdminReceptionistDto';
 
 import type {
+  AdminUpdateDepartmentCommand
+} from '../../model/AdminUpdateDepartmentCommand';
+
+import type {
   AdminUpdateReceptionistCommand
 } from '../../model/AdminUpdateReceptionistCommand';
 
@@ -62,7 +66,332 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-export type adminGetAllReceptionistsResponse200 = {
+export type adminGetAllDepartmentsResponse200 = {
+  data: AdminDepartmentDto[]
+  status: 200
+}
+
+export type adminGetAllDepartmentsResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type adminGetAllDepartmentsResponse403 = {
+  data: ProblemDetails
+  status: 403
+}
+
+export type adminGetAllDepartmentsResponseSuccess = (adminGetAllDepartmentsResponse200) & {
+  headers: Headers;
+};
+export type adminGetAllDepartmentsResponseError = (adminGetAllDepartmentsResponse401 | adminGetAllDepartmentsResponse403) & {
+  headers: Headers;
+};
+
+export type adminGetAllDepartmentsResponse = (adminGetAllDepartmentsResponseSuccess | adminGetAllDepartmentsResponseError)
+
+export const getAdminGetAllDepartmentsUrl = () => {
+
+
+
+
+  return `http://localhost:5144/api/v1/admins/departments`
+}
+
+export const adminGetAllDepartments = async ( options?: RequestInit): Promise<adminGetAllDepartmentsResponse> => {
+
+  return ofetchMutator<adminGetAllDepartmentsResponse>(getAdminGetAllDepartmentsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminGetAllDepartmentsQueryKey = () => {
+    return [
+    `http://localhost:5144/api/v1/admins/departments`
+    ] as const;
+    }
+
+
+export const getAdminGetAllDepartmentsQueryOptions = <TData = Awaited<ReturnType<typeof adminGetAllDepartments>>, TError = ProblemDetails>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminGetAllDepartmentsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetAllDepartments>>> = ({ signal }) => adminGetAllDepartments({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type AdminGetAllDepartmentsQueryResult = NonNullable<Awaited<ReturnType<typeof adminGetAllDepartments>>>
+export type AdminGetAllDepartmentsQueryError = ProblemDetails
+
+
+export function useAdminGetAllDepartments<TData = Awaited<ReturnType<typeof adminGetAllDepartments>>, TError = ProblemDetails>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminGetAllDepartments>>,
+          TError,
+          Awaited<ReturnType<typeof adminGetAllDepartments>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminGetAllDepartments<TData = Awaited<ReturnType<typeof adminGetAllDepartments>>, TError = ProblemDetails>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminGetAllDepartments>>,
+          TError,
+          Awaited<ReturnType<typeof adminGetAllDepartments>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminGetAllDepartments<TData = Awaited<ReturnType<typeof adminGetAllDepartments>>, TError = ProblemDetails>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useAdminGetAllDepartments<TData = Awaited<ReturnType<typeof adminGetAllDepartments>>, TError = ProblemDetails>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getAdminGetAllDepartmentsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export type adminCreateDepartmentResponse201 = {
+  data: AdminDepartmentDto
+  status: 201
+}
+
+export type adminCreateDepartmentResponse400 = {
+  data: ProblemDetails
+  status: 400
+}
+
+export type adminCreateDepartmentResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type adminCreateDepartmentResponse403 = {
+  data: ProblemDetails
+  status: 403
+}
+
+export type adminCreateDepartmentResponse409 = {
+  data: ProblemDetails
+  status: 409
+}
+
+export type adminCreateDepartmentResponse422 = {
+  data: ProblemDetails
+  status: 422
+}
+
+export type adminCreateDepartmentResponseSuccess = (adminCreateDepartmentResponse201) & {
+  headers: Headers;
+};
+export type adminCreateDepartmentResponseError = (adminCreateDepartmentResponse400 | adminCreateDepartmentResponse401 | adminCreateDepartmentResponse403 | adminCreateDepartmentResponse409 | adminCreateDepartmentResponse422) & {
+  headers: Headers;
+};
+
+export type adminCreateDepartmentResponse = (adminCreateDepartmentResponseSuccess | adminCreateDepartmentResponseError)
+
+export const getAdminCreateDepartmentUrl = () => {
+
+
+
+
+  return `http://localhost:5144/api/v1/admins/departments`
+}
+
+export const adminCreateDepartment = async (adminCreateDepartmentCommand: AdminCreateDepartmentCommand, options?: RequestInit): Promise<adminCreateDepartmentResponse> => {
+
+  return ofetchMutator<adminCreateDepartmentResponse>(getAdminCreateDepartmentUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      adminCreateDepartmentCommand,)
+  }
+);}
+
+
+
+
+export const getAdminCreateDepartmentMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCreateDepartment>>, TError,{data: AdminCreateDepartmentCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminCreateDepartment>>, TError,{data: AdminCreateDepartmentCommand}, TContext> => {
+
+const mutationKey = ['adminCreateDepartment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCreateDepartment>>, {data: AdminCreateDepartmentCommand}> = (props) => {
+          const {data} = props ?? {};
+
+          return  adminCreateDepartment(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminCreateDepartmentMutationResult = NonNullable<Awaited<ReturnType<typeof adminCreateDepartment>>>
+    export type AdminCreateDepartmentMutationBody = AdminCreateDepartmentCommand
+    export type AdminCreateDepartmentMutationError = ProblemDetails
+
+    export const useAdminCreateDepartment = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCreateDepartment>>, TError,{data: AdminCreateDepartmentCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminCreateDepartment>>,
+        TError,
+        {data: AdminCreateDepartmentCommand},
+        TContext
+      > => {
+      return useMutation(getAdminCreateDepartmentMutationOptions(options), queryClient);
+    }
+    export type adminUpdateDepartmentResponse200 = {
+  data: AdminDepartmentDto
+  status: 200
+}
+
+export type adminUpdateDepartmentResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type adminUpdateDepartmentResponse403 = {
+  data: ProblemDetails
+  status: 403
+}
+
+export type adminUpdateDepartmentResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type adminUpdateDepartmentResponse409 = {
+  data: ProblemDetails
+  status: 409
+}
+
+export type adminUpdateDepartmentResponse422 = {
+  data: ProblemDetails
+  status: 422
+}
+
+export type adminUpdateDepartmentResponseSuccess = (adminUpdateDepartmentResponse200) & {
+  headers: Headers;
+};
+export type adminUpdateDepartmentResponseError = (adminUpdateDepartmentResponse401 | adminUpdateDepartmentResponse403 | adminUpdateDepartmentResponse404 | adminUpdateDepartmentResponse409 | adminUpdateDepartmentResponse422) & {
+  headers: Headers;
+};
+
+export type adminUpdateDepartmentResponse = (adminUpdateDepartmentResponseSuccess | adminUpdateDepartmentResponseError)
+
+export const getAdminUpdateDepartmentUrl = (slug: string,) => {
+
+
+
+
+  return `http://localhost:5144/api/v1/admins/departments/${slug}`
+}
+
+export const adminUpdateDepartment = async (slug: string,
+    adminUpdateDepartmentCommand: AdminUpdateDepartmentCommand, options?: RequestInit): Promise<adminUpdateDepartmentResponse> => {
+
+  return ofetchMutator<adminUpdateDepartmentResponse>(getAdminUpdateDepartmentUrl(slug),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      adminUpdateDepartmentCommand,)
+  }
+);}
+
+
+
+
+export const getAdminUpdateDepartmentMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateDepartment>>, TError,{slug: string;data: AdminUpdateDepartmentCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateDepartment>>, TError,{slug: string;data: AdminUpdateDepartmentCommand}, TContext> => {
+
+const mutationKey = ['adminUpdateDepartment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateDepartment>>, {slug: string;data: AdminUpdateDepartmentCommand}> = (props) => {
+          const {slug,data} = props ?? {};
+
+          return  adminUpdateDepartment(slug,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminUpdateDepartmentMutationResult = NonNullable<Awaited<ReturnType<typeof adminUpdateDepartment>>>
+    export type AdminUpdateDepartmentMutationBody = AdminUpdateDepartmentCommand
+    export type AdminUpdateDepartmentMutationError = ProblemDetails
+
+    export const useAdminUpdateDepartment = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateDepartment>>, TError,{slug: string;data: AdminUpdateDepartmentCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminUpdateDepartment>>,
+        TError,
+        {slug: string;data: AdminUpdateDepartmentCommand},
+        TContext
+      > => {
+      return useMutation(getAdminUpdateDepartmentMutationOptions(options), queryClient);
+    }
+    export type adminGetAllReceptionistsResponse200 = {
   data: PagedResultOfAdminReceptionistDto
   status: 200
 }
@@ -481,223 +810,3 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getAdminDeactivateReceptionistMutationOptions(options), queryClient);
     }
-export type adminCreateDepartmentResponse201 = {
-  data: AdminDepartmentDto
-  status: 201
-}
-
-export type adminCreateDepartmentResponse400 = {
-  data: ProblemDetails
-  status: 400
-}
-
-export type adminCreateDepartmentResponse401 = {
-  data: ProblemDetails
-  status: 401
-}
-
-export type adminCreateDepartmentResponse403 = {
-  data: ProblemDetails
-  status: 403
-}
-
-export type adminCreateDepartmentResponse409 = {
-  data: ProblemDetails
-  status: 409
-}
-
-export type adminCreateDepartmentResponse422 = {
-  data: ProblemDetails
-  status: 422
-}
-
-export type adminCreateDepartmentResponseSuccess = (adminCreateDepartmentResponse201) & {
-  headers: Headers;
-};
-export type adminCreateDepartmentResponseError = (adminCreateDepartmentResponse400 | adminCreateDepartmentResponse401 | adminCreateDepartmentResponse403 | adminCreateDepartmentResponse409 | adminCreateDepartmentResponse422) & {
-  headers: Headers;
-};
-
-export type adminCreateDepartmentResponse = (adminCreateDepartmentResponseSuccess | adminCreateDepartmentResponseError)
-
-export const getAdminCreateDepartmentUrl = () => {
-
-
-
-
-  return `http://localhost:5144/api/v1/admins/departments`
-}
-
-export const adminCreateDepartment = async (adminCreateDepartmentCommand: AdminCreateDepartmentCommand, options?: RequestInit): Promise<adminCreateDepartmentResponse> => {
-
-  return ofetchMutator<adminCreateDepartmentResponse>(getAdminCreateDepartmentUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      adminCreateDepartmentCommand,)
-  }
-);}
-
-
-
-
-export const getAdminCreateDepartmentMutationOptions = <TError = ProblemDetails,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCreateDepartment>>, TError,{data: AdminCreateDepartmentCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof adminCreateDepartment>>, TError,{data: AdminCreateDepartmentCommand}, TContext> => {
-
-const mutationKey = ['adminCreateDepartment'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCreateDepartment>>, {data: AdminCreateDepartmentCommand}> = (props) => {
-          const {data} = props ?? {};
-
-          return  adminCreateDepartment(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type AdminCreateDepartmentMutationResult = NonNullable<Awaited<ReturnType<typeof adminCreateDepartment>>>
-    export type AdminCreateDepartmentMutationBody = AdminCreateDepartmentCommand
-    export type AdminCreateDepartmentMutationError = ProblemDetails
-
-    export const useAdminCreateDepartment = <TError = ProblemDetails,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCreateDepartment>>, TError,{data: AdminCreateDepartmentCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof adminCreateDepartment>>,
-        TError,
-        {data: AdminCreateDepartmentCommand},
-        TContext
-      > => {
-      return useMutation(getAdminCreateDepartmentMutationOptions(options), queryClient);
-    }
-
-export type adminGetAllDepartmentsResponse200 = {
-  data: AdminDepartmentDto[]
-  status: 200
-}
-
-export type adminGetAllDepartmentsResponse401 = {
-  data: ProblemDetails
-  status: 401
-}
-
-export type adminGetAllDepartmentsResponse403 = {
-  data: ProblemDetails
-  status: 403
-}
-
-export type adminGetAllDepartmentsResponseSuccess = (adminGetAllDepartmentsResponse200) & {
-  headers: Headers;
-};
-export type adminGetAllDepartmentsResponseError = (adminGetAllDepartmentsResponse401 | adminGetAllDepartmentsResponse403) & {
-  headers: Headers;
-};
-
-export type adminGetAllDepartmentsResponse = (adminGetAllDepartmentsResponseSuccess | adminGetAllDepartmentsResponseError)
-
-export const getAdminGetAllDepartmentsUrl = () => {
-
-
-
-
-  return `http://localhost:5144/api/v1/admins/departments`
-}
-
-export const adminGetAllDepartments = async ( options?: RequestInit): Promise<adminGetAllDepartmentsResponse> => {
-
-  return ofetchMutator<adminGetAllDepartmentsResponse>(getAdminGetAllDepartmentsUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getAdminGetAllDepartmentsQueryKey = () => {
-    return [
-    `http://localhost:5144/api/v1/admins/departments`
-    ] as const;
-    }
-
-
-export const getAdminGetAllDepartmentsQueryOptions = <TData = Awaited<ReturnType<typeof adminGetAllDepartments>>, TError = ProblemDetails>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getAdminGetAllDepartmentsQueryKey();
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetAllDepartments>>> = ({ signal }) => adminGetAllDepartments({ signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type AdminGetAllDepartmentsQueryResult = NonNullable<Awaited<ReturnType<typeof adminGetAllDepartments>>>
-export type AdminGetAllDepartmentsQueryError = ProblemDetails
-
-
-export function useAdminGetAllDepartments<TData = Awaited<ReturnType<typeof adminGetAllDepartments>>, TError = ProblemDetails>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof adminGetAllDepartments>>,
-          TError,
-          Awaited<ReturnType<typeof adminGetAllDepartments>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ofetchMutator>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useAdminGetAllDepartments<TData = Awaited<ReturnType<typeof adminGetAllDepartments>>, TError = ProblemDetails>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof adminGetAllDepartments>>,
-          TError,
-          Awaited<ReturnType<typeof adminGetAllDepartments>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ofetchMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useAdminGetAllDepartments<TData = Awaited<ReturnType<typeof adminGetAllDepartments>>, TError = ProblemDetails>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useAdminGetAllDepartments<TData = Awaited<ReturnType<typeof adminGetAllDepartments>>, TError = ProblemDetails>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getAdminGetAllDepartmentsQueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-

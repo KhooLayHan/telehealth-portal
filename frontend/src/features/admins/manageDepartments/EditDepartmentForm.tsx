@@ -1,8 +1,14 @@
 import { useForm } from "@tanstack/react-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { Building2, Check } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import {
+  getAdminGetAllDepartmentsQueryKey,
+  useAdminUpdateDepartment,
+} from "@/api/generated/admins/admins";
+import { ApiError } from "@/api/ofetch-mutator";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,7 +26,7 @@ import type { DepartmentTableRow } from "./UseDepartmentsTable";
 const MAX_DEPARTMENT_NAME_LENGTH = 100;
 const MAX_DEPARTMENT_DESCRIPTION_LENGTH = 500;
 
-// Validates department detail edits before they are saved locally.
+// Validates department detail edits before they are saved to the backend.
 const editDepartmentSchema = z.object({
   name: z
     .string()
@@ -36,19 +42,11 @@ const editDepartmentSchema = z.object({
 // Describes the values captured by the edit-department form.
 type EditDepartmentFormValues = z.infer<typeof editDepartmentSchema>;
 
-// Describes the local-only department update emitted by the edit form.
-export interface EditDepartmentDetails {
-  id: string;
-  name: string;
-  description: string;
-}
-
 // Props for controlling the edit-department dialog from the department page.
 interface EditDepartmentFormProps {
   department: DepartmentTableRow | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave?: (department: EditDepartmentDetails) => void | Promise<void>;
 }
 
 // Props for the mounted edit-department form content.
@@ -56,7 +54,6 @@ interface EditDepartmentFormContentProps {
   department: DepartmentTableRow;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave?: (department: EditDepartmentDetails) => void | Promise<void>;
 }
 
 // Converts a department table row into the default values used by the form.
@@ -81,12 +78,7 @@ function toFieldErrors(errors: unknown[]): Array<{ message: string }> {
 }
 
 // Renders the selected department edit dialog when a table row is active.
-export function EditDepartmentForm({
-  department,
-  open,
-  onOpenChange,
-  onSave,
-}: EditDepartmentFormProps) {
+export function EditDepartmentForm({ department, open, onOpenChange }: EditDepartmentFormProps) {
   if (!department) {
     return null;
   }
@@ -97,30 +89,48 @@ export function EditDepartmentForm({
       department={department}
       open={open}
       onOpenChange={onOpenChange}
-      onSave={onSave}
     />
   );
 }
 
-// Renders a prefilled frontend-only form for editing department details.
+// Renders a prefilled form for editing department details through the backend.
 function EditDepartmentFormContent({
   department,
   open,
   onOpenChange,
-  onSave,
 }: EditDepartmentFormContentProps) {
+  const queryClient = useQueryClient();
+  const { mutateAsync, isPending } = useAdminUpdateDepartment({
+    mutation: {
+      onSuccess: async () => {
+        toast.success("Department details updated successfully");
+        await queryClient.invalidateQueries({ queryKey: getAdminGetAllDepartmentsQueryKey() });
+        onOpenChange(false);
+      },
+      onError: (error) => {
+        if (error instanceof ApiError) {
+          toast.error(error.data.title ?? "Failed to update department");
+          return;
+        }
+
+        toast.error("Failed to update department");
+      },
+    },
+  });
+
   const form = useForm({
     defaultValues: buildEditDepartmentValues(department),
     validators: { onSubmit: editDepartmentSchema },
     onSubmit: async ({ value }) => {
-      await onSave?.({
-        id: department.id,
-        name: value.name.trim(),
-        description: value.description.trim(),
-      });
+      const description = value.description.trim();
 
-      toast.success("Department details updated locally");
-      onOpenChange(false);
+      await mutateAsync({
+        slug: department.id,
+        data: {
+          name: value.name.trim(),
+          description: description.length > 0 ? description : null,
+        },
+      });
     },
   });
 
@@ -145,8 +155,7 @@ function EditDepartmentFormContent({
             <div className="min-w-0 space-y-1">
               <DialogTitle className="text-xl font-semibold">Edit Department Details</DialogTitle>
               <DialogDescription>
-                Update the department name and internal admin description before backend saving is
-                connected.
+                Update the department name and internal admin description.
               </DialogDescription>
             </div>
           </div>
@@ -222,9 +231,9 @@ function EditDepartmentFormContent({
             </Button>
             <form.Subscribe selector={(state) => state.isSubmitting}>
               {(isSubmitting) => (
-                <Button type="submit" className="gap-1.5" disabled={isSubmitting}>
+                <Button type="submit" className="gap-1.5" disabled={isSubmitting || isPending}>
                   <Check className="size-4" />
-                  {isSubmitting ? "Saving..." : "Save Changes"}
+                  {isPending ? "Saving..." : "Save Changes"}
                 </Button>
               )}
             </form.Subscribe>
