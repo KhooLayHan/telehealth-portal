@@ -1,9 +1,11 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, LayoutGrid, List, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileDown, LayoutGrid, List, Search } from "lucide-react";
 import { useState } from "react";
 import type { ReceptionistAppointmentDto } from "@/api/model/ReceptionistAppointmentDto";
+import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { useAppointmentsCsvExport } from "@/features/admins/manageAppointments/UseAppointmentsCsvExport";
 import { cn } from "@/lib/utils";
 import { type DayData, useAdminAppointments } from "../appointments/roles/UseAdminAppointments";
 
@@ -438,7 +440,13 @@ export function AdminAppointmentPage() {
     listItems,
     listTotalPages,
     isListLoading,
+    isListError,
   } = useAdminAppointments(currentYear, currentMonth, listPage, search);
+  const { exportAppointmentsCsv, isExportDisabled } = useAppointmentsCsvExport({
+    appointments: listItems,
+    isLoading: isListLoading,
+    isError: isListError,
+  });
 
   function handleDaySelect(day: number) {
     setSelectedDay(day);
@@ -471,15 +479,29 @@ export function AdminAppointmentPage() {
 
   return (
     <div className="space-y-4">
-      <div className="space-y-1">
-        <h1 className="font-semibold text-3xl tracking-tight">View Appointments</h1>
-        <p className="text-lg text-muted-foreground">
-          View all scheduled appointments in one place
-        </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-1">
+          <h1 className="font-semibold text-3xl tracking-tight">View Appointments</h1>
+          <p className="text-lg text-muted-foreground">
+            View all scheduled appointments in one place
+          </p>
+        </div>
+        <div className="flex flex-col gap-2 sm:ml-auto sm:flex-row sm:items-center">
+          <Button
+            type="button"
+            variant="outline"
+            className="h-9 gap-1.5 bg-background"
+            disabled={isExportDisabled}
+            onClick={exportAppointmentsCsv}
+          >
+            <FileDown className="size-4" />
+            Export CSV
+          </Button>
+        </div>
       </div>
 
       {/* Search bar + view toggle */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
           <Input
