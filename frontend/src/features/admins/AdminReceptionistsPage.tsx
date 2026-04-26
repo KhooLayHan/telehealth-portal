@@ -2,7 +2,6 @@ import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { FileDown, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import { useAdminGetAllReceptionists } from "@/api/generated/admins/admins";
 import type { AdminReceptionistDto } from "@/api/model/AdminReceptionistDto";
 import {
@@ -18,66 +17,10 @@ import { AddNewReceptionistForm } from "@/features/admins/manageReceptionists/Ad
 import { DeleteReceptionistDialog } from "@/features/admins/manageReceptionists/DeleteReceptionistDialog";
 import { EditReceptionistForm } from "@/features/admins/manageReceptionists/EditReceptionistForm";
 import { ReceptionistTable } from "@/features/admins/manageReceptionists/ReceptionistTable";
+import { useReceptionistsCsvExport } from "@/features/admins/manageReceptionists/UseReceptionistsCsvExport";
 import { ViewReceptionistDetailDialog } from "@/features/admins/manageReceptionists/ViewReceptionistDetailDialog";
 
 const PAGE_SIZE = 10;
-const RECEPTIONISTS_CSV_HEADERS = ["Name", "Username", "Email", "Phone", "Joined"] as const;
-const CSV_SPECIAL_CHARACTERS_PATTERN = /[",\n]/;
-const WINDOWS_NEWLINES_PATTERN = /\r\n/g;
-const CARRIAGE_RETURN_PATTERN = /\r/g;
-const DOUBLE_QUOTE_PATTERN = /"/g;
-
-// Formats a date string as "15 Apr 1982"
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
-
-// Escapes one cell so commas, quotes, and line breaks remain valid CSV content.
-function escapeCsvCell(value: string | null | undefined): string {
-  const normalizedValue = String(value ?? "")
-    .replace(WINDOWS_NEWLINES_PATTERN, "\n")
-    .replace(CARRIAGE_RETURN_PATTERN, "\n");
-
-  if (!CSV_SPECIAL_CHARACTERS_PATTERN.test(normalizedValue)) {
-    return normalizedValue;
-  }
-
-  return `"${normalizedValue.replace(DOUBLE_QUOTE_PATTERN, '""')}"`;
-}
-
-// Converts receptionist records into a CSV document with one row per receptionist.
-function buildReceptionistsCsv(receptionists: AdminReceptionistDto[]): string {
-  const rows = [
-    RECEPTIONISTS_CSV_HEADERS,
-    ...receptionists.map((receptionist) => [
-      `${receptionist.firstName} ${receptionist.lastName}`,
-      receptionist.username,
-      receptionist.email,
-      receptionist.phoneNumber ?? "",
-      receptionist.createdAt ? formatDate(String(receptionist.createdAt)) : "",
-    ]),
-  ];
-
-  return `${rows.map((row) => row.map(escapeCsvCell).join(",")).join("\r\n")}\r\n`;
-}
-
-// Triggers a browser download for the generated CSV content.
-function downloadCsvFile(fileName: string, csvContent: string): void {
-  const blob = new Blob(["\uFEFF", csvContent], { type: "text/csv;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-
-  link.href = url;
-  link.download = fileName;
-  document.body.append(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
-}
 
 // Admin page displaying a paginated, searchable list of all receptionists
 export function AdminReceptionistsPage() {
@@ -129,19 +72,11 @@ export function AdminReceptionistsPage() {
   const receptionists = result?.items ?? [];
   const totalCount = result ? Number(result.totalCount) : 0;
   const totalPages = result ? Number(result.totalPages ?? 1) : 1;
-
-  const handleExportCsv = () => {
-    if (receptionists.length === 0) {
-      toast.info("No receptionist records available to export.");
-      return;
-    }
-
-    const today = new Date().toISOString().slice(0, 10);
-    downloadCsvFile(`receptionists-${today}.csv`, buildReceptionistsCsv(receptionists));
-    toast.success(
-      `Exported ${receptionists.length} receptionist record${receptionists.length === 1 ? "" : "s"}.`,
-    );
-  };
+  const { exportReceptionistsCsv, isExportDisabled } = useReceptionistsCsvExport({
+    receptionists,
+    isLoading,
+    isError,
+  });
 
   return (
     <div className="space-y-6">
@@ -171,8 +106,8 @@ export function AdminReceptionistsPage() {
               type="button"
               variant="outline"
               className="h-9 gap-1.5 bg-background"
-              disabled={isLoading || isError}
-              onClick={handleExportCsv}
+              disabled={isExportDisabled}
+              onClick={exportReceptionistsCsv}
             >
               <FileDown className="size-4" />
               Export CSV
