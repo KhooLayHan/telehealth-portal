@@ -6,7 +6,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-
 // Displays the admin patient management page with a header and patient records table.
 export function AdminPatientsPage() {
   return (
@@ -31,7 +30,6 @@ export function AdminPatientsPage() {
           </p>
         </div>
       </header>
-
     </div>
   );
 }

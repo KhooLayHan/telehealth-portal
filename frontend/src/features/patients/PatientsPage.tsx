@@ -8,14 +8,15 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { useAuthStore } from "@/store/useAuthStore";
-import { AdminPatientsPage } from "../admins/AdminPatientsPage";
 import { ReceptionistPatientsPage } from "./roles/ReceptionistPatientsPage";
 
 export function PatientsListingPage() {
   const { user } = useAuthStore();
+  const role = user?.role?.toLowerCase();
+  const isAdmin = role === "admin";
 
   const renderPatientsPage = () => {
-    switch (user?.role?.toLowerCase()) {
+    switch (role) {
       case "patient":
         return "Do something";
       case "receptionist":
@@ -23,7 +24,7 @@ export function PatientsListingPage() {
       case "doctor":
         return "";
       case "admin":
-        return <AdminPatientsPage />;
+        return null;
       case "lab-tech":
         return "Do something";
       default:
@@ -45,9 +46,11 @@ export function PatientsListingPage() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <p className="mt-0.5 text-muted-foreground text-sm">
-          View and manage all active patients in one place
-        </p>
+        {!isAdmin && (
+          <p className="mt-0.5 text-muted-foreground text-sm">
+            View and manage all active patients in one place
+          </p>
+        )}
       </div>
       {renderPatientsPage()}
     </>
