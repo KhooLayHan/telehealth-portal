@@ -35,6 +35,7 @@ interface PatientTableProps extends PatientTableActions {
   data: ClinicStaffPatientDto[];
   isLoading: boolean;
   page: number;
+  totalCount: number;
   totalPages: number;
   onPageChange: (page: number) => void;
   search: string;
@@ -73,9 +74,9 @@ function genderLabel(code: string | null): string {
   return map[code] ?? code;
 }
 
-// Builds the patient table columns and includes row actions when callbacks are available.
-function getPatientColumns(hasActions: boolean): ColumnDef<ClinicStaffPatientDto>[] {
-  const columns: ColumnDef<ClinicStaffPatientDto>[] = [
+// Builds the patient table columns with row actions.
+function getPatientColumns(): ColumnDef<ClinicStaffPatientDto>[] {
+  return [
     {
       accessorKey: "firstName",
       header: "Name",
@@ -109,14 +110,6 @@ function getPatientColumns(hasActions: boolean): ColumnDef<ClinicStaffPatientDto
       header: "Joined At",
       cell: ({ row }) => <span className="text-xs">{formatDate(row.getValue("joinedAt"))}</span>,
     },
-  ];
-
-  if (!hasActions) {
-    return columns;
-  }
-
-  return [
-    ...columns,
     {
       id: "actions",
       header: "Actions",
@@ -125,42 +118,42 @@ function getPatientColumns(hasActions: boolean): ColumnDef<ClinicStaffPatientDto
 
         return (
           <div className="flex items-center gap-1">
-            {meta.onView && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
-                aria-label="View patient details"
-                title="View patient details"
-                onClick={() => meta.onView?.(row.original)}
-              >
-                <Eye className="size-3.5" />
-              </Button>
-            )}
-            {meta.onEdit && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
-                aria-label="Edit patient"
-                title="Edit patient"
-                onClick={() => meta.onEdit?.(row.original)}
-              >
-                <Pencil className="size-3.5" />
-              </Button>
-            )}
-            {meta.onRemove && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
-                aria-label="Remove patient record"
-                title="Remove patient record"
-                onClick={() => meta.onRemove?.(row.original)}
-              >
-                <Trash2 className="size-3.5" />
-              </Button>
-            )}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+              disabled={!meta.onView}
+              aria-label="View patient details"
+              title="View patient details"
+              onClick={() => meta.onView?.(row.original)}
+            >
+              <Eye className="size-3.5" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+              disabled={!meta.onEdit}
+              aria-label="Edit patient"
+              title="Edit patient"
+              onClick={() => meta.onEdit?.(row.original)}
+            >
+              <Pencil className="size-3.5" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+              disabled={!meta.onRemove}
+              aria-label="Remove patient record"
+              title="Remove patient record"
+              onClick={() => meta.onRemove?.(row.original)}
+            >
+              <Trash2 className="size-3.5" />
+            </Button>
           </div>
         );
       },
@@ -173,6 +166,7 @@ export function PatientTable({
   data,
   isLoading,
   page,
+  totalCount,
   totalPages,
   onPageChange,
   search,
@@ -182,8 +176,7 @@ export function PatientTable({
   onRemove,
   onAddNew,
 }: PatientTableProps) {
-  const hasActions = !!(onView || onEdit || onRemove);
-  const columns = useMemo(() => getPatientColumns(hasActions), [hasActions]);
+  const columns = useMemo(() => getPatientColumns(), []);
   const table = useReactTable({
     data,
     columns,
@@ -198,8 +191,12 @@ export function PatientTable({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
           <div className="relative w-full sm:w-80">
+            <label htmlFor="patient-search" className="sr-only">
+              Search patients
+            </label>
             <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
             <Input
+              id="patient-search"
               placeholder="Search by name..."
               value={search}
               onChange={(event) => onSearchChange(event.target.value)}
@@ -209,20 +206,26 @@ export function PatientTable({
           {isLoading && <Loader2 className="size-4 animate-spin text-muted-foreground" />}
         </div>
 
-        {onAddNew && (
-          <Button
-            type="button"
-            size="sm"
-            className="h-9 gap-1.5 bg-foreground text-background hover:bg-foreground/90"
-            onClick={onAddNew}
-          >
-            <Plus className="size-3.5" />
-            Add New Patient
-          </Button>
-        )}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+          {onAddNew && (
+            <Button
+              type="button"
+              size="sm"
+              className="h-9 gap-1.5 bg-foreground text-background hover:bg-foreground/90"
+              onClick={onAddNew}
+            >
+              <Plus className="size-3.5" />
+              Add New Patient
+            </Button>
+          )}
+          <p className="text-sm text-muted-foreground" aria-live="polite">
+            <span className="font-semibold text-foreground">{totalCount}</span>{" "}
+            {totalCount === 1 ? "patient" : "patients"} found
+          </p>
+        </div>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-border">
+      <div className="overflow-x-auto rounded-lg border border-border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -281,6 +284,7 @@ export function PatientTable({
           <p className="text-xs text-muted-foreground">
             Page <span className="font-medium text-foreground">{page}</span> of{" "}
             <span className="font-medium text-foreground">{totalPages}</span>
+            <span className="hidden sm:inline"> - {totalCount} total</span>
           </p>
           <div className="flex items-center gap-1.5">
             <Button

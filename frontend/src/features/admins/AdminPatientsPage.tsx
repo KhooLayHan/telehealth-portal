@@ -2,6 +2,13 @@ import { FileDown, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { useGetAllPatientsForClinicStaff } from "@/api/generated/patients/patients";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { AddNewPatientForm } from "@/features/admins/managePatients/AddNewPatientForm";
 import { PatientTable } from "@/features/admins/managePatients/PatientTable";
@@ -40,6 +47,18 @@ export function AdminPatientsPage() {
   return (
     <div className="space-y-6">
       <header className="space-y-2">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbPage className="text-muted-foreground">Patient Management</BreadcrumbPage>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Patients</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-1">
             <h1 className="font-semibold text-3xl tracking-tight">Manage Patients</h1>
@@ -50,15 +69,6 @@ export function AdminPatientsPage() {
           <div className="flex flex-col gap-2 sm:ml-auto sm:flex-row sm:items-center">
             <Button
               type="button"
-              size="sm"
-              className="h-9 gap-1.5 bg-foreground text-background hover:bg-foreground/90"
-              onClick={() => setAddPatientOpen(true)}
-            >
-              <Plus className="size-3.5" />
-              Add Patient
-            </Button>
-            <Button
-              type="button"
               variant="outline"
               className="h-9 gap-1.5 bg-background"
               disabled={isExportDisabled}
@@ -67,28 +77,28 @@ export function AdminPatientsPage() {
               <FileDown className="size-4" />
               Export CSV
             </Button>
+            <Button
+              type="button"
+              className="h-9 gap-1.5 bg-black text-white hover:bg-black/85"
+              onClick={() => setAddPatientOpen(true)}
+            >
+              <Plus className="size-4" />
+              Add New Patient
+            </Button>
           </div>
         </div>
       </header>
 
-      <section className="space-y-4">
-        <div className="flex items-center justify-end gap-3">
-          <p className="text-muted-foreground text-sm">
-            <span className="font-semibold text-foreground">{totalCount}</span>{" "}
-            {totalCount === 1 ? "patient" : "patients"} found
-          </p>
-        </div>
-
-        <PatientTable
-          data={patients}
-          isLoading={isLoading}
-          page={page}
-          totalPages={totalPages}
-          onPageChange={setPage}
-          search={searchInput}
-          onSearchChange={setSearchInput}
-        />
-      </section>
+      <PatientTable
+        data={patients}
+        isLoading={isLoading}
+        page={page}
+        totalCount={totalCount}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        search={searchInput}
+        onSearchChange={setSearchInput}
+      />
 
       <AddNewPatientForm open={addPatientOpen} onOpenChange={setAddPatientOpen} />
     </div>
