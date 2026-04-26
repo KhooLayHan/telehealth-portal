@@ -62,8 +62,8 @@ export function AdminPatientsPage() {
         </div>
       </header>
 
-      <section className="rounded-lg border border-border bg-card p-4 sm:p-6">
-        <div className="mb-4 flex items-center justify-between gap-3">
+      <section className="space-y-4">
+        <div className="flex items-center justify-between gap-3">
           <h2 className="font-semibold text-lg">Patient Records</h2>
           <p className="text-muted-foreground text-sm">
             <span className="font-semibold text-foreground">{totalCount}</span>{" "}
