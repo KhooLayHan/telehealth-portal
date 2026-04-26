@@ -19,13 +19,13 @@ internal sealed class UnexpectedExceptionHandler(IProblemDetailsService problemD
             return false;
         }
 
+        var isDevelopment = httpContext
+            .RequestServices.GetRequiredService<IHostEnvironment>()
+            .IsDevelopment();
+
         if (exception is BadHttpRequestException badRequestException)
         {
             httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
-
-            var isDevelopment = httpContext
-                .RequestServices.GetRequiredService<IHostEnvironment>()
-                .IsDevelopment();
 
             var badRequestDetails = new ProblemDetails
             {
@@ -53,7 +53,9 @@ internal sealed class UnexpectedExceptionHandler(IProblemDetailsService problemD
         {
             Title = ReasonPhrases.GetReasonPhrase(StatusCodes.Status500InternalServerError),
             Type = "InternalError",
-            Detail = "An unexpected error occurred.",
+            Detail = isDevelopment
+                ? $"{exception.GetType().Name}: {exception.Message}"
+                : "An unexpected error occurred.",
             Status = StatusCodes.Status500InternalServerError,
         };
 

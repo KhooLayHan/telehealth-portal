@@ -10,7 +10,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "SES_SENDER_EMAIL": "hongjx0321@gmail.com",
         "SES_REGION": "us-east-1",
-        "AWS_PROFILE": "dev-jingxin"
+        "AWS_PROFILE": "default"
       }
     },
     "https": {
@@ -22,7 +22,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "SES_SENDER_EMAIL": "hongjx0321@gmail.com",
         "SES_REGION": "us-east-1",
-        "AWS_PROFILE": "dev-jingxin"
+        "AWS_PROFILE": "default"
       }
     }
   }
