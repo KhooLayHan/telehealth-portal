@@ -2,13 +2,6 @@ import { FileDown, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { useGetAllPatientsForClinicStaff } from "@/api/generated/patients/patients";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { AddNewPatientForm } from "@/features/admins/managePatients/AddNewPatientForm";
 import { PatientTable } from "@/features/admins/managePatients/PatientTable";
@@ -47,18 +40,6 @@ export function AdminPatientsPage() {
   return (
     <div className="space-y-6">
       <header className="space-y-2">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbPage className="text-muted-foreground">Patient Management</BreadcrumbPage>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Patients</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-1">
             <h1 className="font-semibold text-3xl tracking-tight">Manage Patients</h1>
