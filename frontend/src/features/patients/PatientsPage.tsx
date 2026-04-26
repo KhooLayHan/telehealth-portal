@@ -8,8 +8,8 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { useAuthStore } from "@/store/useAuthStore";
-import { ReceptionistPatientsPage } from "./roles/ReceptionistPatientsPage";
 import { AdminPatientsPage } from "../admins/AdminPatientsPage";
+import { ReceptionistPatientsPage } from "./roles/ReceptionistPatientsPage";
 
 export function PatientsListingPage() {
   const { user } = useAuthStore();
