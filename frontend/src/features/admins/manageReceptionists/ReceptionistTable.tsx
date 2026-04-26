@@ -1,5 +1,5 @@
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { ChevronLeft, ChevronRight, Eye, Pencil, Plus, Search, UserX } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, Pencil, Search, UserX } from "lucide-react";
 import type { AdminReceptionistDto } from "@/api/model/AdminReceptionistDto";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -129,7 +129,6 @@ interface ReceptionistTableProps {
   onView: (receptionist: AdminReceptionistDto) => void;
   onEdit: (receptionist: AdminReceptionistDto) => void;
   onDeactivate: (receptionist: AdminReceptionistDto) => void;
-  onAddNew: () => void;
 }
 
 // Paginated and searchable data table for the receptionists list
@@ -145,7 +144,6 @@ export function ReceptionistTable({
   onView,
   onEdit,
   onDeactivate,
-  onAddNew,
 }: ReceptionistTableProps) {
   const table = useReactTable({
     data,
@@ -158,7 +156,7 @@ export function ReceptionistTable({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center gap-4">
         <div className="relative w-72">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -168,10 +166,6 @@ export function ReceptionistTable({
             className="h-9 pl-9 text-sm"
           />
         </div>
-        <Button className="h-9 gap-1.5 bg-black text-white hover:bg-black/85" onClick={onAddNew}>
-          <Plus className="size-4" />
-          New Receptionist
-        </Button>
       </div>
 
       <div className="overflow-hidden rounded-lg border border-border">
