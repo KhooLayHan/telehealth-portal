@@ -5,7 +5,7 @@ import type { ReceptionistAppointmentDto } from "@/api/model/ReceptionistAppoint
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { type DayData, useAdminAppointments } from "./UseAdminAppointments";
+import { type DayData, useAdminAppointments } from "../appointments/roles/UseAdminAppointments";
 
 // ---------------------------------------------------------------------------
 // Helpers
