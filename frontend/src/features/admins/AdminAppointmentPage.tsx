@@ -5,6 +5,7 @@ import type { ReceptionistAppointmentDto } from "@/api/model/ReceptionistAppoint
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { AppointmentTable } from "@/features/admins/manageAppointments/AppointmentTable";
 import { useAppointmentsCsvExport } from "@/features/admins/manageAppointments/UseAppointmentsCsvExport";
 import { cn } from "@/lib/utils";
 import { type DayData, useAdminAppointments } from "../appointments/roles/UseAdminAppointments";
@@ -72,25 +73,6 @@ function AppointmentTypeBadge({ visitReason }: { visitReason: string }) {
   return (
     <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold tracking-wide bg-zinc-800 text-zinc-300">
       {visitReason.toUpperCase()}
-    </span>
-  );
-}
-
-// Renders a status badge using the color code returned by the API
-function AppointmentStatusBadge({
-  status,
-  colorCode,
-}: {
-  status: string;
-  colorCode: string | undefined;
-}) {
-  const color = colorCode ?? "#71717a";
-  return (
-    <span
-      className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold tracking-wide capitalize"
-      style={{ backgroundColor: `${color}33`, color }}
-    >
-      {status}
     </span>
   );
 }
@@ -314,112 +296,6 @@ function AppointmentDayDialog({
   );
 }
 
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-
-interface ListViewTableProps {
-  appointments: ReceptionistAppointmentDto[];
-  isLoading: boolean;
-  page: number;
-  totalPages: number;
-  onPrev: () => void;
-  onNext: () => void;
-}
-
-function ListViewTable({
-  appointments,
-  isLoading,
-  page,
-  totalPages,
-  onPrev,
-  onNext,
-}: ListViewTableProps) {
-  return (
-    <div className="space-y-3">
-      <div className="rounded-xl border border-border overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/50">
-            <tr>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">Time</th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">Date</th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">Patient</th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                Visit Reason
-              </th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">Doctor</th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {isLoading ? (
-              <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-sm text-muted-foreground">
-                  Loading appointments…
-                </td>
-              </tr>
-            ) : appointments.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-sm text-muted-foreground">
-                  No appointments found.
-                </td>
-              </tr>
-            ) : (
-              appointments.map((appt) => (
-                <tr key={appt.publicId} className="hover:bg-muted/30 transition-colors">
-                  <td className="px-4 py-3 font-mono text-xs text-foreground">
-                    {formatLocalTime(appt.startTime)}
-                  </td>
-                  <td className="px-4 py-3 font-mono text-xs text-foreground">{appt.date}</td>
-                  <td className="px-4 py-3 font-medium text-foreground">{appt.patientName}</td>
-                  <td className="px-4 py-3 text-muted-foreground text-xs">{appt.visitReason}</td>
-                  <td className="px-4 py-3 text-muted-foreground text-xs">
-                    {appt.doctorName} · {appt.specialization}
-                  </td>
-                  <td className="px-4 py-3">
-                    <AppointmentStatusBadge
-                      status={appt.status ?? ""}
-                      colorCode={appt.statusColorCode}
-                    />
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination controls */}
-      <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <span>
-          Page {page} of {totalPages}
-        </span>
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            onClick={onPrev}
-            disabled={page <= 1}
-            className="inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors hover:bg-muted disabled:opacity-40"
-          >
-            <ChevronLeft className="size-4" />
-          </button>
-          <button
-            type="button"
-            onClick={onNext}
-            disabled={page >= totalPages}
-            className="inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors hover:bg-muted disabled:opacity-40"
-          >
-            <ChevronRight className="size-4" />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Main page
-// ---------------------------------------------------------------------------
-
 type ViewMode = "calendar" | "list";
 
 export function AdminAppointmentPage() {
@@ -583,7 +459,7 @@ export function AdminAppointmentPage() {
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.18 }}
           >
-            <ListViewTable
+            <AppointmentTable
               appointments={listItems}
               isLoading={isListLoading}
               page={listPage}
