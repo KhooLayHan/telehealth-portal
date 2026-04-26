@@ -43,7 +43,7 @@ function AppointmentStatusBadge({
   const color = colorCode ?? "#71717a";
   return (
     <span
-      className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold tracking-wide capitalize"
+      className="inline-flex items-center rounded px-2 py-1 text-[11px] font-semibold capitalize tracking-wide"
       style={{ backgroundColor: `${color}33`, color }}
     >
       {status}
@@ -61,60 +61,66 @@ export function AppointmentTable({
   onNext,
 }: AppointmentTableProps) {
   return (
-    <div className="space-y-3">
-      <div className="overflow-hidden rounded-xl border border-border">
+    <div className="space-y-4">
+      <div className="overflow-x-auto rounded-lg border border-border">
         <Table>
-          <TableHeader className="bg-muted/50">
-            <TableRow>
-              <TableHead className="px-4 py-3 text-muted-foreground">Time</TableHead>
-              <TableHead className="px-4 py-3 text-muted-foreground">Date</TableHead>
-              <TableHead className="px-4 py-3 text-muted-foreground">Patient</TableHead>
-              <TableHead className="px-4 py-3 text-muted-foreground">Visit Reason</TableHead>
-              <TableHead className="px-4 py-3 text-muted-foreground">Doctor</TableHead>
-              <TableHead className="px-4 py-3 text-muted-foreground">Status</TableHead>
+          <TableHeader>
+            <TableRow className="border-b border-foreground/20 bg-foreground hover:bg-foreground">
+              <TableHead className="w-32 px-5 py-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-background/70">
+                Time
+              </TableHead>
+              <TableHead className="w-36 px-5 py-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-background/70">
+                Date
+              </TableHead>
+              <TableHead className="min-w-48 px-5 py-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-background/70">
+                Patient
+              </TableHead>
+              <TableHead className="min-w-80 px-5 py-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-background/70">
+                Visit Reason
+              </TableHead>
+              <TableHead className="min-w-56 px-5 py-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-background/70">
+                Doctor
+              </TableHead>
+              <TableHead className="w-32 px-5 py-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-background/70">
+                Status
+              </TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody className="divide-y divide-border">
+          <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell
-                  colSpan={6}
-                  className="px-4 py-8 text-center text-muted-foreground text-sm"
-                >
-                  Loading appointments...
+                <TableCell colSpan={6} className="h-32 text-center">
+                  <p className="text-sm text-muted-foreground">Loading appointments...</p>
                 </TableCell>
               </TableRow>
             ) : appointments.length === 0 ? (
               <TableRow>
-                <TableCell
-                  colSpan={6}
-                  className="px-4 py-8 text-center text-muted-foreground text-sm"
-                >
-                  No appointments found.
+                <TableCell colSpan={6} className="h-32 text-center">
+                  <p className="text-sm text-muted-foreground">No appointments found.</p>
                 </TableCell>
               </TableRow>
             ) : (
               appointments.map((appointment) => (
                 <TableRow
                   key={appointment.publicId}
-                  className="transition-colors hover:bg-muted/30"
+                  className="border-b border-border transition-colors duration-100 hover:bg-muted/50"
                 >
-                  <TableCell className="px-4 py-3 font-mono text-foreground text-xs">
+                  <TableCell className="px-5 py-3.5 font-mono text-sm">
                     {formatLocalTime(appointment.startTime)}
                   </TableCell>
-                  <TableCell className="px-4 py-3 font-mono text-foreground text-xs">
+                  <TableCell className="px-5 py-3.5 font-mono text-sm text-muted-foreground">
                     {appointment.date}
                   </TableCell>
-                  <TableCell className="px-4 py-3 font-medium text-foreground">
+                  <TableCell className="px-5 py-3.5 text-sm font-medium">
                     {appointment.patientName}
                   </TableCell>
-                  <TableCell className="px-4 py-3 text-muted-foreground text-xs">
-                    {appointment.visitReason}
+                  <TableCell className="max-w-xl whitespace-normal px-5 py-3.5 text-sm text-muted-foreground">
+                    {appointment.visitReason || "No visit reason provided."}
                   </TableCell>
-                  <TableCell className="px-4 py-3 text-muted-foreground text-xs">
+                  <TableCell className="px-5 py-3.5 text-sm text-muted-foreground">
                     {appointment.doctorName} &middot; {appointment.specialization}
                   </TableCell>
-                  <TableCell className="px-4 py-3">
+                  <TableCell className="px-5 py-3.5">
                     <AppointmentStatusBadge
                       status={appointment.status ?? ""}
                       colorCode={appointment.statusColorCode}
@@ -127,33 +133,40 @@ export function AppointmentTable({
         </Table>
       </div>
 
-      <div className="flex items-center justify-between text-muted-foreground text-sm">
-        <span>
-          Page {page} of {totalPages}
-        </span>
-        <div className="flex items-center gap-1">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            onClick={onPrev}
-            disabled={page <= 1}
-            aria-label="Previous page"
-          >
-            <ChevronLeft className="size-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            onClick={onNext}
-            disabled={page >= totalPages}
-            aria-label="Next page"
-          >
-            <ChevronRight className="size-4" />
-          </Button>
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between pt-1">
+          <p className="text-xs text-muted-foreground" aria-live="polite">
+            Page <span className="font-medium text-foreground">{page}</span> of{" "}
+            <span className="font-medium text-foreground">{totalPages}</span>
+          </p>
+          <div className="flex items-center gap-1.5">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={onPrev}
+              disabled={page <= 1}
+              aria-label="Previous appointments page"
+              title="Previous page"
+            >
+              <ChevronLeft className="size-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={onNext}
+              disabled={page >= totalPages}
+              aria-label="Next appointments page"
+              title="Next page"
+            >
+              <ChevronRight className="size-4" />
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
