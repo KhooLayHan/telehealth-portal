@@ -2,16 +2,20 @@ import { FileDown, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { useGetAllPatientsForClinicStaff } from "@/api/generated/patients/patients";
+import type { ClinicStaffPatientDto } from "@/api/model/ClinicStaffPatientDto";
 import { Button } from "@/components/ui/button";
 import { AddNewPatientForm } from "@/features/admins/managePatients/AddNewPatientForm";
 import { PatientTable } from "@/features/admins/managePatients/PatientTable";
 import { usePatientsCsvExport } from "@/features/admins/managePatients/UsePatientsCsvExport";
+import { ViewPatientDetailDialog } from "@/features/admins/managePatients/ViewPatientDetailDialog";
 
 const PAGE_SIZE = 10;
 
 // Displays the admin patient management page with a header and patient records table.
 export function AdminPatientsPage() {
   const [addPatientOpen, setAddPatientOpen] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState<ClinicStaffPatientDto | null>(null);
+  const [viewPatientOpen, setViewPatientOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
@@ -36,6 +40,11 @@ export function AdminPatientsPage() {
   const patients = pagedResult?.items ?? [];
   const totalCount = Number(pagedResult?.totalCount ?? 0);
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+
+  const handleViewPatient = (patient: ClinicStaffPatientDto) => {
+    setSelectedPatient(patient);
+    setViewPatientOpen(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -79,9 +88,15 @@ export function AdminPatientsPage() {
         onPageChange={setPage}
         search={searchInput}
         onSearchChange={setSearchInput}
+        onView={handleViewPatient}
       />
 
       <AddNewPatientForm open={addPatientOpen} onOpenChange={setAddPatientOpen} />
+      <ViewPatientDetailDialog
+        patient={selectedPatient}
+        open={viewPatientOpen}
+        onOpenChange={setViewPatientOpen}
+      />
     </div>
   );
 }
