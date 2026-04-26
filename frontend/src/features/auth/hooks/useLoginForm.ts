@@ -32,6 +32,7 @@ export function useLoginForm() {
           email: string;
           firstName: string;
           lastName: string;
+          avatarUrl: string | null;
           roles: string[];
         };
 
@@ -45,6 +46,7 @@ export function useLoginForm() {
           email: profile.email,
           firstName: profile.firstName,
           role: pickPrimaryRole(profile.roles),
+          avatarUrl: profile.avatarUrl,
           // roles: profile.roles,
         });
 

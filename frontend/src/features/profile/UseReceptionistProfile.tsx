@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:5144";
 
@@ -105,6 +106,7 @@ async function patchProfile(data: ProfileFormData): Promise<void> {
 }
 
 export function UseReceptionistProfile() {
+  const setAvatarUrl = useAuthStore((s) => s.setAvatarUrl);
   const [me, setMe] = useState<ReceptionistMeData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
@@ -155,6 +157,7 @@ export function UseReceptionistProfile() {
       await patchAvatarUrl(cacheBustedUrl);
 
       setMe((prev) => (prev ? { ...prev, avatarUrl: cacheBustedUrl } : prev));
+      setAvatarUrl(cacheBustedUrl);
       toast.success("Profile photo updated");
     } catch {
       toast.error("Failed to upload photo. Please try again.");

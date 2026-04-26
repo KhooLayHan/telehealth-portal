@@ -100,6 +100,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     item.allowedRoles.includes(normalizedRole ?? ""),
   );
   const userInitial = user?.firstName?.charAt(0).toUpperCase() ?? "U";
+  const avatarUrl = user?.avatarUrl;
 
   const handleLogout = () => {
     logout();
@@ -136,8 +137,12 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="mb-1 flex items-center gap-3 rounded-lg px-3 py-2">
             <DropdownMenu>
               <DropdownMenuTrigger>
-                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground text-xs cursor-pointer">
-                  {userInitial}
+                <div className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary font-semibold text-primary-foreground text-xs cursor-pointer">
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="" className="size-full object-cover" />
+                  ) : (
+                    userInitial
+                  )}
                 </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-45">
@@ -199,8 +204,12 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger>
-                <div className="flex size-8 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground text-xs cursor-pointer">
-                  {userInitial}
+                <div className="flex size-8 items-center justify-center overflow-hidden rounded-full bg-primary font-semibold text-primary-foreground text-xs cursor-pointer">
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="" className="size-full object-cover" />
+                  ) : (
+                    userInitial
+                  )}
                 </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-45">
