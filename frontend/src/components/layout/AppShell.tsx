@@ -156,8 +156,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                     </DropdownMenuItem>
                   ) : null}
                   {normalizedRole === "doctor" || normalizedRole === "receptionist" ? (
-                    <DropdownMenuItem className="cursor-pointer" asChild>
-                      <Link to="/profile" className="flex items-center gap-1.5">
+                    <DropdownMenuItem className="cursor-pointer p-0">
+                      <Link to="/profile" className="flex w-full items-center gap-1.5 px-2 py-1.5">
                         <User className="size-3 shrink-0" />
                         Manage Profile
                       </Link>
@@ -219,8 +219,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                     </DropdownMenuItem>
                   ) : null}
                   {normalizedRole === "doctor" || normalizedRole === "receptionist" ? (
-                    <DropdownMenuItem className="cursor-pointer" asChild>
-                      <Link to="/profile" className="flex items-center gap-1.5">
+                    <DropdownMenuItem className="cursor-pointer p-0">
+                      <Link to="/profile" className="flex w-full items-center gap-1.5 px-2 py-1.5">
                         <User className="size-3 shrink-0" />
                         Manage Profile
                       </Link>
