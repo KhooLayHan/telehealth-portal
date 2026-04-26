@@ -13,6 +13,7 @@ import { AddNewDepartmentForm } from "@/features/admins/manageDepartments/AddNew
 import { DeleteDepartmentDialog } from "@/features/admins/manageDepartments/DeleteDepartmentDialog";
 import { DepartmentsTable } from "@/features/admins/manageDepartments/DepartmentsTable";
 import { EditDepartmentForm } from "@/features/admins/manageDepartments/EditDepartmentForm";
+import { useDepartmentsCsvExport } from "@/features/admins/manageDepartments/UseDepartmentsCsvExport";
 import type { DepartmentTableRow } from "@/features/admins/manageDepartments/UseDepartmentsTable";
 
 // Displays the admin department management page with a header and department table.
@@ -23,6 +24,7 @@ export function AdminDepartmentPage() {
   const [departmentSearch, setDepartmentSearch] = useState("");
   const [editingDepartment, setEditingDepartment] = useState<DepartmentTableRow | null>(null);
   const [deletingDepartment, setDeletingDepartment] = useState<DepartmentTableRow | null>(null);
+  const { exportDepartmentsCsv, isExportDisabled } = useDepartmentsCsvExport();
 
   const handleEditDepartment = (department: DepartmentTableRow) => {
     setEditingDepartment(department);
@@ -57,7 +59,13 @@ export function AdminDepartmentPage() {
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:ml-auto sm:flex-row sm:items-center">
-            <Button type="button" variant="outline" className="h-9 gap-1.5 bg-background">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-9 gap-1.5 bg-background"
+              disabled={isExportDisabled}
+              onClick={exportDepartmentsCsv}
+            >
               <FileDown className="size-4" />
               Export CSV
             </Button>
