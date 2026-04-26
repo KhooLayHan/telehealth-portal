@@ -11,7 +11,7 @@ import { PatientTable } from "@/features/admins/managePatients/PatientTable";
 import { usePatientsCsvExport } from "@/features/admins/managePatients/UsePatientsCsvExport";
 import { ViewPatientDetailDialog } from "@/features/admins/managePatients/ViewPatientDetailDialog";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 5;
 
 // Displays the admin patient management page with a header and patient records table.
 export function AdminPatientsPage() {
