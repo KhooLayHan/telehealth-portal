@@ -1178,36 +1178,30 @@ export function AdminReceptionistsPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: "easeOut" }}
       >
-        <div className="relative overflow-hidden rounded-xl border border-border bg-card">
-          <div className="p-6">
-            {isLoading ? (
-              <div className="flex h-48 items-center justify-center">
-                <p className="text-sm text-muted-foreground tracking-wide">
-                  Loading receptionists…
-                </p>
-              </div>
-            ) : isError ? (
-              <div className="flex h-48 items-center justify-center">
-                <p className="text-sm text-destructive">Failed to load receptionists.</p>
-              </div>
-            ) : (
-              <ReceptionistTable
-                data={receptionists}
-                page={page}
-                totalPages={totalPages}
-                hasNextPage={result?.hasNextPage}
-                hasPreviousPage={result?.hasPreviousPage}
-                onPageChange={setPage}
-                search={searchInput}
-                onSearchChange={setSearchInput}
-                onView={handleView}
-                onEdit={handleEdit}
-                onDeactivate={handleDeactivate}
-                onAddNew={() => setAddDialogOpen(true)}
-              />
-            )}
+        {isLoading ? (
+          <div className="flex h-48 items-center justify-center">
+            <p className="text-sm text-muted-foreground tracking-wide">Loading receptionists…</p>
           </div>
-        </div>
+        ) : isError ? (
+          <div className="flex h-48 items-center justify-center">
+            <p className="text-sm text-destructive">Failed to load receptionists.</p>
+          </div>
+        ) : (
+          <ReceptionistTable
+            data={receptionists}
+            page={page}
+            totalPages={totalPages}
+            hasNextPage={result?.hasNextPage}
+            hasPreviousPage={result?.hasPreviousPage}
+            onPageChange={setPage}
+            search={searchInput}
+            onSearchChange={setSearchInput}
+            onView={handleView}
+            onEdit={handleEdit}
+            onDeactivate={handleDeactivate}
+            onAddNew={() => setAddDialogOpen(true)}
+          />
+        )}
       </motion.div>
 
       <ReceptionistDetailsDialog
