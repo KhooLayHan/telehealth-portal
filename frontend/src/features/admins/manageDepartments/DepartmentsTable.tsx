@@ -1,6 +1,7 @@
-import { ChevronLeft, ChevronRight, Pencil, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pencil, Search, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -13,17 +14,44 @@ import { type DepartmentTableRow, useDepartmentsTable } from "./UseDepartmentsTa
 
 // Props for department table row actions.
 interface DepartmentsTableProps {
+  search: string;
+  onSearchChange: (value: string) => void;
   onEditDepartment?: (department: DepartmentTableRow) => void;
   onDeleteDepartment?: (department: DepartmentTableRow) => void;
 }
 
 // Displays the admin-facing departments table with backend data.
-export function DepartmentsTable({ onEditDepartment, onDeleteDepartment }: DepartmentsTableProps) {
+export function DepartmentsTable({
+  search,
+  onSearchChange,
+  onEditDepartment,
+  onDeleteDepartment,
+}: DepartmentsTableProps) {
   const { departments, isError, isLoading, page, totalCount, totalPages, onPageChange } =
-    useDepartmentsTable();
+    useDepartmentsTable(search);
 
   return (
     <div className="space-y-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative w-full sm:w-80">
+          <label htmlFor="department-search" className="sr-only">
+            Search departments
+          </label>
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            id="department-search"
+            value={search}
+            placeholder="Search by name or description..."
+            className="h-9 pl-9 text-sm"
+            onChange={(event) => onSearchChange(event.target.value)}
+          />
+        </div>
+        <p className="text-sm text-muted-foreground" aria-live="polite">
+          <span className="font-semibold text-foreground">{totalCount}</span>{" "}
+          {totalCount === 1 ? "department" : "departments"} found
+        </p>
+      </div>
+
       <div className="overflow-hidden rounded-lg border border-border">
         <Table>
           <TableHeader>
@@ -98,7 +126,9 @@ export function DepartmentsTable({ onEditDepartment, onDeleteDepartment }: Depar
                       </p>
                       {!isLoading && (
                         <p className="mt-1 text-xs text-muted-foreground/60">
-                          Add a department to start tracking staff coverage.
+                          {search.trim()
+                            ? "Try adjusting your search."
+                            : "Add a department to start tracking staff coverage."}
                         </p>
                       )}
                     </>

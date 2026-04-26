@@ -20,6 +20,7 @@ export function AdminDepartmentPage() {
   const [addDepartmentOpen, setAddDepartmentOpen] = useState(false);
   const [editDepartmentOpen, setEditDepartmentOpen] = useState(false);
   const [deleteDepartmentOpen, setDeleteDepartmentOpen] = useState(false);
+  const [departmentSearch, setDepartmentSearch] = useState("");
   const [editingDepartment, setEditingDepartment] = useState<DepartmentTableRow | null>(null);
   const [deletingDepartment, setDeletingDepartment] = useState<DepartmentTableRow | null>(null);
 
@@ -73,6 +74,8 @@ export function AdminDepartmentPage() {
       </header>
 
       <DepartmentsTable
+        search={departmentSearch}
+        onSearchChange={setDepartmentSearch}
         onEditDepartment={handleEditDepartment}
         onDeleteDepartment={handleDeleteDepartment}
       />
