@@ -40,9 +40,6 @@ public static class MassTransitExtensions
                         options.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb)
                     );
 
-                    var topicArn = configuration["AWS_SNS_TOPIC_ARN"]!;
-                    cfg.Message<LabReportCompletedEvent>(x => x.SetEntityName(topicArn));
-
                     cfg.ConfigureEndpoints(ctx);
                 }
             );
