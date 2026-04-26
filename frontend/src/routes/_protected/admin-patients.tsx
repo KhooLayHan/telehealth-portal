@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { AdminPatientsPage } from "@/features/admins/AdminPatientsPage";
+import { AdminPatientsPage } from "@/features/admins/AdminPatientsPageOld";
 import { useAuthStore } from "@/store/useAuthStore";
 
 export const Route = createFileRoute("/_protected/admin-patients")({
