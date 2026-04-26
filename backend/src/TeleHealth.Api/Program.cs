@@ -12,9 +12,13 @@ using TeleHealth.Api.Common;
 using TeleHealth.Api.Common.Extensions;
 using TeleHealth.Api.Common.Security;
 using TeleHealth.Api.Domain.Entities;
+using TeleHealth.Api.Features.Admins.CreateDepartment;
 using TeleHealth.Api.Features.Admins.CreateReceptionist;
+using TeleHealth.Api.Features.Admins.DeleteDepartment;
 using TeleHealth.Api.Features.Admins.DeleteReceptionist;
+using TeleHealth.Api.Features.Admins.GetAllDepartments;
 using TeleHealth.Api.Features.Admins.GetAllReceptionists;
+using TeleHealth.Api.Features.Admins.UpdateDepartment;
 using TeleHealth.Api.Features.Admins.UpdateReceptionist;
 using TeleHealth.Api.Features.Appointments.Book;
 using TeleHealth.Api.Features.Appointments.GetAllAppointments;
@@ -91,6 +95,12 @@ builder.Services.AddOpenApi(options =>
             {
                 schema.Type = Microsoft.OpenApi.JsonSchemaType.String;
                 schema.Format = "date";
+            }
+
+            if (context.JsonTypeInfo.Type == typeof(Instant))
+            {
+                schema.Type = Microsoft.OpenApi.JsonSchemaType.String;
+                schema.Format = "date-time";
             }
 
             if (context.JsonTypeInfo.Type == typeof(LocalTime))
@@ -172,6 +182,10 @@ builder.Services.AddScoped<SubmitConsultationHandler>();
 builder.Services.AddScoped<GetAppointmentByIdOrSlugHandler>();
 builder.Services.AddScoped<RescheduleAppointmentHandler>();
 builder.Services.AddScoped<CancelAppointmentHandler>();
+builder.Services.AddScoped<AdminGetAllDepartmentsHandler>();
+builder.Services.AddScoped<AdminCreateDepartmentHandler>();
+builder.Services.AddScoped<AdminUpdateDepartmentHandler>();
+builder.Services.AddScoped<AdminDeleteDepartmentHandler>();
 builder.Services.AddScoped<AdminGetAllReceptionistsHandler>();
 builder.Services.AddScoped<AdminCreateReceptionistHandler>();
 builder.Services.AddScoped<AdminUpdateReceptionistHandler>();
@@ -248,6 +262,10 @@ api.MapSubmitConsultationEndpoint();
 api.MapGetAppointmentByIdOrSlugEndpoint();
 api.MapRescheduleAppointmentEndpoint();
 api.MapCancelAppointmentEndpoint();
+api.MapAdminGetAllDepartmentsEndpoint();
+api.MapAdminCreateDepartmentEndpoint();
+api.MapAdminUpdateDepartmentEndpoint();
+api.MapAdminDeleteDepartmentEndpoint();
 api.MapAdminGetAllReceptionistsEndpoint();
 api.MapAdminCreateReceptionistEndpoint();
 api.MapAdminUpdateReceptionistEndpoint();
