@@ -8,7 +8,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { useAuthStore } from "@/store/useAuthStore";
-import { AdminPatientsPage } from "../admins/AdminPatientsPageOld";
+import { AdminPatientsPage } from "../admins/AdminPatientsPage";
 import { ReceptionistPatientsPage } from "./roles/ReceptionistPatientsPage";
 
 export function PatientsListingPage() {
