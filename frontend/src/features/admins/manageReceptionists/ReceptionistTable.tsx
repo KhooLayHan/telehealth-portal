@@ -13,8 +13,6 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
-const ACCENT = "#0d9488";
-
 // Keeps receptionist table columns stable across different data lengths.
 const COLUMN_STYLES: Record<string, { cell: string; header: string }> = {
   firstName: {
@@ -299,7 +297,6 @@ export function ReceptionistTable({
                     variant={item === page ? "default" : "outline"}
                     size="sm"
                     className="h-8 w-8 p-0 text-xs"
-                    style={item === page ? { background: ACCENT } : undefined}
                     onClick={() => onPageChange(item)}
                   >
                     {item}
