@@ -36,9 +36,7 @@ public class Function
 
         foreach (var record in evnt.Records)
         {
-            context.Logger.LogInformation(
-                $"Processing SNS message ID: {record.Sns.MessageId}"
-            );
+            context.Logger.LogInformation($"Processing SNS message ID: {record.Sns.MessageId}");
 
             try
             {
@@ -68,10 +66,7 @@ public class Function
                     new SendEmailRequest
                     {
                         FromEmailAddress = s_senderEmail,
-                        Destination = new Destination
-                        {
-                            ToAddresses = [bookedEvent.PatientEmail],
-                        },
+                        Destination = new Destination { ToAddresses = [bookedEvent.PatientEmail] },
                         Content = new EmailContent
                         {
                             Simple = new Message
