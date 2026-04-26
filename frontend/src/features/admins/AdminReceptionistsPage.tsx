@@ -20,7 +20,7 @@ import { ReceptionistTable } from "@/features/admins/manageReceptionists/Recepti
 import { useReceptionistsCsvExport } from "@/features/admins/manageReceptionists/UseReceptionistsCsvExport";
 import { ViewReceptionistDetailDialog } from "@/features/admins/manageReceptionists/ViewReceptionistDetailDialog";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 5;
 
 // Admin page displaying a paginated, searchable list of all receptionists
 export function AdminReceptionistsPage() {
