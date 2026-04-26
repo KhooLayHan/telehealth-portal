@@ -51,19 +51,42 @@ function formatDate(iso: string): string {
   });
 }
 
+// Builds a two-letter fallback for receptionist avatars.
+function getReceptionistInitials(receptionist: AdminReceptionistDto): string {
+  return `${receptionist.firstName[0] ?? ""}${receptionist.lastName[0] ?? ""}`.toUpperCase();
+}
+
 // Column definitions for the receptionists data table
 const columns: ColumnDef<AdminReceptionistDto>[] = [
   {
     accessorKey: "firstName",
     header: "Name",
-    cell: ({ row }) => (
-      <div className="flex flex-col gap-0.5">
-        <span className="font-medium">
-          {row.original.firstName} {row.original.lastName}
-        </span>
-        <span className="font-mono text-xs text-muted-foreground">@{row.original.username}</span>
-      </div>
-    ),
+    cell: ({ row }) => {
+      const receptionist = row.original;
+      const fullName = `${receptionist.firstName} ${receptionist.lastName}`;
+
+      return (
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-xs font-semibold text-foreground">
+            {receptionist.avatarUrl ? (
+              <img
+                src={receptionist.avatarUrl}
+                alt={`${fullName} avatar`}
+                className="size-full object-cover"
+              />
+            ) : (
+              getReceptionistInitials(receptionist)
+            )}
+          </div>
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <span className="truncate font-medium">{fullName}</span>
+            <span className="truncate font-mono text-xs text-muted-foreground">
+              @{receptionist.username}
+            </span>
+          </div>
+        </div>
+      );
+    },
   },
   {
     accessorKey: "email",
