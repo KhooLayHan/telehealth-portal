@@ -4,6 +4,7 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
+import type { Instant } from "./Instant";
 
 export interface AdminDepartmentDto {
   slug: string;
@@ -12,4 +13,5 @@ export interface AdminDepartmentDto {
   description?: string | null;
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   staffMembers?: number | string;
+  createdAt?: Instant;
 }

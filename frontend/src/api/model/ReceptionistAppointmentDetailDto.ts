@@ -15,8 +15,12 @@ export interface ReceptionistAppointmentDetailDto {
   /** @nullable */
   cancellationReason?: string | null;
   patientName?: string;
+  /** @nullable */
+  patientAvatarUrl?: string | null;
   doctorPublicId?: string;
   doctorName?: string;
+  /** @nullable */
+  doctorAvatarUrl?: string | null;
   specialization?: string;
   schedulePublicId?: string;
   date?: LocalDate;

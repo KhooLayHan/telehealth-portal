@@ -95,7 +95,7 @@ export const getAdminGetAllDepartmentsUrl = () => {
 
 
 
-  return `http://localhost:5144/api/v1/admins/departments`
+  return `/api/v1/admins/departments`
 }
 
 export const adminGetAllDepartments = async ( options?: RequestInit): Promise<adminGetAllDepartmentsResponse> => {
@@ -115,7 +115,7 @@ export const adminGetAllDepartments = async ( options?: RequestInit): Promise<ad
 
 export const getAdminGetAllDepartmentsQueryKey = () => {
     return [
-    `http://localhost:5144/api/v1/admins/departments`
+    `/api/v1/admins/departments`
     ] as const;
     }
 
@@ -228,7 +228,7 @@ export const getAdminCreateDepartmentUrl = () => {
 
 
 
-  return `http://localhost:5144/api/v1/admins/departments`
+  return `/api/v1/admins/departments`
 }
 
 export const adminCreateDepartment = async (adminCreateDepartmentCommand: AdminCreateDepartmentCommand, options?: RequestInit): Promise<adminCreateDepartmentResponse> => {
@@ -331,7 +331,7 @@ export const getAdminUpdateDepartmentUrl = (slug: string,) => {
 
 
 
-  return `http://localhost:5144/api/v1/admins/departments/${slug}`
+  return `/api/v1/admins/departments/${slug}`
 }
 
 export const adminUpdateDepartment = async (slug: string,
@@ -430,7 +430,7 @@ export const getAdminDeleteDepartmentUrl = (slug: string,) => {
 
 
 
-  return `http://localhost:5144/api/v1/admins/departments/${slug}/deactivate`
+  return `/api/v1/admins/departments/${slug}/deactivate`
 }
 
 export const adminDeleteDepartment = async (slug: string, options?: RequestInit): Promise<adminDeleteDepartmentResponse> => {
