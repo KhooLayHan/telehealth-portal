@@ -1179,8 +1179,6 @@ export function AdminReceptionistsPage() {
         transition={{ duration: 0.35, ease: "easeOut" }}
       >
         <div className="relative overflow-hidden rounded-xl border border-border bg-card">
-          <div className="absolute inset-x-0 top-0 h-0.75" style={{ background: ACCENT }} />
-
           <div className="p-6">
             {isLoading ? (
               <div className="flex h-48 items-center justify-center">
