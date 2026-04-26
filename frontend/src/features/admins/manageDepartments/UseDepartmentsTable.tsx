@@ -1,8 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAdminGetAllDepartments } from "@/api/generated/admins/admins";
 import type { AdminDepartmentDto } from "@/api/model/AdminDepartmentDto";
+import type { Instant } from "@/api/model/Instant";
 
 const DEPARTMENTS_PAGE_SIZE = 5;
+
+// Extends the generated department DTO until the API client is regenerated.
+type AdminDepartmentWithCreatedAt = AdminDepartmentDto & {
+  createdAt?: Instant;
+};
 
 // Represents one department row shown in the admin department table.
 export interface DepartmentTableRow {
@@ -10,15 +16,17 @@ export interface DepartmentTableRow {
   name: string;
   description: string;
   staffMembers: number;
+  createdAt?: Instant;
 }
 
 // Converts the API department response into the row shape used by the table.
-function toDepartmentTableRow(department: AdminDepartmentDto): DepartmentTableRow {
+function toDepartmentTableRow(department: AdminDepartmentWithCreatedAt): DepartmentTableRow {
   return {
     id: department.slug,
     name: department.name,
     description: department.description ?? "",
     staffMembers: Number(department.staffMembers ?? 0),
+    createdAt: department.createdAt,
   };
 }
 

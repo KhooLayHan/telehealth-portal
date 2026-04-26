@@ -73,6 +73,7 @@ public sealed class AdminCreateDepartmentHandler(ApplicationDbContext db)
             Name = department.Name,
             Description = department.Description,
             StaffMembers = 0,
+            CreatedAt = department.CreatedAt,
         };
     }
 }

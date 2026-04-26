@@ -17,6 +17,7 @@ public sealed class AdminGetAllDepartmentsHandler(ApplicationDbContext db)
                 Name = d.Name,
                 Description = d.Description,
                 StaffMembers = d.Doctors.Count,
+                CreatedAt = d.CreatedAt,
             })
             .ToListAsync(ct);
     }

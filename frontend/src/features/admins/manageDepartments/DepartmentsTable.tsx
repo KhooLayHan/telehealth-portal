@@ -12,6 +12,19 @@ import {
 } from "@/components/ui/table";
 import { type DepartmentTableRow, useDepartmentsTable } from "./UseDepartmentsTable";
 
+// Formats a NodaTime Instant string as a readable date for the table.
+function formatCreatedAt(createdAt: string | undefined): string {
+  if (!createdAt) {
+    return "Not available";
+  }
+
+  return new Date(createdAt).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
 // Props for department table row actions.
 interface DepartmentsTableProps {
   search: string;
@@ -52,7 +65,7 @@ export function DepartmentsTable({
         </p>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-border">
+      <div className="overflow-x-auto rounded-lg border border-border">
         <Table>
           <TableHeader>
             <TableRow className="border-b border-foreground/20 bg-foreground hover:bg-foreground">
@@ -64,6 +77,9 @@ export function DepartmentsTable({
               </TableHead>
               <TableHead className="w-36 px-5 py-3.5 text-right text-[11px] font-semibold uppercase tracking-[0.15em] text-background/70">
                 Staff Members
+              </TableHead>
+              <TableHead className="w-36 px-5 py-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-background/70">
+                Created At
               </TableHead>
               <TableHead className="w-28 px-5 py-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-background/70">
                 Actions
@@ -85,6 +101,9 @@ export function DepartmentsTable({
                   </TableCell>
                   <TableCell className="px-5 py-3.5 text-right text-sm tabular-nums">
                     {department.staffMembers}
+                  </TableCell>
+                  <TableCell className="px-5 py-3.5 text-sm text-muted-foreground">
+                    {formatCreatedAt(department.createdAt)}
                   </TableCell>
                   <TableCell className="px-5 py-3.5">
                     <div className="flex items-center gap-1">
@@ -116,7 +135,7 @@ export function DepartmentsTable({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={4} className="h-32 text-center">
+                <TableCell colSpan={5} className="h-32 text-center">
                   {isError ? (
                     <p className="text-sm text-destructive">Failed to load departments.</p>
                   ) : (

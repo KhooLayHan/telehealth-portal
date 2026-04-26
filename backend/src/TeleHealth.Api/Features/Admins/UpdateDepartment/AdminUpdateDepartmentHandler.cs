@@ -78,6 +78,7 @@ public sealed class AdminUpdateDepartmentHandler(ApplicationDbContext db)
             Name = department.Name,
             Description = department.Description,
             StaffMembers = staffMembers,
+            CreatedAt = department.CreatedAt,
         };
     }
 }
