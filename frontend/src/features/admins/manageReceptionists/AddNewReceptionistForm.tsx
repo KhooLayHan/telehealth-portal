@@ -1,6 +1,7 @@
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
-import type { ReactNode } from "react";
+import { Eye, EyeOff, Plus } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import {
@@ -13,12 +14,11 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -26,9 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-
-const ACCENT = "#0d9488";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Zod schema for validating the add receptionist form
 const addReceptionistSchema = z
@@ -57,32 +55,34 @@ const addReceptionistSchema = z
     path: ["confirmPassword"],
   });
 
+// Default values used whenever the add receptionist dialog is opened
+const addReceptionistDefaultValues = {
+  firstName: "",
+  lastName: "",
+  username: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+  icNumber: "",
+  phoneNumber: "",
+  gender: "N" as "M" | "F" | "O" | "N",
+  dateOfBirth: "",
+  street: "",
+  city: "",
+  state: "",
+  postalCode: "",
+  country: "",
+};
+
 // Describes the open state controls for the add receptionist dialog
 interface AddNewReceptionistFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-// Describes a reusable labelled form field wrapper
-interface FormFieldProps {
-  label: string;
-  error?: string;
-  children: ReactNode;
-}
-
-// Reusable labelled field wrapper used in the add receptionist form
-function FormField({ label, error, children }: FormFieldProps) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <Label className="text-xs font-medium text-foreground/80">{label}</Label>
-      {children}
-      {error && <p className="text-xs text-destructive">{error}</p>}
-    </div>
-  );
-}
-
 // Modal form for registering a new receptionist account
 export function AddNewReceptionistForm({ open, onOpenChange }: AddNewReceptionistFormProps) {
+  const [showPassword, setShowPassword] = useState(false);
   const queryClient = useQueryClient();
   const { mutate, isPending } = useAdminCreateReceptionist({
     mutation: {
@@ -100,23 +100,7 @@ export function AddNewReceptionistForm({ open, onOpenChange }: AddNewReceptionis
   });
 
   const form = useForm({
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      username: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-      icNumber: "",
-      phoneNumber: "",
-      gender: "N" as "M" | "F" | "O" | "N",
-      dateOfBirth: "",
-      street: "",
-      city: "",
-      state: "",
-      postalCode: "",
-      country: "",
-    },
+    defaultValues: addReceptionistDefaultValues,
     validators: { onSubmit: addReceptionistSchema },
     onSubmit: async ({ value }) => {
       mutate({
@@ -152,354 +136,332 @@ export function AddNewReceptionistForm({ open, onOpenChange }: AddNewReceptionis
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-2xl gap-0 overflow-hidden p-0">
-        <div className="absolute inset-x-0 top-0 h-1" style={{ background: ACCENT }} />
+        <div className="absolute inset-x-0 top-0 h-px bg-border" />
 
         <DialogHeader className="px-6 pb-4 pt-7">
-          <DialogTitle className="text-xl font-semibold">Add New Receptionist</DialogTitle>
-          <DialogDescription className="text-sm text-muted-foreground">
-            Fill in the details below to register a new receptionist account.
-          </DialogDescription>
+          <div className="flex items-start gap-4">
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-muted text-lg font-bold text-foreground">
+              <Plus className="size-6" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <DialogTitle className="text-xl font-semibold leading-none">
+                Add New Receptionist
+              </DialogTitle>
+              <DialogDescription className="mt-1 text-sm text-muted-foreground">
+                Fill in the receptionist&apos;s details to register them in the system.
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
 
         <form
-          onSubmit={(e) => {
-            e.preventDefault();
+          onSubmit={(event) => {
+            event.preventDefault();
             form.handleSubmit();
           }}
+          className="flex flex-col"
         >
-          <div className="max-h-[60vh] overflow-y-auto px-6 pb-2">
-            <p
-              className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em]"
-              style={{ color: ACCENT }}
+          <Tabs defaultValue="personal" className="flex-1 px-6 pb-2">
+            <TabsList className="mb-5 grid w-full grid-cols-3">
+              <TabsTrigger value="personal">Personal</TabsTrigger>
+              <TabsTrigger value="account">Account</TabsTrigger>
+              <TabsTrigger value="address">Address</TabsTrigger>
+            </TabsList>
+
+            <TabsContent
+              value="personal"
+              className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
             >
-              Account Credentials
-            </p>
-            <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <form.Field name="username">
+              <div className="grid grid-cols-2 gap-4">
+                <form.Field name="firstName">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>First Name</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(event) => field.handleChange(event.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. Nur"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+                <form.Field name="lastName">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Last Name</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(event) => field.handleChange(event.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. Aisyah"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+
+              <form.Field name="icNumber">
                 {(field) => (
-                  <FormField
-                    label="Username *"
-                    error={
-                      field.state.meta.errors[0] ? String(field.state.meta.errors[0]) : undefined
-                    }
-                  >
+                  <Field>
+                    <FieldLabel>IC Number</FieldLabel>
                     <Input
                       value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
+                      onChange={(event) => field.handleChange(event.target.value)}
                       onBlur={field.handleBlur}
-                      placeholder="username"
-                      autoComplete="off"
+                      placeholder="e.g. 900101011234"
+                      maxLength={12}
+                      className="font-mono"
                     />
-                  </FormField>
+                    <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                  </Field>
                 )}
               </form.Field>
 
-              <form.Field name="email">
+              <div className="grid grid-cols-2 gap-4">
+                <form.Field name="phoneNumber">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Phone Number</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(event) => field.handleChange(event.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="+601x-xxxxxxx"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+                <form.Field name="gender">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Gender</FieldLabel>
+                      <Select
+                        value={field.state.value}
+                        onValueChange={(value) =>
+                          field.handleChange((value ?? "N") as "M" | "F" | "O" | "N")
+                        }
+                      >
+                        <SelectTrigger className="w-full" onBlur={field.handleBlur}>
+                          <SelectValue placeholder="Select gender" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="M">Male</SelectItem>
+                          <SelectItem value="F">Female</SelectItem>
+                          <SelectItem value="O">Other</SelectItem>
+                          <SelectItem value="N">Prefer not to say</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+
+              <form.Field name="dateOfBirth">
                 {(field) => (
-                  <FormField
-                    label="Email *"
-                    error={
-                      field.state.meta.errors[0] ? String(field.state.meta.errors[0]) : undefined
-                    }
-                  >
+                  <Field>
+                    <FieldLabel>Date of Birth</FieldLabel>
                     <Input
-                      type="email"
+                      type="date"
                       value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
+                      onChange={(event) => field.handleChange(event.target.value)}
                       onBlur={field.handleBlur}
-                      placeholder="email@example.com"
-                      autoComplete="off"
                     />
-                  </FormField>
+                    <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                  </Field>
                 )}
               </form.Field>
+            </TabsContent>
+
+            <TabsContent
+              value="account"
+              className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
+            >
+              <div className="grid grid-cols-2 gap-4">
+                <form.Field name="username">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Username</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(event) => field.handleChange(event.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. reception.nur"
+                        autoComplete="off"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+
+                <form.Field name="email">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Email</FieldLabel>
+                      <Input
+                        type="email"
+                        value={field.state.value}
+                        onChange={(event) => field.handleChange(event.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. receptionist@hospital.com"
+                        autoComplete="off"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
 
               <form.Field name="password">
                 {(field) => (
-                  <FormField
-                    label="Password *"
-                    error={
-                      field.state.meta.errors[0] ? String(field.state.meta.errors[0]) : undefined
-                    }
-                  >
-                    <Input
-                      type="password"
-                      value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      onBlur={field.handleBlur}
-                      placeholder="Min. 8 characters"
-                      autoComplete="new-password"
-                    />
-                  </FormField>
+                  <Field>
+                    <FieldLabel>Password</FieldLabel>
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        value={field.state.value}
+                        onChange={(event) => field.handleChange(event.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="Min 8 characters"
+                        autoComplete="new-password"
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((value) => !value)}
+                        className="absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-foreground"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                      >
+                        {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                      </button>
+                    </div>
+                    <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                  </Field>
                 )}
               </form.Field>
 
               <form.Field name="confirmPassword">
                 {(field) => (
-                  <FormField
-                    label="Confirm Password *"
-                    error={
-                      field.state.meta.errors[0] ? String(field.state.meta.errors[0]) : undefined
-                    }
-                  >
+                  <Field>
+                    <FieldLabel>Confirm Password</FieldLabel>
                     <Input
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
+                      onChange={(event) => field.handleChange(event.target.value)}
                       onBlur={field.handleBlur}
                       placeholder="Re-enter password"
                       autoComplete="new-password"
                     />
-                  </FormField>
+                    <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                  </Field>
                 )}
               </form.Field>
-            </div>
+            </TabsContent>
 
-            <p
-              className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em]"
-              style={{ color: ACCENT }}
+            <TabsContent
+              value="address"
+              className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
             >
-              Personal Information
-            </p>
-            <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <form.Field name="firstName">
+              <form.Field name="street">
                 {(field) => (
-                  <FormField
-                    label="First Name *"
-                    error={
-                      field.state.meta.errors[0] ? String(field.state.meta.errors[0]) : undefined
-                    }
-                  >
+                  <Field>
+                    <FieldLabel>Street</FieldLabel>
                     <Input
                       value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
+                      onChange={(event) => field.handleChange(event.target.value)}
                       onBlur={field.handleBlur}
-                      placeholder="First name"
+                      placeholder="e.g. 123 Jalan Ampang"
                     />
-                  </FormField>
+                    <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                  </Field>
                 )}
               </form.Field>
 
-              <form.Field name="lastName">
-                {(field) => (
-                  <FormField
-                    label="Last Name *"
-                    error={
-                      field.state.meta.errors[0] ? String(field.state.meta.errors[0]) : undefined
-                    }
-                  >
-                    <Input
-                      value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      onBlur={field.handleBlur}
-                      placeholder="Last name"
-                    />
-                  </FormField>
-                )}
-              </form.Field>
-
-              <form.Field name="icNumber">
-                {(field) => (
-                  <FormField
-                    label="IC Number *"
-                    error={
-                      field.state.meta.errors[0] ? String(field.state.meta.errors[0]) : undefined
-                    }
-                  >
-                    <Input
-                      value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      onBlur={field.handleBlur}
-                      placeholder="e.g. 900101011234"
-                      maxLength={12}
-                    />
-                  </FormField>
-                )}
-              </form.Field>
-
-              <form.Field name="phoneNumber">
-                {(field) => (
-                  <FormField
-                    label="Phone Number"
-                    error={
-                      field.state.meta.errors[0] ? String(field.state.meta.errors[0]) : undefined
-                    }
-                  >
-                    <Input
-                      value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      onBlur={field.handleBlur}
-                      placeholder="+60 12-345 6789"
-                    />
-                  </FormField>
-                )}
-              </form.Field>
-
-              <form.Field name="gender">
-                {(field) => (
-                  <FormField
-                    label="Gender *"
-                    error={
-                      field.state.meta.errors[0] ? String(field.state.meta.errors[0]) : undefined
-                    }
-                  >
-                    <Select
-                      value={field.state.value}
-                      onValueChange={(v) => field.handleChange((v ?? "N") as "M" | "F" | "O" | "N")}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select gender" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="M">Male</SelectItem>
-                        <SelectItem value="F">Female</SelectItem>
-                        <SelectItem value="O">Other</SelectItem>
-                        <SelectItem value="N">Not specified</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormField>
-                )}
-              </form.Field>
-
-              <form.Field name="dateOfBirth">
-                {(field) => (
-                  <FormField
-                    label="Date of Birth"
-                    error={
-                      field.state.meta.errors[0] ? String(field.state.meta.errors[0]) : undefined
-                    }
-                  >
-                    <Input
-                      type="date"
-                      value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      onBlur={field.handleBlur}
-                    />
-                  </FormField>
-                )}
-              </form.Field>
-            </div>
-
-            <p
-              className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em]"
-              style={{ color: ACCENT }}
-            >
-              Address
-            </p>
-            <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="sm:col-span-2">
-                <form.Field name="street">
+              <div className="grid grid-cols-2 gap-4">
+                <form.Field name="city">
                   {(field) => (
-                    <FormField
-                      label="Street"
-                      error={
-                        field.state.meta.errors[0] ? String(field.state.meta.errors[0]) : undefined
-                      }
-                    >
+                    <Field>
+                      <FieldLabel>City</FieldLabel>
                       <Input
                         value={field.state.value}
-                        onChange={(e) => field.handleChange(e.target.value)}
+                        onChange={(event) => field.handleChange(event.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder="123 Main St"
+                        placeholder="e.g. Kuala Lumpur"
                       />
-                    </FormField>
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+                <form.Field name="state">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>State</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(event) => field.handleChange(event.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. Wilayah Persekutuan"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
                   )}
                 </form.Field>
               </div>
 
-              <form.Field name="city">
-                {(field) => (
-                  <FormField
-                    label="City"
-                    error={
-                      field.state.meta.errors[0] ? String(field.state.meta.errors[0]) : undefined
-                    }
-                  >
-                    <Input
-                      value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      onBlur={field.handleBlur}
-                      placeholder="Kuala Lumpur"
-                    />
-                  </FormField>
-                )}
-              </form.Field>
+              <div className="grid grid-cols-2 gap-4">
+                <form.Field name="postalCode">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Postal Code</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(event) => field.handleChange(event.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. 50450"
+                        className="font-mono"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+                <form.Field name="country">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Country</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(event) => field.handleChange(event.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. Malaysia"
+                      />
+                      <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+            </TabsContent>
+          </Tabs>
 
-              <form.Field name="state">
-                {(field) => (
-                  <FormField
-                    label="State"
-                    error={
-                      field.state.meta.errors[0] ? String(field.state.meta.errors[0]) : undefined
-                    }
-                  >
-                    <Input
-                      value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      onBlur={field.handleBlur}
-                      placeholder="Selangor"
-                    />
-                  </FormField>
-                )}
-              </form.Field>
-
-              <form.Field name="postalCode">
-                {(field) => (
-                  <FormField
-                    label="Postal Code"
-                    error={
-                      field.state.meta.errors[0] ? String(field.state.meta.errors[0]) : undefined
-                    }
-                  >
-                    <Input
-                      value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      onBlur={field.handleBlur}
-                      placeholder="50000"
-                    />
-                  </FormField>
-                )}
-              </form.Field>
-
-              <form.Field name="country">
-                {(field) => (
-                  <FormField
-                    label="Country"
-                    error={
-                      field.state.meta.errors[0] ? String(field.state.meta.errors[0]) : undefined
-                    }
-                  >
-                    <Input
-                      value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      onBlur={field.handleBlur}
-                      placeholder="Malaysia"
-                    />
-                  </FormField>
-                )}
-              </form.Field>
-            </div>
-          </div>
-
-          <Separator />
-
-          <DialogFooter className="px-6 py-4">
+          <div className="flex justify-end gap-2 border-t border-border px-6 py-4">
             <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
               Cancel
             </Button>
-            <form.Subscribe selector={(s) => s.isSubmitting}>
-              {(isSubmitting) => (
+            <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting] as const}>
+              {([canSubmit, isSubmitting]) => (
                 <Button
                   type="submit"
-                  disabled={isSubmitting || isPending}
-                  style={{ background: ACCENT }}
-                  className="text-white hover:opacity-90"
+                  disabled={!canSubmit || isSubmitting || isPending}
+                  className="bg-black text-white hover:bg-black/85"
                 >
-                  {isSubmitting || isPending ? "Creating…" : "Create Receptionist"}
+                  {isSubmitting || isPending ? "Creating..." : "Create Receptionist"}
                 </Button>
               )}
             </form.Subscribe>
-          </DialogFooter>
+          </div>
         </form>
       </DialogContent>
     </Dialog>
