@@ -472,8 +472,8 @@ export function AdminAppointmentPage() {
   return (
     <div className="space-y-4">
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold text-foreground">View Appointments</h1>
-        <p className="text-muted-foreground text-sm">
+        <h1 className="font-semibold text-3xl tracking-tight">View Appointments</h1>
+        <p className="text-lg text-muted-foreground">
           View all scheduled appointments in one place
         </p>
       </div>
