@@ -2,6 +2,7 @@ using MassTransit;
 using NodaTime;
 using NodaTime.Serialization.SystemTextJson;
 using TeleHealth.Api.Infrastructure.Persistence;
+using TeleHealth.Contracts;
 
 namespace TeleHealth.Api.Common.Extensions;
 
