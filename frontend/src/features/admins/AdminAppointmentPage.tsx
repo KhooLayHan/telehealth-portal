@@ -471,7 +471,12 @@ export function AdminAppointmentPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold text-foreground">View Appointments</h1>
+      <div className="space-y-1">
+        <h1 className="text-2xl font-bold text-foreground">View Appointments</h1>
+        <p className="text-muted-foreground text-sm">
+          View all scheduled appointments in one place
+        </p>
+      </div>
 
       {/* Search bar + view toggle */}
       <div className="flex items-center gap-3">
