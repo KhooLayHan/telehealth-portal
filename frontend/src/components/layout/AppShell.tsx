@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
+  Bell,
   Building2,
   Calendar,
   ClipboardList,
@@ -7,6 +8,7 @@ import {
   Heart,
   LayoutDashboard,
   LogOut,
+  Search,
   Settings,
   Stethoscope,
   User,
@@ -14,6 +16,7 @@ import {
   Users,
 } from "lucide-react";
 import type { ReactNode } from "react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,6 +25,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/store/useAuthStore";
 
 const navItems = [
@@ -86,24 +90,6 @@ const navItems = [
     allowedRoles: ["admin"],
   },
 ];
-
-function UserAvatar({ avatarUrl, initial }: { avatarUrl: string | null; initial: string }) {
-  if (avatarUrl) {
-    return (
-      <img
-        key={avatarUrl}
-        src={avatarUrl}
-        alt="Profile"
-        className="size-8 shrink-0 rounded-full object-cover cursor-pointer"
-      />
-    );
-  }
-  return (
-    <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground text-xs cursor-pointer">
-      {initial}
-    </div>
-  );
-}
 
 export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
@@ -253,14 +239,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                     <LogOut className="size-3 shrink-0" />
                     Log out
                   </DropdownMenuItem>
-                ) : null}
-                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
-                  <LogOut className="size-3 shrink-0" />
-                  Log out
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </header>
 
         <main className="flex-1 overflow-y-auto p-6">{children}</main>
