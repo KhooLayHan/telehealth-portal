@@ -139,6 +139,8 @@ public static class ApiEndpoints
         public const string UpdateProfile = $"{Me}/profile";
 
         public const string GetDoctorProfile = $"{Me}/doctor";
+
+        public const string GetReceptionistProfile = $"{Me}/receptionist";
     }
 
     public static class Admins

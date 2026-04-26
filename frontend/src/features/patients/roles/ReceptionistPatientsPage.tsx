@@ -24,11 +24,27 @@ const columns: ColumnDef<ReceptionistPatientsDto>[] = [
   {
     accessorKey: "firstName",
     header: "Name",
-    cell: ({ row }) => (
-      <span className="font-medium">
-        {row.original.firstName} {row.original.lastName}
-      </span>
-    ),
+    cell: ({ row }) => {
+      const name = `${row.original.firstName ?? ""} ${row.original.lastName ?? ""}`.trim();
+      const avatarUrl = row.original.avatarUrl;
+      const initials = name
+        .split(" ")
+        .slice(0, 2)
+        .map((n) => n.charAt(0).toUpperCase())
+        .join("");
+      return (
+        <div className="flex items-center gap-2.5">
+          <div className="flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-[10px] font-semibold text-primary-foreground">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt={name} className="size-full object-cover" />
+            ) : (
+              initials
+            )}
+          </div>
+          <span className="font-medium">{name}</span>
+        </div>
+      );
+    },
   },
   {
     accessorKey: "icNumber",

@@ -48,6 +48,7 @@ public sealed class ReceptionistGetAllPatientsHandler(ApplicationDbContext db)
                 Slug = p.Slug,
                 FirstName = p.User.FirstName,
                 LastName = p.User.LastName,
+                AvatarUrl = p.User.AvatarUrl,
                 PatientEmail = p.User.Email,
                 DateOfBirth = p.User.DateOfBirth,
                 PhoneNumber = p.User.Phone ?? string.Empty,

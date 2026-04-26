@@ -88,12 +88,18 @@ export function ReceptionistPatientDetailsPage() {
 
         <CardContent className="relative pt-7 pb-6 px-7">
           <div className="flex items-center gap-6">
-            {/* Avatar initials */}
-            <div
-              className="shrink-0 w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-bold text-white select-none shadow-sm"
-              style={{ background: `linear-gradient(135deg, ${ACCENT} 0%, #0f766e 100%)` }}
-            >
-              {getInitials(p.firstName ?? "?", p.lastName ?? "?")}
+            {/* Avatar */}
+            <div className="shrink-0 w-16 h-16 rounded-2xl overflow-hidden shadow-sm">
+              {p.avatarUrl ? (
+                <img src={p.avatarUrl} alt={fullName} className="w-full h-full object-cover" />
+              ) : (
+                <div
+                  className="w-full h-full flex items-center justify-center text-xl font-bold text-white select-none"
+                  style={{ background: `linear-gradient(135deg, ${ACCENT} 0%, #0f766e 100%)` }}
+                >
+                  {getInitials(p.firstName ?? "?", p.lastName ?? "?")}
+                </div>
+              )}
             </div>
 
             {/* Name + contact row */}

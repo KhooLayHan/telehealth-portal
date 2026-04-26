@@ -70,12 +70,31 @@ export function ReceptionistApptDetailsPage() {
             {/* Identity */}
             <div>
               <Label>Patient</Label>
-              <p className="text-2xl font-semibold tracking-tight leading-none mb-1.5">
-                {appt.patientName}
-              </p>
-              <p className="font-mono text-[11px] text-muted-foreground/60 tracking-wider">
-                {appt.publicId}
-              </p>
+              <div className="flex items-center gap-4 mb-1.5">
+                <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+                  {appt.patientAvatarUrl ? (
+                    <img
+                      src={appt.patientAvatarUrl}
+                      alt={appt.patientName}
+                      className="size-full object-cover"
+                    />
+                  ) : (
+                    (appt.patientName ?? "")
+                      .split(" ")
+                      .slice(0, 2)
+                      .map((n) => n.charAt(0).toUpperCase())
+                      .join("")
+                  )}
+                </div>
+                <div>
+                  <p className="text-2xl font-semibold tracking-tight leading-none">
+                    {appt.patientName}
+                  </p>
+                  <p className="font-mono text-[11px] text-muted-foreground/60 tracking-wider mt-1">
+                    {appt.publicId}
+                  </p>
+                </div>
+              </div>
             </div>
 
             <div className="h-px bg-border" />
@@ -142,12 +161,31 @@ export function ReceptionistApptDetailsPage() {
             {/* Doctor identity */}
             <div>
               <Label>Attending Doctor</Label>
-              <p className="text-2xl font-semibold tracking-tight leading-none mb-1.5">
-                {appt.doctorName}
-              </p>
-              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                {appt.specialization}
-              </p>
+              <div className="flex items-center gap-4 mb-1.5">
+                <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-sm font-semibold text-foreground">
+                  {appt.doctorAvatarUrl ? (
+                    <img
+                      src={appt.doctorAvatarUrl}
+                      alt={appt.doctorName}
+                      className="size-full object-cover"
+                    />
+                  ) : (
+                    (appt.doctorName ?? "")
+                      .split(" ")
+                      .slice(0, 2)
+                      .map((n) => n.charAt(0).toUpperCase())
+                      .join("")
+                  )}
+                </div>
+                <div>
+                  <p className="text-2xl font-semibold tracking-tight leading-none">
+                    {appt.doctorName}
+                  </p>
+                  <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground mt-1">
+                    {appt.specialization}
+                  </p>
+                </div>
+              </div>
             </div>
 
             <div className="h-px bg-border" />

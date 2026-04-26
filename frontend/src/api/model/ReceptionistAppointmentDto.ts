@@ -10,10 +10,14 @@ import type { LocalTime } from "./LocalTime";
 export interface ReceptionistAppointmentDto {
   patientName?: string;
   doctorName?: string;
+  /** @nullable */
+  doctorAvatarUrl?: string | null;
   specialization?: string;
   status?: string;
   statusSlug?: string;
   statusColorCode?: string;
+  /** @nullable */
+  patientAvatarUrl?: string | null;
   date?: LocalDate;
   startTime?: LocalTime;
   endTime?: LocalTime;

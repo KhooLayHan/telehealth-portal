@@ -14,6 +14,8 @@ export interface ReceptionistPatientsDto {
   slug?: string;
   lastName?: string;
   firstName?: string;
+  /** @nullable */
+  avatarUrl?: string | null;
   patientEmail?: string;
   dateOfBirth?: LocalDate;
   phoneNumber?: string;

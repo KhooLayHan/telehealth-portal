@@ -47,8 +47,10 @@ public sealed class ReceptionistGetAppointmentByIdHandler(ApplicationDbContext d
             CancellationReason = appointment.CancellationReason,
             PatientName =
                 $"{appointment.Patient.User.FirstName} {appointment.Patient.User.LastName}",
+            PatientAvatarUrl = appointment.Patient.User.AvatarUrl,
             DoctorPublicId = appointment.Doctor.PublicId,
             DoctorName = $"{appointment.Doctor.User.FirstName} {appointment.Doctor.User.LastName}",
+            DoctorAvatarUrl = appointment.Doctor.User.AvatarUrl,
             Specialization = appointment.Doctor.Specialization,
             SchedulePublicId = appointment.DoctorSchedule.PublicId,
             Date = appointment.DoctorSchedule.Date,
