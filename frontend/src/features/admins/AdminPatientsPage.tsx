@@ -1,4 +1,4 @@
-import { FileDown } from "lucide-react";
+import { FileDown, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { useGetAllPatientsForClinicStaff } from "@/api/generated/patients/patients";
@@ -50,6 +50,15 @@ export function AdminPatientsPage() {
           <div className="flex flex-col gap-2 sm:ml-auto sm:flex-row sm:items-center">
             <Button
               type="button"
+              size="sm"
+              className="h-9 gap-1.5 bg-foreground text-background hover:bg-foreground/90"
+              onClick={() => setAddPatientOpen(true)}
+            >
+              <Plus className="size-3.5" />
+              Add Patient
+            </Button>
+            <Button
+              type="button"
               variant="outline"
               className="h-9 gap-1.5 bg-background"
               disabled={isExportDisabled}
@@ -63,8 +72,7 @@ export function AdminPatientsPage() {
       </header>
 
       <section className="space-y-4">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="font-semibold text-lg">Patient Records</h2>
+        <div className="flex items-center justify-end gap-3">
           <p className="text-muted-foreground text-sm">
             <span className="font-semibold text-foreground">{totalCount}</span>{" "}
             {totalCount === 1 ? "patient" : "patients"} found
@@ -79,7 +87,6 @@ export function AdminPatientsPage() {
           onPageChange={setPage}
           search={searchInput}
           onSearchChange={setSearchInput}
-          onAddNew={() => setAddPatientOpen(true)}
         />
       </section>
 
