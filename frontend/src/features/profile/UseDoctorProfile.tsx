@@ -116,7 +116,7 @@ async function patchProfile(data: ProfileFormData): Promise<void> {
 }
 
 export function UseDoctorProfile() {
-  const updateAvatarUrl = useAuthStore((s) => s.updateAvatarUrl);
+  const setAvatarUrl = useAuthStore((s) => s.setAvatarUrl);
   const [me, setMe] = useState<MeData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
@@ -169,7 +169,7 @@ export function UseDoctorProfile() {
       await patchAvatarUrl(cacheBustedUrl);
 
       setMe((prev) => (prev ? { ...prev, avatarUrl: cacheBustedUrl } : prev));
-      updateAvatarUrl(cacheBustedUrl);
+      setAvatarUrl(cacheBustedUrl);
       toast.success("Profile photo updated");
     } catch {
       toast.error("Failed to upload photo. Please try again.");

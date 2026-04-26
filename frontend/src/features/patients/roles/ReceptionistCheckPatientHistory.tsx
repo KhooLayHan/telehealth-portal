@@ -70,7 +70,7 @@ function PrescriptionCard({ rx }: { rx: PrescriptionSummaryDto }) {
 
       {(rx.warnings?.length ?? 0) > 0 && (
         <div className="flex flex-wrap gap-1 pt-1 border-t border-border">
-          {rx.warnings!.map((w) => (
+          {rx.warnings?.map((w) => (
             <span
               key={w}
               className="rounded-full bg-amber-50 border border-amber-200 px-2 py-0.5 text-[10px] font-medium text-amber-700"
@@ -144,11 +144,11 @@ function ConsultationSection({ consultation }: { consultation: ConsultationSumma
               <Pill className="size-3.5 text-amber-500" />
             </div>
             <span className="text-xs font-semibold tracking-[0.15em] uppercase text-amber-600">
-              Prescriptions ({consultation.prescriptions!.length})
+              Prescriptions ({consultation.prescriptions?.length})
             </span>
           </div>
           <div className="space-y-2">
-            {consultation.prescriptions!.map((rx) => (
+            {consultation.prescriptions?.map((rx) => (
               <PrescriptionCard key={rx.publicId} rx={rx} />
             ))}
           </div>
