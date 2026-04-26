@@ -144,8 +144,8 @@ export function AdminReceptionistsPage() {
   };
 
   return (
-    <>
-      <div className="mb-6">
+    <div className="space-y-6">
+      <header className="space-y-2">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -157,13 +157,20 @@ export function AdminReceptionistsPage() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="mt-3 flex items-center justify-between gap-4">
-          <h1 className="text-2xl font-bold tracking-tight">Receptionist Directory</h1>
-          <div className="flex shrink-0 items-center gap-2">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-1">
+            <h1 className="font-semibold text-3xl tracking-tight">Receptionist Directory</h1>
+            <p className="text-lg text-muted-foreground">
+              {isLoading
+                ? "Loading..."
+                : `Total: ${totalCount} personnel currently managed within the system.`}
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 sm:ml-auto sm:flex-row sm:items-center">
             <Button
               type="button"
               variant="outline"
-              className="gap-1.5 bg-white text-black hover:bg-muted"
+              className="h-9 gap-1.5 bg-background"
               disabled={isLoading || isError}
               onClick={handleExportCsv}
             >
@@ -172,7 +179,7 @@ export function AdminReceptionistsPage() {
             </Button>
             <Button
               type="button"
-              className="gap-1.5 bg-black text-white hover:bg-black/85"
+              className="h-9 gap-1.5 bg-black text-white hover:bg-black/85"
               onClick={() => setAddDialogOpen(true)}
             >
               <Plus className="size-4" />
@@ -180,12 +187,7 @@ export function AdminReceptionistsPage() {
             </Button>
           </div>
         </div>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {isLoading
-            ? "Loading..."
-            : `Total: ${totalCount} personnel currently managed within the system.`}
-        </p>
-      </div>
+      </header>
 
       <motion.div
         initial={{ opacity: 0, y: 12 }}
@@ -238,6 +240,6 @@ export function AdminReceptionistsPage() {
         open={deactivateDialogOpen}
         onOpenChange={setDeactivateDialogOpen}
       />
-    </>
+    </div>
   );
 }
