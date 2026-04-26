@@ -6,5 +6,6 @@ public sealed record AppointmentBookedEvent(
     Guid AppointmentPublicId,
     Guid PatientPublicId,
     Guid SchedulePublicId,
-    Instant OccurredAt
+    Instant OccurredAt,
+    string PatientEmail
 );

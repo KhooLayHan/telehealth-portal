@@ -18,6 +18,7 @@ public static class Serverless
     public sealed class Result
     {
         public required Aws.Lambda.Function PdfProcessorLambda { get; init; }
+        public required Aws.Lambda.Function ReminderLambda { get; init; }
     }
 
     public static Result Create(StackConfig cfg, Messaging.Result msg, Storage.Result storage)
@@ -130,6 +131,107 @@ public static class Serverless
             }
         );
 
-        return new Result { PdfProcessorLambda = pdfProcessorLambda };
+        // ── IAM role for Appointment Reminder Lambda ──
+        var reminderRole = new Aws.Iam.Role(
+            "lambda-reminder-role",
+            new Aws.Iam.RoleArgs
+            {
+                AssumeRolePolicy =
+                    @"{
+                    ""Version"": ""2012-10-17"",
+                    ""Statement"": [{
+                        ""Action"": ""sts:AssumeRole"",
+                        ""Principal"": { ""Service"": ""lambda.amazonaws.com"" },
+                        ""Effect"": ""Allow""
+                    }]
+                }",
+                Tags = cfg.Tags,
+            }
+        );
+
+        _ = new Aws.Iam.RolePolicyAttachment(
+            "reminder-basic-execution",
+            new Aws.Iam.RolePolicyAttachmentArgs
+            {
+                Role = reminderRole.Name,
+                PolicyArn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+            }
+        );
+
+        // Scoped SES send permission
+        _ = new Aws.Iam.RolePolicy(
+            "reminder-ses-send",
+            new Aws.Iam.RolePolicyArgs
+            {
+                Role = reminderRole.Name,
+                Policy =
+                    @"{
+                        ""Version"": ""2012-10-17"",
+                        ""Statement"": [{
+                            ""Effect"": ""Allow"",
+                            ""Action"": [""ses:SendEmail"", ""ses:SendRawEmail""],
+                            ""Resource"": ""*""
+                        }]
+                    }",
+            }
+        );
+
+        // ── Appointment Reminder Lambda (triggered directly by SNS) ──
+        var reminderLambda = new Aws.Lambda.Function(
+            "appointment-reminder",
+            new Aws.Lambda.FunctionArgs
+            {
+                Name = $"telehealth-appointment-reminder-{cfg.StackName}",
+                Role = reminderRole.Arn,
+                Runtime = "dotnet10",
+                Handler =
+                    "AppointmentReminder-dev-SentReminder::AppointmentReminder_dev_SentReminder.Function::FunctionHandler",
+                MemorySize = 256,
+                Timeout = 60,
+                Code = new FileArchive("./dummy-lambda"),
+                Environment = new Aws.Lambda.Inputs.FunctionEnvironmentArgs
+                {
+                    Variables = new InputMap<string>
+                    {
+                        { "ENVIRONMENT", cfg.StackName },
+                        { "SES_SENDER_EMAIL", "hongjx0321@gmail.com" },
+                        { "SES_REGION", "us-east-1" },
+                    },
+                },
+                Tags = cfg.Tags,
+            },
+            new CustomResourceOptions { IgnoreChanges = { "sourceCodeHash" } }
+        );
+
+        // Allow SNS to invoke the Lambda directly
+        _ = new Aws.Lambda.Permission(
+            "reminder-sns-invoke",
+            new Aws.Lambda.PermissionArgs
+            {
+                Action = "lambda:InvokeFunction",
+                Function = reminderLambda.Arn,
+                Principal = "sns.amazonaws.com",
+                SourceArn =
+                    "arn:aws:sns:us-east-1:920263653571:TeleHealth_Contracts-AppointmentBookedEvent",
+            }
+        );
+
+        // Subscribe Lambda directly to the AppointmentBookedEvent SNS topic
+        _ = new Aws.Sns.TopicSubscription(
+            "reminder-sns-sub",
+            new Aws.Sns.TopicSubscriptionArgs
+            {
+                Topic =
+                    "arn:aws:sns:us-east-1:920263653571:TeleHealth_Contracts-AppointmentBookedEvent",
+                Protocol = "lambda",
+                Endpoint = reminderLambda.Arn,
+            }
+        );
+
+        return new Result
+        {
+            PdfProcessorLambda = pdfProcessorLambda,
+            ReminderLambda = reminderLambda,
+        };
     }
 }

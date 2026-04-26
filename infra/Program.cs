@@ -35,5 +35,6 @@ return await Deployment.RunAsync(() =>
         ["XRayGroupArn"] = obs.XrayGroup.Arn,
         ["ApiLogGroupName"] = obs.ApiLogGroup.Name,
         ["LambdaFunctionName"] = serverless.PdfProcessorLambda.Name,
+        ["ReminderLambdaName"] = serverless.ReminderLambda.Name,
     };
 });

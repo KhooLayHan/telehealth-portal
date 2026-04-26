@@ -1,11 +1,22 @@
 import { Link } from "@tanstack/react-router";
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { motion } from "framer-motion";
-import { CalendarCheck, ChevronLeft, ChevronRight, Eye, Pencil, Search, X } from "lucide-react";
+import {
+  BellRing,
+  CalendarCheck,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  Pencil,
+  Search,
+  X,
+} from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import {
   useGetAllAppointmentsForReceptionist,
   useGetAllStatuses,
+  useRemindPatient,
 } from "@/api/generated/appointments/appointments";
 import type { ReceptionistAppointmentDto } from "@/api/model/ReceptionistAppointmentDto";
 import { Button } from "@/components/ui/button";
@@ -24,6 +35,55 @@ import {
 
 const ACCENT = "#0d9488";
 const PAGE_SIZE = 10;
+const TERMINAL_SLUGS = ["cancelled", "completed", "no-show"];
+
+function ActionsCell({ row }: { row: { original: ReceptionistAppointmentDto } }) {
+  const { mutateAsync: sendReminder, isPending: isSending } = useRemindPatient();
+  const isTerminal = TERMINAL_SLUGS.includes(row.original.statusSlug ?? "");
+
+  return (
+    <div className="flex items-center gap-1">
+      <Link
+        to="/appointments/$id"
+        params={{ id: row.original.publicId ?? "" }}
+        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+      >
+        <Eye className="size-3.5" />
+      </Link>
+      <Link
+        to="/appointments/edit/$id"
+        params={{ id: row.original.publicId ?? "" }}
+        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+      >
+        <Pencil className="size-3.5" />
+      </Link>
+      <button
+        type="button"
+        disabled={isSending || isTerminal}
+        title={
+          isTerminal
+            ? "Cannot send reminder for completed/cancelled appointments"
+            : "Send reminder email"
+        }
+        onClick={async () => {
+          try {
+            await sendReminder({ id: row.original.publicId ?? "" });
+            toast.success(`Reminder sent to ${row.original.patientName}.`);
+          } catch {
+            toast.error("Failed to send reminder. Please try again.");
+          }
+        }}
+        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        {isSending ? (
+          <span className="size-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+        ) : (
+          <BellRing className="size-3.5" />
+        )}
+      </button>
+    </div>
+  );
+}
 
 function getTodayStr() {
   return new Date().toISOString().slice(0, 10);
@@ -92,24 +152,7 @@ const columns: ColumnDef<ReceptionistAppointmentDto>[] = [
   {
     id: "actions",
     header: "Actions",
-    cell: ({ row }) => (
-      <div className="flex items-center gap-1">
-        <Link
-          to="/appointments/$id"
-          params={{ id: row.original.publicId ?? "" }}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-        >
-          <Eye className="size-3.5" />
-        </Link>
-        <Link
-          to="/appointments/edit/$id"
-          params={{ id: row.original.publicId ?? "" }}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-        >
-          <Pencil className="size-3.5" />
-        </Link>
-      </div>
-    ),
+    cell: ({ row }) => <ActionsCell row={row} />,
   },
 ];
 

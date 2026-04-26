@@ -199,6 +199,24 @@ public static class Compute
             }
         );
 
+        // Scoped inline policy: SES send email for appointment reminder feature
+        _ = new Aws.Iam.RolePolicy(
+            "policy-ses-scoped",
+            new Aws.Iam.RolePolicyArgs
+            {
+                Role = ebRole.Name,
+                Policy =
+                    @"{
+                        ""Version"": ""2012-10-17"",
+                        ""Statement"": [{
+                            ""Effect"": ""Allow"",
+                            ""Action"": [""ses:SendEmail"", ""ses:SendRawEmail""],
+                            ""Resource"": ""*""
+                        }]
+                    }",
+            }
+        );
+
         var instanceProfile = new Aws.Iam.InstanceProfile(
             "eb-instance-profile",
             new Aws.Iam.InstanceProfileArgs { Role = ebRole.Name }
@@ -255,6 +273,8 @@ public static class Compute
                     EbEnvVar("AWS_S3_LAB_REPORTS_BUCKET", storage.LabReportsBucket.BucketName),
                     EbEnvVar("AWS_SNS_TOPIC_ARN", msg.MedicalAlertsTopic.Arn),
                     EbEnvVar("AWS_SQS_QUEUE_URL", msg.ProcessingQueue.Id),
+                    EbEnvVar("SES_SENDER_EMAIL", "hongjx0321@gmail.com"),
+                    EbEnvVar("SES_REGION", "us-east-1"),
                     // -- VPC placement --
                     EbSetting("aws:ec2:vpc", "VPCId", net.VpcId),
                     EbSetting(
