@@ -43,6 +43,11 @@ interface PatientTableProps extends PatientTableActions {
   onAddNew?: () => void;
 }
 
+// Extends generated patient rows with the avatar URL returned by the API.
+type PatientWithAvatar = ClinicStaffPatientDto & {
+  avatarUrl?: string | null;
+};
+
 // Formats an API date value for display inside the patient table.
 function formatDate(value: unknown): string {
   const date = new Date(String(value));
@@ -74,17 +79,44 @@ function genderLabel(code: string | null): string {
   return map[code] ?? code;
 }
 
+// Builds stable initials for the patient avatar fallback.
+function getInitials(patient: ClinicStaffPatientDto): string {
+  const firstInitial = patient.firstName.trim().at(0) ?? "";
+  const lastInitial = patient.lastName.trim().at(0) ?? "";
+  const initials = `${firstInitial}${lastInitial}`.toUpperCase();
+
+  return initials || "P";
+}
+
+// Reads the optional avatar URL returned by newer patient list responses.
+function getAvatarUrl(patient: ClinicStaffPatientDto): string | null {
+  return (patient as PatientWithAvatar).avatarUrl ?? null;
+}
+
 // Builds the patient table columns with row actions.
 function getPatientColumns(): ColumnDef<ClinicStaffPatientDto>[] {
   return [
     {
       accessorKey: "firstName",
       header: "Name",
-      cell: ({ row }) => (
-        <span className="font-medium">
-          {row.original.firstName} {row.original.lastName}
-        </span>
-      ),
+      cell: ({ row }) => {
+        const patient = row.original;
+        const fullName = `${patient.firstName} ${patient.lastName}`;
+        const avatarUrl = getAvatarUrl(patient);
+
+        return (
+          <div className="flex min-w-48 items-center gap-3">
+            <div className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary font-semibold text-primary-foreground text-xs">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt={fullName} className="size-full object-cover" />
+              ) : (
+                getInitials(patient)
+              )}
+            </div>
+            <span className="font-medium">{fullName}</span>
+          </div>
+        );
+      },
     },
     {
       accessorKey: "phoneNumber",
