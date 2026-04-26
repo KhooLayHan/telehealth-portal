@@ -153,6 +153,7 @@ const columns: ColumnDef<AdminReceptionistDto>[] = [
 interface ReceptionistTableProps {
   data: AdminReceptionistDto[];
   page: number;
+  totalCount: number;
   totalPages: number;
   hasNextPage?: boolean;
   hasPreviousPage?: boolean;
@@ -168,6 +169,7 @@ interface ReceptionistTableProps {
 export function ReceptionistTable({
   data,
   page,
+  totalCount,
   totalPages,
   hasNextPage,
   hasPreviousPage,
@@ -189,8 +191,8 @@ export function ReceptionistTable({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-4">
-        <div className="relative w-72">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative w-full sm:w-80">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search by name, email, department or ID…"
@@ -199,6 +201,10 @@ export function ReceptionistTable({
             className="h-9 pl-9 text-sm"
           />
         </div>
+        <p className="text-sm text-muted-foreground" aria-live="polite">
+          <span className="font-semibold text-foreground">{totalCount}</span>{" "}
+          {totalCount === 1 ? "receptionist record" : "receptionist records"} found
+        </p>
       </div>
 
       <div className="overflow-hidden rounded-lg border border-border">

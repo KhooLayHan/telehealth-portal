@@ -96,9 +96,7 @@ export function AdminReceptionistsPage() {
           <div className="space-y-1">
             <h1 className="font-semibold text-3xl tracking-tight">Receptionist Directory</h1>
             <p className="text-lg text-muted-foreground">
-              {isLoading
-                ? "Loading..."
-                : `Total: ${totalCount} personnel currently managed within the system.`}
+              Manage receptionist accounts and front-desk access across the platform.
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:ml-auto sm:flex-row sm:items-center">
@@ -141,6 +139,7 @@ export function AdminReceptionistsPage() {
           <ReceptionistTable
             data={receptionists}
             page={page}
+            totalCount={totalCount}
             totalPages={totalPages}
             hasNextPage={result?.hasNextPage}
             hasPreviousPage={result?.hasPreviousPage}
