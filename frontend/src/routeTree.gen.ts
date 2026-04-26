@@ -18,6 +18,7 @@ import { Route as ProtectedReceptionistsRouteImport } from './routes/_protected/
 import { Route as ProtectedPatientsRouteImport } from './routes/_protected/patients_'
 import { Route as ProtectedLabReportsRouteImport } from './routes/_protected/lab-reports_'
 import { Route as ProtectedDoctorsRouteImport } from './routes/_protected/doctors'
+import { Route as ProtectedDepartmentsRouteImport } from './routes/_protected/departments'
 import { Route as ProtectedDashboardRouteImport } from './routes/_protected/dashboard'
 import { Route as ProtectedAppointmentsRouteImport } from './routes/_protected/appointments_'
 import { Route as ProtectedAdminPatientsRouteImport } from './routes/_protected/admin-patients'
@@ -71,6 +72,11 @@ const ProtectedLabReportsRoute = ProtectedLabReportsRouteImport.update({
 const ProtectedDoctorsRoute = ProtectedDoctorsRouteImport.update({
   id: '/doctors',
   path: '/doctors',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedDepartmentsRoute = ProtectedDepartmentsRouteImport.update({
+  id: '/departments',
+  path: '/departments',
   getParentRoute: () => ProtectedRoute,
 } as any)
 const ProtectedDashboardRoute = ProtectedDashboardRouteImport.update({
@@ -140,6 +146,7 @@ export interface FileRoutesByFullPath {
   '/admin-patients': typeof ProtectedAdminPatientsRoute
   '/appointments': typeof ProtectedAppointmentsRoute
   '/dashboard': typeof ProtectedDashboardRoute
+  '/departments': typeof ProtectedDepartmentsRoute
   '/doctors': typeof ProtectedDoctorsRoute
   '/lab-reports': typeof ProtectedLabReportsRoute
   '/patients': typeof ProtectedPatientsRoute
@@ -160,6 +167,7 @@ export interface FileRoutesByTo {
   '/admin-patients': typeof ProtectedAdminPatientsRoute
   '/appointments': typeof ProtectedAppointmentsRoute
   '/dashboard': typeof ProtectedDashboardRoute
+  '/departments': typeof ProtectedDepartmentsRoute
   '/doctors': typeof ProtectedDoctorsRoute
   '/lab-reports': typeof ProtectedLabReportsRoute
   '/patients': typeof ProtectedPatientsRoute
@@ -183,6 +191,7 @@ export interface FileRoutesById {
   '/_protected/admin-patients': typeof ProtectedAdminPatientsRoute
   '/_protected/appointments_': typeof ProtectedAppointmentsRoute
   '/_protected/dashboard': typeof ProtectedDashboardRoute
+  '/_protected/departments': typeof ProtectedDepartmentsRoute
   '/_protected/doctors': typeof ProtectedDoctorsRoute
   '/_protected/lab-reports_': typeof ProtectedLabReportsRoute
   '/_protected/patients_': typeof ProtectedPatientsRoute
@@ -205,6 +214,7 @@ export interface FileRouteTypes {
     | '/admin-patients'
     | '/appointments'
     | '/dashboard'
+    | '/departments'
     | '/doctors'
     | '/lab-reports'
     | '/patients'
@@ -225,6 +235,7 @@ export interface FileRouteTypes {
     | '/admin-patients'
     | '/appointments'
     | '/dashboard'
+    | '/departments'
     | '/doctors'
     | '/lab-reports'
     | '/patients'
@@ -247,6 +258,7 @@ export interface FileRouteTypes {
     | '/_protected/admin-patients'
     | '/_protected/appointments_'
     | '/_protected/dashboard'
+    | '/_protected/departments'
     | '/_protected/doctors'
     | '/_protected/lab-reports_'
     | '/_protected/patients_'
@@ -330,6 +342,13 @@ declare module '@tanstack/react-router' {
       path: '/doctors'
       fullPath: '/doctors'
       preLoaderRoute: typeof ProtectedDoctorsRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/departments': {
+      id: '/_protected/departments'
+      path: '/departments'
+      fullPath: '/departments'
+      preLoaderRoute: typeof ProtectedDepartmentsRouteImport
       parentRoute: typeof ProtectedRoute
     }
     '/_protected/dashboard': {
@@ -442,6 +461,7 @@ interface ProtectedRouteChildren {
   ProtectedAdminPatientsRoute: typeof ProtectedAdminPatientsRoute
   ProtectedAppointmentsRoute: typeof ProtectedAppointmentsRoute
   ProtectedDashboardRoute: typeof ProtectedDashboardRoute
+  ProtectedDepartmentsRoute: typeof ProtectedDepartmentsRoute
   ProtectedDoctorsRoute: typeof ProtectedDoctorsRoute
   ProtectedLabReportsRoute: typeof ProtectedLabReportsRoute
   ProtectedPatientsRoute: typeof ProtectedPatientsRoute
@@ -458,6 +478,7 @@ const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedAdminPatientsRoute: ProtectedAdminPatientsRoute,
   ProtectedAppointmentsRoute: ProtectedAppointmentsRoute,
   ProtectedDashboardRoute: ProtectedDashboardRoute,
+  ProtectedDepartmentsRoute: ProtectedDepartmentsRoute,
   ProtectedDoctorsRoute: ProtectedDoctorsRoute,
   ProtectedLabReportsRoute: ProtectedLabReportsRoute,
   ProtectedPatientsRoute: ProtectedPatientsRoute,
