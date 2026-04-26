@@ -7,6 +7,7 @@
     <PackageVersion Include="Amazon.Lambda.CloudWatchEvents" Version="4.4.1" />
     <PackageVersion Include="Amazon.Lambda.Core" Version="2.8.0" />
     <PackageVersion Include="Amazon.Lambda.Serialization.SystemTextJson" Version="2.4.4" />
+    <PackageVersion Include="Amazon.Lambda.SNSEvents" Version="2.1.1" />
     <PackageVersion Include="Amazon.Lambda.SQSEvents" Version="2.2.1" />
     <PackageVersion Include="Amazon.Lambda.APIGatewayEvents" Version="2.7.1" />
     <PackageVersion Include="Amazon.Lambda.S3Events" Version="3.1.2" />
@@ -16,6 +17,7 @@
     <PackageVersion Include="AWSSDK.SimpleNotificationService" Version="4.0.2.29" />
     <PackageVersion Include="AWSSDK.SQS" Version="4.0.2.27" />
     <PackageVersion Include="AWSSDK.S3" Version="4.0.22.1" />
+    <PackageVersion Include="AWSSDK.SimpleEmailV2" Version="4.0.12.12" />
     <!-- EF Core & PostgreSQL -->
     <PackageVersion Include="Bogus" Version="35.6.5" />
     <PackageVersion Include="Destructurama.Attributed" Version="5.3.0" />

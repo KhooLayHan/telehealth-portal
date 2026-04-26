@@ -16,6 +16,7 @@ public partial record ReceptionistAppointmentDto
     public string DoctorName { get; set; } = string.Empty;
     public string Specialization { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
+    public string StatusSlug { get; set; } = string.Empty;
     public string StatusColorCode { get; set; } = string.Empty;
     public LocalDate Date { get; set; }
     public LocalTime StartTime { get; set; }
@@ -31,6 +32,7 @@ public class ReceptionistAppointmentMappingConfig
         target.DoctorName = $"{source.Doctor.User.FirstName} {source.Doctor.User.LastName}";
         target.Specialization = source.Doctor.Specialization;
         target.Status = source.AppointmentStatus.Name;
+        target.StatusSlug = source.AppointmentStatus.Slug;
         target.StatusColorCode = source.AppointmentStatus.ColorCode ?? string.Empty;
         target.Date = source.DoctorSchedule.Date;
         target.StartTime = source.DoctorSchedule.StartTime;

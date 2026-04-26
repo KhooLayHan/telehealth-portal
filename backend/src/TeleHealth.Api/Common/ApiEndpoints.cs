@@ -68,6 +68,8 @@ public static class ApiEndpoints
         public const string GetAllStatuses = $"{Base}/statuses";
 
         public const string UpdateById = $"{Base}/{{id:guid}}";
+
+        public const string RemindPatient = $"{Base}/{{id:guid}}/remind";
     }
 
     public static class Doctors

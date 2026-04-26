@@ -98,7 +98,8 @@ public sealed class BookAppointmentHandler(
                     publicId,
                     patient.PublicId,
                     schedule.PublicId,
-                    SystemClock.Instance.GetCurrentInstant()
+                    SystemClock.Instance.GetCurrentInstant(),
+                    patient.User.Email
                 ),
                 ct
             );

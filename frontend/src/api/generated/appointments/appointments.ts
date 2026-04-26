@@ -622,7 +622,99 @@ export function useGetAllStatuses<TData = Awaited<ReturnType<typeof getAllStatus
 
 
 
-export type getAppointmentByIdForDoctorResponse200 = {
+export type remindPatientResponse204 = {
+  data: void
+  status: 204
+}
+
+export type remindPatientResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type remindPatientResponse403 = {
+  data: ProblemDetails
+  status: 403
+}
+
+export type remindPatientResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type remindPatientResponseSuccess = (remindPatientResponse204) & {
+  headers: Headers;
+};
+export type remindPatientResponseError = (remindPatientResponse401 | remindPatientResponse403 | remindPatientResponse404) & {
+  headers: Headers;
+};
+
+export type remindPatientResponse = (remindPatientResponseSuccess | remindPatientResponseError)
+
+export const getRemindPatientUrl = (id: string,) => {
+
+
+
+
+  return `/api/v1/appointments/${id}/remind`
+}
+
+export const remindPatient = async (id: string, options?: RequestInit): Promise<remindPatientResponse> => {
+
+  return ofetchMutator<remindPatientResponse>(getRemindPatientUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getRemindPatientMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof remindPatient>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof remindPatient>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['remindPatient'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof remindPatient>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  remindPatient(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RemindPatientMutationResult = NonNullable<Awaited<ReturnType<typeof remindPatient>>>
+
+    export type RemindPatientMutationError = ProblemDetails
+
+    export const useRemindPatient = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof remindPatient>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof remindPatient>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getRemindPatientMutationOptions(options), queryClient);
+    }
+    export type getAppointmentByIdForDoctorResponse200 = {
   data: DoctorAppointmentDetailDto
   status: 200
 }

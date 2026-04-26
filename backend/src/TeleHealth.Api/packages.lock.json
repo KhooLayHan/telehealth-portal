@@ -38,6 +38,15 @@
           "AWSSDK.Core": "[4.0.4, 5.0.0)"
         }
       },
+      "AWSSDK.SimpleEmailV2": {
+        "type": "Direct",
+        "requested": "[4.0.12.12, )",
+        "resolved": "4.0.12.12",
+        "contentHash": "yXOVniaZoAFSBQVo5b35D3wi7asxEKddm9xJHWiTXm0wg+b1TjOyONtU1drqNQ3cqbLaJlAQhjUzKLxA57WZFw==",
+        "dependencies": {
+          "AWSSDK.Core": "[4.0.4, 5.0.0)"
+        }
+      },
       "AWSSDK.SimpleNotificationService": {
         "type": "Direct",
         "requested": "[4.0.2.29, )",
