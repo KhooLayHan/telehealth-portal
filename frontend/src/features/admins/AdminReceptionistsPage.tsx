@@ -1,16 +1,10 @@
-import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { FileDown, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import {
-  getAdminGetAllReceptionistsQueryKey,
-  useAdminDeactivateReceptionist,
-  useAdminGetAllReceptionists,
-} from "@/api/generated/admins/admins";
+import { useAdminGetAllReceptionists } from "@/api/generated/admins/admins";
 import type { AdminReceptionistDto } from "@/api/model/AdminReceptionistDto";
-import { ApiError } from "@/api/ofetch-mutator";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -24,12 +18,11 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
 import { AddNewReceptionistForm } from "@/features/admins/manageReceptionists/AddNewReceptionistForm";
+import { DeleteReceptionistDialog } from "@/features/admins/manageReceptionists/DeleteReceptionistDialog";
 import { EditReceptionistForm } from "@/features/admins/manageReceptionists/EditReceptionistForm";
 import { ReceptionistTable } from "@/features/admins/manageReceptionists/ReceptionistTable";
 
@@ -209,74 +202,6 @@ function ReceptionistDetailsDialog({
   );
 }
 
-interface DeactivateReceptionistDialogProps {
-  receptionist: AdminReceptionistDto | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-// Confirmation dialog before soft-deleting a receptionist account
-function DeactivateReceptionistDialog({
-  receptionist,
-  open,
-  onOpenChange,
-}: DeactivateReceptionistDialogProps) {
-  const queryClient = useQueryClient();
-  const { mutate, isPending } = useAdminDeactivateReceptionist({
-    mutation: {
-      onSuccess: () => {
-        toast.success("Receptionist removed successfully");
-        queryClient.invalidateQueries({ queryKey: getAdminGetAllReceptionistsQueryKey() });
-        onOpenChange(false);
-      },
-      onError: (error) => {
-        if (error instanceof ApiError) {
-          toast.error(error.data.title ?? "Failed to remove receptionist");
-        }
-      },
-    },
-  });
-
-  if (!receptionist) return null;
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md gap-0 overflow-hidden p-0">
-        <div className="absolute inset-x-0 top-0 h-1 bg-destructive" />
-        <DialogHeader className="px-6 pb-4 pt-7">
-          <DialogTitle className="text-xl font-semibold">Remove Receptionist</DialogTitle>
-          <DialogDescription className="text-sm text-muted-foreground">
-            Are you sure you want to remove{" "}
-            <span className="font-medium text-foreground">
-              {receptionist.firstName} {receptionist.lastName}
-            </span>
-            ? Their account will be disabled and they will no longer be able to log in. This action
-            cannot be undone from the portal.
-          </DialogDescription>
-        </DialogHeader>
-        <Separator />
-        <DialogFooter className="px-6 py-4">
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button
-            type="button"
-            variant="destructive"
-            disabled={isPending}
-            onClick={() => {
-              if (receptionist.publicId) {
-                mutate({ id: receptionist.publicId.toString() });
-              }
-            }}
-          >
-            {isPending ? "Removing…" : "Remove"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
 // Admin page displaying a paginated, searchable list of all receptionists
 export function AdminReceptionistsPage() {
   const [page, setPage] = useState(1);
@@ -430,7 +355,7 @@ export function AdminReceptionistsPage() {
 
       <AddNewReceptionistForm open={addDialogOpen} onOpenChange={setAddDialogOpen} />
 
-      <DeactivateReceptionistDialog
+      <DeleteReceptionistDialog
         key={deactivateReceptionist?.publicId?.toString()}
         receptionist={deactivateReceptionist}
         open={deactivateDialogOpen}
