@@ -5,7 +5,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { AdminPatientsPage as AdminPatientsPageOld } from "@/features/admins/AdminPatientsPageOld";
+
 
 // Displays the admin patient management page with a header and patient records table.
 export function AdminPatientsPage() {
@@ -32,7 +32,6 @@ export function AdminPatientsPage() {
         </div>
       </header>
 
-      <AdminPatientsPageOld />
     </div>
   );
 }
