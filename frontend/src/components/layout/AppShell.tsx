@@ -60,6 +60,12 @@ const navItems = [
     allowedRoles: ["admin", "doctor", "lab-tech", "patient"],
   },
   {
+    icon: User,
+    label: "Profile",
+    href: "/profile",
+    allowedRoles: ["doctor"],
+  },
+  {
     icon: UserCog,
     label: "Doctor List",
     href: "/doctors",

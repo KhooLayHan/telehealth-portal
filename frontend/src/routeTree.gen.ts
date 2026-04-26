@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProtectedSettingsRouteImport } from './routes/_protected/settings'
 import { Route as ProtectedSchedulesRouteImport } from './routes/_protected/schedules'
 import { Route as ProtectedReceptionistsRouteImport } from './routes/_protected/receptionists'
+import { Route as ProtectedProfileRouteImport } from './routes/_protected/profile'
 import { Route as ProtectedPatientsRouteImport } from './routes/_protected/patients_'
 import { Route as ProtectedLabReportsRouteImport } from './routes/_protected/lab-reports_'
 import { Route as ProtectedDoctorsRouteImport } from './routes/_protected/doctors'
@@ -57,6 +58,11 @@ const ProtectedSchedulesRoute = ProtectedSchedulesRouteImport.update({
 const ProtectedReceptionistsRoute = ProtectedReceptionistsRouteImport.update({
   id: '/receptionists',
   path: '/receptionists',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedProfileRoute = ProtectedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => ProtectedRoute,
 } as any)
 const ProtectedPatientsRoute = ProtectedPatientsRouteImport.update({
@@ -150,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/doctors': typeof ProtectedDoctorsRoute
   '/lab-reports': typeof ProtectedLabReportsRoute
   '/patients': typeof ProtectedPatientsRoute
+  '/profile': typeof ProtectedProfileRoute
   '/receptionists': typeof ProtectedReceptionistsRoute
   '/schedules': typeof ProtectedSchedulesRoute
   '/settings': typeof ProtectedSettingsRoute
@@ -171,6 +178,7 @@ export interface FileRoutesByTo {
   '/doctors': typeof ProtectedDoctorsRoute
   '/lab-reports': typeof ProtectedLabReportsRoute
   '/patients': typeof ProtectedPatientsRoute
+  '/profile': typeof ProtectedProfileRoute
   '/receptionists': typeof ProtectedReceptionistsRoute
   '/schedules': typeof ProtectedSchedulesRoute
   '/settings': typeof ProtectedSettingsRoute
@@ -195,6 +203,7 @@ export interface FileRoutesById {
   '/_protected/doctors': typeof ProtectedDoctorsRoute
   '/_protected/lab-reports_': typeof ProtectedLabReportsRoute
   '/_protected/patients_': typeof ProtectedPatientsRoute
+  '/_protected/profile': typeof ProtectedProfileRoute
   '/_protected/receptionists': typeof ProtectedReceptionistsRoute
   '/_protected/schedules': typeof ProtectedSchedulesRoute
   '/_protected/settings': typeof ProtectedSettingsRoute
@@ -218,6 +227,7 @@ export interface FileRouteTypes {
     | '/doctors'
     | '/lab-reports'
     | '/patients'
+    | '/profile'
     | '/receptionists'
     | '/schedules'
     | '/settings'
@@ -239,6 +249,7 @@ export interface FileRouteTypes {
     | '/doctors'
     | '/lab-reports'
     | '/patients'
+    | '/profile'
     | '/receptionists'
     | '/schedules'
     | '/settings'
@@ -262,6 +273,7 @@ export interface FileRouteTypes {
     | '/_protected/doctors'
     | '/_protected/lab-reports_'
     | '/_protected/patients_'
+    | '/_protected/profile'
     | '/_protected/receptionists'
     | '/_protected/schedules'
     | '/_protected/settings'
@@ -321,6 +333,13 @@ declare module '@tanstack/react-router' {
       path: '/receptionists'
       fullPath: '/receptionists'
       preLoaderRoute: typeof ProtectedReceptionistsRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/profile': {
+      id: '/_protected/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProtectedProfileRouteImport
       parentRoute: typeof ProtectedRoute
     }
     '/_protected/patients_': {
@@ -465,6 +484,7 @@ interface ProtectedRouteChildren {
   ProtectedDoctorsRoute: typeof ProtectedDoctorsRoute
   ProtectedLabReportsRoute: typeof ProtectedLabReportsRoute
   ProtectedPatientsRoute: typeof ProtectedPatientsRoute
+  ProtectedProfileRoute: typeof ProtectedProfileRoute
   ProtectedReceptionistsRoute: typeof ProtectedReceptionistsRoute
   ProtectedSchedulesRoute: typeof ProtectedSchedulesRoute
   ProtectedSettingsRoute: typeof ProtectedSettingsRoute
@@ -482,6 +502,7 @@ const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedDoctorsRoute: ProtectedDoctorsRoute,
   ProtectedLabReportsRoute: ProtectedLabReportsRoute,
   ProtectedPatientsRoute: ProtectedPatientsRoute,
+  ProtectedProfileRoute: ProtectedProfileRoute,
   ProtectedReceptionistsRoute: ProtectedReceptionistsRoute,
   ProtectedSchedulesRoute: ProtectedSchedulesRoute,
   ProtectedSettingsRoute: ProtectedSettingsRoute,

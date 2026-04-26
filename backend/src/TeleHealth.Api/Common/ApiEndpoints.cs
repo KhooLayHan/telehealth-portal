@@ -128,6 +128,19 @@ public static class ApiEndpoints
         public const string UpdateBySlug = $"{Base}/{{slug}}/complete";
     }
 
+    public static class Users
+    {
+        private const string Me = "users/me";
+
+        public const string GetAvatarUploadUrl = $"{Me}/avatar/upload-url";
+
+        public const string UpdateAvatar = $"{Me}/avatar";
+
+        public const string UpdateProfile = $"{Me}/profile";
+
+        public const string GetDoctorProfile = $"{Me}/doctor";
+    }
+
     public static class Admins
     {
         private const string Base = "admins";

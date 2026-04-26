@@ -1,28 +1,28 @@
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
+using TeleHealth.Api.Common;
+using TeleHealth.Api.Common.Security;
 using TeleHealth.Api.Infrastructure.Persistence;
 
-namespace TeleHealth.Api.Features.Users.GetMe;
+namespace TeleHealth.Api.Features.Users.DoctorProfile;
 
-// * NOTE: Just a temporary implementation; will remove soon once full MVP RBAC support is implemented!
-public static class GetMeEndpoint
+public static class GetDoctorProfileEndpoint
 {
-    public static void MapGetMeEndpoint(this RouteGroupBuilder group)
+    public static void MapGetDoctorProfileEndpoint(this RouteGroupBuilder group)
     {
-        // Route: GET /api/v1/users/me
         group
             .MapGet(
-                "/me",
-                async (ApplicationDbContext db, ClaimsPrincipal user, CancellationToken ct) =>
+                ApiEndpoints.Users.GetDoctorProfile,
+                async (ClaimsPrincipal user, ApplicationDbContext db, CancellationToken ct) =>
                 {
                     var publicIdString = user.FindFirstValue(ClaimTypes.NameIdentifier);
                     if (!Guid.TryParse(publicIdString, out var publicId))
                         return Results.Unauthorized();
 
-                    // Universal identity — used by all roles (app shell)
-                    var currentUser = await db
+                    var profile = await db
                         .Users.AsNoTracking()
                         .Include(u => u.Roles)
+                        .Include(u => u.Doctor)
                         .Where(u => u.PublicId == publicId)
                         .Select(u => new
                         {
@@ -31,15 +31,20 @@ public static class GetMeEndpoint
                             u.FirstName,
                             u.LastName,
                             u.AvatarUrl,
+                            u.Phone,
+                            u.IcNumber,
+                            Address = u.Address != null ? u.Address.Street : null,
+                            LicenseNumber = u.Doctor != null ? u.Doctor.LicenseNumber : null,
+                            Specialization = u.Doctor != null ? u.Doctor.Specialization : null,
                             Roles = u.Roles.Select(r => r.Slug).ToList(),
                         })
                         .FirstOrDefaultAsync(ct);
 
-                    return currentUser is not null ? Results.Ok(currentUser) : Results.NotFound();
+                    return profile is not null ? Results.Ok(profile) : Results.NotFound();
                 }
             )
-            .WithName("GetMe")
+            .WithName("GetDoctorProfile")
             .WithTags("Users")
-            .RequireAuthorization(); // Notice: NO specific policy! ANY logged-in user can hit this.
+            .RequireAuthorization(AuthConstants.DoctorPolicy);
     }
 }
