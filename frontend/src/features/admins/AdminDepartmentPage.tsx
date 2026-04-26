@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { AddNewDepartmentForm } from "@/features/admins/manageDepartments/AddNewDepartmentForm";
+import { DeleteDepartmentDialog } from "@/features/admins/manageDepartments/DeleteDepartmentDialog";
 import { DepartmentsTable } from "@/features/admins/manageDepartments/DepartmentsTable";
 import { EditDepartmentForm } from "@/features/admins/manageDepartments/EditDepartmentForm";
 import type { DepartmentTableRow } from "@/features/admins/manageDepartments/UseDepartmentsTable";
@@ -18,11 +19,18 @@ import type { DepartmentTableRow } from "@/features/admins/manageDepartments/Use
 export function AdminDepartmentPage() {
   const [addDepartmentOpen, setAddDepartmentOpen] = useState(false);
   const [editDepartmentOpen, setEditDepartmentOpen] = useState(false);
+  const [deleteDepartmentOpen, setDeleteDepartmentOpen] = useState(false);
   const [editingDepartment, setEditingDepartment] = useState<DepartmentTableRow | null>(null);
+  const [deletingDepartment, setDeletingDepartment] = useState<DepartmentTableRow | null>(null);
 
   const handleEditDepartment = (department: DepartmentTableRow) => {
     setEditingDepartment(department);
     setEditDepartmentOpen(true);
+  };
+
+  const handleDeleteDepartment = (department: DepartmentTableRow) => {
+    setDeletingDepartment(department);
+    setDeleteDepartmentOpen(true);
   };
 
   return (
@@ -64,12 +72,20 @@ export function AdminDepartmentPage() {
         </div>
       </header>
 
-      <DepartmentsTable onEditDepartment={handleEditDepartment} />
+      <DepartmentsTable
+        onEditDepartment={handleEditDepartment}
+        onDeleteDepartment={handleDeleteDepartment}
+      />
       <AddNewDepartmentForm open={addDepartmentOpen} onOpenChange={setAddDepartmentOpen} />
       <EditDepartmentForm
         department={editingDepartment}
         open={editDepartmentOpen}
         onOpenChange={setEditDepartmentOpen}
+      />
+      <DeleteDepartmentDialog
+        department={deletingDepartment}
+        open={deleteDepartmentOpen}
+        onOpenChange={setDeleteDepartmentOpen}
       />
     </div>
   );

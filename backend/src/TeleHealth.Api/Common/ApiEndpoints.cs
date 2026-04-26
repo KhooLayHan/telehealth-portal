@@ -136,6 +136,8 @@ public static class ApiEndpoints
 
         public const string UpdateDepartment = $"{Base}/departments/{{slug}}";
 
+        public const string DeleteDepartment = $"{Base}/departments/{{slug}}/deactivate";
+
         public const string GetAllReceptionists = $"{Base}/receptionists";
 
         public const string CreateReceptionist = $"{Base}/receptionists";

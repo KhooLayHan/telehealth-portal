@@ -9,5 +9,6 @@ public sealed class Department
     public required string Name { get; set; }
     public string? Description { get; set; }
     public Instant CreatedAt { get; set; }
+    public Instant? DeletedAt { get; set; }
     public ICollection<Doctor> Doctors { get; } = [];
 }

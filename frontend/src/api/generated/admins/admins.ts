@@ -391,6 +391,103 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getAdminUpdateDepartmentMutationOptions(options), queryClient);
     }
+    export type adminDeleteDepartmentResponse204 = {
+  data: void
+  status: 204
+}
+
+export type adminDeleteDepartmentResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type adminDeleteDepartmentResponse403 = {
+  data: ProblemDetails
+  status: 403
+}
+
+export type adminDeleteDepartmentResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type adminDeleteDepartmentResponse409 = {
+  data: ProblemDetails
+  status: 409
+}
+
+export type adminDeleteDepartmentResponseSuccess = (adminDeleteDepartmentResponse204) & {
+  headers: Headers;
+};
+export type adminDeleteDepartmentResponseError = (adminDeleteDepartmentResponse401 | adminDeleteDepartmentResponse403 | adminDeleteDepartmentResponse404 | adminDeleteDepartmentResponse409) & {
+  headers: Headers;
+};
+
+export type adminDeleteDepartmentResponse = (adminDeleteDepartmentResponseSuccess | adminDeleteDepartmentResponseError)
+
+export const getAdminDeleteDepartmentUrl = (slug: string,) => {
+
+
+
+
+  return `http://localhost:5144/api/v1/admins/departments/${slug}/deactivate`
+}
+
+export const adminDeleteDepartment = async (slug: string, options?: RequestInit): Promise<adminDeleteDepartmentResponse> => {
+
+  return ofetchMutator<adminDeleteDepartmentResponse>(getAdminDeleteDepartmentUrl(slug),
+  {
+    ...options,
+    method: 'PATCH'
+
+
+  }
+);}
+
+
+
+
+export const getAdminDeleteDepartmentMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDeleteDepartment>>, TError,{slug: string}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminDeleteDepartment>>, TError,{slug: string}, TContext> => {
+
+const mutationKey = ['adminDeleteDepartment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminDeleteDepartment>>, {slug: string}> = (props) => {
+          const {slug} = props ?? {};
+
+          return  adminDeleteDepartment(slug,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminDeleteDepartmentMutationResult = NonNullable<Awaited<ReturnType<typeof adminDeleteDepartment>>>
+
+    export type AdminDeleteDepartmentMutationError = ProblemDetails
+
+    export const useAdminDeleteDepartment = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDeleteDepartment>>, TError,{slug: string}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminDeleteDepartment>>,
+        TError,
+        {slug: string},
+        TContext
+      > => {
+      return useMutation(getAdminDeleteDepartmentMutationOptions(options), queryClient);
+    }
     export type adminGetAllReceptionistsResponse200 = {
   data: PagedResultOfAdminReceptionistDto
   status: 200

@@ -22,3 +22,14 @@ public sealed class DepartmentNotFoundException : NotFoundException
             "The requested department could not be found."
         ) { }
 }
+
+// Represents a conflict when a department still has active staff assigned.
+public sealed class DepartmentHasAssignedStaffException : ConflictException
+{
+    public DepartmentHasAssignedStaffException()
+        : base(
+            DepartmentErrorCodes.HasAssignedStaff,
+            "Department Has Assigned Staff",
+            "Departments with assigned staff cannot be deleted."
+        ) { }
+}

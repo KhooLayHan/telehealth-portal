@@ -20,6 +20,8 @@ public sealed class DepartmentConfiguration : IEntityTypeConfiguration<Departmen
         builder.Property(d => d.Description).HasMaxLength(500);
 
         builder.Property(d => d.CreatedAt).IsRequired().HasDefaultValueSql("now()");
+        builder.Property(d => d.DeletedAt);
+        builder.HasQueryFilter("SoftDeletionFilter", d => d.DeletedAt == null);
 
         builder.HasData(
             new Department
