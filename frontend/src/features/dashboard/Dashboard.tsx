@@ -1,3 +1,6 @@
+import { Link } from "@tanstack/react-router";
+import { CalendarPlus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/useAuthStore";
 import { AdminDashboard } from "./roles/AdminDashboard";
 import { DoctorDashboard } from "./roles/DoctorDashboard";
@@ -28,10 +31,31 @@ export function Dashboard() {
   return (
     <>
       <div className="mb-6">
-        <h1 className="font-semibold text-2xl">Good morning, {user?.firstName ?? "User"}</h1>
-        <p className="mt-0.5 text-muted-foreground text-sm">
-          Here's what's happening at the clinic today.
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="font-semibold text-2xl">
+              {(() => {
+                const h = new Date().getHours();
+                const greeting =
+                  h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
+                return `${greeting}, ${user?.firstName ?? "User"}`;
+              })()}
+            </h1>
+            <p className="mt-0.5 text-muted-foreground text-sm">
+              Here's what's happening at the clinic today.
+            </p>
+          </div>
+          {user?.role?.toLowerCase() === "patient" && (
+            <Button
+              render={
+                <Link to="/appointments/book">
+                  <CalendarPlus className="mr-2 size-4" />
+                  Book New Appointment
+                </Link>
+              }
+            />
+          )}
+        </div>
       </div>
       {renderDashboardContent()}
     </>

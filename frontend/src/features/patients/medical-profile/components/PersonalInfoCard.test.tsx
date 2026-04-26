@@ -20,33 +20,24 @@ const mockProfile: PatientProfileDto = {
 };
 
 describe("PersonalInfoCard", () => {
-  it("renders firstName value in the first name input", () => {
+  it("renders user initials in avatar", () => {
     render(<PersonalInfoCard profile={mockProfile} />);
-    const firstNameInput = screen.getByLabelText(/first name/i);
-    expect(firstNameInput).toHaveValue("Alice");
+    expect(screen.getByText("AS")).toBeInTheDocument();
   });
 
-  it("renders lastName value in the last name input", () => {
+  it("renders full name", () => {
     render(<PersonalInfoCard profile={mockProfile} />);
-    const lastNameInput = screen.getByLabelText(/last name/i);
-    expect(lastNameInput).toHaveValue("Smith");
+    expect(screen.getByText(/Alice/)).toBeInTheDocument();
+    expect(screen.getByText(/Smith/)).toBeInTheDocument();
   });
 
-  it("renders email value in the email input", () => {
+  it("renders email", () => {
     render(<PersonalInfoCard profile={mockProfile} />);
-    const emailInput = screen.getByLabelText(/email/i);
-    expect(emailInput).toHaveValue("alice@example.com");
+    expect(screen.getByText("alice@example.com")).toBeInTheDocument();
   });
 
-  it("has all three inputs disabled", () => {
+  it("displays read-only indicator", () => {
     render(<PersonalInfoCard profile={mockProfile} />);
-
-    const firstNameInput = screen.getByLabelText(/first name/i);
-    const lastNameInput = screen.getByLabelText(/last name/i);
-    const emailInput = screen.getByLabelText(/email/i);
-
-    expect(firstNameInput).toBeDisabled();
-    expect(lastNameInput).toBeDisabled();
-    expect(emailInput).toBeDisabled();
+    expect(screen.getByText("Read-only")).toBeInTheDocument();
   });
 });

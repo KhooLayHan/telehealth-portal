@@ -1,4 +1,3 @@
-import { Separator } from "@base-ui/react/separator";
 import { Activity, Save } from "lucide-react";
 import { useId } from "react";
 import type { PatientProfileDto } from "@/api/model/PatientProfileDto";
@@ -11,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { BLOOD_GROUP_OPTIONS, medicalInfoSchema } from "../types";
 import { AllergiesManager } from "./AllergiesManager";
 import { EmergencyContactForm } from "./EmergencyContactForm";
@@ -46,7 +46,7 @@ export function ProfileFormInner({ profile }: { profile: PatientProfileDto }) {
             validators={{ onChange: medicalInfoSchema.shape.bloodGroup }}
           >
             {(field) => (
-              <div className="md:w-1/3">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <FormField
                   label="Blood Group"
                   htmlFor={bloodGroupId}
@@ -77,7 +77,7 @@ export function ProfileFormInner({ profile }: { profile: PatientProfileDto }) {
           <div className="space-y-3">
             <AllergiesManager form={form} />
           </div>
-          <div className="flex justify-end pt-4 cursor-pointer">
+          <div className="flex justify-end pt-4">
             <form.Subscribe>
               {(state) => (
                 <Button

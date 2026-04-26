@@ -524,7 +524,7 @@ export const getAdminGetAllReceptionistsUrl = (params?: AdminGetAllReceptionists
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `http://localhost:5144/api/v1/admins/receptionists?${stringifiedParams}` : `http://localhost:5144/api/v1/admins/receptionists`
+  return stringifiedParams.length > 0 ? `/api/v1/admins/receptionists?${stringifiedParams}` : `/api/v1/admins/receptionists`
 }
 
 export const adminGetAllReceptionists = async (params?: AdminGetAllReceptionistsParams, options?: RequestInit): Promise<adminGetAllReceptionistsResponse> => {
@@ -544,7 +544,7 @@ export const adminGetAllReceptionists = async (params?: AdminGetAllReceptionists
 
 export const getAdminGetAllReceptionistsQueryKey = (params?: AdminGetAllReceptionistsParams,) => {
     return [
-    `http://localhost:5144/api/v1/admins/receptionists`, ...(params ? [params] : [])
+    `/api/v1/admins/receptionists`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -657,7 +657,7 @@ export const getAdminCreateReceptionistUrl = () => {
 
 
 
-  return `http://localhost:5144/api/v1/admins/receptionists`
+  return `/api/v1/admins/receptionists`
 }
 
 export const adminCreateReceptionist = async (adminCreateReceptionistCommand: AdminCreateReceptionistCommand, options?: RequestInit): Promise<adminCreateReceptionistResponse> => {
@@ -755,7 +755,7 @@ export const getAdminUpdateReceptionistUrl = (id: string,) => {
 
 
 
-  return `http://localhost:5144/api/v1/admins/receptionists/${id}`
+  return `/api/v1/admins/receptionists/${id}`
 }
 
 export const adminUpdateReceptionist = async (id: string,
@@ -849,7 +849,7 @@ export const getAdminDeactivateReceptionistUrl = (id: string,) => {
 
 
 
-  return `http://localhost:5144/api/v1/admins/receptionists/${id}/deactivate`
+  return `/api/v1/admins/receptionists/${id}/deactivate`
 }
 
 export const adminDeactivateReceptionist = async (id: string, options?: RequestInit): Promise<adminDeactivateReceptionistResponse> => {

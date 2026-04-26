@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net">
   <diagram id="lkVh-SMzk4fx-sdMW5Uw" name="Page-1">
-    <mxGraphModel dx="1264" dy="636" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1769" dy="863" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -45,9 +45,6 @@
         </mxCell>
         <mxCell id="alb" parent="1" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#8C4FFF;labelBackgroundColor=#ffffff;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontStyle=1;fontSize=10;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.application_load_balancer;" value="Application&#xa;Load Balancer" vertex="1">
           <mxGeometry height="60" width="60" x="660" y="210" as="geometry" />
-        </mxCell>
-        <mxCell id="nat" parent="1" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#8C4FFF;labelBackgroundColor=#ffffff;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontSize=10;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.nat_gateway;" value="NAT Gateway (×2)" vertex="1">
-          <mxGeometry height="60" width="60" x="900" y="210" as="geometry" />
         </mxCell>
         <mxCell id="beanstalk" parent="1" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#ED7100;labelBackgroundColor=#ffffff;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontStyle=1;fontSize=10;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.elastic_beanstalk;" value="Elastic Beanstalk&#xa;(Single Instance&#xa;Docker, .NET 10)" vertex="1">
           <mxGeometry height="60" width="60" x="1160" y="210" as="geometry" />

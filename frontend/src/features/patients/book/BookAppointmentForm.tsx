@@ -51,7 +51,9 @@ export function BookAppointmentForm() {
 
   return (
     <div className="max-w-2xl mx-auto py-8">
-      <ProgressBar step={step} />
+      <div className="px-4">
+        <ProgressBar step={step} />
+      </div>
 
       <form
         onSubmit={(e) => {

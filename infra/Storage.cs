@@ -14,6 +14,7 @@ public static class Storage
     public sealed class Result
     {
         public required Aws.S3.Bucket FrontendBucket { get; init; }
+        public required Aws.S3.BucketWebsiteConfiguration FrontendWebsiteConfig { get; init; }
         public required Aws.S3.Bucket ArtifactsBucket { get; init; }
         public required Aws.S3.Bucket LabReportsBucket { get; init; }
     }
@@ -121,6 +122,7 @@ public static class Storage
         return new Result
         {
             FrontendBucket = frontendBucket,
+            FrontendWebsiteConfig = frontendWebsiteConfig,
             ArtifactsBucket = artifactsBucket,
             LabReportsBucket = labReportsBucket,
         };
