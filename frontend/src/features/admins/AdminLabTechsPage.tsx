@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { AddNewLabTechForm } from "@/features/admins/manageLabTech/AddNewLabTechForm";
+import { DeleteLabTechDialog } from "@/features/admins/manageLabTech/DeleteLabTechDialog";
 import { EditLabTechForm } from "@/features/admins/manageLabTech/EditLabTechForm";
 import { LabTechTable } from "@/features/admins/manageLabTech/LabTechTable";
 
@@ -27,10 +28,17 @@ export function AdminLabTechsPage() {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editLabTech, setEditLabTech] = useState<AdminLabTechDto | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteLabTech, setDeleteLabTech] = useState<AdminLabTechDto | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const handleEdit = (labTech: AdminLabTechDto) => {
     setEditLabTech(labTech);
     setEditDialogOpen(true);
+  };
+
+  const handleDelete = (labTech: AdminLabTechDto) => {
+    setDeleteLabTech(labTech);
+    setDeleteDialogOpen(true);
   };
 
   useEffect(() => {
@@ -120,6 +128,7 @@ export function AdminLabTechsPage() {
             search={searchInput}
             onSearchChange={setSearchInput}
             onEdit={handleEdit}
+            onDeactivate={handleDelete}
           />
         )}
       </motion.div>
@@ -131,6 +140,13 @@ export function AdminLabTechsPage() {
         labTech={editLabTech}
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
+      />
+
+      <DeleteLabTechDialog
+        key={deleteLabTech?.publicId?.toString()}
+        labTech={deleteLabTech}
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
       />
     </div>
   );
