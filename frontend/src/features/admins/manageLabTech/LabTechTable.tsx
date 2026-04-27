@@ -1,6 +1,5 @@
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { ChevronLeft, ChevronRight, Eye, Pencil, Search, UserX } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -31,24 +30,16 @@ export interface LabTechRecord {
 // Keeps lab technician table columns stable across different data lengths.
 const COLUMN_STYLES: Record<string, { cell: string; header: string }> = {
   firstName: {
-    header: "min-w-56 w-[24%]",
-    cell: "min-w-56 w-[24%]",
-  },
-  staffId: {
-    header: "w-36",
-    cell: "w-36",
+    header: "min-w-56 w-[28%]",
+    cell: "min-w-56 w-[28%]",
   },
   email: {
-    header: "min-w-64 w-[26%]",
-    cell: "min-w-64 w-[26%]",
+    header: "min-w-64 w-[30%]",
+    cell: "min-w-64 w-[30%]",
   },
-  laboratory: {
-    header: "min-w-44 w-[18%]",
-    cell: "min-w-44 w-[18%]",
-  },
-  status: {
-    header: "w-32",
-    cell: "w-32",
+  phoneNumber: {
+    header: "w-40",
+    cell: "w-40",
   },
   createdAt: {
     header: "w-36",
@@ -77,19 +68,6 @@ function formatDate(iso: string): string {
 // Builds a two-letter fallback for lab technician avatars.
 function getLabTechInitials(labTech: LabTechRecord): string {
   return `${labTech.firstName[0] ?? ""}${labTech.lastName[0] ?? ""}`.toUpperCase();
-}
-
-// Returns the badge variant that matches a lab technician account status.
-function getStatusVariant(status: LabTechRecord["status"]): "default" | "secondary" | "outline" {
-  if (status === "Active") {
-    return "default";
-  }
-
-  if (status === "Training") {
-    return "secondary";
-  }
-
-  return "outline";
 }
 
 // Describes optional table actions supplied by the parent page.
@@ -132,11 +110,6 @@ const columns: ColumnDef<LabTechRecord>[] = [
     },
   },
   {
-    accessorKey: "staffId",
-    header: "Staff ID",
-    cell: ({ row }) => <span className="font-mono text-xs">{row.getValue("staffId")}</span>,
-  },
-  {
     accessorKey: "email",
     header: "Email",
     cell: ({ row }) => (
@@ -144,22 +117,11 @@ const columns: ColumnDef<LabTechRecord>[] = [
     ),
   },
   {
-    accessorKey: "laboratory",
-    header: "Laboratory",
+    accessorKey: "phoneNumber",
+    header: "Phone",
     cell: ({ row }) => (
-      <span className="block truncate text-muted-foreground text-xs">
-        {row.getValue("laboratory")}
-      </span>
+      <span className="font-mono text-xs">{row.getValue("phoneNumber") || "-"}</span>
     ),
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => {
-      const status = row.getValue<LabTechRecord["status"]>("status");
-
-      return <Badge variant={getStatusVariant(status)}>{status}</Badge>;
-    },
   },
   {
     accessorKey: "createdAt",
@@ -258,7 +220,7 @@ export function LabTechTable({
         <div className="relative w-full sm:w-80">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search by name, email, lab or staff ID..."
+            placeholder="Search by name, email or phone..."
             value={search}
             onChange={(event) => onSearchChange(event.target.value)}
             className="h-9 pl-9 text-sm"
@@ -271,7 +233,7 @@ export function LabTechTable({
       </div>
 
       <div className="overflow-hidden rounded-lg border border-border">
-        <Table className="min-w-[64rem]">
+        <Table className="min-w-[52rem]">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow
