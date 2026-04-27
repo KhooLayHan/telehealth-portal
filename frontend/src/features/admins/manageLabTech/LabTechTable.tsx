@@ -1,5 +1,6 @@
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { ChevronLeft, ChevronRight, Eye, Pencil, Search, UserX } from "lucide-react";
+import type { AdminLabTechDto } from "@/api/model/AdminLabTechDto";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,21 +12,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-
-// Represents a lab technician row before backend integration is connected.
-export interface LabTechRecord {
-  publicId: string;
-  firstName: string;
-  lastName: string;
-  username: string;
-  email: string;
-  phoneNumber?: string;
-  staffId: string;
-  laboratory: string;
-  status: "Active" | "Training" | "On Leave";
-  createdAt: string;
-  avatarUrl?: string | null;
-}
 
 // Keeps lab technician table columns stable across different data lengths.
 const COLUMN_STYLES: Record<string, { cell: string; header: string }> = {
@@ -57,7 +43,11 @@ function getColumnStyle(columnId: string, part: "cell" | "header"): string {
 }
 
 // Formats a date string as "15 Apr 1982".
-function formatDate(iso: string): string {
+function formatDate(iso?: string): string {
+  if (!iso) {
+    return "-";
+  }
+
   return new Date(iso).toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",
@@ -66,19 +56,19 @@ function formatDate(iso: string): string {
 }
 
 // Builds a two-letter fallback for lab technician avatars.
-function getLabTechInitials(labTech: LabTechRecord): string {
+function getLabTechInitials(labTech: AdminLabTechDto): string {
   return `${labTech.firstName[0] ?? ""}${labTech.lastName[0] ?? ""}`.toUpperCase();
 }
 
 // Describes optional table actions supplied by the parent page.
 interface LabTechTableMeta {
-  onView?: (labTech: LabTechRecord) => void;
-  onEdit?: (labTech: LabTechRecord) => void;
-  onDeactivate?: (labTech: LabTechRecord) => void;
+  onView?: (labTech: AdminLabTechDto) => void;
+  onEdit?: (labTech: AdminLabTechDto) => void;
+  onDeactivate?: (labTech: AdminLabTechDto) => void;
 }
 
 // Column definitions for the lab technicians data table.
-const columns: ColumnDef<LabTechRecord>[] = [
+const columns: ColumnDef<AdminLabTechDto>[] = [
   {
     accessorKey: "firstName",
     header: "Name",
@@ -179,7 +169,7 @@ const columns: ColumnDef<LabTechRecord>[] = [
 
 // Describes the data and controls needed by the lab technician table.
 interface LabTechTableProps extends LabTechTableMeta {
-  data: LabTechRecord[];
+  data: AdminLabTechDto[];
   page: number;
   totalCount: number;
   totalPages: number;
