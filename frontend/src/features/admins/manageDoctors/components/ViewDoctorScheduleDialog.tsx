@@ -36,6 +36,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { addDays, getTodayStr } from "@/features/schedules/ScheduleUtils";
 import { cn } from "@/lib/utils";
 import { AddDoctorScheduleForm } from "./AddDoctorScheduleForm";
+import { DeleteScheduleDialog } from "./DeleteScheduleDialog";
 
 // Describes the minimum doctor information needed by the schedule dialog.
 interface ScheduleDoctor {
@@ -233,6 +234,9 @@ export function ViewDoctorScheduleDialog({
 }: ViewDoctorScheduleDialogProps) {
   const [selectedDate, setSelectedDate] = useState(getTodayStr());
   const [addScheduleOpen, setAddScheduleOpen] = useState(false);
+  const [deleteScheduleOpen, setDeleteScheduleOpen] = useState(false);
+  const [selectedScheduleSlot, setSelectedScheduleSlot] =
+    useState<ReceptionistDoctorScheduleSlotDto | null>(null);
   const [removedSlotKeys, setRemovedSlotKeys] = useState<Set<string>>(() => new Set());
   const doctorPublicId = doctor?.doctorPublicId ?? "";
   const scheduleQuery = useGetDailySchedulesForReceptionist(
@@ -265,12 +269,24 @@ export function ViewDoctorScheduleDialog({
     },
     {},
   );
-  const handleRemoveScheduleSlot = (slot: ReceptionistDoctorScheduleSlotDto) => {
+  const handleRequestRemoveScheduleSlot = (slot: ReceptionistDoctorScheduleSlotDto) => {
+    setSelectedScheduleSlot(slot);
+    setDeleteScheduleOpen(true);
+  };
+  const handleConfirmRemoveScheduleSlot = (slot: ReceptionistDoctorScheduleSlotDto) => {
     setRemovedSlotKeys((currentKeys) => {
       const nextKeys = new Set(currentKeys);
       nextKeys.add(getSlotKey(slot));
       return nextKeys;
     });
+    setSelectedScheduleSlot(null);
+  };
+  const handleDeleteScheduleOpenChange = (nextOpen: boolean) => {
+    setDeleteScheduleOpen(nextOpen);
+
+    if (!nextOpen) {
+      setSelectedScheduleSlot(null);
+    }
   };
 
   if (!doctor) return null;
@@ -403,7 +419,7 @@ export function ViewDoctorScheduleDialog({
                         <ScheduleSlotCard
                           key={getSlotKey(slot)}
                           slot={slot}
-                          onRemove={handleRemoveScheduleSlot}
+                          onRemove={handleRequestRemoveScheduleSlot}
                         />
                       ))}
                     </div>
@@ -470,7 +486,7 @@ export function ViewDoctorScheduleDialog({
                                   size="sm"
                                   type="button"
                                   variant="destructive"
-                                  onClick={() => handleRemoveScheduleSlot(slot)}
+                                  onClick={() => handleRequestRemoveScheduleSlot(slot)}
                                 >
                                   <Trash2 className="size-3.5" />
                                   Remove Schedule
@@ -553,7 +569,7 @@ export function ViewDoctorScheduleDialog({
                               size="sm"
                               type="button"
                               variant="destructive"
-                              onClick={() => handleRemoveScheduleSlot(slot)}
+                              onClick={() => handleRequestRemoveScheduleSlot(slot)}
                             >
                               <Trash2 className="size-3.5" />
                               Remove Schedule
@@ -582,6 +598,13 @@ export function ViewDoctorScheduleDialog({
         doctor={doctor}
         open={addScheduleOpen}
         onOpenChange={setAddScheduleOpen}
+      />
+
+      <DeleteScheduleDialog
+        open={deleteScheduleOpen}
+        scheduleSlot={selectedScheduleSlot}
+        onConfirm={handleConfirmRemoveScheduleSlot}
+        onOpenChange={handleDeleteScheduleOpenChange}
       />
     </>
   );
