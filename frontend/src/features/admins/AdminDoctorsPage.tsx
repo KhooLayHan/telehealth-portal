@@ -5,10 +5,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Download,
+  Filter,
   GraduationCap,
   Plus,
   Search,
   Stethoscope,
+  X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -31,6 +33,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { AddNewDoctorForm } from "./manageDoctors/components/AddNewDoctorForm";
 import { DoctorCard } from "./manageDoctors/components/DoctorCard";
 import { EditDoctorForm } from "./manageDoctors/components/EditDoctorForm";
@@ -286,6 +296,8 @@ export function AdminDoctorsPage() {
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
+  const [departmentFilter, setDepartmentFilter] = useState("");
+  const [specializationFilter, setSpecializationFilter] = useState("");
   const [selectedDoctor, setSelectedDoctor] = useState<DoctorListDto | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [selectedDoctorForEdit, setSelectedDoctorForEdit] = useState<DoctorListDto | null>(null);
@@ -302,6 +314,30 @@ export function AdminDoctorsPage() {
     () => new Set(allDoctors.map((d: DoctorListDto) => d.departmentName).filter(Boolean)).size,
     [allDoctors],
   );
+  const departmentOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          allDoctors
+            .map((doctor: DoctorListDto) => doctor.departmentName)
+            .filter((department): department is string => Boolean(department)),
+        ),
+      ).sort((a, b) => a.localeCompare(b)),
+    [allDoctors],
+  );
+  const specializationOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          allDoctors
+            .map((doctor: DoctorListDto) => doctor.specialization)
+            .filter((specialization): specialization is string => Boolean(specialization)),
+        ),
+      ).sort((a, b) => a.localeCompare(b)),
+    [allDoctors],
+  );
+  const activeFilterCount =
+    Number(Boolean(departmentFilter)) + Number(Boolean(specializationFilter));
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -312,18 +348,23 @@ export function AdminDoctorsPage() {
   }, [searchInput]);
 
   const filtered = useMemo(() => {
-    if (!search) return allDoctors;
     const q = search.toLowerCase();
-    return allDoctors.filter(
-      (d: DoctorListDto) =>
+    return allDoctors.filter((d: DoctorListDto) => {
+      const matchesSearch =
+        !q ||
         `${d.firstName ?? ""} ${d.lastName ?? ""}`.toLowerCase().includes(q) ||
         (d.email ?? "").toLowerCase().includes(q) ||
         (d.username ?? "").toLowerCase().includes(q) ||
         (d.specialization ?? "").toLowerCase().includes(q) ||
         (d.departmentName ?? "").toLowerCase().includes(q) ||
-        (d.licenseNumber ?? "").toLowerCase().includes(q),
-    );
-  }, [search, allDoctors]);
+        (d.licenseNumber ?? "").toLowerCase().includes(q);
+      const matchesDepartment = !departmentFilter || d.departmentName === departmentFilter;
+      const matchesSpecialization =
+        !specializationFilter || d.specialization === specializationFilter;
+
+      return matchesSearch && matchesDepartment && matchesSpecialization;
+    });
+  }, [search, allDoctors, departmentFilter, specializationFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -396,8 +437,8 @@ export function AdminDoctorsPage() {
         </div>
       </div>
 
-      <div className="mb-4 flex items-center gap-3">
-        <div className="relative w-72">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative w-full sm:w-72">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <input
             className="h-9 w-full rounded-md border border-input bg-background pl-9 pr-3 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -406,6 +447,112 @@ export function AdminDoctorsPage() {
             onChange={(e) => setSearchInput(e.target.value)}
           />
         </div>
+        <Popover>
+          <PopoverTrigger
+            render={
+              <Button
+                type="button"
+                variant="outline"
+                className="h-9 w-fit gap-1.5 bg-background"
+                aria-label="Filter doctors"
+              >
+                <Filter className="size-4" />
+                Filters
+                {activeFilterCount > 0 && (
+                  <span className="ml-0.5 inline-flex size-5 items-center justify-center rounded-full bg-primary text-[11px] text-primary-foreground">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </Button>
+            }
+          />
+          <PopoverContent align="start" className="w-80 gap-4 p-4">
+            <PopoverHeader>
+              <PopoverTitle>Doctor filters</PopoverTitle>
+            </PopoverHeader>
+
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Department</Label>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant={departmentFilter ? "outline" : "default"}
+                  size="sm"
+                  onClick={() => {
+                    setDepartmentFilter("");
+                    setPage(1);
+                  }}
+                >
+                  All
+                </Button>
+                {departmentOptions.map((department) => (
+                  <Button
+                    key={department}
+                    type="button"
+                    variant={departmentFilter === department ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => {
+                      setDepartmentFilter(departmentFilter === department ? "" : department);
+                      setPage(1);
+                    }}
+                  >
+                    {department}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Specialization</Label>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant={specializationFilter ? "outline" : "default"}
+                  size="sm"
+                  onClick={() => {
+                    setSpecializationFilter("");
+                    setPage(1);
+                  }}
+                >
+                  All
+                </Button>
+                {specializationOptions.map((specialization) => (
+                  <Button
+                    key={specialization}
+                    type="button"
+                    variant={specializationFilter === specialization ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => {
+                      setSpecializationFilter(
+                        specializationFilter === specialization ? "" : specialization,
+                      );
+                      setPage(1);
+                    }}
+                  >
+                    {specialization}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {activeFilterCount > 0 && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="w-fit gap-1.5 text-muted-foreground"
+                onClick={() => {
+                  setDepartmentFilter("");
+                  setSpecializationFilter("");
+                  setPage(1);
+                }}
+              >
+                <X className="size-3.5" />
+                Clear filters
+              </Button>
+            )}
+          </PopoverContent>
+        </Popover>
       </div>
 
       {isLoading ? (
