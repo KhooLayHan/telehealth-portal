@@ -1,4 +1,4 @@
-import { Activity, FileBarChart, ShieldCheck, Users } from "lucide-react";
+import { CalendarDays, FileBarChart, ShieldCheck, Stethoscope, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -10,8 +10,17 @@ export function AdminDashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="font-medium text-muted-foreground text-sm">
-              Total Active Users
+              Today's Appointments
             </CardTitle>
+            <CalendarDays className="size-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <p className="font-bold text-2xl">24</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="font-medium text-muted-foreground text-sm">Patients</CardTitle>
             <Users className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -20,20 +29,16 @@ export function AdminDashboard() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="font-medium text-muted-foreground text-sm">
-              System Health
-            </CardTitle>
-            <Activity className="size-4 text-green-500" />
+            <CardTitle className="font-medium text-muted-foreground text-sm">Doctors</CardTitle>
+            <Stethoscope className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <p className="font-bold text-2xl">Optimal</p>
+            <p className="font-bold text-2xl">86</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="font-medium text-muted-foreground text-sm">
-              Active Staff
-            </CardTitle>
+            <CardTitle className="font-medium text-muted-foreground text-sm">Staff</CardTitle>
             <ShieldCheck className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
