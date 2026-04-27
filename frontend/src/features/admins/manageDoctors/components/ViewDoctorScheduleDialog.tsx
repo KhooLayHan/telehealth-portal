@@ -133,6 +133,11 @@ function isScheduleStatus(slot: ReceptionistDoctorScheduleSlotDto, status: strin
   return slot.scheduleStatus?.toLowerCase() === status;
 }
 
+// Checks whether the schedule slot can be removed by an admin.
+function canRemoveScheduleSlot(slot: ReceptionistDoctorScheduleSlotDto): boolean {
+  return isScheduleStatus(slot, "available");
+}
+
 // Builds a stable fallback key for schedule slots when generated types mark IDs optional.
 function getSlotKey(slot: ReceptionistDoctorScheduleSlotDto): string {
   return slot.publicId ?? `${slot.doctorPublicId ?? "doctor"}-${slot.date}-${slot.startTime}`;
@@ -167,6 +172,8 @@ function ScheduleSlotCard({
   onRemove: (slot: ReceptionistDoctorScheduleSlotDto) => void;
   slot: ReceptionistDoctorScheduleSlotDto;
 }) {
+  const canRemove = canRemoveScheduleSlot(slot);
+
   return (
     <article className="space-y-3 rounded-lg border border-border bg-background p-3">
       <div className="flex items-start justify-between gap-3">
@@ -214,7 +221,9 @@ function ScheduleSlotCard({
 
       <Button
         className="w-full gap-1.5"
+        disabled={!canRemove}
         size="sm"
+        title={canRemove ? "Remove schedule" : "Only available schedules can be removed"}
         type="button"
         variant="destructive"
         onClick={() => onRemove(slot)}
@@ -237,7 +246,6 @@ export function ViewDoctorScheduleDialog({
   const [deleteScheduleOpen, setDeleteScheduleOpen] = useState(false);
   const [selectedScheduleSlot, setSelectedScheduleSlot] =
     useState<ReceptionistDoctorScheduleSlotDto | null>(null);
-  const [removedSlotKeys, setRemovedSlotKeys] = useState<Set<string>>(() => new Set());
   const doctorPublicId = doctor?.doctorPublicId ?? "";
   const scheduleQuery = useGetDailySchedulesForReceptionist(
     { Date: selectedDate, ...(doctorPublicId ? { DoctorPublicId: doctorPublicId } : {}) },
@@ -248,8 +256,8 @@ export function ViewDoctorScheduleDialog({
     [scheduleQuery.data],
   );
   const scheduleSlots = useMemo<ReceptionistDoctorScheduleSlotDto[]>(
-    () => backendScheduleSlots.filter((slot) => !removedSlotKeys.has(getSlotKey(slot))),
-    [backendScheduleSlots, removedSlotKeys],
+    () => backendScheduleSlots,
+    [backendScheduleSlots],
   );
   const doctorName = `Dr. ${doctor?.firstName ?? ""} ${doctor?.lastName ?? ""}`.trim();
   const hasLoadError = scheduleQuery.isError || scheduleQuery.data?.status === 401;
@@ -270,16 +278,12 @@ export function ViewDoctorScheduleDialog({
     {},
   );
   const handleRequestRemoveScheduleSlot = (slot: ReceptionistDoctorScheduleSlotDto) => {
+    if (!canRemoveScheduleSlot(slot)) {
+      return;
+    }
+
     setSelectedScheduleSlot(slot);
     setDeleteScheduleOpen(true);
-  };
-  const handleConfirmRemoveScheduleSlot = (slot: ReceptionistDoctorScheduleSlotDto) => {
-    setRemovedSlotKeys((currentKeys) => {
-      const nextKeys = new Set(currentKeys);
-      nextKeys.add(getSlotKey(slot));
-      return nextKeys;
-    });
-    setSelectedScheduleSlot(null);
   };
   const handleDeleteScheduleOpenChange = (nextOpen: boolean) => {
     setDeleteScheduleOpen(nextOpen);
@@ -483,7 +487,13 @@ export function ViewDoctorScheduleDialog({
                               <TableCell className="text-right">
                                 <Button
                                   className="gap-1.5"
+                                  disabled={!canRemoveScheduleSlot(slot)}
                                   size="sm"
+                                  title={
+                                    canRemoveScheduleSlot(slot)
+                                      ? "Remove schedule"
+                                      : "Only available schedules can be removed"
+                                  }
                                   type="button"
                                   variant="destructive"
                                   onClick={() => handleRequestRemoveScheduleSlot(slot)}
@@ -566,7 +576,13 @@ export function ViewDoctorScheduleDialog({
                             </div>
                             <Button
                               className="w-full gap-1.5 md:w-auto"
+                              disabled={!canRemoveScheduleSlot(slot)}
                               size="sm"
+                              title={
+                                canRemoveScheduleSlot(slot)
+                                  ? "Remove schedule"
+                                  : "Only available schedules can be removed"
+                              }
                               type="button"
                               variant="destructive"
                               onClick={() => handleRequestRemoveScheduleSlot(slot)}
@@ -603,7 +619,6 @@ export function ViewDoctorScheduleDialog({
       <DeleteScheduleDialog
         open={deleteScheduleOpen}
         scheduleSlot={selectedScheduleSlot}
-        onConfirm={handleConfirmRemoveScheduleSlot}
         onOpenChange={handleDeleteScheduleOpenChange}
       />
     </>

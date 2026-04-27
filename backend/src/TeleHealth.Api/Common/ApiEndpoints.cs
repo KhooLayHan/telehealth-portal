@@ -110,7 +110,7 @@ public static class ApiEndpoints
 
         public const string UpdateById = $"{Base}/{{id:guid}}";
 
-        public const string DeleteById = $"{Base}/{{id:guid}}";
+        public const string DeleteById = $"{Base}/{{id:guid}}/deactivate";
     }
 
     public static class LabReports

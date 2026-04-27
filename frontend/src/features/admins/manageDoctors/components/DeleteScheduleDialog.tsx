@@ -1,6 +1,12 @@
-import { CalendarDays, Clock3, Trash2 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { CalendarDays, Clock3, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  getGetDailySchedulesForReceptionistQueryKey,
+  useDeleteById,
+} from "@/api/generated/schedules/schedules";
 import type { ReceptionistDoctorScheduleSlotDto } from "@/api/model/ReceptionistDoctorScheduleSlotDto";
+import { ApiError } from "@/api/ofetch-mutator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,7 +22,6 @@ import {
 interface DeleteScheduleDialogProps {
   open: boolean;
   scheduleSlot: ReceptionistDoctorScheduleSlotDto | null;
-  onConfirm: (scheduleSlot: ReceptionistDoctorScheduleSlotDto) => void;
   onOpenChange: (open: boolean) => void;
 }
 
@@ -45,19 +50,52 @@ function formatTimeLabel(time?: string): string {
   return time ? time.slice(0, 5) : "Not provided";
 }
 
-// Displays a frontend-only confirmation dialog before removing a schedule slot from the view.
+// Checks whether the selected schedule can be removed.
+function canRemoveScheduleSlot(scheduleSlot: ReceptionistDoctorScheduleSlotDto): boolean {
+  return scheduleSlot.scheduleStatus?.toLowerCase() === "available";
+}
+
+// Displays a confirmation dialog before removing an available schedule slot.
 export function DeleteScheduleDialog({
   open,
   scheduleSlot,
-  onConfirm,
   onOpenChange,
 }: DeleteScheduleDialogProps) {
+  const queryClient = useQueryClient();
+  const { mutateAsync, isPending } = useDeleteById();
+
   if (!scheduleSlot) return null;
 
-  const handleConfirm = () => {
-    onConfirm(scheduleSlot);
-    toast.success("Schedule removed from this view.");
-    onOpenChange(false);
+  const isRemovable = canRemoveScheduleSlot(scheduleSlot);
+
+  const handleConfirm = async () => {
+    if (!scheduleSlot.publicId) {
+      toast.error("Schedule ID is missing. Please refresh and try again.");
+      return;
+    }
+
+    if (!isRemovable) {
+      toast.error("Only available schedules can be removed.");
+      return;
+    }
+
+    try {
+      await mutateAsync({ id: scheduleSlot.publicId });
+      await queryClient.invalidateQueries({
+        queryKey: getGetDailySchedulesForReceptionistQueryKey({
+          Date: scheduleSlot.date ?? "",
+          DoctorPublicId: scheduleSlot.doctorPublicId,
+        }),
+      });
+      toast.success("Schedule removed.");
+      onOpenChange(false);
+    } catch (error) {
+      if (error instanceof ApiError) {
+        toast.error(error.data?.title ?? "Failed to remove schedule.");
+      } else {
+        toast.error("Failed to remove schedule.");
+      }
+    }
   };
 
   return (
@@ -73,8 +111,9 @@ export function DeleteScheduleDialog({
             <div className="min-w-0 space-y-1">
               <DialogTitle className="text-xl font-semibold">Delete Schedule</DialogTitle>
               <DialogDescription>
-                Are you sure you want to delete this schedule slot? This is a frontend-only removal
-                until the backend delete endpoint is connected.
+                {isRemovable
+                  ? "Are you sure you want to delete this schedule slot?"
+                  : "Only available schedule slots can be removed."}
               </DialogDescription>
             </div>
           </div>
@@ -115,11 +154,22 @@ export function DeleteScheduleDialog({
         </div>
 
         <DialogFooter className="border-t border-border px-6 py-4">
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isPending}
+            onClick={() => onOpenChange(false)}
+          >
             Cancel
           </Button>
-          <Button type="button" variant="destructive" onClick={handleConfirm}>
-            Delete Schedule
+          <Button
+            type="button"
+            variant="destructive"
+            disabled={!isRemovable || isPending}
+            onClick={handleConfirm}
+          >
+            {isPending && <Loader2 className="size-3.5 animate-spin" />}
+            {isPending ? "Deleting..." : "Delete Schedule"}
           </Button>
         </DialogFooter>
       </DialogContent>
