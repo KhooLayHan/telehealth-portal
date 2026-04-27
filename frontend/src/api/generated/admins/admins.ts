@@ -28,6 +28,10 @@ import type {
 } from '../../model/AdminCreateDepartmentCommand';
 
 import type {
+  AdminCreateLabTechCommand
+} from '../../model/AdminCreateLabTechCommand';
+
+import type {
   AdminCreateReceptionistCommand
 } from '../../model/AdminCreateReceptionistCommand';
 
@@ -42,6 +46,10 @@ import type {
 import type {
   AdminGetAllLabTechsParams
 } from '../../model/AdminGetAllLabTechsParams';
+
+import type {
+  AdminLabTechDto
+} from '../../model/AdminLabTechDto';
 
 import type {
   AdminReceptionistDto
@@ -741,6 +749,109 @@ export function useAdminGetAllLabTechs<TData = Awaited<ReturnType<typeof adminGe
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
+export type adminCreateLabTechResponse201 = {
+  data: AdminLabTechDto
+  status: 201
+}
+
+export type adminCreateLabTechResponse400 = {
+  data: ProblemDetails
+  status: 400
+}
+
+export type adminCreateLabTechResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type adminCreateLabTechResponse403 = {
+  data: ProblemDetails
+  status: 403
+}
+
+export type adminCreateLabTechResponse409 = {
+  data: ProblemDetails
+  status: 409
+}
+
+export type adminCreateLabTechResponse422 = {
+  data: ProblemDetails
+  status: 422
+}
+
+export type adminCreateLabTechResponseSuccess = (adminCreateLabTechResponse201) & {
+  headers: Headers;
+};
+export type adminCreateLabTechResponseError = (adminCreateLabTechResponse400 | adminCreateLabTechResponse401 | adminCreateLabTechResponse403 | adminCreateLabTechResponse409 | adminCreateLabTechResponse422) & {
+  headers: Headers;
+};
+
+export type adminCreateLabTechResponse = (adminCreateLabTechResponseSuccess | adminCreateLabTechResponseError)
+
+export const getAdminCreateLabTechUrl = () => {
+
+
+
+
+  return `/api/v1/admins/lab-techs`
+}
+
+export const adminCreateLabTech = async (adminCreateLabTechCommand: AdminCreateLabTechCommand, options?: RequestInit): Promise<adminCreateLabTechResponse> => {
+
+  return ofetchMutator<adminCreateLabTechResponse>(getAdminCreateLabTechUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      adminCreateLabTechCommand,)
+  }
+);}
+
+
+
+
+export const getAdminCreateLabTechMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCreateLabTech>>, TError,{data: AdminCreateLabTechCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminCreateLabTech>>, TError,{data: AdminCreateLabTechCommand}, TContext> => {
+
+const mutationKey = ['adminCreateLabTech'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCreateLabTech>>, {data: AdminCreateLabTechCommand}> = (props) => {
+          const {data} = props ?? {};
+
+          return  adminCreateLabTech(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminCreateLabTechMutationResult = NonNullable<Awaited<ReturnType<typeof adminCreateLabTech>>>
+    export type AdminCreateLabTechMutationBody = AdminCreateLabTechCommand
+    export type AdminCreateLabTechMutationError = ProblemDetails
+
+    export const useAdminCreateLabTech = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCreateLabTech>>, TError,{data: AdminCreateLabTechCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminCreateLabTech>>,
+        TError,
+        {data: AdminCreateLabTechCommand},
+        TContext
+      > => {
+      return useMutation(getAdminCreateLabTechMutationOptions(options), queryClient);
+    }
 
 
 

@@ -164,5 +164,7 @@ public static class ApiEndpoints
         public const string DeleteReceptionist = $"{Base}/receptionists/{{id:guid}}/deactivate";
 
         public const string GetAllLabTechs = $"{Base}/lab-techs";
+
+        public const string CreateLabTech = $"{Base}/lab-techs";
     }
 }

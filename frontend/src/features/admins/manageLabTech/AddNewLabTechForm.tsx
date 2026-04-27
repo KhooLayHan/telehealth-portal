@@ -1,8 +1,14 @@
 import { useForm } from "@tanstack/react-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { Eye, EyeOff, Plus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import {
+  getAdminGetAllLabTechsQueryKey,
+  useAdminCreateLabTech,
+} from "@/api/generated/admins/admins";
+import { ApiError } from "@/api/ofetch-mutator";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -22,7 +28,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Validates the frontend-only add lab technician form.
+// Validates the add lab technician form before account creation.
 const addLabTechSchema = z
   .object({
     firstName: z.string().min(1, "First name is required"),
@@ -90,17 +96,55 @@ function toFieldErrors(errors: unknown[]): Array<{ message: string }> {
   }));
 }
 
-// Modal form for collecting new lab technician account details before backend integration.
+// Modal form for registering a new lab technician account.
 export function AddNewLabTechForm({ open, onOpenChange }: AddNewLabTechFormProps) {
   const [showPassword, setShowPassword] = useState(false);
+  const queryClient = useQueryClient();
+  const { mutate, isPending } = useAdminCreateLabTech({
+    mutation: {
+      onSuccess: () => {
+        toast.success("Lab technician created successfully");
+        queryClient.invalidateQueries({ queryKey: getAdminGetAllLabTechsQueryKey() });
+        form.reset();
+        onOpenChange(false);
+      },
+      onError: (error) => {
+        if (error instanceof ApiError) {
+          toast.error(error.data.title ?? "Failed to create lab technician");
+          return;
+        }
+
+        toast.error("Failed to create lab technician");
+      },
+    },
+  });
 
   const form = useForm({
     defaultValues: addLabTechDefaultValues,
     validators: { onSubmit: addLabTechSchema },
-    onSubmit: () => {
-      toast.success("Lab technician form submitted. Backend connection pending.");
-      form.reset();
-      onOpenChange(false);
+    onSubmit: async ({ value }) => {
+      mutate({
+        data: {
+          firstName: value.firstName,
+          lastName: value.lastName,
+          username: value.username,
+          email: value.email,
+          password: value.password,
+          phoneNumber: value.phoneNumber || null,
+          gender: value.gender,
+          dateOfBirth: value.dateOfBirth,
+          icNumber: value.icNumber,
+          address: value.street
+            ? {
+                street: value.street,
+                city: value.city,
+                state: value.state,
+                postalCode: value.postalCode,
+                country: value.country,
+              }
+            : null,
+        },
+      });
     },
   });
 
@@ -124,7 +168,7 @@ export function AddNewLabTechForm({ open, onOpenChange }: AddNewLabTechFormProps
                 Add New Lab Technician
               </DialogTitle>
               <DialogDescription className="mt-1 text-sm text-muted-foreground">
-                Fill in the lab technician&apos;s details before connecting account creation.
+                Fill in the lab technician&apos;s details to register them in the system.
               </DialogDescription>
             </div>
           </div>
@@ -430,10 +474,10 @@ export function AddNewLabTechForm({ open, onOpenChange }: AddNewLabTechFormProps
               {([canSubmit, isSubmitting]) => (
                 <Button
                   type="submit"
-                  disabled={!canSubmit || isSubmitting}
+                  disabled={!canSubmit || isSubmitting || isPending}
                   className="bg-black text-white hover:bg-black/85"
                 >
-                  {isSubmitting ? "Creating..." : "Create Lab Technician"}
+                  {isSubmitting || isPending ? "Creating..." : "Create Lab Technician"}
                 </Button>
               )}
             </form.Subscribe>
