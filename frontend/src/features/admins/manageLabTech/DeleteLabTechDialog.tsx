@@ -1,5 +1,11 @@
-import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import {
+  getAdminGetAllLabTechsQueryKey,
+  useAdminDeactivateLabTech,
+} from "@/api/generated/admins/admins";
 import type { AdminLabTechDto } from "@/api/model/AdminLabTechDto";
+import { ApiError } from "@/api/ofetch-mutator";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,35 +22,30 @@ interface DeleteLabTechDialogProps {
   labTech: AdminLabTechDto | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onConfirm?: (labTech: AdminLabTechDto) => void | Promise<void>;
 }
 
 // Confirmation dialog before removing a lab technician account.
-export function DeleteLabTechDialog({
-  labTech,
-  open,
-  onOpenChange,
-  onConfirm,
-}: DeleteLabTechDialogProps) {
-  const [isRemoving, setIsRemoving] = useState(false);
+export function DeleteLabTechDialog({ labTech, open, onOpenChange }: DeleteLabTechDialogProps) {
+  const queryClient = useQueryClient();
+  const { mutate, isPending } = useAdminDeactivateLabTech({
+    mutation: {
+      onSuccess: () => {
+        toast.success("Lab technician removed successfully");
+        queryClient.invalidateQueries({ queryKey: getAdminGetAllLabTechsQueryKey() });
+        onOpenChange(false);
+      },
+      onError: (error) => {
+        if (error instanceof ApiError) {
+          toast.error(error.data.title ?? "Failed to remove lab technician");
+          return;
+        }
+
+        toast.error("Failed to remove lab technician");
+      },
+    },
+  });
 
   if (!labTech) return null;
-
-  const handleRemove = async () => {
-    if (!onConfirm) {
-      onOpenChange(false);
-      return;
-    }
-
-    setIsRemoving(true);
-
-    try {
-      await onConfirm(labTech);
-      onOpenChange(false);
-    } finally {
-      setIsRemoving(false);
-    }
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -66,8 +67,17 @@ export function DeleteLabTechDialog({
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button type="button" variant="destructive" disabled={isRemoving} onClick={handleRemove}>
-            {isRemoving ? "Removing..." : "Remove"}
+          <Button
+            type="button"
+            variant="destructive"
+            disabled={isPending}
+            onClick={() => {
+              if (labTech.publicId) {
+                mutate({ id: labTech.publicId.toString() });
+              }
+            }}
+          >
+            {isPending ? "Removing..." : "Remove"}
           </Button>
         </DialogFooter>
       </DialogContent>
