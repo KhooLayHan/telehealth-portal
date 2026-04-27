@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { toast } from "sonner";
 
+import { getAllAppointmentsForReceptionist } from "@/api/generated/appointments/appointments";
 import type { ReceptionistAppointmentDto } from "@/api/model/ReceptionistAppointmentDto";
 
+const APPOINTMENTS_EXPORT_PAGE_SIZE = 50;
 const APPOINTMENTS_CSV_HEADERS = [
   "Public ID",
   "Slug",
@@ -21,16 +24,9 @@ const CARRIAGE_RETURN_PATTERN = /\r/g;
 const DOUBLE_QUOTE_PATTERN = /"/g;
 const CSV_FORMULA_PREFIX_PATTERN = /^\s*[=+\-@]/;
 
-// Describes the appointment records and loading state needed for CSV export.
-interface UseAppointmentsCsvExportOptions {
-  appointments: ReceptionistAppointmentDto[];
-  isLoading: boolean;
-  isError: boolean;
-}
-
 // Describes the CSV export controls exposed to the appointment page.
 interface UseAppointmentsCsvExportReturn {
-  exportAppointmentsCsv: () => void;
+  exportAppointmentsCsv: () => Promise<void>;
   isExportDisabled: boolean;
 }
 
@@ -86,37 +82,58 @@ function downloadCsvFile(fileName: string, csvContent: string): void {
   URL.revokeObjectURL(url);
 }
 
-// Exports the currently loaded appointment records as CSV.
-export function useAppointmentsCsvExport({
-  appointments,
-  isLoading,
-  isError,
-}: UseAppointmentsCsvExportOptions): UseAppointmentsCsvExportReturn {
-  const exportAppointmentsCsv = () => {
-    if (isLoading) {
-      toast.info("Appointments are still loading.");
+// Fetches all appointment pages from the generated API client and exports them as CSV.
+export function useAppointmentsCsvExport(): UseAppointmentsCsvExportReturn {
+  const [isExporting, setIsExporting] = useState(false);
+
+  const exportAppointmentsCsv = async () => {
+    if (isExporting) {
       return;
     }
 
-    if (isError) {
+    setIsExporting(true);
+
+    try {
+      const appointments: ReceptionistAppointmentDto[] = [];
+      let page = 1;
+      let hasNextPage = true;
+
+      while (hasNextPage) {
+        const response = await getAllAppointmentsForReceptionist({
+          Page: page,
+          PageSize: APPOINTMENTS_EXPORT_PAGE_SIZE,
+          SortOrder: "asc",
+        });
+
+        if (response.status !== 200) {
+          toast.error("Failed to export appointments.");
+          return;
+        }
+
+        appointments.push(...response.data.items);
+        hasNextPage = response.data.hasNextPage ?? false;
+        page += 1;
+      }
+
+      if (appointments.length === 0) {
+        toast.info("No appointment records available to export.");
+        return;
+      }
+
+      const today = new Date().toISOString().slice(0, 10);
+      downloadCsvFile(`appointments-${today}.csv`, buildAppointmentsCsv(appointments));
+      toast.success(
+        `Exported ${appointments.length} appointment record${appointments.length === 1 ? "" : "s"}.`,
+      );
+    } catch {
       toast.error("Failed to export appointments.");
-      return;
+    } finally {
+      setIsExporting(false);
     }
-
-    if (appointments.length === 0) {
-      toast.info("No appointment records available to export.");
-      return;
-    }
-
-    const today = new Date().toISOString().slice(0, 10);
-    downloadCsvFile(`appointments-${today}.csv`, buildAppointmentsCsv(appointments));
-    toast.success(
-      `Exported ${appointments.length} appointment record${appointments.length === 1 ? "" : "s"}.`,
-    );
   };
 
   return {
     exportAppointmentsCsv,
-    isExportDisabled: isLoading || isError,
+    isExportDisabled: isExporting,
   };
 }

@@ -31,13 +31,8 @@ export function AdminAppointmentPage() {
     listItems,
     listTotalPages,
     isListLoading,
-    isListError,
   } = useAdminAppointments(currentYear, currentMonth, listPage, search);
-  const { exportAppointmentsCsv, isExportDisabled } = useAppointmentsCsvExport({
-    appointments: listItems,
-    isLoading: isListLoading,
-    isError: isListError,
-  });
+  const { exportAppointmentsCsv, isExportDisabled } = useAppointmentsCsvExport();
 
   function handlePrev() {
     if (currentMonth === 0) {
@@ -74,7 +69,7 @@ export function AdminAppointmentPage() {
             variant="outline"
             className="h-9 gap-1.5 bg-background"
             disabled={isExportDisabled}
-            onClick={exportAppointmentsCsv}
+            onClick={() => void exportAppointmentsCsv()}
           >
             <FileDown className="size-4" />
             Export CSV
