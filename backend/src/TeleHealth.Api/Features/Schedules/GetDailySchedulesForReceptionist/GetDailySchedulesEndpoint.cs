@@ -23,7 +23,7 @@ public static class GetDailySchedulesEndpoint
             )
             .WithName("GetDailySchedulesForReceptionist")
             .WithTags(nameof(ApiEndpoints.Schedules))
-            .RequireAuthorization(AuthConstants.ReceptionistPolicy)
+            .RequireAuthorization(AuthConstants.AdminOrReceptionistPolicy)
             .ProducesProblem(StatusCodes.Status401Unauthorized);
     }
 }
