@@ -354,7 +354,7 @@ export function AdminDoctorsPage() {
 
   return (
     <>
-      <div className="mb-6">
+      <div className="mb-6 space-y-2">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -366,12 +366,19 @@ export function AdminDoctorsPage() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="mt-3 flex items-center justify-between gap-4">
-          <h1 className="text-2xl font-bold tracking-tight">Doctor Directory</h1>
-          <div className="flex shrink-0 items-center gap-2">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-1">
+            <h1 className="font-semibold text-3xl tracking-tight">Doctor Directory</h1>
+            <p className="text-lg text-muted-foreground">
+              {isLoading
+                ? "Loading..."
+                : `Manage ${filtered.length} registered medical professional${filtered.length === 1 ? "" : "s"} across ${departmentCount} department${departmentCount === 1 ? "" : "s"}.`}
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-2 sm:ml-auto">
             <Button
               variant="outline"
-              className="gap-1.5 bg-white text-black hover:bg-muted"
+              className="h-9 gap-1.5 bg-white text-black hover:bg-muted"
               disabled={isLoading || isError}
               onClick={handleExportCsv}
             >
@@ -379,7 +386,7 @@ export function AdminDoctorsPage() {
               Export CSV
             </Button>
             <Button
-              className="gap-1.5 bg-black text-white hover:bg-black/85"
+              className="h-9 gap-1.5 bg-black text-white hover:bg-black/85"
               onClick={() => setAddOpen(true)}
             >
               <Plus className="size-4" />
@@ -387,11 +394,6 @@ export function AdminDoctorsPage() {
             </Button>
           </div>
         </div>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {isLoading
-            ? "Loading…"
-            : `Manage ${filtered.length} registered medical professional${filtered.length === 1 ? "" : "s"} across ${departmentCount} department${departmentCount === 1 ? "" : "s"}.`}
-        </p>
       </div>
 
       <div className="mb-4 flex items-center gap-3">
