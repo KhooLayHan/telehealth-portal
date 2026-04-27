@@ -66,6 +66,167 @@ type PrescriptionRow = {
   missedDose: string;
 };
 
+// ─── Validation types ────────────────────────────────────────────────────────
+
+type SoapErrors = {
+  subjective?: string;
+  objective?: string;
+  assessment?: string;
+  plan?: string;
+};
+
+type RxErrors = {
+  medicationName?: string;
+  dosage?: string;
+  frequency?: string;
+  durationDays?: string;
+  takeWith?: string;
+  storage?: string;
+  missedDose?: string;
+};
+
+type FormErrors = {
+  soap: SoapErrors;
+  rx: Record<string, RxErrors>;
+};
+
+// Medication name: letters and spaces only, must start with a letter
+const MED_NAME_RE = /^[a-zA-Z][a-zA-Z\s]*$/;
+
+// Letters-and-spaces-only check for optional instruction fields
+const LETTERS_ONLY_RE = /^[a-zA-Z\s]+$/;
+
+function wordCount(str: string): number {
+  return str.trim().split(/\s+/).filter(Boolean).length;
+}
+
+// Dosage must contain a numeric value followed by a recognised unit
+const DOSAGE_RE =
+  /\d+(\.\d+)?\s*(mg|ml|g|mcg|iu|units?|drops?|tabs?|tablets?|capsules?|caps?|puffs?|sprays?|patches?|%|mmol)/i;
+
+function isRowPartial(row: PrescriptionRow): boolean {
+  return !!(row.medicationName || row.dosage || row.frequency || row.durationDays);
+}
+
+function validateRxRow(row: PrescriptionRow): RxErrors {
+  const errs: RxErrors = {};
+  if (!isRowPartial(row)) return errs;
+
+  if (!row.medicationName.trim()) {
+    errs.medicationName = "Medication name is required.";
+  } else if (row.medicationName.trim().length > 100) {
+    errs.medicationName = "Medication name must be 100 characters or fewer.";
+  } else if (!MED_NAME_RE.test(row.medicationName.trim())) {
+    errs.medicationName = "Medication name must contain letters and spaces only.";
+  }
+
+  if (!row.dosage.trim()) {
+    errs.dosage = "Dosage is required.";
+  } else if (!DOSAGE_RE.test(row.dosage.trim())) {
+    errs.dosage = "Include a value and unit — e.g. 500mg, 5ml, 2 tablets.";
+  }
+
+  if (!row.frequency.trim()) {
+    errs.frequency = "Frequency is required.";
+  }
+
+  if (!row.durationDays) {
+    errs.durationDays = "Duration is required.";
+  } else {
+    const days = Number(row.durationDays);
+    if (!Number.isInteger(days) || days < 1) {
+      errs.durationDays = "Duration must be a whole number of at least 1 day.";
+    } else if (days > 365) {
+      errs.durationDays = "Duration cannot exceed 365 days.";
+    }
+  }
+
+  // Optional instruction fields — only validate if filled
+  if (row.takeWith.trim()) {
+    if (!LETTERS_ONLY_RE.test(row.takeWith)) {
+      errs.takeWith = "Letters and spaces only.";
+    } else if (wordCount(row.takeWith) > 20) {
+      errs.takeWith = "Must be 20 words or fewer.";
+    }
+  }
+
+  if (row.storage.trim()) {
+    const temp = parseFloat(row.storage);
+    if (!/^\d+(\.\d+)?$/.test(row.storage.trim())) {
+      errs.storage = "Storage must be a number (°C).";
+    } else if (temp > 37) {
+      errs.storage = "Temperature cannot exceed 37°C.";
+    }
+  }
+
+  if (row.missedDose.trim()) {
+    if (!LETTERS_ONLY_RE.test(row.missedDose)) {
+      errs.missedDose = "Letters and spaces only.";
+    } else if (wordCount(row.missedDose) > 20) {
+      errs.missedDose = "Must be 20 words or fewer.";
+    }
+  }
+
+  return errs;
+}
+
+type SoapState = { subjective: string; objective: string; assessment: string; plan: string };
+
+const SOAP_NO_DIGITS_RE = /\d/;
+
+function validateSoapField(value: string, label: string, minLen: number): string | undefined {
+  if (!value.trim()) return `${label} is required.`;
+  if (SOAP_NO_DIGITS_RE.test(value)) return "Numbers are not allowed.";
+  if (value.trim().length < minLen) return `Must be at least ${minLen} characters.`;
+  if (value.length > 200) return "Must be 200 characters or fewer.";
+  return undefined;
+}
+
+function validateSoap(soap: SoapState): SoapErrors {
+  const assessment = (() => {
+    if (!soap.assessment.trim())
+      return "Assessment (diagnosis) is required — cannot mark complete without one.";
+    if (SOAP_NO_DIGITS_RE.test(soap.assessment)) return "Numbers are not allowed.";
+    if (soap.assessment.trim().length < 5) return "Must be at least 5 characters.";
+    if (soap.assessment.length > 200) return "Must be 200 characters or fewer.";
+    return undefined;
+  })();
+
+  return {
+    subjective: validateSoapField(soap.subjective, "Subjective", 10),
+    objective: validateSoapField(soap.objective, "Objective", 10),
+    assessment,
+    plan: validateSoapField(soap.plan, "Plan", 10),
+  };
+}
+
+function computeErrors(
+  soap: SoapState,
+  prescriptions: PrescriptionRow[],
+  noPrescription: boolean,
+): FormErrors {
+  const rx: Record<string, RxErrors> = {};
+  if (!noPrescription) {
+    for (const row of prescriptions) {
+      const errs = validateRxRow(row);
+      if (Object.keys(errs).length > 0) rx[row.id] = errs;
+    }
+  }
+  return { soap: validateSoap(soap), rx };
+}
+
+// ─── Shared helpers ──────────────────────────────────────────────────────────
+
+function FieldError({ msg }: { msg?: string }) {
+  if (!msg) return null;
+  return <p className="mt-0.5 text-xs text-destructive">{msg}</p>;
+}
+
+function FieldWarn({ msg }: { msg?: string }) {
+  if (!msg) return null;
+  return <p className="mt-0.5 text-xs text-amber-500">{msg}</p>;
+}
+
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <p className="mb-3 select-none font-semibold text-[10px] text-muted-foreground uppercase tracking-[0.22em]">
@@ -196,11 +357,27 @@ function ReadOnlyConsultation({ c }: { c: ConsultationDetail }) {
                       <br />
                       <span className="text-foreground font-medium">{p.frequency}</span>
                     </span>
-                    <span>
-                      <span className="uppercase tracking-wide text-[10px]">Take with</span>
-                      <br />
-                      <span className="text-foreground font-medium">{p.takeWith}</span>
-                    </span>
+                    {p.takeWith && (
+                      <span>
+                        <span className="uppercase tracking-wide text-[10px]">Take with</span>
+                        <br />
+                        <span className="text-foreground font-medium">{p.takeWith}</span>
+                      </span>
+                    )}
+                    {p.storage && (
+                      <span>
+                        <span className="uppercase tracking-wide text-[10px]">Storage</span>
+                        <br />
+                        <span className="text-foreground font-medium">{p.storage}°C</span>
+                      </span>
+                    )}
+                    {p.missedDose && (
+                      <span>
+                        <span className="uppercase tracking-wide text-[10px]">Missed dose</span>
+                        <br />
+                        <span className="text-foreground font-medium">{p.missedDose}</span>
+                      </span>
+                    )}
                   </div>
                   {p.warnings.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-1">
@@ -238,24 +415,48 @@ function PrescriptionRowCard({
   index,
   onChange,
   onRemove,
+  errors,
 }: {
   row: PrescriptionRow;
   index: number;
   onChange: (updated: PrescriptionRow) => void;
   onRemove: () => void;
+  errors?: RxErrors;
 }) {
+  const [warningError, setWarningError] = useState<string | undefined>();
+
   function set(field: keyof PrescriptionRow, value: string | string[]) {
     onChange({ ...row, [field]: value });
   }
 
   function commitWarning() {
     const trimmed = row.warningInput.trim();
-    if (!trimmed || row.warnings.includes(trimmed)) {
+    if (!trimmed) {
       onChange({ ...row, warningInput: "" });
       return;
     }
+    if (row.warnings.includes(trimmed)) {
+      onChange({ ...row, warningInput: "" });
+      return;
+    }
+    if (!LETTERS_ONLY_RE.test(trimmed)) {
+      setWarningError("Letters and spaces only.");
+      return;
+    }
+    if (wordCount(trimmed) > 50) {
+      setWarningError("Must be 50 words or fewer.");
+      return;
+    }
+    setWarningError(undefined);
     onChange({ ...row, warnings: [...row.warnings, trimmed], warningInput: "" });
   }
+
+  const durationNum = Number(row.durationDays);
+  const showDurationWarn =
+    row.durationDays !== "" &&
+    Number.isInteger(durationNum) &&
+    durationNum > 90 &&
+    durationNum <= 365;
 
   return (
     <div className="rounded-lg border border-border/70 bg-muted/20 px-4 py-4">
@@ -281,7 +482,11 @@ function PrescriptionRowCard({
             placeholder="e.g. Amoxicillin"
             value={row.medicationName}
             onChange={(e) => set("medicationName", e.target.value)}
+            className={
+              errors?.medicationName ? "border-destructive focus-visible:ring-destructive" : ""
+            }
           />
+          <FieldError msg={errors?.medicationName} />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label className="text-[10px] uppercase tracking-wide text-muted-foreground">
@@ -291,7 +496,9 @@ function PrescriptionRowCard({
             placeholder="e.g. 500mg"
             value={row.dosage}
             onChange={(e) => set("dosage", e.target.value)}
+            className={errors?.dosage ? "border-destructive focus-visible:ring-destructive" : ""}
           />
+          <FieldError msg={errors?.dosage} />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label className="text-[10px] uppercase tracking-wide text-muted-foreground">
@@ -301,7 +508,9 @@ function PrescriptionRowCard({
             placeholder="e.g. Twice daily"
             value={row.frequency}
             onChange={(e) => set("frequency", e.target.value)}
+            className={errors?.frequency ? "border-destructive focus-visible:ring-destructive" : ""}
           />
+          <FieldError msg={errors?.frequency} />
           <div className="flex flex-wrap gap-1 mt-0.5">
             {FREQUENCY_CHIPS.map((chip) => (
               <button
@@ -322,9 +531,21 @@ function PrescriptionRowCard({
           <Input
             type="number"
             min={1}
+            max={365}
             placeholder="e.g. 7"
             value={row.durationDays}
             onChange={(e) => set("durationDays", e.target.value)}
+            className={
+              errors?.durationDays ? "border-destructive focus-visible:ring-destructive" : ""
+            }
+          />
+          <FieldError msg={errors?.durationDays} />
+          <FieldWarn
+            msg={
+              showDurationWarn
+                ? "Duration over 90 days is unusually long — double-check."
+                : undefined
+            }
           />
         </div>
       </div>
@@ -343,7 +564,11 @@ function PrescriptionRowCard({
               placeholder="e.g. With food"
               value={row.takeWith}
               onChange={(e) => set("takeWith", e.target.value)}
+              className={
+                errors?.takeWith ? "border-destructive focus-visible:ring-destructive" : ""
+              }
             />
+            <FieldError msg={errors?.takeWith} />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label className="text-[10px] uppercase tracking-wide text-muted-foreground">
@@ -353,7 +578,9 @@ function PrescriptionRowCard({
               placeholder="e.g. Room temperature"
               value={row.storage}
               onChange={(e) => set("storage", e.target.value)}
+              className={errors?.storage ? "border-destructive focus-visible:ring-destructive" : ""}
             />
+            <FieldError msg={errors?.storage} />
           </div>
           <div className="flex flex-col gap-1.5 col-span-2">
             <Label className="text-[10px] uppercase tracking-wide text-muted-foreground">
@@ -363,7 +590,11 @@ function PrescriptionRowCard({
               placeholder="e.g. Skip if near next dose"
               value={row.missedDose}
               onChange={(e) => set("missedDose", e.target.value)}
+              className={
+                errors?.missedDose ? "border-destructive focus-visible:ring-destructive" : ""
+              }
             />
+            <FieldError msg={errors?.missedDose} />
           </div>
           <div className="flex flex-col gap-1.5 col-span-2">
             <Label className="text-[10px] uppercase tracking-wide text-muted-foreground">
@@ -373,7 +604,10 @@ function PrescriptionRowCard({
               <Input
                 placeholder="Type a warning and press Enter"
                 value={row.warningInput}
-                onChange={(e) => set("warningInput", e.target.value)}
+                onChange={(e) => {
+                  set("warningInput", e.target.value);
+                  setWarningError(undefined);
+                }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
@@ -382,6 +616,7 @@ function PrescriptionRowCard({
                 }}
               />
             </div>
+            <FieldError msg={warningError} />
             {row.warnings.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-1">
                 {row.warnings.map((w) => (
@@ -418,10 +653,16 @@ export function DoctorApptDetailsPage() {
   const queryClient = useQueryClient();
 
   const [showForm, setShowForm] = useState(false);
-  const [soap, setSoap] = useState({ subjective: "", objective: "", assessment: "", plan: "" });
+  const [soap, setSoap] = useState<SoapState>({
+    subjective: "",
+    objective: "",
+    assessment: "",
+    plan: "",
+  });
   const [followUpDate, setFollowUpDate] = useState<Date | undefined>(undefined);
   const [noPrescription, setNoPrescription] = useState(false);
   const [prescriptions, setPrescriptions] = useState<PrescriptionRow[]>([]);
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
   const { mutate: submitConsultation, isPending } = useSubmitConsultation();
 
@@ -437,19 +678,21 @@ export function DoctorApptDetailsPage() {
   const isBooked = appt.status === "Booked";
   const isCompleted = appt.status === "Completed";
 
-  const soapFilled =
-    soap.subjective.trim() && soap.objective.trim() && soap.assessment.trim() && soap.plan.trim();
+  // Errors are only computed (and shown) after the first submit attempt
+  const formErrors = submitAttempted
+    ? computeErrors(soap, prescriptions, noPrescription)
+    : { soap: {} as SoapErrors, rx: {} as Record<string, RxErrors> };
 
   function handleAddPrescription() {
     setPrescriptions((prev) => [...prev, newPrescriptionRow()]);
   }
 
-  function handleUpdatePrescription(id: string, updated: PrescriptionRow) {
-    setPrescriptions((prev) => prev.map((p) => (p.id === id ? updated : p)));
+  function handleUpdatePrescription(rowId: string, updated: PrescriptionRow) {
+    setPrescriptions((prev) => prev.map((p) => (p.id === rowId ? updated : p)));
   }
 
-  function handleRemovePrescription(id: string) {
-    setPrescriptions((prev) => prev.filter((p) => p.id !== id));
+  function handleRemovePrescription(rowId: string) {
+    setPrescriptions((prev) => prev.filter((p) => p.id !== rowId));
   }
 
   function localDateString(d: Date): string {
@@ -459,7 +702,7 @@ export function DoctorApptDetailsPage() {
     return `${y}-${m}-${day}`;
   }
 
-  function handleSubmit() {
+  function doSubmit() {
     submitConsultation(
       {
         id: appt.publicId ?? "",
@@ -491,10 +734,28 @@ export function DoctorApptDetailsPage() {
             queryKey: getGetAppointmentByIdForDoctorQueryKey(appt.publicId ?? ""),
           });
           setShowForm(false);
+          setSubmitAttempted(false);
         },
       },
     );
   }
+
+  function handleMarkAsCompleted() {
+    setSubmitAttempted(true);
+    const errors = computeErrors(soap, prescriptions, noPrescription);
+    const hasSoapErrors = Object.values(errors.soap).some(Boolean);
+    const hasRxErrors = Object.keys(errors.rx).length > 0;
+    if (hasSoapErrors || hasRxErrors) return;
+    doSubmit();
+  }
+
+  // SOAP field config — order matters (Assessment is the hardest gate)
+  const soapFields = [
+    ["subjective", "S — Subjective", "What does the patient report?"],
+    ["objective", "O — Objective", "Clinical observations, vitals"],
+    ["assessment", "A — Assessment", "Diagnosis"],
+    ["plan", "P — Plan", "Treatment plan"],
+  ] as [keyof SoapState, string, string][];
 
   return (
     <motion.div
@@ -618,7 +879,10 @@ export function DoctorApptDetailsPage() {
                   <Button
                     className="w-full border-dashed border-[#0d9488] text-[#0d9488] hover:bg-[#0d9488]/5"
                     variant="outline"
-                    onClick={() => setShowForm(true)}
+                    onClick={() => {
+                      setShowForm(true);
+                      setSubmitAttempted(false);
+                    }}
                   >
                     <Plus className="size-4 mr-2" />
                     Add Consultation Notes
@@ -650,26 +914,20 @@ export function DoctorApptDetailsPage() {
                 <CardContent className="px-6 pt-7 pb-6">
                   <SectionLabel>Consultation Notes</SectionLabel>
                   <div className="grid grid-cols-2 gap-5">
-                    {(
-                      [
-                        ["subjective", "S — Subjective", "What does the patient report?"],
-                        ["objective", "O — Objective", "Clinical observations, vitals"],
-                        ["assessment", "A — Assessment", "Diagnosis"],
-                        ["plan", "P — Plan", "Treatment plan"],
-                      ] as [keyof typeof soap, string, string][]
-                    ).map(([field, label, placeholder]) => (
+                    {soapFields.map(([field, label, placeholder]) => (
                       <div key={field} className="flex flex-col gap-1.5">
                         <Label className="text-[10px] uppercase tracking-wide text-muted-foreground">
                           {label}
                         </Label>
                         <Textarea
                           placeholder={placeholder}
-                          className="min-h-[80px] resize-y"
+                          className={`min-h-[80px] resize-y${formErrors.soap[field] ? " border-destructive focus-visible:ring-destructive" : ""}`}
                           value={soap[field]}
                           onChange={(e) =>
                             setSoap((prev) => ({ ...prev, [field]: e.target.value }))
                           }
                         />
+                        <FieldError msg={formErrors.soap[field]} />
                       </div>
                     ))}
                   </div>
@@ -763,6 +1021,7 @@ export function DoctorApptDetailsPage() {
                                 index={index}
                                 onChange={(updated) => handleUpdatePrescription(row.id, updated)}
                                 onRemove={() => handleRemovePrescription(row.id)}
+                                errors={formErrors.rx[row.id]}
                               />
                             </motion.div>
                           ))}
@@ -783,8 +1042,8 @@ export function DoctorApptDetailsPage() {
                   {/* Footer — Mark as Completed */}
                   <div className="mt-6 flex justify-end">
                     <Button
-                      disabled={!soapFilled || isPending}
-                      onClick={handleSubmit}
+                      disabled={isPending}
+                      onClick={handleMarkAsCompleted}
                       className="bg-[#0d9488] text-white hover:bg-[#0b857a] px-6"
                     >
                       {isPending ? "Saving..." : "Mark as Completed"}
