@@ -36,7 +36,7 @@ import { DoctorCard } from "./manageDoctors/components/DoctorCard";
 import { EditDoctorForm } from "./manageDoctors/components/EditDoctorForm";
 
 const ACCENT = "#0d9488";
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 6;
 const CSV_FORMULA_PREFIX_PATTERN = /^\s*[=+\-@]/;
 
 // Defines one exported doctor CSV column and how its value is read.
@@ -419,7 +419,7 @@ export function AdminDoctorsPage() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: "easeOut" }}
-          className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
         >
           {paged.map((doctor: DoctorListDto) => (
             <DoctorCard
