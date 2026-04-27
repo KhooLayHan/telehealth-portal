@@ -44,8 +44,8 @@ interface AddScheduleDoctor {
   specialization?: string | null;
 }
 
-// Describes the add schedule dialog state and local submit callback.
-interface AddDoctorScheduleDialogProps {
+// Describes the add schedule form state and local submit callback.
+interface AddDoctorScheduleFormProps {
   defaultDate: string;
   doctor: AddScheduleDoctor | null;
   open: boolean;
@@ -54,13 +54,13 @@ interface AddDoctorScheduleDialogProps {
 }
 
 // Displays a frontend-only form for drafting a new doctor schedule slot.
-export function AddDoctorScheduleDialog({
+export function AddDoctorScheduleForm({
   defaultDate,
   doctor,
   open,
   onAddSchedule,
   onOpenChange,
-}: AddDoctorScheduleDialogProps) {
+}: AddDoctorScheduleFormProps) {
   const doctorName = `Dr. ${doctor?.firstName ?? ""} ${doctor?.lastName ?? ""}`.trim();
   const defaultValues: AddDoctorScheduleFormValues = {
     date: defaultDate,

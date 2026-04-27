@@ -35,7 +35,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { addDays, getTodayStr } from "@/features/schedules/ScheduleUtils";
 import { cn } from "@/lib/utils";
-import { AddDoctorScheduleDialog } from "./AddDoctorScheduleDialog";
+import { AddDoctorScheduleForm } from "./AddDoctorScheduleForm";
 
 // Describes the minimum doctor information needed by the schedule dialog.
 interface ScheduleDoctor {
@@ -546,7 +546,7 @@ export function ViewDoctorScheduleDialog({
         </DialogContent>
       </Dialog>
 
-      <AddDoctorScheduleDialog
+      <AddDoctorScheduleForm
         key={`${doctorPublicId}-${selectedDate}`}
         defaultDate={selectedDate}
         doctor={doctor}
