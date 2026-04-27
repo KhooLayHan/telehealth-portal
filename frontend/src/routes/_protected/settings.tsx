@@ -1,4 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import { AdminSettingsPage } from "@/features/admins/AdminSettingsPage";
 import { useAuthStore } from "@/store/useAuthStore";
 
 export const Route = createFileRoute("/_protected/settings")({
@@ -10,5 +11,5 @@ export const Route = createFileRoute("/_protected/settings")({
       throw redirect({ to: "/dashboard" });
     }
   },
-  component: () => <div>Admin System Settings Here!</div>,
+  component: AdminSettingsPage,
 });
