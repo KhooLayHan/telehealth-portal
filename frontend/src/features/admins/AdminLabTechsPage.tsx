@@ -17,6 +17,7 @@ import { AddNewLabTechForm } from "@/features/admins/manageLabTech/AddNewLabTech
 import { DeleteLabTechDialog } from "@/features/admins/manageLabTech/DeleteLabTechDialog";
 import { EditLabTechForm } from "@/features/admins/manageLabTech/EditLabTechForm";
 import { LabTechTable } from "@/features/admins/manageLabTech/LabTechTable";
+import { useLabTechCsvExport } from "@/features/admins/manageLabTech/UseLabTechCsvExport";
 import { ViewLabTechDetailDialog } from "@/features/admins/manageLabTech/ViewLabTechDetailDialog";
 
 const PAGE_SIZE = 5;
@@ -33,6 +34,7 @@ export function AdminLabTechsPage() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteLabTech, setDeleteLabTech] = useState<AdminLabTechDto | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const { exportLabTechsCsv, isExportDisabled } = useLabTechCsvExport();
 
   const handleView = (labTech: AdminLabTechDto) => {
     setSelectedLabTech(labTech);
@@ -93,7 +95,13 @@ export function AdminLabTechsPage() {
           </div>
 
           <div className="flex flex-col gap-2 sm:ml-auto sm:flex-row sm:items-center">
-            <Button type="button" variant="outline" className="h-9 gap-1.5 bg-background" disabled>
+            <Button
+              type="button"
+              variant="outline"
+              className="h-9 gap-1.5 bg-background"
+              disabled={isExportDisabled}
+              onClick={() => void exportLabTechsCsv()}
+            >
               <FileDown className="size-4" />
               Export CSV
             </Button>
