@@ -5,16 +5,20 @@
  * OpenAPI spec version: 1.0.0
  */
 import {
+  useMutation,
   useQuery
 } from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
   DefinedUseQueryResult,
+  MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult
 } from '@tanstack/react-query';
@@ -22,6 +26,10 @@ import type {
 import type {
   AvailableScheduleDto
 } from '../../model/AvailableScheduleDto';
+
+import type {
+  CreateScheduleCommand
+} from '../../model/CreateScheduleCommand';
 
 import type {
   GetAllAvailableParams
@@ -46,6 +54,110 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
+export type createScheduleResponse201 = {
+  data: ReceptionistDoctorScheduleSlotDto
+  status: 201
+}
+
+export type createScheduleResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type createScheduleResponse403 = {
+  data: ProblemDetails
+  status: 403
+}
+
+export type createScheduleResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type createScheduleResponse409 = {
+  data: ProblemDetails
+  status: 409
+}
+
+export type createScheduleResponse422 = {
+  data: ProblemDetails
+  status: 422
+}
+
+export type createScheduleResponseSuccess = (createScheduleResponse201) & {
+  headers: Headers;
+};
+export type createScheduleResponseError = (createScheduleResponse401 | createScheduleResponse403 | createScheduleResponse404 | createScheduleResponse409 | createScheduleResponse422) & {
+  headers: Headers;
+};
+
+export type createScheduleResponse = (createScheduleResponseSuccess | createScheduleResponseError)
+
+export const getCreateScheduleUrl = () => {
+
+
+
+
+  return `/api/v1/schedules`
+}
+
+export const createSchedule = async (createScheduleCommand: CreateScheduleCommand, options?: RequestInit): Promise<createScheduleResponse> => {
+
+  return ofetchMutator<createScheduleResponse>(getCreateScheduleUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      createScheduleCommand,)
+  }
+);}
+
+
+
+
+export const getCreateScheduleMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createSchedule>>, TError,{data: CreateScheduleCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof createSchedule>>, TError,{data: CreateScheduleCommand}, TContext> => {
+
+const mutationKey = ['createSchedule'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createSchedule>>, {data: CreateScheduleCommand}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createSchedule(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateScheduleMutationResult = NonNullable<Awaited<ReturnType<typeof createSchedule>>>
+    export type CreateScheduleMutationBody = CreateScheduleCommand
+    export type CreateScheduleMutationError = ProblemDetails
+
+    export const useCreateSchedule = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createSchedule>>, TError,{data: CreateScheduleCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createSchedule>>,
+        TError,
+        {data: CreateScheduleCommand},
+        TContext
+      > => {
+      return useMutation(getCreateScheduleMutationOptions(options), queryClient);
+    }
+    
 export type getAllAvailableResponse200 = {
   data: AvailableScheduleDto[]
   status: 200

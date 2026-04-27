@@ -222,9 +222,6 @@ export function ViewDoctorScheduleDialog({
 }: ViewDoctorScheduleDialogProps) {
   const [selectedDate, setSelectedDate] = useState(getTodayStr());
   const [addScheduleOpen, setAddScheduleOpen] = useState(false);
-  const [localScheduleSlots, setLocalScheduleSlots] = useState<ReceptionistDoctorScheduleSlotDto[]>(
-    [],
-  );
   const doctorPublicId = doctor?.doctorPublicId ?? "";
   const scheduleQuery = useGetDailySchedulesForReceptionist(
     { Date: selectedDate, ...(doctorPublicId ? { DoctorPublicId: doctorPublicId } : {}) },
@@ -235,13 +232,8 @@ export function ViewDoctorScheduleDialog({
     [scheduleQuery.data],
   );
   const scheduleSlots = useMemo<ReceptionistDoctorScheduleSlotDto[]>(
-    () => [
-      ...backendScheduleSlots,
-      ...localScheduleSlots.filter(
-        (slot) => slot.date === selectedDate && slot.doctorPublicId === doctorPublicId,
-      ),
-    ],
-    [backendScheduleSlots, doctorPublicId, localScheduleSlots, selectedDate],
+    () => backendScheduleSlots,
+    [backendScheduleSlots],
   );
   const doctorName = `Dr. ${doctor?.firstName ?? ""} ${doctor?.lastName ?? ""}`.trim();
   const hasLoadError = scheduleQuery.isError || scheduleQuery.data?.status === 401;
@@ -551,7 +543,6 @@ export function ViewDoctorScheduleDialog({
         defaultDate={selectedDate}
         doctor={doctor}
         open={addScheduleOpen}
-        onAddSchedule={(schedule) => setLocalScheduleSlots((current) => [...current, schedule])}
         onOpenChange={setAddScheduleOpen}
       />
     </>

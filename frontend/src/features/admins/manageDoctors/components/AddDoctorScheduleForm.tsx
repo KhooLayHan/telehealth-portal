@@ -1,8 +1,14 @@
 import { useForm } from "@tanstack/react-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { CalendarPlus } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
-import type { ReceptionistDoctorScheduleSlotDto } from "@/api/model/ReceptionistDoctorScheduleSlotDto";
+import {
+  getGetDailySchedulesForReceptionistQueryKey,
+  useCreateSchedule,
+} from "@/api/generated/schedules/schedules";
+import type { CreateScheduleCommand } from "@/api/model/CreateScheduleCommand";
+import { ApiError } from "@/api/ofetch-mutator";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -33,10 +39,15 @@ const addDoctorScheduleSchema = z
     path: ["endTime"],
   });
 
+// Converts browser time input values into the LocalTime format expected by the API.
+function normalizeLocalTimeForApi(time: string): string {
+  return time.length === 5 ? `${time}:00` : time;
+}
+
 // Represents the validated values collected by the local schedule form.
 type AddDoctorScheduleFormValues = z.infer<typeof addDoctorScheduleSchema>;
 
-// Describes the doctor context needed to create a frontend-only schedule slot.
+// Describes the doctor context needed to create a schedule slot.
 interface AddScheduleDoctor {
   doctorPublicId?: string | null;
   firstName?: string | null;
@@ -44,23 +55,23 @@ interface AddScheduleDoctor {
   specialization?: string | null;
 }
 
-// Describes the add schedule form state and local submit callback.
+// Describes the add schedule form state and open-state callback.
 interface AddDoctorScheduleFormProps {
   defaultDate: string;
   doctor: AddScheduleDoctor | null;
   open: boolean;
-  onAddSchedule: (schedule: ReceptionistDoctorScheduleSlotDto) => void;
   onOpenChange: (open: boolean) => void;
 }
 
-// Displays a frontend-only form for drafting a new doctor schedule slot.
+// Displays a form for creating a doctor schedule slot.
 export function AddDoctorScheduleForm({
   defaultDate,
   doctor,
   open,
-  onAddSchedule,
   onOpenChange,
 }: AddDoctorScheduleFormProps) {
+  const queryClient = useQueryClient();
+  const { mutateAsync, isPending } = useCreateSchedule();
   const doctorName = `Dr. ${doctor?.firstName ?? ""} ${doctor?.lastName ?? ""}`.trim();
   const defaultValues: AddDoctorScheduleFormValues = {
     date: defaultDate,
@@ -72,31 +83,37 @@ export function AddDoctorScheduleForm({
     defaultValues,
     validators: { onSubmit: addDoctorScheduleSchema },
     onSubmit: async ({ value }) => {
-      const localId =
-        typeof crypto !== "undefined" && "randomUUID" in crypto
-          ? crypto.randomUUID()
-          : `${value.date}-${value.startTime}-${Date.now()}`;
+      if (!doctor?.doctorPublicId) {
+        toast.error("Doctor ID is missing. Please refresh and try again.");
+        return;
+      }
 
-      onAddSchedule({
-        publicId: `local-${localId}`,
+      const payload: CreateScheduleCommand = {
+        doctorPublicId: doctor.doctorPublicId,
         date: value.date,
-        startTime: value.startTime,
-        endTime: value.endTime,
-        scheduleStatus: value.scheduleStatus,
-        scheduleStatusColorCode: null,
-        doctorPublicId: doctor?.doctorPublicId ?? undefined,
-        doctorName,
-        doctorSpecialization: doctor?.specialization ?? undefined,
-        appointmentPublicId: null,
-        patientName: null,
-        visitReason: null,
-        appointmentStatus: null,
-        appointmentStatusColorCode: null,
-      });
+        startTime: normalizeLocalTimeForApi(value.startTime),
+        endTime: normalizeLocalTimeForApi(value.endTime),
+        scheduleStatus: value.scheduleStatus.toLowerCase(),
+      };
 
-      toast.success("Schedule added locally. Backend save is not connected yet.");
-      onOpenChange(false);
-      form.reset();
+      try {
+        await mutateAsync({ data: payload });
+        await queryClient.invalidateQueries({
+          queryKey: getGetDailySchedulesForReceptionistQueryKey({
+            Date: value.date,
+            DoctorPublicId: doctor.doctorPublicId,
+          }),
+        });
+        toast.success(`Schedule added for ${doctorName}.`);
+        onOpenChange(false);
+        form.reset();
+      } catch (error) {
+        if (error instanceof ApiError) {
+          toast.error(error.data?.title ?? "Failed to add schedule.");
+        } else {
+          toast.error("Failed to add schedule.");
+        }
+      }
     },
   });
 
@@ -115,7 +132,7 @@ export function AddDoctorScheduleForm({
             <div className="min-w-0 flex-1">
               <DialogTitle className="text-xl font-semibold leading-none">Add Schedule</DialogTitle>
               <DialogDescription className="mt-1 text-sm text-muted-foreground">
-                Create a local schedule slot for{" "}
+                Create a schedule slot for{" "}
                 <span className="font-medium text-foreground">{doctorName}</span>.
               </DialogDescription>
             </div>
@@ -211,8 +228,11 @@ export function AddDoctorScheduleForm({
             </Button>
             <form.Subscribe>
               {(state: { canSubmit: boolean; isSubmitting: boolean }) => (
-                <Button type="submit" disabled={!state.canSubmit || state.isSubmitting}>
-                  Add Schedule
+                <Button
+                  type="submit"
+                  disabled={!state.canSubmit || state.isSubmitting || isPending}
+                >
+                  {state.isSubmitting || isPending ? "Adding..." : "Add Schedule"}
                 </Button>
               )}
             </form.Subscribe>
