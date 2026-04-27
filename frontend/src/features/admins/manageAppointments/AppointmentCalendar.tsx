@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import type { DayData } from "./UseAdminAppointments";
+import { ViewAllTodayAppointments } from "./ViewAllTodayAppointments";
 
 const WEEKDAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
@@ -61,6 +62,7 @@ interface MiniCalendarProps {
 interface UpcomingTodayPanelProps {
   appointments: ReceptionistAppointmentDto[];
   isLoading: boolean;
+  onViewAll: () => void;
 }
 
 // Converts a NodaTime LocalTime string into a compact 12-hour display time.
@@ -210,7 +212,7 @@ function MiniCalendar({
 }
 
 // Displays appointments scheduled for the current day in a sidebar panel.
-function UpcomingTodayPanel({ appointments, isLoading }: UpcomingTodayPanelProps) {
+function UpcomingTodayPanel({ appointments, isLoading, onViewAll }: UpcomingTodayPanelProps) {
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-xl bg-zinc-900">
       <div className="px-5 pt-5 pb-3">
@@ -247,6 +249,7 @@ function UpcomingTodayPanel({ appointments, isLoading }: UpcomingTodayPanelProps
           type="button"
           variant="outline"
           className="w-full border-white/50 bg-transparent text-white hover:bg-white/10 hover:text-white"
+          onClick={onViewAll}
         >
           View All Tasks
         </Button>
@@ -317,6 +320,7 @@ export function AppointmentCalendar({
   onNextMonth,
 }: AppointmentCalendarProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [todayDialogOpen, setTodayDialogOpen] = useState(false);
   const selectedDateIso = toIsoDate(currentYear, currentMonth, selectedDay);
   const dialogAppointments = monthItems.filter(
     (appointment) => appointment.date === selectedDateIso,
@@ -346,7 +350,11 @@ export function AppointmentCalendar({
           )}
         </div>
 
-        <UpcomingTodayPanel appointments={todayAppointments} isLoading={isLoading} />
+        <UpcomingTodayPanel
+          appointments={todayAppointments}
+          isLoading={isLoading}
+          onViewAll={() => setTodayDialogOpen(true)}
+        />
       </div>
 
       <AppointmentDayDialog
@@ -354,6 +362,13 @@ export function AppointmentCalendar({
         onOpenChange={setDialogOpen}
         date={{ year: currentYear, month: currentMonth, day: selectedDay }}
         appointments={dialogAppointments}
+      />
+
+      <ViewAllTodayAppointments
+        open={todayDialogOpen}
+        onOpenChange={setTodayDialogOpen}
+        appointments={todayAppointments}
+        isLoading={isLoading}
       />
     </>
   );
