@@ -12,6 +12,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
+import { AddNewLabTechForm } from "@/features/admins/manageLabTech/AddNewLabTechForm";
 import { LabTechTable } from "@/features/admins/manageLabTech/LabTechTable";
 
 const PAGE_SIZE = 5;
@@ -21,6 +22,7 @@ export function AdminLabTechsPage() {
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -73,7 +75,7 @@ export function AdminLabTechsPage() {
             <Button
               type="button"
               className="h-9 gap-1.5 bg-black text-white hover:bg-black/85"
-              disabled
+              onClick={() => setAddDialogOpen(true)}
             >
               <Plus className="size-4" />
               Add New Lab Tech
@@ -111,6 +113,8 @@ export function AdminLabTechsPage() {
           />
         )}
       </motion.div>
+
+      <AddNewLabTechForm open={addDialogOpen} onOpenChange={setAddDialogOpen} />
     </div>
   );
 }
