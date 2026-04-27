@@ -1,5 +1,8 @@
 import { useMemo } from "react";
-import { useGetAllAppointmentsForReceptionist } from "@/api/generated/appointments/appointments";
+import {
+  useGetAllAppointmentsForReceptionist,
+  useGetAllStatuses,
+} from "@/api/generated/appointments/appointments";
 import type { ReceptionistAppointmentDto } from "@/api/model/ReceptionistAppointmentDto";
 
 // ---------------------------------------------------------------------------
@@ -8,6 +11,12 @@ import type { ReceptionistAppointmentDto } from "@/api/model/ReceptionistAppoint
 
 // Represents a calendar day with its appointment count for the mini calendar dots
 export type DayData = { day: number; count: number };
+
+// Represents the list-view filters sent to the appointments endpoint.
+export interface AppointmentListFilters {
+  status: string;
+  todayOnly: boolean;
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -42,7 +51,13 @@ function buildScheduledDays(items: ReceptionistAppointmentDto[]): DayData[] {
 // ---------------------------------------------------------------------------
 
 // Provides all data needed for the admin appointment page: calendar dots, today panel, and list view
-export function useAdminAppointments(year: number, month: number, listPage: number, search = "") {
+export function useAdminAppointments(
+  year: number,
+  month: number,
+  listPage: number,
+  search = "",
+  filters: AppointmentListFilters = { status: "", todayOnly: false },
+) {
   const today = new Date();
   const todayIso = toIsoDate(today.getFullYear(), today.getMonth(), today.getDate());
   const firstOfMonth = toIsoDate(year, month, 1);
@@ -76,7 +91,20 @@ export function useAdminAppointments(year: number, month: number, listPage: numb
     Page: listPage,
     SortOrder: "asc",
     ...(search.trim() ? { Search: search.trim() } : {}),
+    ...(filters.status ? { Status: filters.status } : {}),
+    ...(filters.todayOnly ? { From: todayIso, To: todayIso } : {}),
   });
+
+  const statusQuery = useGetAllStatuses();
+
+  const statuses = useMemo(() => {
+    if (statusQuery.data?.status !== 200) return [];
+    return statusQuery.data.data.map((status) => ({
+      slug: status.slug,
+      name: status.name,
+      colorCode: status.colorCode,
+    }));
+  }, [statusQuery.data]);
 
   const listItems = useMemo<ReceptionistAppointmentDto[]>(() => {
     if (listQuery.data?.status === 200) return listQuery.data.data.items;
@@ -98,5 +126,6 @@ export function useAdminAppointments(year: number, month: number, listPage: numb
     listTotalPages,
     isListLoading: listQuery.isLoading,
     isListError: listQuery.isError,
+    statuses,
   };
 }

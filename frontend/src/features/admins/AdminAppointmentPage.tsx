@@ -1,9 +1,18 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { FileDown, LayoutGrid, List, Search } from "lucide-react";
+import { CalendarCheck, FileDown, Filter, LayoutGrid, List, Search, X } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Switch } from "@/components/ui/switch";
 import { AppointmentCalendar } from "@/features/admins/manageAppointments/AppointmentCalendar";
 import { AppointmentTable } from "@/features/admins/manageAppointments/AppointmentTable";
 import { useAdminAppointments } from "@/features/admins/manageAppointments/UseAdminAppointments";
@@ -22,6 +31,8 @@ export function AdminAppointmentPage() {
   const [selectedDay, setSelectedDay] = useState(today.getDate());
   const [listPage, setListPage] = useState(1);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [todayOnly, setTodayOnly] = useState(false);
 
   const {
     monthItems,
@@ -31,8 +42,13 @@ export function AdminAppointmentPage() {
     listItems,
     listTotalPages,
     isListLoading,
-  } = useAdminAppointments(currentYear, currentMonth, listPage, search);
+    statuses,
+  } = useAdminAppointments(currentYear, currentMonth, listPage, search, {
+    status: statusFilter,
+    todayOnly,
+  });
   const { exportAppointmentsCsv, isExportDisabled } = useAppointmentsCsvExport();
+  const activeFilterCount = Number(Boolean(statusFilter)) + Number(todayOnly);
 
   function handlePrev() {
     if (currentMonth === 0) {
@@ -91,6 +107,110 @@ export function AdminAppointmentPage() {
             className="pl-9"
           />
         </div>
+        {viewMode === "list" && (
+          <Popover>
+            <PopoverTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-9 gap-1.5 bg-background"
+                  aria-label="Filter appointment list"
+                >
+                  <Filter className="size-4" />
+                  Filters
+                  {activeFilterCount > 0 && (
+                    <span className="ml-0.5 inline-flex size-5 items-center justify-center rounded-full bg-primary text-[11px] text-primary-foreground">
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </Button>
+              }
+            />
+            <PopoverContent align="end" className="w-80 gap-4 p-4">
+              <PopoverHeader>
+                <PopoverTitle>List filters</PopoverTitle>
+              </PopoverHeader>
+
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">Status</Label>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant={statusFilter ? "outline" : "default"}
+                    size="sm"
+                    onClick={() => {
+                      setStatusFilter("");
+                      setListPage(1);
+                    }}
+                  >
+                    All
+                  </Button>
+                  {statuses.map((status) => {
+                    if (!status.slug) return null;
+
+                    const slug = status.slug;
+
+                    return (
+                      <Button
+                        key={slug}
+                        type="button"
+                        variant={statusFilter === slug ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => {
+                          setStatusFilter(statusFilter === slug ? "" : slug);
+                          setListPage(1);
+                        }}
+                      >
+                        {status.colorCode && (
+                          <span
+                            className="size-2 rounded-full"
+                            style={{ backgroundColor: status.colorCode }}
+                          />
+                        )}
+                        {status.name ?? slug}
+                      </Button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
+                <div className="flex items-center gap-2">
+                  <CalendarCheck className="size-4 text-muted-foreground" />
+                  <Label htmlFor="admin-today-filter" className="text-sm">
+                    Today only
+                  </Label>
+                </div>
+                <Switch
+                  id="admin-today-filter"
+                  checked={todayOnly}
+                  onCheckedChange={(checked) => {
+                    setTodayOnly(checked);
+                    setListPage(1);
+                  }}
+                />
+              </div>
+
+              {activeFilterCount > 0 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="w-fit gap-1.5 text-muted-foreground"
+                  onClick={() => {
+                    setStatusFilter("");
+                    setTodayOnly(false);
+                    setListPage(1);
+                  }}
+                >
+                  <X className="size-3.5" />
+                  Clear filters
+                </Button>
+              )}
+            </PopoverContent>
+          </Popover>
+        )}
         <div className="inline-flex shrink-0 overflow-hidden rounded-lg border border-border">
           <button
             type="button"
