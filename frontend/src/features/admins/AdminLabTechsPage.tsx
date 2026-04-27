@@ -138,8 +138,6 @@ export function AdminLabTechsPage() {
             page={page}
             totalCount={totalCount}
             totalPages={totalPages}
-            hasNextPage={result?.hasNextPage}
-            hasPreviousPage={result?.hasPreviousPage}
             onPageChange={setPage}
             search={searchInput}
             onSearchChange={setSearchInput}
