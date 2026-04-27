@@ -60,6 +60,10 @@ import type {
 } from '../../model/AdminUpdateDepartmentCommand';
 
 import type {
+  AdminUpdateLabTechCommand
+} from '../../model/AdminUpdateLabTechCommand';
+
+import type {
   AdminUpdateReceptionistCommand
 } from '../../model/AdminUpdateReceptionistCommand';
 
@@ -851,6 +855,105 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getAdminCreateLabTechMutationOptions(options), queryClient);
+    }
+    export type adminUpdateLabTechResponse200 = {
+  data: AdminLabTechDto
+  status: 200
+}
+
+export type adminUpdateLabTechResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type adminUpdateLabTechResponse403 = {
+  data: ProblemDetails
+  status: 403
+}
+
+export type adminUpdateLabTechResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type adminUpdateLabTechResponse422 = {
+  data: ProblemDetails
+  status: 422
+}
+
+export type adminUpdateLabTechResponseSuccess = (adminUpdateLabTechResponse200) & {
+  headers: Headers;
+};
+export type adminUpdateLabTechResponseError = (adminUpdateLabTechResponse401 | adminUpdateLabTechResponse403 | adminUpdateLabTechResponse404 | adminUpdateLabTechResponse422) & {
+  headers: Headers;
+};
+
+export type adminUpdateLabTechResponse = (adminUpdateLabTechResponseSuccess | adminUpdateLabTechResponseError)
+
+export const getAdminUpdateLabTechUrl = (id: string,) => {
+
+
+
+
+  return `/api/v1/admins/lab-techs/${id}`
+}
+
+export const adminUpdateLabTech = async (id: string,
+    adminUpdateLabTechCommand: AdminUpdateLabTechCommand, options?: RequestInit): Promise<adminUpdateLabTechResponse> => {
+
+  return ofetchMutator<adminUpdateLabTechResponse>(getAdminUpdateLabTechUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      adminUpdateLabTechCommand,)
+  }
+);}
+
+
+
+
+export const getAdminUpdateLabTechMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateLabTech>>, TError,{id: string;data: AdminUpdateLabTechCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateLabTech>>, TError,{id: string;data: AdminUpdateLabTechCommand}, TContext> => {
+
+const mutationKey = ['adminUpdateLabTech'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateLabTech>>, {id: string;data: AdminUpdateLabTechCommand}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  adminUpdateLabTech(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminUpdateLabTechMutationResult = NonNullable<Awaited<ReturnType<typeof adminUpdateLabTech>>>
+    export type AdminUpdateLabTechMutationBody = AdminUpdateLabTechCommand
+    export type AdminUpdateLabTechMutationError = ProblemDetails
+
+    export const useAdminUpdateLabTech = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateLabTech>>, TError,{id: string;data: AdminUpdateLabTechCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminUpdateLabTech>>,
+        TError,
+        {id: string;data: AdminUpdateLabTechCommand},
+        TContext
+      > => {
+      return useMutation(getAdminUpdateLabTechMutationOptions(options), queryClient);
     }
 
 

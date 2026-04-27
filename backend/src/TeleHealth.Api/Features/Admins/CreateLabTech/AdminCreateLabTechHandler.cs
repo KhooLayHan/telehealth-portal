@@ -91,7 +91,10 @@ public sealed class AdminCreateLabTechHandler(
             Email = user.Email,
             PhoneNumber = user.Phone,
             Slug = user.Slug,
+            Gender = user.Gender,
+            DateOfBirth = user.DateOfBirth,
             AvatarUrl = user.AvatarUrl,
+            Address = user.Address,
             CreatedAt = user.CreatedAt,
             DeletedAt = user.DeletedAt,
         };

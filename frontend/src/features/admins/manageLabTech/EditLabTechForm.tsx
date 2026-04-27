@@ -1,7 +1,13 @@
 import { useForm } from "@tanstack/react-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { z } from "zod";
+import {
+  getAdminGetAllLabTechsQueryKey,
+  useAdminUpdateLabTech,
+} from "@/api/generated/admins/admins";
 import type { AdminLabTechDto } from "@/api/model/AdminLabTechDto";
+import { ApiError } from "@/api/ofetch-mutator";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -41,26 +47,33 @@ const editLabTechSchema = z.object({
 type EditLabTechFormValues = z.infer<typeof editLabTechSchema>;
 
 // Builds form defaults from the selected lab technician record.
-function buildEditDefaultValues(labTech: AdminLabTechDto | null): EditLabTechFormValues {
+function buildEditDefaultValues(labTech: AdminLabTechDto): EditLabTechFormValues {
   return {
-    firstName: labTech?.firstName ?? "",
-    lastName: labTech?.lastName ?? "",
-    username: labTech?.username ?? "",
-    email: labTech?.email ?? "",
-    phoneNumber: labTech?.phoneNumber ?? "",
-    gender: "N",
-    dateOfBirth: "",
-    street: "",
-    city: "",
-    state: "",
-    postalCode: "",
-    country: "",
+    firstName: labTech.firstName,
+    lastName: labTech.lastName,
+    username: labTech.username,
+    email: labTech.email,
+    phoneNumber: labTech.phoneNumber ?? "",
+    gender: (labTech.gender ?? "N") as "M" | "F" | "O" | "N",
+    dateOfBirth: labTech.dateOfBirth ?? "",
+    street: labTech.address?.street ?? "",
+    city: labTech.address?.city ?? "",
+    state: labTech.address?.state ?? "",
+    postalCode: labTech.address?.postalCode ?? "",
+    country: labTech.address?.country ?? "",
   };
 }
 
 // Describes the open state controls and selected lab technician for the edit dialog.
 interface EditLabTechFormProps {
   labTech: AdminLabTechDto | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+// Describes the mounted edit form once a lab technician row is selected.
+interface EditLabTechFormContentProps {
+  labTech: AdminLabTechDto;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -78,23 +91,80 @@ function toFieldErrors(errors: unknown[]): Array<{ message: string }> {
   }));
 }
 
-// Modal form that lets the admin update lab technician details locally.
+// Renders the selected lab technician edit dialog when a table row is active.
 export function EditLabTechForm({ labTech, open, onOpenChange }: EditLabTechFormProps) {
+  if (!labTech) {
+    return null;
+  }
+
+  return (
+    <EditLabTechFormContent
+      key={labTech.publicId}
+      labTech={labTech}
+      open={open}
+      onOpenChange={onOpenChange}
+    />
+  );
+}
+
+// Modal form that lets the admin update lab technician details through the backend.
+function EditLabTechFormContent({ labTech, open, onOpenChange }: EditLabTechFormContentProps) {
+  const queryClient = useQueryClient();
+  const { mutateAsync, isPending } = useAdminUpdateLabTech({
+    mutation: {
+      onSuccess: async () => {
+        toast.success("Lab technician updated successfully");
+        await queryClient.invalidateQueries({ queryKey: getAdminGetAllLabTechsQueryKey() });
+        onOpenChange(false);
+      },
+      onError: (error) => {
+        if (error instanceof ApiError) {
+          toast.error(error.data.title ?? "Failed to update lab technician");
+          return;
+        }
+
+        toast.error("Failed to update lab technician");
+      },
+    },
+  });
+
   const form = useForm({
     defaultValues: buildEditDefaultValues(labTech),
     validators: { onSubmit: editLabTechSchema },
-    onSubmit: async () => {
-      toast.success("Lab technician details updated");
-      handleOpenChange(false);
+    onSubmit: async ({ value }) => {
+      if (!labTech.publicId) {
+        toast.error("Failed to update lab technician");
+        return;
+      }
+
+      await mutateAsync({
+        id: labTech.publicId,
+        data: {
+          firstName: value.firstName,
+          lastName: value.lastName,
+          username: value.username,
+          email: value.email,
+          phoneNumber: value.phoneNumber || null,
+          gender: value.gender,
+          dateOfBirth: value.dateOfBirth,
+          address: value.street
+            ? {
+                street: value.street,
+                city: value.city,
+                state: value.state,
+                postalCode: value.postalCode,
+                country: value.country,
+              }
+            : null,
+        },
+      });
     },
   });
 
   const handleOpenChange = (nextOpen: boolean) => {
-    if (!nextOpen) form.reset();
+    if (!nextOpen) form.reset(buildEditDefaultValues(labTech));
     onOpenChange(nextOpen);
   };
-
-  if (!labTech) return null;
 
   const initials = `${labTech.firstName[0] ?? "?"}${labTech.lastName[0] ?? "?"}`.toUpperCase();
 
@@ -361,10 +431,10 @@ export function EditLabTechForm({ labTech, open, onOpenChange }: EditLabTechForm
               {([canSubmit, isSubmitting]) => (
                 <Button
                   type="submit"
-                  disabled={!canSubmit || isSubmitting}
+                  disabled={!canSubmit || isSubmitting || isPending}
                   className="bg-black text-white hover:bg-black/85"
                 >
-                  {isSubmitting ? "Saving..." : "Save Changes"}
+                  {isSubmitting || isPending ? "Saving..." : "Save Changes"}
                 </Button>
               )}
             </form.Subscribe>

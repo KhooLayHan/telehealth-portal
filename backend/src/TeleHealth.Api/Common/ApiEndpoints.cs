@@ -166,5 +166,7 @@ public static class ApiEndpoints
         public const string GetAllLabTechs = $"{Base}/lab-techs";
 
         public const string CreateLabTech = $"{Base}/lab-techs";
+
+        public const string UpdateLabTech = $"{Base}/lab-techs/{{id:guid}}";
     }
 }
