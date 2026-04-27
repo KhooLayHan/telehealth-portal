@@ -5,10 +5,10 @@ import {
   ChevronRight,
   Clock3,
   FileText,
-  Hash,
   Loader2,
   Plus,
   Stethoscope,
+  Trash2,
   UserRound,
 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -159,7 +159,13 @@ function ScheduleMetric({
 }
 
 // Displays one schedule slot in a stacked layout for narrow dialog widths.
-function ScheduleSlotCard({ slot }: { slot: ReceptionistDoctorScheduleSlotDto }) {
+function ScheduleSlotCard({
+  slot,
+  onRemove,
+}: {
+  onRemove: (slot: ReceptionistDoctorScheduleSlotDto) => void;
+  slot: ReceptionistDoctorScheduleSlotDto;
+}) {
   return (
     <article className="space-y-3 rounded-lg border border-border bg-background p-3">
       <div className="flex items-start justify-between gap-3">
@@ -194,7 +200,7 @@ function ScheduleSlotCard({ slot }: { slot: ReceptionistDoctorScheduleSlotDto })
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
         <div className="min-w-0">
           <p className="text-muted-foreground text-xs">Patient</p>
           <p className="truncate">{slot.patientName ?? "Not assigned"}</p>
@@ -203,13 +209,18 @@ function ScheduleSlotCard({ slot }: { slot: ReceptionistDoctorScheduleSlotDto })
           <p className="text-muted-foreground text-xs">Reason</p>
           <p className="truncate">{slot.visitReason ?? "Not provided"}</p>
         </div>
-        <div className="min-w-0">
-          <p className="text-muted-foreground text-xs">Slot ID</p>
-          <p className="truncate text-muted-foreground text-xs">
-            {slot.publicId ?? "Not provided"}
-          </p>
-        </div>
       </div>
+
+      <Button
+        className="w-full gap-1.5"
+        size="sm"
+        type="button"
+        variant="destructive"
+        onClick={() => onRemove(slot)}
+      >
+        <Trash2 className="size-3.5" />
+        Remove Schedule
+      </Button>
     </article>
   );
 }
@@ -222,6 +233,7 @@ export function ViewDoctorScheduleDialog({
 }: ViewDoctorScheduleDialogProps) {
   const [selectedDate, setSelectedDate] = useState(getTodayStr());
   const [addScheduleOpen, setAddScheduleOpen] = useState(false);
+  const [removedSlotKeys, setRemovedSlotKeys] = useState<Set<string>>(() => new Set());
   const doctorPublicId = doctor?.doctorPublicId ?? "";
   const scheduleQuery = useGetDailySchedulesForReceptionist(
     { Date: selectedDate, ...(doctorPublicId ? { DoctorPublicId: doctorPublicId } : {}) },
@@ -232,8 +244,8 @@ export function ViewDoctorScheduleDialog({
     [scheduleQuery.data],
   );
   const scheduleSlots = useMemo<ReceptionistDoctorScheduleSlotDto[]>(
-    () => backendScheduleSlots,
-    [backendScheduleSlots],
+    () => backendScheduleSlots.filter((slot) => !removedSlotKeys.has(getSlotKey(slot))),
+    [backendScheduleSlots, removedSlotKeys],
   );
   const doctorName = `Dr. ${doctor?.firstName ?? ""} ${doctor?.lastName ?? ""}`.trim();
   const hasLoadError = scheduleQuery.isError || scheduleQuery.data?.status === 401;
@@ -253,6 +265,13 @@ export function ViewDoctorScheduleDialog({
     },
     {},
   );
+  const handleRemoveScheduleSlot = (slot: ReceptionistDoctorScheduleSlotDto) => {
+    setRemovedSlotKeys((currentKeys) => {
+      const nextKeys = new Set(currentKeys);
+      nextKeys.add(getSlotKey(slot));
+      return nextKeys;
+    });
+  };
 
   if (!doctor) return null;
 
@@ -381,7 +400,11 @@ export function ViewDoctorScheduleDialog({
                   <>
                     <div className="space-y-3 lg:hidden">
                       {scheduleSlots.map((slot) => (
-                        <ScheduleSlotCard key={getSlotKey(slot)} slot={slot} />
+                        <ScheduleSlotCard
+                          key={getSlotKey(slot)}
+                          slot={slot}
+                          onRemove={handleRemoveScheduleSlot}
+                        />
                       ))}
                     </div>
 
@@ -395,7 +418,7 @@ export function ViewDoctorScheduleDialog({
                             <TableHead>Appointment</TableHead>
                             <TableHead>Patient</TableHead>
                             <TableHead>Reason</TableHead>
-                            <TableHead>Slot ID</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -441,8 +464,17 @@ export function ViewDoctorScheduleDialog({
                               <TableCell className="max-w-52 truncate">
                                 {slot.visitReason ?? "Not provided"}
                               </TableCell>
-                              <TableCell className="max-w-44 truncate text-muted-foreground text-xs">
-                                {slot.publicId ?? "Not provided"}
+                              <TableCell className="text-right">
+                                <Button
+                                  className="gap-1.5"
+                                  size="sm"
+                                  type="button"
+                                  variant="destructive"
+                                  onClick={() => handleRemoveScheduleSlot(slot)}
+                                >
+                                  <Trash2 className="size-3.5" />
+                                  Remove Schedule
+                                </Button>
                               </TableCell>
                             </TableRow>
                           ))}
@@ -485,7 +517,7 @@ export function ViewDoctorScheduleDialog({
                       <div className="divide-y divide-border">
                         {slots.map((slot) => (
                           <div
-                            className="grid grid-cols-1 gap-3 px-4 py-3 md:grid-cols-[10rem_8rem_1fr]"
+                            className="grid grid-cols-1 gap-3 px-4 py-3 md:grid-cols-[10rem_8rem_1fr_auto]"
                             key={getSlotKey(slot)}
                           >
                             <div className="flex items-center gap-2 font-medium text-sm">
@@ -508,10 +540,6 @@ export function ViewDoctorScheduleDialog({
                                 {slot.patientName ?? slot.visitReason ?? "Open for booking"}
                               </p>
                               <div className="flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground text-xs">
-                                <span className="inline-flex items-center gap-1">
-                                  <Hash className="size-3" />
-                                  Slot {slot.publicId}
-                                </span>
                                 {slot.appointmentPublicId && (
                                   <span className="inline-flex items-center gap-1">
                                     <Stethoscope className="size-3" />
@@ -520,6 +548,16 @@ export function ViewDoctorScheduleDialog({
                                 )}
                               </div>
                             </div>
+                            <Button
+                              className="w-full gap-1.5 md:w-auto"
+                              size="sm"
+                              type="button"
+                              variant="destructive"
+                              onClick={() => handleRemoveScheduleSlot(slot)}
+                            >
+                              <Trash2 className="size-3.5" />
+                              Remove Schedule
+                            </Button>
                           </div>
                         ))}
                       </div>
