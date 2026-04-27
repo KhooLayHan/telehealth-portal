@@ -7,6 +7,7 @@ import {
   FileText,
   Hash,
   Loader2,
+  Plus,
   Stethoscope,
   UserRound,
 } from "lucide-react";
@@ -34,6 +35,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { addDays, getTodayStr } from "@/features/schedules/ScheduleUtils";
 import { cn } from "@/lib/utils";
+import { AddDoctorScheduleDialog } from "./AddDoctorScheduleDialog";
 
 // Describes the minimum doctor information needed by the schedule dialog.
 interface ScheduleDoctor {
@@ -219,14 +221,27 @@ export function ViewDoctorScheduleDialog({
   onOpenChange,
 }: ViewDoctorScheduleDialogProps) {
   const [selectedDate, setSelectedDate] = useState(getTodayStr());
+  const [addScheduleOpen, setAddScheduleOpen] = useState(false);
+  const [localScheduleSlots, setLocalScheduleSlots] = useState<ReceptionistDoctorScheduleSlotDto[]>(
+    [],
+  );
   const doctorPublicId = doctor?.doctorPublicId ?? "";
   const scheduleQuery = useGetDailySchedulesForReceptionist(
     { Date: selectedDate, ...(doctorPublicId ? { DoctorPublicId: doctorPublicId } : {}) },
     { query: { enabled: open && Boolean(doctorPublicId) } },
   );
-  const scheduleSlots = useMemo<ReceptionistDoctorScheduleSlotDto[]>(
+  const backendScheduleSlots = useMemo<ReceptionistDoctorScheduleSlotDto[]>(
     () => (scheduleQuery.data?.status === 200 ? scheduleQuery.data.data : []),
     [scheduleQuery.data],
+  );
+  const scheduleSlots = useMemo<ReceptionistDoctorScheduleSlotDto[]>(
+    () => [
+      ...backendScheduleSlots,
+      ...localScheduleSlots.filter(
+        (slot) => slot.date === selectedDate && slot.doctorPublicId === doctorPublicId,
+      ),
+    ],
+    [backendScheduleSlots, doctorPublicId, localScheduleSlots, selectedDate],
   );
   const doctorName = `Dr. ${doctor?.firstName ?? ""} ${doctor?.lastName ?? ""}`.trim();
   const hasLoadError = scheduleQuery.isError || scheduleQuery.data?.status === 401;
@@ -250,274 +265,295 @@ export function ViewDoctorScheduleDialog({
   if (!doctor) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[calc(100vh-2rem)] max-w-[calc(100vw-1rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-6xl xl:max-w-7xl">
-        <div className="absolute inset-x-0 top-0 h-px bg-border" />
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="flex max-h-[calc(100vh-2rem)] max-w-[calc(100vw-1rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-6xl xl:max-w-7xl">
+          <div className="absolute inset-x-0 top-0 h-px bg-border" />
 
-        <DialogHeader className="px-4 pb-5 pt-7 sm:px-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="min-w-0 flex-1 space-y-2">
-              <DialogTitle className="flex items-center gap-2 text-xl font-semibold leading-none">
-                <CalendarClock className="size-5" />
-                Doctor Schedule
-              </DialogTitle>
-              <DialogDescription className="text-sm text-muted-foreground">
-                View schedule slots, availability, and booked appointment details for{" "}
-                <span className="font-medium text-foreground">{doctorName}</span>.
-              </DialogDescription>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                aria-label="Previous day"
-                className="size-8"
-                size="icon"
-                type="button"
-                variant="outline"
-                onClick={() => setSelectedDate((date) => addDays(date, -1))}
-              >
-                <ChevronLeft className="size-4" />
-              </Button>
-              <div className="flex h-8 items-center gap-2 rounded-md border border-input bg-background px-2">
-                <CalendarDays className="size-3.5 text-muted-foreground" />
-                <input
-                  className="bg-transparent font-mono text-xs outline-none"
-                  type="date"
-                  value={selectedDate}
-                  onChange={(event) => setSelectedDate(event.target.value)}
-                />
+          <DialogHeader className="px-4 pb-5 pt-7 sm:px-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0 flex-1 space-y-2">
+                <DialogTitle className="flex items-center gap-2 text-xl font-semibold leading-none">
+                  <CalendarClock className="size-5" />
+                  Doctor Schedule
+                </DialogTitle>
+                <DialogDescription className="text-sm text-muted-foreground">
+                  View schedule slots, availability, and booked appointment details for{" "}
+                  <span className="font-medium text-foreground">{doctorName}</span>.
+                </DialogDescription>
               </div>
-              <Button
-                aria-label="Next day"
-                className="size-8"
-                size="icon"
-                type="button"
-                variant="outline"
-                onClick={() => setSelectedDate((date) => addDays(date, 1))}
-              >
-                <ChevronRight className="size-4" />
-              </Button>
-            </div>
-          </div>
-        </DialogHeader>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-3 sm:px-6">
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <ScheduleMetric
-              icon={CalendarDays}
-              label="Total Slots"
-              value={String(scheduleSlots.length)}
-            />
-            <ScheduleMetric icon={Clock3} label="Available" value={String(availableCount)} />
-            <ScheduleMetric icon={UserRound} label="Booked" value={String(bookedCount)} />
-            <ScheduleMetric icon={FileText} label="Blocked" value={String(blockedCount)} />
-          </div>
-
-          <div className="mt-5 grid grid-cols-1 gap-4 rounded-lg border border-border bg-muted/20 p-4 sm:grid-cols-3">
-            <div className="min-w-0 space-y-1">
-              <p className="text-muted-foreground text-xs">Doctor</p>
-              <p className="font-medium">{doctorName}</p>
-              <p className="break-all text-muted-foreground text-xs">
-                {doctor.doctorPublicId ?? "No public ID"}
-              </p>
-            </div>
-            <div className="min-w-0 space-y-1">
-              <p className="text-muted-foreground text-xs">Department</p>
-              <p className="font-medium">{doctor.departmentName ?? "Not provided"}</p>
-              <p className="text-muted-foreground text-xs">
-                {doctor.specialization ?? "No specialization"}
-              </p>
-            </div>
-            <div className="min-w-0 space-y-1">
-              <p className="text-muted-foreground text-xs">Next Booked Slot</p>
-              <p className="font-medium">
-                {nextBookedSlot
-                  ? `${getDayLabel(nextBookedSlot.date)}, ${formatTime(nextBookedSlot.startTime)}`
-                  : "No booked slots"}
-              </p>
-              <p className="text-muted-foreground text-xs">
-                License {doctor.licenseNumber ?? "not provided"}
-              </p>
-            </div>
-          </div>
-
-          <Tabs defaultValue="table" className="mt-5">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="table">Schedule Slots</TabsTrigger>
-              <TabsTrigger value="daily">Daily View</TabsTrigger>
-            </TabsList>
-
-            <TabsContent className="mt-4" value="table">
-              {scheduleQuery.isLoading ? (
-                <div className="flex min-h-40 items-center justify-center gap-2 text-muted-foreground text-sm">
-                  <Loader2 className="size-4 animate-spin" />
-                  Loading schedule slots...
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  className="h-8 gap-1.5 bg-black text-white hover:bg-black/85"
+                  type="button"
+                  onClick={() => setAddScheduleOpen(true)}
+                >
+                  <Plus className="size-4" />
+                  Add Schedule
+                </Button>
+                <Button
+                  aria-label="Previous day"
+                  className="size-8"
+                  size="icon"
+                  type="button"
+                  variant="outline"
+                  onClick={() => setSelectedDate((date) => addDays(date, -1))}
+                >
+                  <ChevronLeft className="size-4" />
+                </Button>
+                <div className="flex h-8 items-center gap-2 rounded-md border border-input bg-background px-2">
+                  <CalendarDays className="size-3.5 text-muted-foreground" />
+                  <input
+                    className="bg-transparent font-mono text-xs outline-none"
+                    type="date"
+                    value={selectedDate}
+                    onChange={(event) => setSelectedDate(event.target.value)}
+                  />
                 </div>
-              ) : hasLoadError ? (
-                <p className="py-12 text-center text-destructive text-sm">
-                  Failed to load schedule slots.
-                </p>
-              ) : scheduleSlots.length === 0 ? (
-                <p className="py-12 text-center text-muted-foreground text-sm">
-                  No schedule slots found for this date.
-                </p>
-              ) : (
-                <>
-                  <div className="space-y-3 lg:hidden">
-                    {scheduleSlots.map((slot) => (
-                      <ScheduleSlotCard key={getSlotKey(slot)} slot={slot} />
-                    ))}
-                  </div>
+                <Button
+                  aria-label="Next day"
+                  className="size-8"
+                  size="icon"
+                  type="button"
+                  variant="outline"
+                  onClick={() => setSelectedDate((date) => addDays(date, 1))}
+                >
+                  <ChevronRight className="size-4" />
+                </Button>
+              </div>
+            </div>
+          </DialogHeader>
 
-                  <div className="hidden overflow-hidden rounded-lg border border-border lg:block">
-                    <Table className="min-w-[62rem]">
-                      <TableHeader>
-                        <TableRow className="bg-muted/40 hover:bg-muted/40">
-                          <TableHead>Date</TableHead>
-                          <TableHead>Time</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Appointment</TableHead>
-                          <TableHead>Patient</TableHead>
-                          <TableHead>Reason</TableHead>
-                          <TableHead>Slot ID</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {scheduleSlots.map((slot) => (
-                          <TableRow key={getSlotKey(slot)}>
-                            <TableCell>
-                              <div className="space-y-1">
-                                <p className="font-medium">{getDayLabel(slot.date)}</p>
-                                <p className="text-muted-foreground text-xs">{slot.date}</p>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="space-y-1">
-                                <p className="font-medium">
-                                  {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
-                                </p>
-                                <p className="text-muted-foreground text-xs">
-                                  {getDurationLabel(slot.startTime, slot.endTime)}
-                                </p>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant={getScheduleStatusBadgeVariant(slot.scheduleStatus)}>
-                                {slot.scheduleStatus ?? "Unknown"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              {slot.appointmentStatus ? (
-                                <Badge
-                                  variant={getAppointmentStatusBadgeVariant(slot.appointmentStatus)}
-                                >
-                                  {slot.appointmentStatus}
-                                </Badge>
-                              ) : (
-                                <span className="text-muted-foreground text-sm">
-                                  No appointment
-                                </span>
-                              )}
-                            </TableCell>
-                            <TableCell>{slot.patientName ?? "Not assigned"}</TableCell>
-                            <TableCell className="max-w-52 truncate">
-                              {slot.visitReason ?? "Not provided"}
-                            </TableCell>
-                            <TableCell className="max-w-44 truncate text-muted-foreground text-xs">
-                              {slot.publicId ?? "Not provided"}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </>
-              )}
-            </TabsContent>
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-3 sm:px-6">
+            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+              <ScheduleMetric
+                icon={CalendarDays}
+                label="Total Slots"
+                value={String(scheduleSlots.length)}
+              />
+              <ScheduleMetric icon={Clock3} label="Available" value={String(availableCount)} />
+              <ScheduleMetric icon={UserRound} label="Booked" value={String(bookedCount)} />
+              <ScheduleMetric icon={FileText} label="Blocked" value={String(blockedCount)} />
+            </div>
 
-            <TabsContent className="mt-4 space-y-4" value="daily">
-              {scheduleQuery.isLoading ? (
-                <div className="flex min-h-40 items-center justify-center gap-2 text-muted-foreground text-sm">
-                  <Loader2 className="size-4 animate-spin" />
-                  Loading schedule slots...
-                </div>
-              ) : hasLoadError ? (
-                <p className="py-12 text-center text-destructive text-sm">
-                  Failed to load schedule slots.
+            <div className="mt-5 grid grid-cols-1 gap-4 rounded-lg border border-border bg-muted/20 p-4 sm:grid-cols-3">
+              <div className="min-w-0 space-y-1">
+                <p className="text-muted-foreground text-xs">Doctor</p>
+                <p className="font-medium">{doctorName}</p>
+                <p className="break-all text-muted-foreground text-xs">
+                  {doctor.doctorPublicId ?? "No public ID"}
                 </p>
-              ) : scheduleSlots.length === 0 ? (
-                <p className="py-12 text-center text-muted-foreground text-sm">
-                  No schedule slots found for this date.
+              </div>
+              <div className="min-w-0 space-y-1">
+                <p className="text-muted-foreground text-xs">Department</p>
+                <p className="font-medium">{doctor.departmentName ?? "Not provided"}</p>
+                <p className="text-muted-foreground text-xs">
+                  {doctor.specialization ?? "No specialization"}
                 </p>
-              ) : (
-                Object.entries(groupedSlots).map(([dateLabel, slots]) => (
-                  <section className="rounded-lg border border-border" key={dateLabel}>
-                    <div className="flex items-center justify-between gap-3 px-4 py-3">
-                      <div>
-                        <h3 className="font-medium text-sm">{dateLabel}</h3>
-                        <p className="text-muted-foreground text-xs">
-                          {slots.length} slot{slots.length === 1 ? "" : "s"} scheduled
-                        </p>
-                      </div>
-                      <Badge variant="outline">
-                        {slots.filter((slot) => isScheduleStatus(slot, "available")).length} open
-                      </Badge>
-                    </div>
-                    <Separator />
-                    <div className="divide-y divide-border">
-                      {slots.map((slot) => (
-                        <div
-                          className="grid grid-cols-1 gap-3 px-4 py-3 md:grid-cols-[10rem_8rem_1fr]"
-                          key={getSlotKey(slot)}
-                        >
-                          <div className="flex items-center gap-2 font-medium text-sm">
-                            <Clock3 className="size-4 text-muted-foreground" />
-                            {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
-                          </div>
-                          <Badge
-                            className="w-fit"
-                            variant={getScheduleStatusBadgeVariant(slot.scheduleStatus)}
-                          >
-                            {slot.scheduleStatus ?? "Unknown"}
-                          </Badge>
-                          <div className="min-w-0 space-y-1">
-                            <p
-                              className={cn(
-                                "truncate text-sm",
-                                !slot.patientName && "text-muted-foreground",
-                              )}
-                            >
-                              {slot.patientName ?? slot.visitReason ?? "Open for booking"}
-                            </p>
-                            <div className="flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground text-xs">
-                              <span className="inline-flex items-center gap-1">
-                                <Hash className="size-3" />
-                                Slot {slot.publicId}
-                              </span>
-                              {slot.appointmentPublicId && (
-                                <span className="inline-flex items-center gap-1">
-                                  <Stethoscope className="size-3" />
-                                  Appointment {slot.appointmentPublicId}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
+              </div>
+              <div className="min-w-0 space-y-1">
+                <p className="text-muted-foreground text-xs">Next Booked Slot</p>
+                <p className="font-medium">
+                  {nextBookedSlot
+                    ? `${getDayLabel(nextBookedSlot.date)}, ${formatTime(nextBookedSlot.startTime)}`
+                    : "No booked slots"}
+                </p>
+                <p className="text-muted-foreground text-xs">
+                  License {doctor.licenseNumber ?? "not provided"}
+                </p>
+              </div>
+            </div>
+
+            <Tabs defaultValue="table" className="mt-5">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="table">Schedule Slots</TabsTrigger>
+                <TabsTrigger value="daily">Daily View</TabsTrigger>
+              </TabsList>
+
+              <TabsContent className="mt-4" value="table">
+                {scheduleQuery.isLoading ? (
+                  <div className="flex min-h-40 items-center justify-center gap-2 text-muted-foreground text-sm">
+                    <Loader2 className="size-4 animate-spin" />
+                    Loading schedule slots...
+                  </div>
+                ) : hasLoadError ? (
+                  <p className="py-12 text-center text-destructive text-sm">
+                    Failed to load schedule slots.
+                  </p>
+                ) : scheduleSlots.length === 0 ? (
+                  <p className="py-12 text-center text-muted-foreground text-sm">
+                    No schedule slots found for this date.
+                  </p>
+                ) : (
+                  <>
+                    <div className="space-y-3 lg:hidden">
+                      {scheduleSlots.map((slot) => (
+                        <ScheduleSlotCard key={getSlotKey(slot)} slot={slot} />
                       ))}
                     </div>
-                  </section>
-                ))
-              )}
-            </TabsContent>
-          </Tabs>
-        </div>
 
-        <div className="flex justify-end gap-2 border-t border-border px-6 py-4">
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            Close
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+                    <div className="hidden overflow-hidden rounded-lg border border-border lg:block">
+                      <Table className="min-w-[62rem]">
+                        <TableHeader>
+                          <TableRow className="bg-muted/40 hover:bg-muted/40">
+                            <TableHead>Date</TableHead>
+                            <TableHead>Time</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Appointment</TableHead>
+                            <TableHead>Patient</TableHead>
+                            <TableHead>Reason</TableHead>
+                            <TableHead>Slot ID</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {scheduleSlots.map((slot) => (
+                            <TableRow key={getSlotKey(slot)}>
+                              <TableCell>
+                                <div className="space-y-1">
+                                  <p className="font-medium">{getDayLabel(slot.date)}</p>
+                                  <p className="text-muted-foreground text-xs">{slot.date}</p>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="space-y-1">
+                                  <p className="font-medium">
+                                    {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
+                                  </p>
+                                  <p className="text-muted-foreground text-xs">
+                                    {getDurationLabel(slot.startTime, slot.endTime)}
+                                  </p>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant={getScheduleStatusBadgeVariant(slot.scheduleStatus)}>
+                                  {slot.scheduleStatus ?? "Unknown"}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                {slot.appointmentStatus ? (
+                                  <Badge
+                                    variant={getAppointmentStatusBadgeVariant(
+                                      slot.appointmentStatus,
+                                    )}
+                                  >
+                                    {slot.appointmentStatus}
+                                  </Badge>
+                                ) : (
+                                  <span className="text-muted-foreground text-sm">
+                                    No appointment
+                                  </span>
+                                )}
+                              </TableCell>
+                              <TableCell>{slot.patientName ?? "Not assigned"}</TableCell>
+                              <TableCell className="max-w-52 truncate">
+                                {slot.visitReason ?? "Not provided"}
+                              </TableCell>
+                              <TableCell className="max-w-44 truncate text-muted-foreground text-xs">
+                                {slot.publicId ?? "Not provided"}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </>
+                )}
+              </TabsContent>
+
+              <TabsContent className="mt-4 space-y-4" value="daily">
+                {scheduleQuery.isLoading ? (
+                  <div className="flex min-h-40 items-center justify-center gap-2 text-muted-foreground text-sm">
+                    <Loader2 className="size-4 animate-spin" />
+                    Loading schedule slots...
+                  </div>
+                ) : hasLoadError ? (
+                  <p className="py-12 text-center text-destructive text-sm">
+                    Failed to load schedule slots.
+                  </p>
+                ) : scheduleSlots.length === 0 ? (
+                  <p className="py-12 text-center text-muted-foreground text-sm">
+                    No schedule slots found for this date.
+                  </p>
+                ) : (
+                  Object.entries(groupedSlots).map(([dateLabel, slots]) => (
+                    <section className="rounded-lg border border-border" key={dateLabel}>
+                      <div className="flex items-center justify-between gap-3 px-4 py-3">
+                        <div>
+                          <h3 className="font-medium text-sm">{dateLabel}</h3>
+                          <p className="text-muted-foreground text-xs">
+                            {slots.length} slot{slots.length === 1 ? "" : "s"} scheduled
+                          </p>
+                        </div>
+                        <Badge variant="outline">
+                          {slots.filter((slot) => isScheduleStatus(slot, "available")).length} open
+                        </Badge>
+                      </div>
+                      <Separator />
+                      <div className="divide-y divide-border">
+                        {slots.map((slot) => (
+                          <div
+                            className="grid grid-cols-1 gap-3 px-4 py-3 md:grid-cols-[10rem_8rem_1fr]"
+                            key={getSlotKey(slot)}
+                          >
+                            <div className="flex items-center gap-2 font-medium text-sm">
+                              <Clock3 className="size-4 text-muted-foreground" />
+                              {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
+                            </div>
+                            <Badge
+                              className="w-fit"
+                              variant={getScheduleStatusBadgeVariant(slot.scheduleStatus)}
+                            >
+                              {slot.scheduleStatus ?? "Unknown"}
+                            </Badge>
+                            <div className="min-w-0 space-y-1">
+                              <p
+                                className={cn(
+                                  "truncate text-sm",
+                                  !slot.patientName && "text-muted-foreground",
+                                )}
+                              >
+                                {slot.patientName ?? slot.visitReason ?? "Open for booking"}
+                              </p>
+                              <div className="flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground text-xs">
+                                <span className="inline-flex items-center gap-1">
+                                  <Hash className="size-3" />
+                                  Slot {slot.publicId}
+                                </span>
+                                {slot.appointmentPublicId && (
+                                  <span className="inline-flex items-center gap-1">
+                                    <Stethoscope className="size-3" />
+                                    Appointment {slot.appointmentPublicId}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  ))
+                )}
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          <div className="flex justify-end gap-2 border-t border-border px-6 py-4">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <AddDoctorScheduleDialog
+        key={`${doctorPublicId}-${selectedDate}`}
+        defaultDate={selectedDate}
+        doctor={doctor}
+        open={addScheduleOpen}
+        onAddSchedule={(schedule) => setLocalScheduleSlots((current) => [...current, schedule])}
+        onOpenChange={setAddScheduleOpen}
+      />
+    </>
   );
 }
