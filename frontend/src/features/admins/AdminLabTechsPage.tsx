@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { FileDown, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAdminGetAllLabTechs } from "@/api/generated/admins/admins";
+import type { AdminLabTechDto } from "@/api/model/AdminLabTechDto";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { AddNewLabTechForm } from "@/features/admins/manageLabTech/AddNewLabTechForm";
+import { EditLabTechForm } from "@/features/admins/manageLabTech/EditLabTechForm";
 import { LabTechTable } from "@/features/admins/manageLabTech/LabTechTable";
 
 const PAGE_SIZE = 5;
@@ -23,6 +25,13 @@ export function AdminLabTechsPage() {
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [editLabTech, setEditLabTech] = useState<AdminLabTechDto | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+
+  const handleEdit = (labTech: AdminLabTechDto) => {
+    setEditLabTech(labTech);
+    setEditDialogOpen(true);
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -110,11 +119,19 @@ export function AdminLabTechsPage() {
             onPageChange={setPage}
             search={searchInput}
             onSearchChange={setSearchInput}
+            onEdit={handleEdit}
           />
         )}
       </motion.div>
 
       <AddNewLabTechForm open={addDialogOpen} onOpenChange={setAddDialogOpen} />
+
+      <EditLabTechForm
+        key={editLabTech?.publicId}
+        labTech={editLabTech}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+      />
     </div>
   );
 }
