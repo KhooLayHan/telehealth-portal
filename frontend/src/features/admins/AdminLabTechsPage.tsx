@@ -17,6 +17,7 @@ import { AddNewLabTechForm } from "@/features/admins/manageLabTech/AddNewLabTech
 import { DeleteLabTechDialog } from "@/features/admins/manageLabTech/DeleteLabTechDialog";
 import { EditLabTechForm } from "@/features/admins/manageLabTech/EditLabTechForm";
 import { LabTechTable } from "@/features/admins/manageLabTech/LabTechTable";
+import { ViewLabTechDetailDialog } from "@/features/admins/manageLabTech/ViewLabTechDetailDialog";
 
 const PAGE_SIZE = 5;
 
@@ -26,10 +27,17 @@ export function AdminLabTechsPage() {
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [selectedLabTech, setSelectedLabTech] = useState<AdminLabTechDto | null>(null);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [editLabTech, setEditLabTech] = useState<AdminLabTechDto | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteLabTech, setDeleteLabTech] = useState<AdminLabTechDto | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  const handleView = (labTech: AdminLabTechDto) => {
+    setSelectedLabTech(labTech);
+    setViewDialogOpen(true);
+  };
 
   const handleEdit = (labTech: AdminLabTechDto) => {
     setEditLabTech(labTech);
@@ -127,6 +135,7 @@ export function AdminLabTechsPage() {
             onPageChange={setPage}
             search={searchInput}
             onSearchChange={setSearchInput}
+            onView={handleView}
             onEdit={handleEdit}
             onDeactivate={handleDelete}
           />
@@ -134,6 +143,12 @@ export function AdminLabTechsPage() {
       </motion.div>
 
       <AddNewLabTechForm open={addDialogOpen} onOpenChange={setAddDialogOpen} />
+
+      <ViewLabTechDetailDialog
+        labTech={selectedLabTech}
+        open={viewDialogOpen}
+        onOpenChange={setViewDialogOpen}
+      />
 
       <EditLabTechForm
         key={editLabTech?.publicId}
