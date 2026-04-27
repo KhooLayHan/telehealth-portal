@@ -1,3 +1,4 @@
+import { useAdminGetLabTech } from "@/api/generated/admins/admins";
 import type { AdminLabTechDto } from "@/api/model/AdminLabTechDto";
 import {
   Dialog,
@@ -66,14 +67,23 @@ export function ViewLabTechDetailDialog({
   open,
   onOpenChange,
 }: ViewLabTechDetailDialogProps) {
-  if (!labTech) {
+  const labTechId = labTech?.publicId ?? "";
+  const { data, isError, isFetching } = useAdminGetLabTech(labTechId, {
+    query: {
+      enabled: open && !!labTechId,
+    },
+  });
+  const fetchedLabTech = data?.status === 200 ? data.data : null;
+  const displayedLabTech = fetchedLabTech ?? labTech;
+
+  if (!displayedLabTech) {
     return null;
   }
 
-  const initials = getLabTechInitials(labTech);
-  const fullName = `${labTech.firstName} ${labTech.lastName}`;
-  const fullAddress = labTech.address
-    ? `${labTech.address.street}, ${labTech.address.city}, ${labTech.address.state} ${labTech.address.postalCode}, ${labTech.address.country}`
+  const initials = getLabTechInitials(displayedLabTech);
+  const fullName = `${displayedLabTech.firstName} ${displayedLabTech.lastName}`;
+  const fullAddress = displayedLabTech.address
+    ? `${displayedLabTech.address.street}, ${displayedLabTech.address.city}, ${displayedLabTech.address.state} ${displayedLabTech.address.postalCode}, ${displayedLabTech.address.country}`
     : "-";
 
   return (
@@ -83,9 +93,9 @@ export function ViewLabTechDetailDialog({
 
         <DialogHeader className="px-6 pb-4 pt-7">
           <div className="flex items-start gap-4">
-            {labTech.avatarUrl ? (
+            {displayedLabTech.avatarUrl ? (
               <img
-                src={labTech.avatarUrl}
+                src={displayedLabTech.avatarUrl}
                 alt={fullName}
                 className="size-14 shrink-0 rounded-full object-cover"
               />
@@ -100,8 +110,17 @@ export function ViewLabTechDetailDialog({
                 <DialogTitle className="text-xl font-semibold leading-none">{fullName}</DialogTitle>
               </div>
               <DialogDescription className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
-                <span className="font-mono text-xs text-muted-foreground">@{labTech.username}</span>
+                <span className="font-mono text-xs text-muted-foreground">
+                  @{displayedLabTech.username}
+                </span>
               </DialogDescription>
+              {(isFetching || isError) && (
+                <p className="mt-2 text-muted-foreground text-xs" aria-live="polite">
+                  {isFetching
+                    ? "Refreshing details..."
+                    : "Could not refresh details from the backend."}
+                </p>
+              )}
             </div>
           </div>
         </DialogHeader>
@@ -118,13 +137,13 @@ export function ViewLabTechDetailDialog({
             className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
           >
             <div className="grid gap-4 sm:grid-cols-2">
-              <DetailRow label="First Name" value={labTech.firstName} />
-              <DetailRow label="Last Name" value={labTech.lastName} />
+              <DetailRow label="First Name" value={displayedLabTech.firstName} />
+              <DetailRow label="Last Name" value={displayedLabTech.lastName} />
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <DetailRow label="Gender" value={genderLabel(labTech.gender)} />
-              <DetailRow label="Date of Birth" value={formatDate(labTech.dateOfBirth)} />
+              <DetailRow label="Gender" value={genderLabel(displayedLabTech.gender)} />
+              <DetailRow label="Date of Birth" value={formatDate(displayedLabTech.dateOfBirth)} />
             </div>
           </TabsContent>
 
@@ -133,13 +152,13 @@ export function ViewLabTechDetailDialog({
             className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
           >
             <div className="grid gap-4 sm:grid-cols-2">
-              <DetailRow label="Username" value={`@${labTech.username}`} />
-              <DetailRow label="Email" value={labTech.email} />
+              <DetailRow label="Username" value={`@${displayedLabTech.username}`} />
+              <DetailRow label="Email" value={displayedLabTech.email} />
             </div>
 
-            <DetailRow label="Phone Number" value={labTech.phoneNumber ?? "-"} />
-            <DetailRow label="Slug" value={labTech.slug} />
-            <DetailRow label="Joined" value={formatDate(labTech.createdAt)} />
+            <DetailRow label="Phone Number" value={displayedLabTech.phoneNumber ?? "-"} />
+            <DetailRow label="Slug" value={displayedLabTech.slug} />
+            <DetailRow label="Joined" value={formatDate(displayedLabTech.createdAt)} />
           </TabsContent>
 
           <TabsContent
@@ -148,18 +167,18 @@ export function ViewLabTechDetailDialog({
           >
             <DetailRow label="Full Address" value={fullAddress} />
 
-            {labTech.address && (
+            {displayedLabTech.address && (
               <>
-                <DetailRow label="Street" value={labTech.address.street} />
+                <DetailRow label="Street" value={displayedLabTech.address.street} />
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <DetailRow label="City" value={labTech.address.city} />
-                  <DetailRow label="State" value={labTech.address.state} />
+                  <DetailRow label="City" value={displayedLabTech.address.city} />
+                  <DetailRow label="State" value={displayedLabTech.address.state} />
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <DetailRow label="Postal Code" value={labTech.address.postalCode} />
-                  <DetailRow label="Country" value={labTech.address.country} />
+                  <DetailRow label="Postal Code" value={displayedLabTech.address.postalCode} />
+                  <DetailRow label="Country" value={displayedLabTech.address.country} />
                 </div>
               </>
             )}
