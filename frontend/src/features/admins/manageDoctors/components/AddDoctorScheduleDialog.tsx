@@ -20,7 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 
 const addDoctorScheduleSchema = z
   .object({
@@ -28,7 +27,6 @@ const addDoctorScheduleSchema = z
     startTime: z.string().min(1, "Required"),
     endTime: z.string().min(1, "Required"),
     scheduleStatus: z.enum(["Available", "Blocked"]),
-    note: z.string().max(200, "Max 200 characters"),
   })
   .refine((value) => value.endTime > value.startTime, {
     message: "End time must be after start time",
@@ -69,7 +67,6 @@ export function AddDoctorScheduleDialog({
     startTime: "09:00",
     endTime: "09:30",
     scheduleStatus: "Available",
-    note: "",
   };
   const form = useForm({
     defaultValues,
@@ -92,7 +89,7 @@ export function AddDoctorScheduleDialog({
         doctorSpecialization: doctor?.specialization ?? undefined,
         appointmentPublicId: null,
         patientName: null,
-        visitReason: value.note || null,
+        visitReason: null,
         appointmentStatus: null,
         appointmentStatusColorCode: null,
       });
@@ -203,22 +200,6 @@ export function AddDoctorScheduleDialog({
                     <SelectItem value="Blocked">Blocked</SelectItem>
                   </SelectContent>
                 </Select>
-                <FieldError errors={field.state.meta.errors} />
-              </Field>
-            )}
-          </form.Field>
-
-          <form.Field name="note">
-            {(field) => (
-              <Field data-invalid={field.state.meta.errors.length > 0}>
-                <FieldLabel htmlFor={field.name}>Note</FieldLabel>
-                <Textarea
-                  id={field.name}
-                  value={field.state.value}
-                  placeholder="Optional note for this slot"
-                  onBlur={field.handleBlur}
-                  onChange={(event) => field.handleChange(event.target.value)}
-                />
                 <FieldError errors={field.state.meta.errors} />
               </Field>
             )}
