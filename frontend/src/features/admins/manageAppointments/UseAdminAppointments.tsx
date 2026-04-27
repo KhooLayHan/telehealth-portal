@@ -72,7 +72,7 @@ export function useAdminAppointments(year: number, month: number, listPage: numb
 
   // Paginated query for the list view tab (separate from the month overview)
   const listQuery = useGetAllAppointmentsForReceptionist({
-    PageSize: 10,
+    PageSize: 5,
     Page: listPage,
     SortOrder: "asc",
     ...(search.trim() ? { Search: search.trim() } : {}),

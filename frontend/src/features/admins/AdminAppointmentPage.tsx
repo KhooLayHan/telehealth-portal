@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AppointmentCalendar } from "@/features/admins/manageAppointments/AppointmentCalendar";
 import { AppointmentTable } from "@/features/admins/manageAppointments/AppointmentTable";
+import { useAdminAppointments } from "@/features/admins/manageAppointments/UseAdminAppointments";
 import { useAppointmentsCsvExport } from "@/features/admins/manageAppointments/UseAppointmentsCsvExport";
 import { cn } from "@/lib/utils";
-import { useAdminAppointments } from "../appointments/roles/UseAdminAppointments";
 
 // Defines the two display modes available on the admin appointment page.
 type ViewMode = "calendar" | "list";

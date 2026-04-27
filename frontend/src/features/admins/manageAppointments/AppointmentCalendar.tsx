@@ -5,7 +5,7 @@ import type { ReceptionistAppointmentDto } from "@/api/model/ReceptionistAppoint
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import type { DayData } from "../../appointments/roles/UseAdminAppointments";
+import type { DayData } from "./UseAdminAppointments";
 
 const WEEKDAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
