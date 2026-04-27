@@ -100,12 +100,12 @@ export function DoctorCard({
                 }
               />
               <DropdownMenuContent align="end" side="bottom">
-                <DropdownMenuItem onSelect={() => onViewDetails(doctor.publicId)}>
+                <DropdownMenuItem onClick={() => onViewDetails(doctor.publicId)}>
                   <Eye className="mr-2 size-4" />
                   View Details
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive" onSelect={() => onRemove(doctor.publicId)}>
+                <DropdownMenuItem variant="destructive" onClick={() => onRemove(doctor.publicId)}>
                   <Trash2 className="mr-2 size-4" />
                   Remove Doctor
                 </DropdownMenuItem>
