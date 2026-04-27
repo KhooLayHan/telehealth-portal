@@ -221,6 +221,62 @@ function ScheduleMetric({
   );
 }
 
+// Displays one schedule slot in a stacked layout for narrow dialog widths.
+function ScheduleSlotCard({ slot }: { slot: DemoDoctorScheduleSlot }) {
+  return (
+    <article className="space-y-3 rounded-lg border border-border bg-background p-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="font-medium text-sm">{slot.day}</p>
+          <p className="text-muted-foreground text-xs">{slot.date}</p>
+        </div>
+        <Badge className="shrink-0" variant={getScheduleStatusBadgeVariant(slot.scheduleStatus)}>
+          {slot.scheduleStatus}
+        </Badge>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 text-sm">
+        <div className="min-w-0">
+          <p className="text-muted-foreground text-xs">Time</p>
+          <p className="font-medium">
+            {slot.startTime} - {slot.endTime}
+          </p>
+          <p className="text-muted-foreground text-xs">
+            {getDurationLabel(slot.startTime, slot.endTime)}
+          </p>
+        </div>
+        <div className="min-w-0">
+          <p className="text-muted-foreground text-xs">Appointment</p>
+          {slot.appointmentStatus ? (
+            <Badge variant={getAppointmentStatusBadgeVariant(slot.appointmentStatus)}>
+              {slot.appointmentStatus}
+            </Badge>
+          ) : (
+            <p className="text-muted-foreground">No appointment</p>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
+        <div className="min-w-0">
+          <p className="text-muted-foreground text-xs">Patient</p>
+          <p className="truncate">{slot.patientName ?? "Not assigned"}</p>
+        </div>
+        <div className="min-w-0">
+          <p className="text-muted-foreground text-xs">Reason</p>
+          <p className="truncate">{slot.visitReason ?? "Not provided"}</p>
+        </div>
+        <div className="min-w-0">
+          <p className="text-muted-foreground text-xs">Updated</p>
+          <p className="truncate text-muted-foreground text-xs">
+            {formatTimestamp(slot.updatedAt ?? slot.createdAt)}
+          </p>
+        </div>
+      </div>
+    </article>
+  );
+}
+
 // Displays the selected doctor's schedule using local demo data only.
 export function ViewDoctorScheduleDialog({
   doctor,
@@ -247,12 +303,12 @@ export function ViewDoctorScheduleDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl gap-0 overflow-hidden p-0">
+      <DialogContent className="flex max-h-[calc(100vh-2rem)] max-w-[calc(100vw-1rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-6xl xl:max-w-7xl">
         <div className="absolute inset-x-0 top-0 h-px bg-border" />
 
-        <DialogHeader className="px-6 pb-5 pt-7">
+        <DialogHeader className="px-4 pb-5 pt-7 sm:px-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="min-w-0 space-y-2">
+            <div className="min-w-0 flex-1 space-y-2">
               <DialogTitle className="flex items-center gap-2 text-xl font-semibold leading-none">
                 <CalendarClock className="size-5" />
                 Doctor Schedule
@@ -269,30 +325,30 @@ export function ViewDoctorScheduleDialog({
           </div>
         </DialogHeader>
 
-        <div className="max-h-[68vh] overflow-y-auto px-6 pb-2">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-3 sm:px-6">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <ScheduleMetric icon={CalendarDays} label="Total Slots" value="6" />
             <ScheduleMetric icon={Clock3} label="Available" value={String(availableCount)} />
             <ScheduleMetric icon={UserRound} label="Booked" value={String(bookedCount)} />
             <ScheduleMetric icon={FileText} label="Blocked" value={String(blockedCount)} />
           </div>
 
-          <div className="mt-5 grid grid-cols-1 gap-4 rounded-lg border border-border bg-muted/20 p-4 md:grid-cols-3">
-            <div className="space-y-1">
+          <div className="mt-5 grid grid-cols-1 gap-4 rounded-lg border border-border bg-muted/20 p-4 sm:grid-cols-3">
+            <div className="min-w-0 space-y-1">
               <p className="text-muted-foreground text-xs">Doctor</p>
               <p className="font-medium">{doctorName}</p>
-              <p className="text-muted-foreground text-xs">
+              <p className="break-all text-muted-foreground text-xs">
                 {doctor.doctorPublicId ?? "No public ID"}
               </p>
             </div>
-            <div className="space-y-1">
+            <div className="min-w-0 space-y-1">
               <p className="text-muted-foreground text-xs">Department</p>
               <p className="font-medium">{doctor.departmentName ?? "Not provided"}</p>
               <p className="text-muted-foreground text-xs">
                 {doctor.specialization ?? "No specialization"}
               </p>
             </div>
-            <div className="space-y-1">
+            <div className="min-w-0 space-y-1">
               <p className="text-muted-foreground text-xs">Next Booked Slot</p>
               <p className="font-medium">
                 {nextBookedSlot
@@ -312,8 +368,14 @@ export function ViewDoctorScheduleDialog({
             </TabsList>
 
             <TabsContent className="mt-4" value="table">
-              <div className="overflow-hidden rounded-lg border border-border">
-                <Table>
+              <div className="space-y-3 lg:hidden">
+                {demoScheduleSlots.map((slot) => (
+                  <ScheduleSlotCard key={slot.publicId} slot={slot} />
+                ))}
+              </div>
+
+              <div className="hidden overflow-hidden rounded-lg border border-border lg:block">
+                <Table className="min-w-[62rem]">
                   <TableHeader>
                     <TableRow className="bg-muted/40 hover:bg-muted/40">
                       <TableHead>Date</TableHead>
