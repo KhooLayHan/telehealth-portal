@@ -27,6 +27,7 @@ import { DeleteDoctorDialog } from "./manageDoctors/components/DeleteDoctorDialo
 import { DoctorCard } from "./manageDoctors/components/DoctorCard";
 import { EditDoctorForm } from "./manageDoctors/components/EditDoctorForm";
 import { ViewDoctorDetailDialog } from "./manageDoctors/components/ViewDoctorDetailDialog";
+import { ViewDoctorScheduleDialog } from "./manageDoctors/components/ViewDoctorScheduleDialog";
 
 const ACCENT = "#0d9488";
 const PAGE_SIZE = 6;
@@ -114,6 +115,10 @@ export function AdminDoctorsPage() {
     null,
   );
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [selectedDoctorForSchedule, setSelectedDoctorForSchedule] = useState<DoctorListDto | null>(
+    null,
+  );
+  const [scheduleOpen, setScheduleOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
 
   const { data, isLoading, isError } = useGetAll();
@@ -412,8 +417,12 @@ export function AdminDoctorsPage() {
                   setDeleteOpen(true);
                 }
               }}
-              onSchedule={() => {
-                toast.info("Schedule management coming soon.");
+              onSchedule={(id) => {
+                const d = allDoctors.find((x) => String(x.doctorPublicId) === id);
+                if (d) {
+                  setSelectedDoctorForSchedule(d);
+                  setScheduleOpen(true);
+                }
               }}
             />
           ))}
@@ -494,6 +503,12 @@ export function AdminDoctorsPage() {
         doctor={selectedDoctorForDelete}
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
+      />
+
+      <ViewDoctorScheduleDialog
+        doctor={selectedDoctorForSchedule}
+        open={scheduleOpen}
+        onOpenChange={setScheduleOpen}
       />
 
       <AddNewDoctorForm open={addOpen} onOpenChange={setAddOpen} />
