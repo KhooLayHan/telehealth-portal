@@ -17,8 +17,6 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 
-const ACCENT = "#0d9488";
-
 const DAYS = [
   "Monday",
   "Tuesday",
@@ -100,12 +98,7 @@ function CardEditActions({
         <X className="size-3.5" />
         Cancel
       </Button>
-      <Button
-        size="sm"
-        onClick={onSave}
-        className="gap-1.5 text-white"
-        style={{ backgroundColor: ACCENT }}
-      >
+      <Button size="sm" onClick={onSave} className="gap-1.5">
         <Check className="size-3.5" />
         Save
       </Button>
@@ -157,7 +150,7 @@ export function AdminSettingsPage() {
     setClinicName(draftClinicName);
     setSupportEmail(draftSupportEmail);
     setEditingClinic(false);
-    toast.success("Clinic details updated.");
+    toast("Clinic details updated.");
   };
 
   const handleCancelClinic = () => {
@@ -178,7 +171,7 @@ export function AdminSettingsPage() {
   const handleSaveDuration = () => {
     setDuration(draftDuration);
     setEditingDuration(false);
-    toast.success("Appointment duration updated.");
+    toast("Appointment duration updated.");
   };
 
   const handleCancelDuration = () => {
@@ -198,7 +191,7 @@ export function AdminSettingsPage() {
   const handleSaveHours = () => {
     setHours(draftHours);
     setEditingHours(false);
-    toast.success("Operating hours updated.");
+    toast("Operating hours updated.");
   };
 
   const handleCancelHours = () => {
@@ -234,11 +227,8 @@ export function AdminSettingsPage() {
           <CardHeader className="border-b">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span
-                  className="flex size-7 items-center justify-center rounded-lg"
-                  style={{ background: `${ACCENT}18` }}
-                >
-                  <Building2 className="size-4" style={{ color: ACCENT }} />
+                <span className="flex size-7 items-center justify-center rounded-lg bg-muted text-foreground">
+                  <Building2 className="size-4" />
                 </span>
                 <CardTitle>Clinic Details</CardTitle>
               </div>
@@ -308,11 +298,8 @@ export function AdminSettingsPage() {
           <CardHeader className="border-b">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span
-                  className="flex size-7 items-center justify-center rounded-lg"
-                  style={{ background: `${ACCENT}18` }}
-                >
-                  <Settings2 className="size-4" style={{ color: ACCENT }} />
+                <span className="flex size-7 items-center justify-center rounded-lg bg-muted text-foreground">
+                  <Settings2 className="size-4" />
                 </span>
                 <CardTitle>Appointment Settings</CardTitle>
               </div>
@@ -358,11 +345,8 @@ export function AdminSettingsPage() {
           <CardHeader className="border-b">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span
-                  className="flex size-7 items-center justify-center rounded-lg"
-                  style={{ background: `${ACCENT}18` }}
-                >
-                  <Clock className="size-4" style={{ color: ACCENT }} />
+                <span className="flex size-7 items-center justify-center rounded-lg bg-muted text-foreground">
+                  <Clock className="size-4" />
                 </span>
                 <CardTitle>Operating Hours</CardTitle>
               </div>
@@ -409,13 +393,7 @@ export function AdminSettingsPage() {
                       </>
                     ) : schedule.open ? (
                       <div className="flex items-center gap-2">
-                        <Badge
-                          variant="secondary"
-                          className="text-xs"
-                          style={{ backgroundColor: `${ACCENT}15`, color: ACCENT }}
-                        >
-                          Open
-                        </Badge>
+                        <Badge className="text-xs">Open</Badge>
                         <span className="text-muted-foreground text-sm">
                           {formatTime(schedule.openTime)} – {formatTime(schedule.closeTime)}
                         </span>
