@@ -21,6 +21,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Consultation> Consultations => Set<Consultation>();
     public DbSet<Prescription> Prescriptions => Set<Prescription>();
     public DbSet<LabReport> LabReports => Set<LabReport>();
+    public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
+    public DbSet<SystemOperatingHour> SystemOperatingHours => Set<SystemOperatingHour>();
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 

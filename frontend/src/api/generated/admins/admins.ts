@@ -52,6 +52,10 @@ import type {
 } from '../../model/AdminLabTechDto';
 
 import type {
+  AdminSettingsDto
+} from '../../model/AdminSettingsDto';
+
+import type {
   AdminReceptionistDto
 } from '../../model/AdminReceptionistDto';
 
@@ -66,6 +70,10 @@ import type {
 import type {
   AdminUpdateReceptionistCommand
 } from '../../model/AdminUpdateReceptionistCommand';
+
+import type {
+  AdminUpdateSettingsCommand
+} from '../../model/AdminUpdateSettingsCommand';
 
 import type {
   PagedResultOfAdminReceptionistDto
@@ -1462,4 +1470,176 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getAdminDeactivateReceptionistMutationOptions(options), queryClient);
+    }
+
+export type adminGetSettingsResponse200 = {
+  data: AdminSettingsDto
+  status: 200
+}
+
+export type adminGetSettingsResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type adminGetSettingsResponse403 = {
+  data: ProblemDetails
+  status: 403
+}
+
+export type adminGetSettingsResponseSuccess = (adminGetSettingsResponse200) & {
+  headers: Headers;
+};
+export type adminGetSettingsResponseError = (adminGetSettingsResponse401 | adminGetSettingsResponse403) & {
+  headers: Headers;
+};
+
+export type adminGetSettingsResponse = (adminGetSettingsResponseSuccess | adminGetSettingsResponseError)
+
+export const getAdminGetSettingsUrl = () => {
+  return `/api/v1/admins/settings`
+}
+
+export const adminGetSettings = async (options?: RequestInit): Promise<adminGetSettingsResponse> => {
+  return ofetchMutator<adminGetSettingsResponse>(getAdminGetSettingsUrl(),
+  {
+    ...options,
+    method: 'GET'
+  }
+);}
+
+export const getAdminGetSettingsQueryKey = () => {
+    return [
+    `/api/v1/admins/settings`
+    ] as const;
+    }
+
+export const getAdminGetSettingsQueryOptions = <TData = Awaited<ReturnType<typeof adminGetSettings>>, TError = ProblemDetails>(options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetSettings>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminGetSettingsQueryKey();
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetSettings>>> = ({ signal }) => adminGetSettings({ signal, ...requestOptions });
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetSettings>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type AdminGetSettingsQueryResult = NonNullable<Awaited<ReturnType<typeof adminGetSettings>>>
+export type AdminGetSettingsQueryError = ProblemDetails
+
+export function useAdminGetSettings<TData = Awaited<ReturnType<typeof adminGetSettings>>, TError = ProblemDetails>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetSettings>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminGetSettings>>,
+          TError,
+          Awaited<ReturnType<typeof adminGetSettings>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminGetSettings<TData = Awaited<ReturnType<typeof adminGetSettings>>, TError = ProblemDetails>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetSettings>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminGetSettings>>,
+          TError,
+          Awaited<ReturnType<typeof adminGetSettings>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminGetSettings<TData = Awaited<ReturnType<typeof adminGetSettings>>, TError = ProblemDetails>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetSettings>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useAdminGetSettings<TData = Awaited<ReturnType<typeof adminGetSettings>>, TError = ProblemDetails>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetSettings>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getAdminGetSettingsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+export type adminUpdateSettingsResponse200 = {
+  data: AdminSettingsDto
+  status: 200
+}
+
+export type adminUpdateSettingsResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type adminUpdateSettingsResponse403 = {
+  data: ProblemDetails
+  status: 403
+}
+
+export type adminUpdateSettingsResponse422 = {
+  data: ProblemDetails
+  status: 422
+}
+
+export type adminUpdateSettingsResponseSuccess = (adminUpdateSettingsResponse200) & {
+  headers: Headers;
+};
+export type adminUpdateSettingsResponseError = (adminUpdateSettingsResponse401 | adminUpdateSettingsResponse403 | adminUpdateSettingsResponse422) & {
+  headers: Headers;
+};
+
+export type adminUpdateSettingsResponse = (adminUpdateSettingsResponseSuccess | adminUpdateSettingsResponseError)
+
+export const getAdminUpdateSettingsUrl = () => {
+  return `/api/v1/admins/settings`
+}
+
+export const adminUpdateSettings = async (adminUpdateSettingsCommand: AdminUpdateSettingsCommand, options?: RequestInit): Promise<adminUpdateSettingsResponse> => {
+  return ofetchMutator<adminUpdateSettingsResponse>(getAdminUpdateSettingsUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      adminUpdateSettingsCommand,)
+  }
+);}
+
+export const getAdminUpdateSettingsMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateSettings>>, TError,{data: AdminUpdateSettingsCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateSettings>>, TError,{data: AdminUpdateSettingsCommand}, TContext> => {
+
+const mutationKey = ['adminUpdateSettings'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateSettings>>, {data: AdminUpdateSettingsCommand}> = (props) => {
+          const {data} = props ?? {};
+
+          return  adminUpdateSettings(data,requestOptions)
+        }
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminUpdateSettingsMutationResult = NonNullable<Awaited<ReturnType<typeof adminUpdateSettings>>>
+    export type AdminUpdateSettingsMutationBody = AdminUpdateSettingsCommand
+    export type AdminUpdateSettingsMutationError = ProblemDetails
+
+    export const useAdminUpdateSettings = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateSettings>>, TError,{data: AdminUpdateSettingsCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminUpdateSettings>>,
+        TError,
+        {data: AdminUpdateSettingsCommand},
+        TContext
+      > => {
+      return useMutation(getAdminUpdateSettingsMutationOptions(options), queryClient);
     }
