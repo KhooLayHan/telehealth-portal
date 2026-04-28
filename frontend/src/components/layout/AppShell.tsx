@@ -63,7 +63,7 @@ const navItems = [
     icon: User,
     label: "Profile",
     href: "/profile",
-    allowedRoles: ["doctor", "receptionist"],
+    allowedRoles: ["doctor", "receptionist", "admin", "patient"],
   },
   {
     icon: UserCog,
