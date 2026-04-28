@@ -8,6 +8,7 @@ import {
   Heart,
   LayoutDashboard,
   LogOut,
+  Microscope,
   Search,
   Settings,
   Stethoscope,
@@ -81,6 +82,12 @@ const navItems = [
     icon: ClipboardList,
     label: "Receptionist List",
     href: "/receptionists",
+    allowedRoles: ["admin"],
+  },
+  {
+    icon: Microscope,
+    label: "Lab Tech List",
+    href: "/lab-techs",
     allowedRoles: ["admin"],
   },
   {

@@ -1,15 +1,16 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { AdminSettingsPage } from "@/features/admins/AdminSettingsPage";
+import { AdminLabTechsPage } from "@/features/admins/AdminLabTechsPage";
 import { useAuthStore } from "@/store/useAuthStore";
 
-export const Route = createFileRoute("/_protected/settings")({
+// Defines the protected admin lab technician directory route.
+export const Route = createFileRoute("/_protected/lab-techs")({
   beforeLoad: () => {
     const user = useAuthStore.getState().user;
     const role = user?.role?.toLowerCase();
 
-    if (role?.toLowerCase() !== "admin") {
+    if (role !== "admin") {
       throw redirect({ to: "/dashboard" });
     }
   },
-  component: AdminSettingsPage,
+  component: AdminLabTechsPage,
 });

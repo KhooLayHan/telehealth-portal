@@ -162,5 +162,15 @@ public static class ApiEndpoints
         public const string UpdateReceptionist = $"{Base}/receptionists/{{id:guid}}";
 
         public const string DeleteReceptionist = $"{Base}/receptionists/{{id:guid}}/deactivate";
+
+        public const string GetAllLabTechs = $"{Base}/lab-techs";
+
+        public const string GetLabTech = $"{Base}/lab-techs/{{id:guid}}";
+
+        public const string CreateLabTech = $"{Base}/lab-techs";
+
+        public const string UpdateLabTech = $"{Base}/lab-techs/{{id:guid}}";
+
+        public const string DeleteLabTech = $"{Base}/lab-techs/{{id:guid}}/deactivate";
     }
 }
