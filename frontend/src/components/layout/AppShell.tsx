@@ -57,7 +57,7 @@ const navItems = [
     icon: FileText,
     label: "Lab Reports",
     href: "/lab-reports",
-    allowedRoles: ["admin", "lab-tech", "patient"],
+    allowedRoles: ["doctor", "lab-tech", "patient"],
   },
   {
     icon: User,

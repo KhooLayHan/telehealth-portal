@@ -8,13 +8,14 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { useAuthStore } from "@/store/useAuthStore";
+import { AdminAppointmentPage } from "../admins/AdminAppointmentPage";
 import { PatientAppointmentsList } from "../patients/appointments/AppointmentsList";
-import { AdminAppointmentPage } from "./roles/AdminAppointmentPage";
 import { DoctorAppointmentPage } from "./roles/DoctorAppointmentPage";
 import { ReceptionistApptPage } from "./roles/ReceptionistAppointment";
 
 export function AppointmentsPage() {
   const { user } = useAuthStore();
+  const isAdmin = user?.role?.toLowerCase() === "admin";
 
   const renderAppointmentContent = () => {
     switch (user?.role?.toLowerCase()) {
@@ -47,9 +48,11 @@ export function AppointmentsPage() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <p className="mt-0.5 text-muted-foreground text-sm">
-          View and manage all scheduled appointments in one place
-        </p>
+        {!isAdmin && (
+          <p className="mt-0.5 text-muted-foreground text-sm">
+            View and manage all scheduled appointments in one place
+          </p>
+        )}
       </div>
       {renderAppointmentContent()}
     </>

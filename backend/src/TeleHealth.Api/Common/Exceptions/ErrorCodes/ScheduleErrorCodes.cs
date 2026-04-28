@@ -21,6 +21,7 @@ public static class ScheduleErrorCodes
     public const string SlotOverlap = "Schedule.SlotOverlap";
     public const string OutsideWorkingHours = "Schedule.OutsideWorkingHours";
     public const string ConcurrentModification = "Schedule.ConcurrentModification";
+    public const string CannotDeleteUnavailable = "Schedule.CannotDeleteUnavailable";
 
     // Forbidden (403)
     public const string CannotModifyBooked = "Schedule.CannotModifyBooked";

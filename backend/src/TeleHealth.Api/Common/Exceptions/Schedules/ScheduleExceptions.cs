@@ -146,6 +146,17 @@ public sealed class ScheduleConcurrentModificationException : ConflictException
         ) { }
 }
 
+// Represents a conflict when a non-available schedule is requested for deletion.
+public sealed class CannotDeleteUnavailableScheduleException : ConflictException
+{
+    public CannotDeleteUnavailableScheduleException()
+        : base(
+            ScheduleErrorCodes.CannotDeleteUnavailable,
+            "Cannot Delete Schedule",
+            "Only available schedules can be removed."
+        ) { }
+}
+
 // Forbidden Exceptions (403)
 public sealed class CannotModifyBookedScheduleException : ForbiddenException
 {
