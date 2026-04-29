@@ -167,7 +167,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                       </Link>
                     </DropdownMenuItem>
                   ) : null}
-                  {normalizedRole === "doctor" || normalizedRole === "receptionist" ? (
+                  {normalizedRole === "admin" ||
+                  normalizedRole === "doctor" ||
+                  normalizedRole === "receptionist" ? (
                     <DropdownMenuItem className="cursor-pointer p-0">
                       <Link to="/profile" className="flex w-full items-center gap-1.5 px-2 py-1.5">
                         <User className="size-3 shrink-0" />
@@ -234,7 +236,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                       </Link>
                     </DropdownMenuItem>
                   ) : null}
-                  {normalizedRole === "doctor" || normalizedRole === "receptionist" ? (
+                  {normalizedRole === "admin" ||
+                  normalizedRole === "doctor" ||
+                  normalizedRole === "receptionist" ? (
                     <DropdownMenuItem className="cursor-pointer p-0">
                       <Link to="/profile" className="flex w-full items-center gap-1.5 px-2 py-1.5">
                         <User className="size-3 shrink-0" />
