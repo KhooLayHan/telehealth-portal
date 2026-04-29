@@ -1,3 +1,4 @@
+import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import {
   Activity,
   CalendarDays,
@@ -17,12 +18,34 @@ import {
   YAxis,
 } from "recharts";
 import { useAdminGetDashboardSummary } from "@/api/generated/admins/admins";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 // Represents mock appointment counts for the admin dashboard clinic activity chart.
 type ClinicActivityDataPoint = {
   label: string;
   appointments: number;
+};
+
+// Represents a demo row shaped after the current audit_logs database table.
+type AuditLogEntry = {
+  publicId: string;
+  tableName: string;
+  recordId: number;
+  action: "INSERT" | "UPDATE" | "DELETE";
+  changedColumns: string[] | null;
+  metadataSummary: string | null;
+  performedByUserId: number | null;
+  performedBySystem: boolean;
+  createdAt: string;
 };
 
 // Provides static chart data until the clinic activity endpoint is connected.
@@ -36,6 +59,65 @@ const clinicActivityData: ClinicActivityDataPoint[] = [
   { label: "Sun", appointments: 12 },
 ];
 
+// Provides local audit log rows until the admin audit endpoint is connected.
+const auditLogData: AuditLogEntry[] = [
+  {
+    publicId: "018f9d9d-9f64-72e7-97a3-2d29f860f0a1",
+    tableName: "appointments",
+    recordId: 1842,
+    action: "UPDATE",
+    changedColumns: ["status_id", "updated_at"],
+    metadataSummary: "Status moved to Completed",
+    performedByUserId: 12,
+    performedBySystem: false,
+    createdAt: "2026-04-29T09:42:00+08:00",
+  },
+  {
+    publicId: "018f9d9e-4627-7a62-9b24-62d11e0bdf23",
+    tableName: "lab_reports",
+    recordId: 927,
+    action: "INSERT",
+    changedColumns: null,
+    metadataSummary: "Report metadata created",
+    performedByUserId: null,
+    performedBySystem: true,
+    createdAt: "2026-04-29T09:18:00+08:00",
+  },
+  {
+    publicId: "018f9d9f-018a-7b92-8e19-c4b458bc3899",
+    tableName: "doctor_schedules",
+    recordId: 311,
+    action: "UPDATE",
+    changedColumns: ["status_id", "updated_at"],
+    metadataSummary: "Schedule slot blocked",
+    performedByUserId: 7,
+    performedBySystem: false,
+    createdAt: "2026-04-29T08:55:00+08:00",
+  },
+  {
+    publicId: "018f9da0-1b0c-78b7-8c1f-6b8cf5ac16ed",
+    tableName: "prescriptions",
+    recordId: 574,
+    action: "DELETE",
+    changedColumns: null,
+    metadataSummary: "Soft delete captured by trigger",
+    performedByUserId: 24,
+    performedBySystem: false,
+    createdAt: "2026-04-28T17:36:00+08:00",
+  },
+  {
+    publicId: "018f9da1-3f58-775f-a2a4-1b3394252cb1",
+    tableName: "users",
+    recordId: 148,
+    action: "UPDATE",
+    changedColumns: ["avatar_url", "updated_at"],
+    metadataSummary: "Profile asset refreshed",
+    performedByUserId: 148,
+    performedBySystem: false,
+    createdAt: "2026-04-28T16:12:00+08:00",
+  },
+];
+
 // Describes one aggregate card shown at the top of the admin dashboard.
 type AdminDashboardStat = {
   icon: LucideIcon;
@@ -43,9 +125,54 @@ type AdminDashboardStat = {
   value?: number;
 };
 
+// Maps audit actions to badge styling variants.
+function getAuditActionVariant(
+  action: AuditLogEntry["action"],
+): "default" | "outline" | "secondary" {
+  if (action === "INSERT") {
+    return "default";
+  }
+
+  if (action === "DELETE") {
+    return "outline";
+  }
+
+  return "secondary";
+}
+
 // Formats dashboard counts with thousands separators.
 function formatDashboardCount(value?: number): string {
   return value === undefined ? "--" : value.toLocaleString();
+}
+
+// Formats audit timestamps in a compact date and time label.
+function formatAuditTimestamp(value: string): string {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "--";
+  }
+
+  return date.toLocaleString("en-MY", {
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    month: "short",
+  });
+}
+
+// Builds a privacy-safe actor label for demo audit rows.
+function getAuditActorLabel(entry: AuditLogEntry): string {
+  if (entry.performedBySystem) {
+    return "System";
+  }
+
+  return entry.performedByUserId === null ? "Unknown" : `User #${entry.performedByUserId}`;
+}
+
+// Shortens a public ID for compact trace display in the audit table.
+function formatAuditPublicId(publicId: string): string {
+  return publicId.slice(0, 8);
 }
 
 // Renders the tooltip content for the clinic activity chart.
@@ -64,6 +191,116 @@ function ClinicActivityTooltip({
     <div className="rounded-md border bg-popover px-3 py-2 text-popover-foreground shadow-md">
       <p className="font-medium text-sm">{label}</p>
       <p className="text-muted-foreground text-xs">{appointmentCount} appointments</p>
+    </div>
+  );
+}
+
+// Defines the visible columns for the audit log demo table.
+const auditLogColumns: ColumnDef<AuditLogEntry>[] = [
+  {
+    accessorKey: "action",
+    header: "Action",
+    cell: ({ row }) => (
+      <Badge variant={getAuditActionVariant(row.original.action)}>{row.original.action}</Badge>
+    ),
+  },
+  {
+    accessorKey: "tableName",
+    header: "Table",
+    cell: ({ row }) => (
+      <div className="space-y-1">
+        <p className="font-medium">{row.original.tableName}</p>
+        <p className="font-mono text-muted-foreground text-xs">#{row.original.recordId}</p>
+      </div>
+    ),
+  },
+  {
+    id: "actor",
+    header: "Actor",
+    cell: ({ row }) => (
+      <span className="text-muted-foreground text-sm">{getAuditActorLabel(row.original)}</span>
+    ),
+  },
+  {
+    accessorKey: "changedColumns",
+    header: "Changed",
+    cell: ({ row }) => {
+      const changedColumns = row.original.changedColumns;
+
+      if (!changedColumns?.length) {
+        return <span className="text-muted-foreground text-sm">Full row</span>;
+      }
+
+      return (
+        <div className="flex max-w-48 flex-wrap gap-1.5">
+          {changedColumns.map((column) => (
+            <Badge key={column} variant="outline">
+              {column}
+            </Badge>
+          ))}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "metadataSummary",
+    header: "Details",
+    cell: ({ row }) => (
+      <div className="max-w-56 space-y-1">
+        <p className="truncate text-sm">{row.original.metadataSummary ?? "No metadata"}</p>
+        <p className="truncate font-mono text-muted-foreground text-xs">
+          {formatAuditPublicId(row.original.publicId)}
+        </p>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "createdAt",
+    header: "Created",
+    cell: ({ row }) => (
+      <span className="font-mono text-muted-foreground text-xs">
+        {formatAuditTimestamp(row.original.createdAt)}
+      </span>
+    ),
+  },
+];
+
+// Displays the local TanStack Table preview for system audit logs.
+function AuditLogsTable() {
+  const table = useReactTable({
+    data: auditLogData,
+    columns: auditLogColumns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  return (
+    <div className="overflow-hidden rounded-md border">
+      <Table className="min-w-[52rem]">
+        <TableHeader>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <TableHead key={header.id}>
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(header.column.columnDef.header, header.getContext())}
+                </TableHead>
+              ))}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody>
+          {table.getRowModel().rows.map((row) => (
+            <TableRow key={row.id}>
+              {row.getVisibleCells().map((cell) => (
+                <TableCell key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }
@@ -200,13 +437,10 @@ export function AdminDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="font-semibold text-lg">System Audit Logs</CardTitle>
+            <CardDescription>Demo data shaped from the audit_logs schema</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex h-32 items-center justify-center rounded-md border border-dashed border-border bg-muted/50">
-              <p className="text-muted-foreground text-sm">
-                Boh Chun: Insert TanStack Table for Audit Logs here
-              </p>
-            </div>
+            <AuditLogsTable />
           </CardContent>
         </Card>
       </div>
