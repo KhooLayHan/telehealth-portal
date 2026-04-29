@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { CalendarPlus } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { useAdminGetSettings } from "@/api/generated/admins/admins";
 import {
   getGetDailySchedulesForReceptionistQueryKey,
   useCreateSchedule,
@@ -27,21 +28,51 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const addDoctorScheduleSchema = z
-  .object({
-    date: z.string().min(1, "Required"),
-    startTime: z.string().min(1, "Required"),
-    endTime: z.string().min(1, "Required"),
-    scheduleStatus: z.enum(["Available", "Blocked"]),
-  })
-  .refine((value) => value.endTime > value.startTime, {
-    message: "End time must be after start time",
-    path: ["endTime"],
-  });
+const DEFAULT_START_TIME = "09:00";
+const MINUTES_PER_DAY = 24 * 60;
+const SCHEDULE_SETTINGS_STALE_TIME_MS = 5 * 60 * 1000;
+const TIME_INPUT_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+const addDoctorScheduleSchema = z.object({
+  date: z.string().min(1, "Required"),
+  startTime: z.string().min(1, "Required"),
+  scheduleStatus: z.enum(["Available", "Blocked"]),
+});
 
 // Converts browser time input values into the LocalTime format expected by the API.
 function normalizeLocalTimeForApi(time: string): string {
   return time.length === 5 ? `${time}:00` : time;
+}
+
+// Converts a browser time input value into minutes after midnight.
+function getTimeInputMinutes(time: string): number | null {
+  if (!TIME_INPUT_PATTERN.test(time)) return null;
+
+  const [hours, minutes] = time.split(":").map(Number);
+  return hours * 60 + minutes;
+}
+
+// Formats minutes after midnight back into a browser time input value.
+function formatTimeInput(minutesAfterMidnight: number): string {
+  const hours = Math.floor(minutesAfterMidnight / 60)
+    .toString()
+    .padStart(2, "0");
+  const minutes = (minutesAfterMidnight % 60).toString().padStart(2, "0");
+
+  return `${hours}:${minutes}`;
+}
+
+// Calculates the end time for a same-day appointment slot.
+function getSlotEndTime(startTime: string, durationMinutes: null | number): string {
+  const startMinutes = getTimeInputMinutes(startTime);
+
+  if (startMinutes === null || durationMinutes === null || durationMinutes <= 0) {
+    return "";
+  }
+
+  const endMinutes = startMinutes + durationMinutes;
+
+  return endMinutes >= MINUTES_PER_DAY ? "" : formatTimeInput(endMinutes);
 }
 
 // Represents the validated values collected by the local schedule form.
@@ -72,11 +103,20 @@ export function AddDoctorScheduleForm({
 }: AddDoctorScheduleFormProps) {
   const queryClient = useQueryClient();
   const { mutateAsync, isPending } = useCreateSchedule();
+  const settingsQuery = useAdminGetSettings({
+    query: {
+      enabled: open,
+      staleTime: SCHEDULE_SETTINGS_STALE_TIME_MS,
+    },
+  });
+  const appointmentDurationMinutes =
+    settingsQuery.data?.status === 200
+      ? settingsQuery.data.data.defaultAppointmentDurationMinutes
+      : null;
   const doctorName = `Dr. ${doctor?.firstName ?? ""} ${doctor?.lastName ?? ""}`.trim();
   const defaultValues: AddDoctorScheduleFormValues = {
     date: defaultDate,
-    startTime: "09:00",
-    endTime: "09:30",
+    startTime: DEFAULT_START_TIME,
     scheduleStatus: "Available",
   };
   const form = useForm({
@@ -88,11 +128,23 @@ export function AddDoctorScheduleForm({
         return;
       }
 
+      const endTime = getSlotEndTime(value.startTime, appointmentDurationMinutes);
+
+      if (!appointmentDurationMinutes) {
+        toast.error("Appointment duration settings could not be loaded.");
+        return;
+      }
+
+      if (!endTime) {
+        toast.error("Choose an earlier start time for this appointment duration.");
+        return;
+      }
+
       const payload: CreateScheduleCommand = {
         doctorPublicId: doctor.doctorPublicId,
         date: value.date,
         startTime: normalizeLocalTimeForApi(value.startTime),
-        endTime: normalizeLocalTimeForApi(value.endTime),
+        endTime: normalizeLocalTimeForApi(endTime),
         scheduleStatus: value.scheduleStatus.toLowerCase(),
       };
 
@@ -179,21 +231,31 @@ export function AddDoctorScheduleForm({
               )}
             </form.Field>
 
-            <form.Field name="endTime">
-              {(field) => (
-                <Field data-invalid={field.state.meta.errors.length > 0}>
-                  <FieldLabel htmlFor={field.name}>End Time</FieldLabel>
-                  <Input
-                    id={field.name}
-                    type="time"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => field.handleChange(event.target.value)}
-                  />
-                  <FieldError errors={field.state.meta.errors} />
-                </Field>
-              )}
-            </form.Field>
+            <form.Subscribe>
+              {(state) => {
+                const endTime = getSlotEndTime(state.values.startTime, appointmentDurationMinutes);
+                const endTimeError = settingsQuery.isError
+                  ? "Appointment duration settings could not be loaded."
+                  : appointmentDurationMinutes && !endTime
+                    ? "Choose an earlier start time."
+                    : undefined;
+
+                return (
+                  <Field data-invalid={!!endTimeError}>
+                    <FieldLabel htmlFor="endTime">End Time</FieldLabel>
+                    <Input
+                      aria-invalid={!!endTimeError}
+                      disabled
+                      id="endTime"
+                      readOnly
+                      type="time"
+                      value={endTime}
+                    />
+                    <FieldError errors={endTimeError ? [{ message: endTimeError }] : []} />
+                  </Field>
+                );
+              }}
+            </form.Subscribe>
           </div>
 
           <form.Field name="scheduleStatus">
@@ -227,14 +289,22 @@ export function AddDoctorScheduleForm({
               Cancel
             </Button>
             <form.Subscribe>
-              {(state: { canSubmit: boolean; isSubmitting: boolean }) => (
-                <Button
-                  type="submit"
-                  disabled={!state.canSubmit || state.isSubmitting || isPending}
-                >
-                  {state.isSubmitting || isPending ? "Adding..." : "Add Schedule"}
-                </Button>
-              )}
+              {(state) => {
+                const endTime = getSlotEndTime(state.values.startTime, appointmentDurationMinutes);
+                const isSettingsUnavailable =
+                  settingsQuery.isLoading || !appointmentDurationMinutes || !endTime;
+
+                return (
+                  <Button
+                    type="submit"
+                    disabled={
+                      !state.canSubmit || state.isSubmitting || isPending || isSettingsUnavailable
+                    }
+                  >
+                    {state.isSubmitting || isPending ? "Adding..." : "Add Schedule"}
+                  </Button>
+                );
+              }}
             </form.Subscribe>
           </div>
         </form>
