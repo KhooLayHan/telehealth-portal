@@ -36,6 +36,10 @@ import type {
 } from '../../model/AdminCreateReceptionistCommand';
 
 import type {
+  AdminDashboardSummaryDto
+} from '../../model/AdminDashboardSummaryDto';
+
+import type {
   AdminDepartmentDto
 } from '../../model/AdminDepartmentDto';
 
@@ -1471,6 +1475,100 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getAdminDeactivateReceptionistMutationOptions(options), queryClient);
     }
+
+export type adminGetDashboardSummaryResponse200 = {
+  data: AdminDashboardSummaryDto
+  status: 200
+}
+
+export type adminGetDashboardSummaryResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type adminGetDashboardSummaryResponse403 = {
+  data: ProblemDetails
+  status: 403
+}
+
+export type adminGetDashboardSummaryResponseSuccess = (adminGetDashboardSummaryResponse200) & {
+  headers: Headers;
+};
+export type adminGetDashboardSummaryResponseError = (adminGetDashboardSummaryResponse401 | adminGetDashboardSummaryResponse403) & {
+  headers: Headers;
+};
+
+export type adminGetDashboardSummaryResponse = (adminGetDashboardSummaryResponseSuccess | adminGetDashboardSummaryResponseError)
+
+export const getAdminGetDashboardSummaryUrl = () => {
+  return `/api/v1/admins/dashboard-summary`
+}
+
+export const adminGetDashboardSummary = async (options?: RequestInit): Promise<adminGetDashboardSummaryResponse> => {
+  return ofetchMutator<adminGetDashboardSummaryResponse>(getAdminGetDashboardSummaryUrl(),
+  {
+    ...options,
+    method: 'GET'
+  }
+);}
+
+export const getAdminGetDashboardSummaryQueryKey = () => {
+    return [
+    `/api/v1/admins/dashboard-summary`
+    ] as const;
+    }
+
+export const getAdminGetDashboardSummaryQueryOptions = <TData = Awaited<ReturnType<typeof adminGetDashboardSummary>>, TError = ProblemDetails>(options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetDashboardSummary>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminGetDashboardSummaryQueryKey();
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetDashboardSummary>>> = ({ signal }) => adminGetDashboardSummary({ signal, ...requestOptions });
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetDashboardSummary>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type AdminGetDashboardSummaryQueryResult = NonNullable<Awaited<ReturnType<typeof adminGetDashboardSummary>>>
+export type AdminGetDashboardSummaryQueryError = ProblemDetails
+
+export function useAdminGetDashboardSummary<TData = Awaited<ReturnType<typeof adminGetDashboardSummary>>, TError = ProblemDetails>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetDashboardSummary>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminGetDashboardSummary>>,
+          TError,
+          Awaited<ReturnType<typeof adminGetDashboardSummary>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminGetDashboardSummary<TData = Awaited<ReturnType<typeof adminGetDashboardSummary>>, TError = ProblemDetails>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetDashboardSummary>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminGetDashboardSummary>>,
+          TError,
+          Awaited<ReturnType<typeof adminGetDashboardSummary>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminGetDashboardSummary<TData = Awaited<ReturnType<typeof adminGetDashboardSummary>>, TError = ProblemDetails>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetDashboardSummary>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useAdminGetDashboardSummary<TData = Awaited<ReturnType<typeof adminGetDashboardSummary>>, TError = ProblemDetails>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetDashboardSummary>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getAdminGetDashboardSummaryQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
 
 export type adminGetSettingsResponse200 = {
   data: AdminSettingsDto

@@ -147,6 +147,8 @@ public static class ApiEndpoints
     {
         private const string Base = "admins";
 
+        public const string GetDashboardSummary = $"{Base}/dashboard-summary";
+
         public const string GetSettings = $"{Base}/settings";
 
         public const string UpdateSettings = $"{Base}/settings";

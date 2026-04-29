@@ -1,4 +1,11 @@
-import { Activity, CalendarDays, ShieldCheck, Stethoscope, Users } from "lucide-react";
+import {
+  Activity,
+  CalendarDays,
+  type LucideIcon,
+  ShieldCheck,
+  Stethoscope,
+  Users,
+} from "lucide-react";
 import type { TooltipContentProps, TooltipValueType } from "recharts";
 import {
   Area,
@@ -9,6 +16,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useAdminGetDashboardSummary } from "@/api/generated/admins/admins";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 // Represents mock appointment counts for the admin dashboard clinic activity chart.
@@ -27,6 +35,18 @@ const clinicActivityData: ClinicActivityDataPoint[] = [
   { label: "Sat", appointments: 16 },
   { label: "Sun", appointments: 12 },
 ];
+
+// Describes one aggregate card shown at the top of the admin dashboard.
+type AdminDashboardStat = {
+  icon: LucideIcon;
+  title: string;
+  value?: number;
+};
+
+// Formats dashboard counts with thousands separators.
+function formatDashboardCount(value?: number): string {
+  return value === undefined ? "--" : value.toLocaleString();
+}
 
 // Renders the tooltip content for the clinic activity chart.
 function ClinicActivityTooltip({
@@ -48,49 +68,76 @@ function ClinicActivityTooltip({
   );
 }
 
+// Displays one aggregate count card for the admin dashboard.
+function AdminDashboardStatCard({
+  icon: Icon,
+  isError,
+  isLoading,
+  title,
+  value,
+}: AdminDashboardStat & { isError: boolean; isLoading: boolean }) {
+  const displayValue = isLoading
+    ? "Loading"
+    : isError
+      ? "Unavailable"
+      : formatDashboardCount(value);
+  const valueClassName =
+    isLoading || isError
+      ? "font-medium text-muted-foreground text-sm"
+      : "font-bold text-2xl tabular-nums";
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="font-medium text-muted-foreground text-sm">{title}</CardTitle>
+        <Icon className="size-4 text-muted-foreground" />
+      </CardHeader>
+      <CardContent>
+        <p className={valueClassName}>{displayValue}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function AdminDashboard() {
+  const dashboardSummaryQuery = useAdminGetDashboardSummary();
+  const dashboardSummary =
+    dashboardSummaryQuery.data?.status === 200 ? dashboardSummaryQuery.data.data : null;
+  const stats: AdminDashboardStat[] = [
+    {
+      title: "Today's Appointments",
+      value: dashboardSummary?.todayAppointments,
+      icon: CalendarDays,
+    },
+    {
+      title: "Patients",
+      value: dashboardSummary?.patients,
+      icon: Users,
+    },
+    {
+      title: "Doctors",
+      value: dashboardSummary?.doctors,
+      icon: Stethoscope,
+    },
+    {
+      title: "Staff",
+      value: dashboardSummary?.staff,
+      icon: ShieldCheck,
+    },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Admin Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="font-medium text-muted-foreground text-sm">
-              Today's Appointments
-            </CardTitle>
-            <CalendarDays className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="font-bold text-2xl">24</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="font-medium text-muted-foreground text-sm">Patients</CardTitle>
-            <Users className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="font-bold text-2xl">1,204</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="font-medium text-muted-foreground text-sm">Doctors</CardTitle>
-            <Stethoscope className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="font-bold text-2xl">86</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="font-medium text-muted-foreground text-sm">Staff</CardTitle>
-            <ShieldCheck className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="font-bold text-2xl">48</p>
-          </CardContent>
-        </Card>
+        {stats.map((stat) => (
+          <AdminDashboardStatCard
+            key={stat.title}
+            {...stat}
+            isError={dashboardSummaryQuery.isError || dashboardSummaryQuery.data?.status !== 200}
+            isLoading={dashboardSummaryQuery.isLoading}
+          />
+        ))}
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
