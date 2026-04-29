@@ -7,6 +7,7 @@ import {
   FileText,
   Heart,
   LayoutDashboard,
+  LifeBuoy,
   LogOut,
   Microscope,
   Search,
@@ -141,6 +142,20 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Link>
           ))}
         </nav>
+
+        <div className="p-3 pt-0">
+          <Link
+            to="/support"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left font-medium text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            activeProps={{
+              className:
+                "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
+            }}
+          >
+            <LifeBuoy className="size-4 shrink-0" />
+            Support
+          </Link>
+        </div>
 
         <div className="border-border border-t p-3">
           <div className="mb-1 flex items-center gap-3 rounded-lg px-3 py-2">
