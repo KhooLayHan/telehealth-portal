@@ -5,8 +5,11 @@ import {
   getAvatarUploadUrl,
   getGetMeQueryKey,
   updateAvatar,
+  updateProfile,
   useGetMe,
 } from "@/api/generated/users/users";
+import type { UpdateProfileCommand } from "@/api/model/UpdateProfileCommand";
+import { ApiError } from "@/api/ofetch-mutator";
 import { useAuthStore } from "@/store/useAuthStore";
 
 // ---------------------------------------------------------------------------
@@ -58,6 +61,19 @@ export type AdminPasswordFormData = {
 export type AdminProfileFormErrors = Partial<Record<keyof AdminProfileFormData, string>>;
 export type AdminPasswordFormErrors = Partial<Record<keyof AdminPasswordFormData, string>>;
 
+// Describes the extended profile payload accepted by the shared profile update endpoint.
+type AdminUpdateProfilePayload = UpdateProfileCommand & {
+  addressLine1: string | null;
+  addressLine2: string | null;
+  city: string | null;
+  country: string | null;
+  dateOfBirth: string | null;
+  gender: string | null;
+  postalCode: string | null;
+  state: string | null;
+  username: string;
+};
+
 // ---------------------------------------------------------------------------
 // Validation helpers
 // ---------------------------------------------------------------------------
@@ -68,6 +84,8 @@ const PHONE_RE = /^\d{10}$/;
 const IC_RE = /^\d{12}$/;
 const POSTAL_RE = /^\d{5}$/;
 const ADDRESS_BANNED_RE = /[%$#@!&*^<>{}|[\]\\]/;
+const ALLOWED_AVATAR_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
 
 function validateProfile(data: AdminProfileFormData): AdminProfileFormErrors {
   const errors: AdminProfileFormErrors = {};
@@ -202,6 +220,44 @@ function toFormData(data: AdminMeData): AdminProfileFormData {
   };
 }
 
+// Converts the editable admin form into the shared profile update API payload.
+function toUpdatePayload(data: AdminProfileFormData): AdminUpdateProfilePayload {
+  const addressLine1 = emptyToNull(data.addressLine1);
+  const addressLine2 = emptyToNull(data.addressLine2);
+
+  return {
+    firstName: data.firstName.trim(),
+    lastName: data.lastName.trim(),
+    username: data.username.trim(),
+    phone: emptyToNull(data.phone),
+    icNumber: data.icNumber.trim(),
+    address: addressLine1,
+    dateOfBirth: emptyToNull(data.dateOfBirth),
+    gender: emptyToNull(data.gender),
+    addressLine1,
+    addressLine2,
+    city: emptyToNull(data.city),
+    state: emptyToNull(data.state),
+    postalCode: emptyToNull(data.postalCode),
+    country: emptyToNull(data.country),
+  };
+}
+
+// Normalizes empty input strings to null for nullable API fields.
+function emptyToNull(value: string): string | null {
+  const trimmed = value.trim();
+  return trimmed ? trimmed : null;
+}
+
+// Picks the safest message from an API failure without exposing request data.
+function getErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof ApiError) {
+    return error.data.detail ?? error.data.title ?? fallback;
+  }
+
+  return error instanceof Error ? error.message : fallback;
+}
+
 // Provides a blank profile form while the backend profile request is loading.
 const EMPTY_FORM_DATA: AdminProfileFormData = {
   firstName: "",
@@ -222,6 +278,8 @@ const EMPTY_FORM_DATA: AdminProfileFormData = {
 export function UseAdminProfile() {
   const queryClient = useQueryClient();
   const setAvatarUrl = useAuthStore((s) => s.setAvatarUrl);
+  const authUser = useAuthStore((s) => s.user);
+  const setAuth = useAuthStore((s) => s.setAuth);
   const profileQuery = useGetMe<AdminMeData>({
     query: {
       select: (response) => response.data as unknown as AdminMeData,
@@ -270,6 +328,16 @@ export function UseAdminProfile() {
     if (!file) return;
     e.target.value = "";
 
+    if (!ALLOWED_AVATAR_TYPES.has(file.type)) {
+      toast.error("Please upload a JPG, PNG, or WebP image.");
+      return;
+    }
+
+    if (file.size > MAX_AVATAR_BYTES) {
+      toast.error("Profile photo must be 5 MB or smaller.");
+      return;
+    }
+
     setIsUploading(true);
     try {
       const uploadResponse = await getAvatarUploadUrl({ contentType: file.type });
@@ -286,7 +354,7 @@ export function UseAdminProfile() {
       }
 
       const cacheBustedUrl = `${publicUrl}?t=${Date.now()}`;
-      await updateAvatar({ avatarUrl: cacheBustedUrl });
+      await updateAvatar({ avatarUrl: publicUrl });
 
       setMe((prev) => (prev ? { ...prev, avatarUrl: cacheBustedUrl } : prev));
       setAvatarUrl(cacheBustedUrl);
@@ -326,30 +394,43 @@ export function UseAdminProfile() {
     }
 
     setIsSaving(true);
-    await new Promise((resolve) => setTimeout(resolve, 600));
-    setMe((prev) =>
-      prev
-        ? {
-            ...prev,
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            username: formData.username,
-            phone: formData.phone || null,
-            icNumber: formData.icNumber,
-            dateOfBirth: formData.dateOfBirth || null,
-            gender: (formData.gender as AdminMeData["gender"]) || null,
-            addressLine1: formData.addressLine1 || null,
-            addressLine2: formData.addressLine2 || null,
-            city: formData.city || null,
-            state: formData.state || null,
-            postalCode: formData.postalCode || null,
-            country: formData.country || null,
-          }
-        : prev,
-    );
-    setIsSaving(false);
-    setIsEditing(false);
-    toast.success("Profile preview updated.");
+    try {
+      const payload = toUpdatePayload(formData);
+      await updateProfile(payload);
+
+      setMe((prev) =>
+        prev
+          ? {
+              ...prev,
+              firstName: payload.firstName,
+              lastName: payload.lastName,
+              username: payload.username,
+              phone: payload.phone,
+              icNumber: payload.icNumber,
+              dateOfBirth: payload.dateOfBirth,
+              gender: (payload.gender as AdminMeData["gender"]) ?? null,
+              addressLine1: payload.addressLine1,
+              addressLine2: payload.addressLine2,
+              city: payload.city,
+              state: payload.state,
+              postalCode: payload.postalCode,
+              country: payload.country,
+            }
+          : prev,
+      );
+
+      if (authUser) {
+        setAuth({ ...authUser, firstName: payload.firstName });
+      }
+
+      await queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
+      setIsEditing(false);
+      toast.success("Profile updated successfully.");
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Failed to save profile."));
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   // Password change handlers
