@@ -119,7 +119,7 @@ function SelectFieldRow({
       <span className="text-[10px] text-muted-foreground/60 uppercase tracking-[0.15em]">
         {label}
       </span>
-      <Select value={value || undefined} onValueChange={(val) => onChange(field, val)}>
+      <Select value={value || undefined} onValueChange={(val) => onChange(field, val ?? "")}>
         <SelectTrigger
           className={`w-full ${error ? "border-destructive focus-visible:ring-destructive" : ""}`}
         >

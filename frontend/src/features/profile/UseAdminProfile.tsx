@@ -1,5 +1,13 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import {
+  getAvatarUploadUrl,
+  getGetMeQueryKey,
+  updateAvatar,
+  useGetMe,
+} from "@/api/generated/users/users";
+import { useAuthStore } from "@/store/useAuthStore";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -166,28 +174,10 @@ function validatePassword(data: AdminPasswordFormData): AdminPasswordFormErrors 
   return errors;
 }
 
-// ---------------------------------------------------------------------------
-// Mock data (no backend wired yet)
-// ---------------------------------------------------------------------------
-
-const MOCK_ME: AdminMeData = {
-  publicId: "00000000-0000-0000-0000-000000000001",
-  email: "admin@telehealth.com",
-  firstName: "Alex",
-  lastName: "Rivera",
-  username: "alex_admin",
-  avatarUrl: null,
-  phone: "0123456789",
-  icNumber: "900101012345",
-  dateOfBirth: "1990-01-01",
-  gender: "other",
-  addressLine1: "Level 5, Tower A",
-  addressLine2: "Jalan Ampang",
-  city: "Kuala Lumpur",
-  state: "Wilayah Persekutuan",
-  postalCode: "50450",
-  country: "Malaysia",
-  roles: ["admin"],
+// Describes the signed upload URL response returned for profile avatar uploads.
+type AvatarUploadResponse = {
+  publicUrl: string;
+  uploadUrl: string;
 };
 
 // ---------------------------------------------------------------------------
@@ -212,13 +202,36 @@ function toFormData(data: AdminMeData): AdminProfileFormData {
   };
 }
 
+// Provides a blank profile form while the backend profile request is loading.
+const EMPTY_FORM_DATA: AdminProfileFormData = {
+  firstName: "",
+  lastName: "",
+  username: "",
+  phone: "",
+  icNumber: "",
+  dateOfBirth: "",
+  gender: "",
+  addressLine1: "",
+  addressLine2: "",
+  city: "",
+  state: "",
+  postalCode: "",
+  country: "",
+};
+
 export function UseAdminProfile() {
+  const queryClient = useQueryClient();
+  const setAvatarUrl = useAuthStore((s) => s.setAvatarUrl);
+  const profileQuery = useGetMe<AdminMeData>({
+    query: {
+      select: (response) => response.data as unknown as AdminMeData,
+    },
+  });
   const [me, setMe] = useState<AdminMeData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [formData, setFormData] = useState<AdminProfileFormData>(toFormData(MOCK_ME));
+  const [formData, setFormData] = useState<AdminProfileFormData>(EMPTY_FORM_DATA);
   const [formErrors, setFormErrors] = useState<AdminProfileFormErrors>({});
 
   // Password change state
@@ -234,32 +247,56 @@ export function UseAdminProfile() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Simulate async fetch with mock data
-    const timer = setTimeout(() => {
-      setMe(MOCK_ME);
-      setFormData(toFormData(MOCK_ME));
-      setIsLoading(false);
-    }, 400);
-    return () => clearTimeout(timer);
-  }, []);
+    if (!profileQuery.data) return;
+
+    setMe(profileQuery.data);
+    if (!isEditing) {
+      setFormData(toFormData(profileQuery.data));
+    }
+  }, [isEditing, profileQuery.data]);
+
+  useEffect(() => {
+    if (profileQuery.isError) {
+      toast.error("Failed to load profile.");
+    }
+  }, [profileQuery.isError]);
 
   function triggerFileSelect() {
     fileInputRef.current?.click();
   }
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     e.target.value = "";
 
     setIsUploading(true);
-    // Simulate upload — replace with real S3 upload when backend is ready
-    setTimeout(() => {
-      const objectUrl = URL.createObjectURL(file);
-      setMe((prev) => (prev ? { ...prev, avatarUrl: objectUrl } : prev));
-      setIsUploading(false);
+    try {
+      const uploadResponse = await getAvatarUploadUrl({ contentType: file.type });
+      const { publicUrl, uploadUrl } = uploadResponse.data as unknown as AvatarUploadResponse;
+
+      const s3Response = await fetch(uploadUrl, {
+        method: "PUT",
+        body: file,
+        headers: { "Content-Type": file.type },
+      });
+
+      if (!s3Response.ok) {
+        throw new Error("Upload to S3 failed");
+      }
+
+      const cacheBustedUrl = `${publicUrl}?t=${Date.now()}`;
+      await updateAvatar({ avatarUrl: cacheBustedUrl });
+
+      setMe((prev) => (prev ? { ...prev, avatarUrl: cacheBustedUrl } : prev));
+      setAvatarUrl(cacheBustedUrl);
+      await queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
       toast.success("Profile photo updated.");
-    }, 1000);
+    } catch {
+      toast.error("Failed to upload photo. Please try again.");
+    } finally {
+      setIsUploading(false);
+    }
   }
 
   function handleEdit() {
@@ -289,7 +326,6 @@ export function UseAdminProfile() {
     }
 
     setIsSaving(true);
-    // Simulate save — replace with real API call when backend is ready
     await new Promise((resolve) => setTimeout(resolve, 600));
     setMe((prev) =>
       prev
@@ -313,7 +349,7 @@ export function UseAdminProfile() {
     );
     setIsSaving(false);
     setIsEditing(false);
-    toast.success("Profile updated successfully.");
+    toast.success("Profile preview updated.");
   }
 
   // Password change handlers
@@ -344,7 +380,6 @@ export function UseAdminProfile() {
     }
 
     setIsSavingPassword(true);
-    // Simulate save — replace with real API call when backend is ready
     await new Promise((resolve) => setTimeout(resolve, 600));
     setIsSavingPassword(false);
     setIsChangingPassword(false);
@@ -353,7 +388,7 @@ export function UseAdminProfile() {
 
   return {
     me,
-    isLoading,
+    isLoading: profileQuery.isLoading,
     isUploading,
     isEditing,
     isSaving,
