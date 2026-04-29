@@ -8,6 +8,7 @@ import {
   getGetDailySchedulesForReceptionistQueryKey,
   useCreateSchedule,
 } from "@/api/generated/schedules/schedules";
+import type { AdminOperatingHourDto } from "@/api/model/AdminOperatingHourDto";
 import type { CreateScheduleCommand } from "@/api/model/CreateScheduleCommand";
 import { ApiError } from "@/api/ofetch-mutator";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ import {
 const DEFAULT_START_TIME = "09:00";
 const MINUTES_PER_DAY = 24 * 60;
 const SCHEDULE_SETTINGS_STALE_TIME_MS = 5 * 60 * 1000;
+const DATE_INPUT_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_INPUT_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 const addDoctorScheduleSchema = z.object({
@@ -94,6 +96,83 @@ interface AddDoctorScheduleFormProps {
   onOpenChange: (open: boolean) => void;
 }
 
+// Describes the values needed to validate a slot against clinic operating hours.
+interface OperatingHoursValidationInput {
+  date: string;
+  endTime: string;
+  operatingHours: AdminOperatingHourDto[];
+  startTime: string;
+}
+
+// Converts LocalTime values from the API into browser time input values.
+function toTimeInput(value?: null | string): string {
+  return value?.slice(0, 5) ?? "";
+}
+
+// Returns the API day-of-week number for a browser date input value.
+function getApiDayOfWeek(date: string): null | number {
+  if (!DATE_INPUT_PATTERN.test(date)) return null;
+
+  const [year, month, day] = date.split("-").map(Number);
+  const utcDay = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+
+  return utcDay === 0 ? 7 : utcDay;
+}
+
+// Finds the configured operating hours for the selected calendar day.
+function getOperatingHourForDate(
+  date: string,
+  operatingHours: AdminOperatingHourDto[],
+): AdminOperatingHourDto | null {
+  const dayOfWeek = getApiDayOfWeek(date);
+
+  if (dayOfWeek === null) return null;
+
+  return operatingHours.find((hour) => hour.dayOfWeek === dayOfWeek) ?? null;
+}
+
+// Builds the validation message when a schedule is outside operating hours.
+function getOperatingHoursValidationMessage({
+  date,
+  endTime,
+  operatingHours,
+  startTime,
+}: OperatingHoursValidationInput): string | undefined {
+  if (!(date && startTime && endTime)) return undefined;
+
+  if (getApiDayOfWeek(date) === null) {
+    return "Choose a valid date.";
+  }
+
+  const dayOperatingHours = getOperatingHourForDate(date, operatingHours);
+
+  if (!dayOperatingHours?.isOpen) {
+    return "Clinic is closed on this day.";
+  }
+
+  const openTime = toTimeInput(dayOperatingHours.openTime);
+  const closeTime = toTimeInput(dayOperatingHours.closeTime);
+  const openMinutes = getTimeInputMinutes(openTime);
+  const closeMinutes = getTimeInputMinutes(closeTime);
+  const startMinutes = getTimeInputMinutes(startTime);
+  const endMinutes = getTimeInputMinutes(endTime);
+
+  if (
+    openMinutes === null ||
+    closeMinutes === null ||
+    startMinutes === null ||
+    endMinutes === null
+  ) {
+    return "Operating hours settings could not be validated.";
+  }
+
+  if (startMinutes < openMinutes || endMinutes > closeMinutes) {
+    return `Choose a time between ${openTime} and ${closeTime}.`;
+  }
+
+  return undefined;
+}
+
 // Displays a form for creating a doctor schedule slot.
 export function AddDoctorScheduleForm({
   defaultDate,
@@ -113,6 +192,8 @@ export function AddDoctorScheduleForm({
     settingsQuery.data?.status === 200
       ? settingsQuery.data.data.defaultAppointmentDurationMinutes
       : null;
+  const operatingHours =
+    settingsQuery.data?.status === 200 ? settingsQuery.data.data.operatingHours : [];
   const doctorName = `Dr. ${doctor?.firstName ?? ""} ${doctor?.lastName ?? ""}`.trim();
   const defaultValues: AddDoctorScheduleFormValues = {
     date: defaultDate,
@@ -137,6 +218,18 @@ export function AddDoctorScheduleForm({
 
       if (!endTime) {
         toast.error("Choose an earlier start time for this appointment duration.");
+        return;
+      }
+
+      const operatingHoursError = getOperatingHoursValidationMessage({
+        date: value.date,
+        endTime,
+        operatingHours,
+        startTime: value.startTime,
+      });
+
+      if (operatingHoursError) {
+        toast.error(operatingHoursError);
         return;
       }
 
@@ -234,11 +327,17 @@ export function AddDoctorScheduleForm({
             <form.Subscribe>
               {(state) => {
                 const endTime = getSlotEndTime(state.values.startTime, appointmentDurationMinutes);
+                const operatingHoursError = getOperatingHoursValidationMessage({
+                  date: state.values.date,
+                  endTime,
+                  operatingHours,
+                  startTime: state.values.startTime,
+                });
                 const endTimeError = settingsQuery.isError
                   ? "Appointment duration settings could not be loaded."
                   : appointmentDurationMinutes && !endTime
                     ? "Choose an earlier start time."
-                    : undefined;
+                    : operatingHoursError;
 
                 return (
                   <Field data-invalid={!!endTimeError}>
@@ -291,8 +390,17 @@ export function AddDoctorScheduleForm({
             <form.Subscribe>
               {(state) => {
                 const endTime = getSlotEndTime(state.values.startTime, appointmentDurationMinutes);
+                const operatingHoursError = getOperatingHoursValidationMessage({
+                  date: state.values.date,
+                  endTime,
+                  operatingHours,
+                  startTime: state.values.startTime,
+                });
                 const isSettingsUnavailable =
-                  settingsQuery.isLoading || !appointmentDurationMinutes || !endTime;
+                  settingsQuery.isLoading ||
+                  !appointmentDurationMinutes ||
+                  !endTime ||
+                  !!operatingHoursError;
 
                 return (
                   <Button
