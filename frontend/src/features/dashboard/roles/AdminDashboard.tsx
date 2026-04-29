@@ -17,7 +17,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { useAdminGetDashboardSummary } from "@/api/generated/admins/admins";
+import { useAdminGetAuditLogs, useAdminGetDashboardSummary } from "@/api/generated/admins/admins";
+import type { AdminAuditLogDto } from "@/api/model/AdminAuditLogDto";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -35,19 +36,6 @@ type ClinicActivityDataPoint = {
   appointments: number;
 };
 
-// Represents a demo row shaped after the current audit_logs database table.
-type AuditLogEntry = {
-  publicId: string;
-  tableName: string;
-  recordId: number;
-  action: "INSERT" | "UPDATE" | "DELETE";
-  changedColumns: string[] | null;
-  metadataSummary: string | null;
-  performedByUserId: number | null;
-  performedBySystem: boolean;
-  createdAt: string;
-};
-
 // Provides static chart data until the clinic activity endpoint is connected.
 const clinicActivityData: ClinicActivityDataPoint[] = [
   { label: "Mon", appointments: 18 },
@@ -59,65 +47,6 @@ const clinicActivityData: ClinicActivityDataPoint[] = [
   { label: "Sun", appointments: 12 },
 ];
 
-// Provides local audit log rows until the admin audit endpoint is connected.
-const auditLogData: AuditLogEntry[] = [
-  {
-    publicId: "018f9d9d-9f64-72e7-97a3-2d29f860f0a1",
-    tableName: "appointments",
-    recordId: 1842,
-    action: "UPDATE",
-    changedColumns: ["status_id", "updated_at"],
-    metadataSummary: "Status moved to Completed",
-    performedByUserId: 12,
-    performedBySystem: false,
-    createdAt: "2026-04-29T09:42:00+08:00",
-  },
-  {
-    publicId: "018f9d9e-4627-7a62-9b24-62d11e0bdf23",
-    tableName: "lab_reports",
-    recordId: 927,
-    action: "INSERT",
-    changedColumns: null,
-    metadataSummary: "Report metadata created",
-    performedByUserId: null,
-    performedBySystem: true,
-    createdAt: "2026-04-29T09:18:00+08:00",
-  },
-  {
-    publicId: "018f9d9f-018a-7b92-8e19-c4b458bc3899",
-    tableName: "doctor_schedules",
-    recordId: 311,
-    action: "UPDATE",
-    changedColumns: ["status_id", "updated_at"],
-    metadataSummary: "Schedule slot blocked",
-    performedByUserId: 7,
-    performedBySystem: false,
-    createdAt: "2026-04-29T08:55:00+08:00",
-  },
-  {
-    publicId: "018f9da0-1b0c-78b7-8c1f-6b8cf5ac16ed",
-    tableName: "prescriptions",
-    recordId: 574,
-    action: "DELETE",
-    changedColumns: null,
-    metadataSummary: "Soft delete captured by trigger",
-    performedByUserId: 24,
-    performedBySystem: false,
-    createdAt: "2026-04-28T17:36:00+08:00",
-  },
-  {
-    publicId: "018f9da1-3f58-775f-a2a4-1b3394252cb1",
-    tableName: "users",
-    recordId: 148,
-    action: "UPDATE",
-    changedColumns: ["avatar_url", "updated_at"],
-    metadataSummary: "Profile asset refreshed",
-    performedByUserId: 148,
-    performedBySystem: false,
-    createdAt: "2026-04-28T16:12:00+08:00",
-  },
-];
-
 // Describes one aggregate card shown at the top of the admin dashboard.
 type AdminDashboardStat = {
   icon: LucideIcon;
@@ -126,9 +55,7 @@ type AdminDashboardStat = {
 };
 
 // Maps audit actions to badge styling variants.
-function getAuditActionVariant(
-  action: AuditLogEntry["action"],
-): "default" | "outline" | "secondary" {
+function getAuditActionVariant(action: string): "default" | "outline" | "secondary" {
   if (action === "INSERT") {
     return "default";
   }
@@ -161,13 +88,15 @@ function formatAuditTimestamp(value: string): string {
   });
 }
 
-// Builds a privacy-safe actor label for demo audit rows.
-function getAuditActorLabel(entry: AuditLogEntry): string {
+// Builds a privacy-safe actor label for audit rows.
+function getAuditActorLabel(entry: AdminAuditLogDto): string {
   if (entry.performedBySystem) {
     return "System";
   }
 
-  return entry.performedByUserId === null ? "Unknown" : `User #${entry.performedByUserId}`;
+  return entry.performedByUserPublicId === null
+    ? "Unknown"
+    : `User ${formatAuditPublicId(entry.performedByUserPublicId)}`;
 }
 
 // Shortens a public ID for compact trace display in the audit table.
@@ -195,8 +124,8 @@ function ClinicActivityTooltip({
   );
 }
 
-// Defines the visible columns for the audit log demo table.
-const auditLogColumns: ColumnDef<AuditLogEntry>[] = [
+// Defines the visible columns for the audit log table.
+const auditLogColumns: ColumnDef<AdminAuditLogDto>[] = [
   {
     accessorKey: "action",
     header: "Action",
@@ -210,7 +139,9 @@ const auditLogColumns: ColumnDef<AuditLogEntry>[] = [
     cell: ({ row }) => (
       <div className="space-y-1">
         <p className="font-medium">{row.original.tableName}</p>
-        <p className="font-mono text-muted-foreground text-xs">#{row.original.recordId}</p>
+        <p className="font-mono text-muted-foreground text-xs">
+          {formatAuditPublicId(row.original.publicId)}
+        </p>
       </div>
     ),
   },
@@ -243,14 +174,11 @@ const auditLogColumns: ColumnDef<AuditLogEntry>[] = [
     },
   },
   {
-    accessorKey: "metadataSummary",
+    accessorKey: "summary",
     header: "Details",
     cell: ({ row }) => (
       <div className="max-w-56 space-y-1">
-        <p className="truncate text-sm">{row.original.metadataSummary ?? "No metadata"}</p>
-        <p className="truncate font-mono text-muted-foreground text-xs">
-          {formatAuditPublicId(row.original.publicId)}
-        </p>
+        <p className="truncate text-sm">{row.original.summary}</p>
       </div>
     ),
   },
@@ -265,16 +193,29 @@ const auditLogColumns: ColumnDef<AuditLogEntry>[] = [
   },
 ];
 
-// Displays the local TanStack Table preview for system audit logs.
-function AuditLogsTable() {
+// Describes the data and loading state for the audit log table.
+interface AuditLogsTableProps {
+  data: AdminAuditLogDto[];
+  isError: boolean;
+  isLoading: boolean;
+}
+
+// Displays the backend audit log feed for system activity.
+function AuditLogsTable({ data, isError, isLoading }: AuditLogsTableProps) {
   const table = useReactTable({
-    data: auditLogData,
+    data,
     columns: auditLogColumns,
     getCoreRowModel: getCoreRowModel(),
+    getRowId: (row) => row.publicId,
   });
+  const message = isLoading
+    ? "Loading audit logs"
+    : isError
+      ? "Audit logs unavailable"
+      : "No audit logs found";
 
   return (
-    <div className="overflow-hidden rounded-md border">
+    <div className="overflow-x-auto rounded-md border">
       <Table className="min-w-[52rem]">
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -290,15 +231,23 @@ function AuditLogsTable() {
           ))}
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows.map((row) => (
-            <TableRow key={row.id}>
-              {row.getVisibleCells().map((cell) => (
-                <TableCell key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
-              ))}
+          {table.getRowModel().rows.length > 0 ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell className="h-24 text-center text-muted-foreground" colSpan={6}>
+                {message}
+              </TableCell>
             </TableRow>
-          ))}
+          )}
         </TableBody>
       </Table>
     </div>
@@ -338,8 +287,13 @@ function AdminDashboardStatCard({
 
 export function AdminDashboard() {
   const dashboardSummaryQuery = useAdminGetDashboardSummary();
+  const auditLogsQuery = useAdminGetAuditLogs({ Page: 1, PageSize: 5 });
   const dashboardSummary =
     dashboardSummaryQuery.data?.status === 200 ? dashboardSummaryQuery.data.data : null;
+  const auditLogs = auditLogsQuery.data?.status === 200 ? auditLogsQuery.data.data.items : [];
+  const auditLogsUnavailable =
+    auditLogsQuery.isError ||
+    (auditLogsQuery.data !== undefined && auditLogsQuery.data.status !== 200);
   const stats: AdminDashboardStat[] = [
     {
       title: "Today's Appointments",
@@ -433,14 +387,18 @@ export function AdminDashboard() {
           </CardContent>
         </Card>
 
-        {/* Recent System Activity Table Placeholder */}
+        {/* Recent System Activity */}
         <Card>
           <CardHeader>
             <CardTitle className="font-semibold text-lg">System Audit Logs</CardTitle>
-            <CardDescription>Demo data shaped from the audit_logs schema</CardDescription>
+            <CardDescription>Latest backend audit records</CardDescription>
           </CardHeader>
           <CardContent>
-            <AuditLogsTable />
+            <AuditLogsTable
+              data={auditLogs}
+              isError={auditLogsUnavailable}
+              isLoading={auditLogsQuery.isLoading}
+            />
           </CardContent>
         </Card>
       </div>

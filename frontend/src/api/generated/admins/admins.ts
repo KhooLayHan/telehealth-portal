@@ -52,6 +52,10 @@ import type {
 } from '../../model/AdminGetAllLabTechsParams';
 
 import type {
+  AdminGetAuditLogsParams
+} from '../../model/AdminGetAuditLogsParams';
+
+import type {
   AdminLabTechDto
 } from '../../model/AdminLabTechDto';
 
@@ -86,6 +90,10 @@ import type {
 import type {
   PagedResultOfAdminLabTechDto
 } from '../../model/PagedResultOfAdminLabTechDto';
+
+import type {
+  PagedResultOfAdminAuditLogDto
+} from '../../model/PagedResultOfAdminAuditLogDto';
 
 import type {
   ProblemDetails
@@ -1475,6 +1483,110 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getAdminDeactivateReceptionistMutationOptions(options), queryClient);
     }
+
+export type adminGetAuditLogsResponse200 = {
+  data: PagedResultOfAdminAuditLogDto
+  status: 200
+}
+
+export type adminGetAuditLogsResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type adminGetAuditLogsResponse403 = {
+  data: ProblemDetails
+  status: 403
+}
+
+export type adminGetAuditLogsResponseSuccess = (adminGetAuditLogsResponse200) & {
+  headers: Headers;
+};
+export type adminGetAuditLogsResponseError = (adminGetAuditLogsResponse401 | adminGetAuditLogsResponse403) & {
+  headers: Headers;
+};
+
+export type adminGetAuditLogsResponse = (adminGetAuditLogsResponseSuccess | adminGetAuditLogsResponseError)
+
+export const getAdminGetAuditLogsUrl = (params?: AdminGetAuditLogsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/v1/admins/audit-logs?${stringifiedParams}` : `/api/v1/admins/audit-logs`
+}
+
+export const adminGetAuditLogs = async (params?: AdminGetAuditLogsParams, options?: RequestInit): Promise<adminGetAuditLogsResponse> => {
+  return ofetchMutator<adminGetAuditLogsResponse>(getAdminGetAuditLogsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+  }
+);}
+
+export const getAdminGetAuditLogsQueryKey = (params?: AdminGetAuditLogsParams,) => {
+    return [
+    `/api/v1/admins/audit-logs`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+export const getAdminGetAuditLogsQueryOptions = <TData = Awaited<ReturnType<typeof adminGetAuditLogs>>, TError = ProblemDetails>(params?: AdminGetAuditLogsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAuditLogs>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminGetAuditLogsQueryKey(params);
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetAuditLogs>>> = ({ signal }) => adminGetAuditLogs(params, { signal, ...requestOptions });
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetAuditLogs>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type AdminGetAuditLogsQueryResult = NonNullable<Awaited<ReturnType<typeof adminGetAuditLogs>>>
+export type AdminGetAuditLogsQueryError = ProblemDetails
+
+export function useAdminGetAuditLogs<TData = Awaited<ReturnType<typeof adminGetAuditLogs>>, TError = ProblemDetails>(
+ params: undefined |  AdminGetAuditLogsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAuditLogs>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminGetAuditLogs>>,
+          TError,
+          Awaited<ReturnType<typeof adminGetAuditLogs>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminGetAuditLogs<TData = Awaited<ReturnType<typeof adminGetAuditLogs>>, TError = ProblemDetails>(
+ params?: AdminGetAuditLogsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAuditLogs>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminGetAuditLogs>>,
+          TError,
+          Awaited<ReturnType<typeof adminGetAuditLogs>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminGetAuditLogs<TData = Awaited<ReturnType<typeof adminGetAuditLogs>>, TError = ProblemDetails>(
+ params?: AdminGetAuditLogsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAuditLogs>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useAdminGetAuditLogs<TData = Awaited<ReturnType<typeof adminGetAuditLogs>>, TError = ProblemDetails>(
+ params?: AdminGetAuditLogsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAuditLogs>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getAdminGetAuditLogsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
 
 export type adminGetDashboardSummaryResponse200 = {
   data: AdminDashboardSummaryDto

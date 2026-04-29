@@ -149,6 +149,8 @@ public static class ApiEndpoints
 
         public const string GetDashboardSummary = $"{Base}/dashboard-summary";
 
+        public const string GetAuditLogs = $"{Base}/audit-logs";
+
         public const string GetSettings = $"{Base}/settings";
 
         public const string UpdateSettings = $"{Base}/settings";
