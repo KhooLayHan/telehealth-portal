@@ -17,7 +17,7 @@ import {
   UserCog,
   Users,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -28,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { SupportDialog } from "@/features/system-settings/SupportDialog";
 import { useSystemName } from "@/features/system-settings/useSystemName";
 import { useAuthStore } from "@/store/useAuthStore";
 
@@ -102,6 +103,7 @@ const navItems = [
 
 export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
+  const [isSupportDialogOpen, setIsSupportDialogOpen] = useState(false);
   const { systemName } = useSystemName();
   const { user, logout } = useAuthStore();
 
@@ -144,17 +146,14 @@ export function AppShell({ children }: { children: ReactNode }) {
         </nav>
 
         <div className="p-3 pt-0">
-          <Link
-            to="/support"
+          <button
+            type="button"
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left font-medium text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            activeProps={{
-              className:
-                "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
-            }}
+            onClick={() => setIsSupportDialogOpen(true)}
           >
             <LifeBuoy className="size-4 shrink-0" />
             Support
-          </Link>
+          </button>
         </div>
 
         <div className="border-border border-t p-3">
@@ -271,6 +270,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </div>
+      <SupportDialog open={isSupportDialogOpen} onOpenChange={setIsSupportDialogOpen} />
     </div>
   );
 }
