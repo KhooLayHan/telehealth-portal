@@ -8,14 +8,19 @@ namespace TeleHealth.Api.Features.SystemSettings.GetPublic;
 public sealed class GetPublicSystemSettingsHandler(ApplicationDbContext db)
 {
     private const string DefaultSystemName = "TeleHealth Medical Centre";
+    private const string DefaultSupportEmail = "support@telehealth.com";
 
     public async Task<GetPublicSystemSettingsDto> HandleAsync(CancellationToken ct)
     {
-        var systemName = await db
-            .SystemSettings.Where(s => s.Slug == AdminGetSettingsHandler.SettingsSlug)
-            .Select(s => s.ClinicName)
+        var settings = await db
+            .SystemSettings.AsNoTracking()
+            .Where(s => s.Slug == AdminGetSettingsHandler.SettingsSlug)
+            .Select(s => new { s.ClinicName, s.SupportEmail })
             .FirstOrDefaultAsync(ct);
 
-        return new GetPublicSystemSettingsDto(systemName ?? DefaultSystemName);
+        return new GetPublicSystemSettingsDto(
+            settings?.ClinicName ?? DefaultSystemName,
+            settings?.SupportEmail ?? DefaultSupportEmail
+        );
     }
 }

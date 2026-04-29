@@ -7,4 +7,5 @@
 
 export interface GetPublicSystemSettingsDto {
   systemName: string;
+  supportEmail: string;
 }

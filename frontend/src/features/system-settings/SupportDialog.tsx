@@ -1,6 +1,7 @@
 import { Copy, LifeBuoy, Mail } from "lucide-react";
 import { useState } from "react";
 
+import { useGetPublicSystemSettings } from "@/api/generated/system-settings/system-settings";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,7 +12,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-const SUPPORT_EMAIL = "support@telehealth.com";
+const SUPPORT_EMAIL_FALLBACK = "support@telehealth.com";
+const SUPPORT_EMAIL_STALE_TIME_MS = 5 * 60 * 1000;
 
 // Props for controlling the support contact dialog.
 interface SupportDialogProps {
@@ -19,9 +21,21 @@ interface SupportDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-// Shows the support contact email without connecting to any backend flow.
+// Shows the support contact email from public system settings.
 export function SupportDialog({ open, onOpenChange }: SupportDialogProps) {
   const [hasCopied, setHasCopied] = useState(false);
+  const systemSettingsQuery = useGetPublicSystemSettings({
+    query: {
+      enabled: open,
+      staleTime: SUPPORT_EMAIL_STALE_TIME_MS,
+    },
+  });
+
+  const supportEmail =
+    systemSettingsQuery.data?.status === 200
+      ? systemSettingsQuery.data.data.supportEmail
+      : SUPPORT_EMAIL_FALLBACK;
+  const isLoadingSupportEmail = systemSettingsQuery.isLoading && !systemSettingsQuery.data;
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) {
@@ -33,7 +47,7 @@ export function SupportDialog({ open, onOpenChange }: SupportDialogProps) {
 
   const handleCopyEmail = async () => {
     try {
-      await navigator.clipboard.writeText(SUPPORT_EMAIL);
+      await navigator.clipboard.writeText(supportEmail);
       setHasCopied(true);
     } catch {
       setHasCopied(false);
@@ -65,7 +79,9 @@ export function SupportDialog({ open, onOpenChange }: SupportDialogProps) {
           </div>
           <div className="min-w-0">
             <p className="font-medium text-sm">Support email</p>
-            <p className="break-all text-muted-foreground text-sm">{SUPPORT_EMAIL}</p>
+            <p className="break-all text-muted-foreground text-sm">
+              {isLoadingSupportEmail ? "Loading..." : supportEmail}
+            </p>
           </div>
         </div>
 
@@ -73,7 +89,7 @@ export function SupportDialog({ open, onOpenChange }: SupportDialogProps) {
           <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
             Close
           </Button>
-          <Button type="button" onClick={handleCopyEmail}>
+          <Button type="button" disabled={isLoadingSupportEmail} onClick={handleCopyEmail}>
             <Copy className="size-4" />
             {hasCopied ? "Copied" : "Copy Email"}
           </Button>
