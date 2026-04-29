@@ -177,4 +177,11 @@ public static class ApiEndpoints
 
         public const string DeleteLabTech = $"{Base}/lab-techs/{{id:guid}}/deactivate";
     }
+
+    public static class SystemSettings
+    {
+        private const string Base = "system-settings";
+
+        public const string GetPublic = $"{Base}/public";
+    }
 }

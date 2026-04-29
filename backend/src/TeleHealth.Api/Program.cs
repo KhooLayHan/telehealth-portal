@@ -63,6 +63,7 @@ using TeleHealth.Api.Features.Schedules.CreateSchedule;
 using TeleHealth.Api.Features.Schedules.DeleteSchedule;
 using TeleHealth.Api.Features.Schedules.GetAllAvailableSchedules;
 using TeleHealth.Api.Features.Schedules.GetDailySchedulesForReceptionist;
+using TeleHealth.Api.Features.SystemSettings.GetPublic;
 using TeleHealth.Api.Features.Users.Create;
 using TeleHealth.Api.Features.Users.DoctorProfile;
 using TeleHealth.Api.Features.Users.GetMe;
@@ -236,6 +237,7 @@ builder.Services.AddScoped<UpdatePatientRecordHandler>();
 builder.Services.AddScoped<DeletePatientHandler>();
 builder.Services.AddScoped<UpdateProfileHandler>();
 builder.Services.AddScoped<UpdateReceptionistProfileHandler>();
+builder.Services.AddScoped<GetPublicSystemSettingsHandler>();
 
 builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonS3>();
@@ -332,6 +334,7 @@ api.MapUpdatePatientRecordEndpoint();
 api.MapDeletePatientEndpoint();
 api.MapGetDoctorPatientsEndpoint();
 api.MapGetDoctorPatientAppointmentsEndpoint();
+api.MapGetPublicSystemSettingsEndpoint();
 
 Log.Information("TeleHealth API successfully started.");
 

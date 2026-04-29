@@ -27,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { useSystemName } from "@/features/system-settings/useSystemName";
 import { useAuthStore } from "@/store/useAuthStore";
 
 const navItems = [
@@ -100,6 +101,7 @@ const navItems = [
 
 export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
+  const { systemName } = useSystemName();
   const { user, logout } = useAuthStore();
 
   const normalizedRole = user?.role?.toLowerCase();
@@ -120,7 +122,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <aside className="flex w-60 shrink-0 flex-col border-border border-r bg-card">
         <div className="flex h-16 items-center gap-2 border-border border-b px-6">
           <Heart className="size-5 text-primary" />
-          <span className="font-bold text-base">TeleHealth</span>
+          <span className="truncate font-bold text-base">{systemName}</span>
         </div>
 
         <nav className="flex-1 space-y-0.5 overflow-y-auto p-3">
