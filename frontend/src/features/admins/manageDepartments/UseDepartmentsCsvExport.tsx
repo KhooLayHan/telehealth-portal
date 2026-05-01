@@ -4,7 +4,13 @@ import { useAdminGetAllDepartments } from "@/api/generated/admins/admins";
 import type { AdminDepartmentDto } from "@/api/model/AdminDepartmentDto";
 
 const DEPARTMENTS_CSV_FILE_NAME = "departments.csv";
-const CSV_HEADERS = ["Slug", "Department Name", "Description", "Staff Members"] as const;
+const CSV_HEADERS = [
+  "Slug",
+  "Department Name",
+  "Description",
+  "Staff Members",
+  "Created At",
+] as const;
 const CSV_SPECIAL_CHARACTERS_PATTERN = /[",\n]/;
 const WINDOWS_NEWLINES_PATTERN = /\r\n/g;
 const CARRIAGE_RETURN_PATTERN = /\r/g;
@@ -14,6 +20,19 @@ const DOUBLE_QUOTE_PATTERN = /"/g;
 interface UseDepartmentsCsvExportReturn {
   exportDepartmentsCsv: () => void;
   isExportDisabled: boolean;
+}
+
+// Formats a date string as "15 Apr 1982".
+function formatDate(iso: string | undefined): string {
+  if (!iso) {
+    return "";
+  }
+
+  return new Date(iso).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 // Escapes one cell so commas, quotes, and line breaks remain valid CSV content.
@@ -38,6 +57,7 @@ function buildDepartmentsCsv(departments: AdminDepartmentDto[]): string {
       department.name,
       department.description ?? "",
       department.staffMembers ?? 0,
+      formatDate(department.createdAt),
     ]),
   ];
 
