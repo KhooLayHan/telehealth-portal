@@ -1,4 +1,7 @@
+using Microsoft.AspNetCore.Http.HttpResults;
 using TeleHealth.Api.Common;
+using TeleHealth.Api.Common.Models;
+using TeleHealth.Api.Common.Security;
 
 namespace TeleHealth.Api.Features.Doctors.GetAllDoctors;
 
@@ -9,15 +12,19 @@ public static class GetAllDoctorsEndpoint
         group
             .MapGet(
                 $"{ApiEndpoints.Doctors.GetAll}",
-                async (GetAllDoctorsHandler handler, CancellationToken ct) =>
+                async Task<Ok<PagedResult<DoctorListDto>>> (
+                    [AsParameters] GetAllDoctorsQuery query,
+                    GetAllDoctorsHandler handler,
+                    CancellationToken ct
+                ) =>
                 {
-                    var doctors = await handler.HandleAsync(ct);
+                    var doctors = await handler.HandleAsync(query, ct);
                     return TypedResults.Ok(doctors);
                 }
             )
             .WithName(nameof(ApiEndpoints.Doctors.GetAll))
             .WithTags(nameof(ApiEndpoints.Doctors))
-            .RequireAuthorization()
+            .RequireAuthorization(AuthConstants.AnyRole)
             .ProducesProblem(StatusCodes.Status401Unauthorized);
     }
 }

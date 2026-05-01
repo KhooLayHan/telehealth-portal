@@ -5,9 +5,10 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type GetAllPatientsForClinicStaffParams = {
+export type GetAllParams = {
   Search?: string;
-  Gender?: string;
+  Department?: string;
+  Specialization?: string;
   /**
    * @pattern ^-?(?:0|[1-9]\d*)$
    */
@@ -16,5 +17,4 @@ export type GetAllPatientsForClinicStaffParams = {
    * @pattern ^-?(?:0|[1-9]\d*)$
    */
   PageSize?: number | string;
-  SortOrder?: string;
 };

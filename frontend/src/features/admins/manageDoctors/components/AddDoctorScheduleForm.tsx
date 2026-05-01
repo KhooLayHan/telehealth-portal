@@ -128,7 +128,7 @@ function getOperatingHourForDate(
 
   if (dayOfWeek === null) return null;
 
-  return operatingHours.find((hour) => hour.dayOfWeek === dayOfWeek) ?? null;
+  return operatingHours.find((hour) => Number(hour.dayOfWeek) === dayOfWeek) ?? null;
 }
 
 // Builds the validation message when a schedule is outside operating hours.
@@ -190,7 +190,7 @@ export function AddDoctorScheduleForm({
   });
   const appointmentDurationMinutes =
     settingsQuery.data?.status === 200
-      ? settingsQuery.data.data.defaultAppointmentDurationMinutes
+      ? Number(settingsQuery.data.data.defaultAppointmentDurationMinutes)
       : null;
   const operatingHours =
     settingsQuery.data?.status === 200 ? settingsQuery.data.data.operatingHours : [];

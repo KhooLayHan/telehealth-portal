@@ -15,6 +15,8 @@ export interface ClinicStaffPatientDto {
   firstName: string;
   lastName: string;
   fullName: string;
+  /** @nullable */
+  avatarUrl: string | null;
   dateOfBirth: LocalDate;
   phoneNumber: string;
   bloodGroup: string;

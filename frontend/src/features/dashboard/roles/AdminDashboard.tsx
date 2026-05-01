@@ -72,6 +72,11 @@ function formatDashboardCount(value?: number): string {
   return value === undefined ? "--" : value.toLocaleString();
 }
 
+// Converts generated numeric DTO values into plain numbers for dashboard display.
+function toOptionalNumber(value?: number | string): number | undefined {
+  return value === undefined ? undefined : Number(value);
+}
+
 // Formats audit timestamps in a compact date and time label.
 function formatAuditTimestamp(value: string): string {
   const date = new Date(value);
@@ -297,22 +302,22 @@ export function AdminDashboard() {
   const stats: AdminDashboardStat[] = [
     {
       title: "Today's Appointments",
-      value: dashboardSummary?.todayAppointments,
+      value: toOptionalNumber(dashboardSummary?.todayAppointments),
       icon: CalendarDays,
     },
     {
       title: "Patients",
-      value: dashboardSummary?.patients,
+      value: toOptionalNumber(dashboardSummary?.patients),
       icon: Users,
     },
     {
       title: "Doctors",
-      value: dashboardSummary?.doctors,
+      value: toOptionalNumber(dashboardSummary?.doctors),
       icon: Stethoscope,
     },
     {
       title: "Staff",
-      value: dashboardSummary?.staff,
+      value: toOptionalNumber(dashboardSummary?.staff),
       icon: ShieldCheck,
     },
   ];
