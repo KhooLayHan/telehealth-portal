@@ -43,6 +43,7 @@ interface DoctorCsvColumn {
 // Lists the doctor fields exported by the CSV download.
 const DOCTOR_CSV_COLUMNS: DoctorCsvColumn[] = [
   { header: "Doctor Public ID", getValue: (doctor) => doctor.doctorPublicId },
+  { header: "Slug", getValue: (doctor) => doctor.slug },
   { header: "First Name", getValue: (doctor) => doctor.firstName },
   { header: "Last Name", getValue: (doctor) => doctor.lastName },
   { header: "Username", getValue: (doctor) => doctor.username },
@@ -54,7 +55,6 @@ const DOCTOR_CSV_COLUMNS: DoctorCsvColumn[] = [
   { header: "Department", getValue: (doctor) => doctor.departmentName },
   { header: "License Number", getValue: (doctor) => doctor.licenseNumber },
   { header: "Consultation Fee MYR", getValue: (doctor) => doctor.consultationFee },
-  { header: "Slug", getValue: (doctor) => doctor.slug },
   { header: "Address Street", getValue: (doctor) => doctor.address?.street },
   { header: "Address City", getValue: (doctor) => doctor.address?.city },
   { header: "Address State", getValue: (doctor) => doctor.address?.state },
