@@ -273,7 +273,7 @@ jobs:
 
       # ─- Build the Lambda function using Native AOT for Amazon Linux 2023 ──
       - name: Publish Lambda (Native AOT)
-        working-directory: functions/lab-pdf-processor
+        working-directory: functions/lab-pdf-processor/src/LabPdfProcessor-dev-ProcessPdfDocument
         run: |
           # Publish for Linux ARM64 (Graviton) or x64 depending on your preference. 
           # Assuming x64 here to match standard Lambda provided.al2023
@@ -281,7 +281,7 @@ jobs:
           
           # Zip the output (The Native AOT binary is named 'bootstrap')
           cd publish
-          zip -r ../function.zip *
+          zip -r ../../function.zip *
 
       # ── Update the Lambda function code directly via AWS CLI ──
       - name: Deploy to AWS Lambda
