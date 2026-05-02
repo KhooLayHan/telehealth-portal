@@ -34,30 +34,110 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 // Lists the selectable blood groups for the patient record form.
 const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"] as const;
 
+// Lists the gender codes accepted by the patient registration API.
+const GENDERS = ["M", "F", "O", "N"] as const;
+
+// Lists the selectable allergy severities accepted by the patient record API.
+const ALLERGY_SEVERITIES = ["Mild", "Moderate", "Severe"] as const;
+
+// Matches Malaysian IC numbers in the backend format: 12 digits without dashes.
+const MALAYSIAN_IC_REGEX = /^\d{12}$/;
+
+// Checks that a form date string is not later than today's local date.
+function isNotFutureDate(value: string): boolean {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const selectedDate = new Date(`${value}T00:00:00`);
+
+  return !Number.isNaN(selectedDate.getTime()) && selectedDate <= today;
+}
+
 // Validates a single allergy row in the add-patient form.
 const allergySchema = z.object({
-  allergen: z.string().min(1, "Allergen is required"),
-  severity: z.string().min(1, "Severity is required"),
-  reaction: z.string().min(1, "Reaction is required"),
+  allergen: z.string().trim().min(1, "Allergen is required").max(100),
+  severity: z
+    .string()
+    .refine(
+      (severity) => ALLERGY_SEVERITIES.includes(severity as (typeof ALLERGY_SEVERITIES)[number]),
+      "Severity must be Mild, Moderate, or Severe",
+    ),
+  reaction: z.string().trim().min(1, "Reaction is required").max(255),
 });
 
 // Validates the full patient registration form.
-const addPatientSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  email: z.string().email("Valid email is required"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  icNumber: z.string().min(1, "IC number is required"),
-  gender: z.string().min(1, "Gender is required"),
-  dateOfBirth: z.string().min(1, "Date of birth is required"),
-  phoneNumber: z.string(),
-  bloodGroup: z.string(),
-  allergies: z.array(allergySchema),
-  emergencyContactName: z.string(),
-  emergencyContactRelationship: z.string(),
-  emergencyContactPhone: z.string(),
-});
+const addPatientSchema = z
+  .object({
+    firstName: z.string().trim().min(1, "First name is required").max(100),
+    lastName: z.string().trim().min(1, "Last name is required").max(100),
+    username: z.string().trim().min(3, "Username must be at least 3 characters").max(50),
+    email: z.string().trim().email("Valid email is required").max(255),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+      .regex(/[0-9]/, "Password must contain at least one digit")
+      .regex(/[^a-zA-Z0-9]/, "Password must contain at least one special character"),
+    icNumber: z
+      .string()
+      .trim()
+      .regex(MALAYSIAN_IC_REGEX, "IC number must be exactly 12 digits without dashes"),
+    gender: z
+      .string()
+      .refine(
+        (gender) => GENDERS.includes(gender as (typeof GENDERS)[number]),
+        "Gender must be M, F, O, or N",
+      ),
+    dateOfBirth: z
+      .string()
+      .min(1, "Date of birth is required")
+      .refine(isNotFutureDate, "Date of birth cannot be in the future"),
+    phoneNumber: z.string().trim().max(16, "Phone number must be 16 characters or fewer"),
+    bloodGroup: z.string().refine((bloodGroup) => {
+      return (
+        bloodGroup === "" || BLOOD_GROUPS.includes(bloodGroup as (typeof BLOOD_GROUPS)[number])
+      );
+    }, "Blood group must be valid"),
+    allergies: z.array(allergySchema),
+    emergencyContactName: z.string().trim().max(100),
+    emergencyContactRelationship: z.string().trim().max(50),
+    emergencyContactPhone: z.string().trim().max(16, "Phone number must be 16 characters or fewer"),
+  })
+  .superRefine((value, context) => {
+    const emergencyContactFields = [
+      {
+        field: "emergencyContactName",
+        message: "Emergency contact name is required",
+        value: value.emergencyContactName,
+      },
+      {
+        field: "emergencyContactRelationship",
+        message: "Emergency contact relationship is required",
+        value: value.emergencyContactRelationship,
+      },
+      {
+        field: "emergencyContactPhone",
+        message: "Emergency contact phone is required",
+        value: value.emergencyContactPhone,
+      },
+    ] as const;
+    const hasEmergencyContact = emergencyContactFields.some((field) => field.value.length > 0);
+
+    if (!hasEmergencyContact) {
+      return;
+    }
+
+    for (const field of emergencyContactFields) {
+      if (field.value.length === 0) {
+        context.addIssue({
+          code: "custom",
+          message: field.message,
+          path: [field.field],
+        });
+      }
+    }
+  });
 
 // Describes the values collected by the add-patient form.
 type AddPatientFormValues = z.infer<typeof addPatientSchema>;
@@ -303,7 +383,7 @@ export function AddNewPatientForm({ open, onOpenChange }: AddNewPatientFormProps
                         value={field.state.value}
                         onChange={(event) => field.handleChange(event.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder="e.g. 920101-01-1234"
+                        placeholder="e.g. 920101011234"
                       />
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
