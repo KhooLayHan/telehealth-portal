@@ -99,7 +99,7 @@ const optionalPhoneNumber = z
     message: "Phone must be 12-13 characters starting with + followed by digits only",
   });
 
-// Checks that a date input value is a real date and not later than today's local date.
+// Checks that a date input value is a real date before today's local date.
 function isValidDateOfBirth(value: string): boolean {
   const dateOfBirthRegex = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -124,7 +124,19 @@ function isValidDateOfBirth(value: string): boolean {
     "0",
   )}-${String(today.getDate()).padStart(2, "0")}`;
 
-  return value <= todayKey;
+  return value < todayKey;
+}
+
+// Formats yesterday as the latest date of birth allowed by the date picker.
+function getYesterdayDateInputValue(): string {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  const year = yesterday.getFullYear();
+  const month = String(yesterday.getMonth() + 1).padStart(2, "0");
+  const day = String(yesterday.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 }
 
 // Validates the lab technician edit form before local save.
@@ -152,7 +164,7 @@ const editLabTechSchema = z
       .min(1, "Date of birth is required")
       .refine(
         (value) => value.length === 0 || isValidDateOfBirth(value),
-        "Date of birth cannot be in the future",
+        "Date of birth cannot be today or in the future",
       ),
     street: optionalText("Street", 200),
     city: optionalText("City", 100),
@@ -429,8 +441,8 @@ function EditLabTechFormContent({ labTech, open, onOpenChange }: EditLabTechForm
                         value={field.state.value}
                         onChange={(event) => field.handleChange(event.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder="e.g. 0123456789"
-                        maxLength={10}
+                        placeholder="e.g. +60162173366"
+                        maxLength={13}
                       />
                       <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                     </Field>
@@ -471,6 +483,7 @@ function EditLabTechFormContent({ labTech, open, onOpenChange }: EditLabTechForm
                       value={field.state.value}
                       onChange={(event) => field.handleChange(event.target.value)}
                       onBlur={field.handleBlur}
+                      max={getYesterdayDateInputValue()}
                     />
                     <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                   </Field>
