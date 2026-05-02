@@ -30,6 +30,7 @@ export function useDepartmentsTable(search: string) {
   const [page, setPage] = useState(1);
   const [debouncedSearch, setDebouncedSearch] = useState(search);
   const previousSearch = useRef("");
+  const lastKnownTotalPages = useRef(1);
   const normalizedSearch = debouncedSearch.trim();
   const { data, isError, isLoading } = useAdminGetAllDepartments({
     Page: page,
@@ -43,7 +44,15 @@ export function useDepartmentsTable(search: string) {
     [pagedResult],
   );
   const totalCount = Number(pagedResult?.totalCount ?? 0);
-  const totalPages = Math.max(1, Number(pagedResult?.totalPages ?? 1));
+  const totalPages = pagedResult
+    ? Math.max(
+        1,
+        Number(
+          pagedResult.totalPages ??
+            Math.ceil(totalCount / Number(pagedResult.pageSize || DEPARTMENTS_PAGE_SIZE)),
+        ),
+      )
+    : lastKnownTotalPages.current;
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -61,8 +70,13 @@ export function useDepartmentsTable(search: string) {
   }, [normalizedSearch]);
 
   useEffect(() => {
+    if (!pagedResult) {
+      return;
+    }
+
+    lastKnownTotalPages.current = totalPages;
     setPage((currentPage) => Math.min(currentPage, totalPages));
-  }, [totalPages]);
+  }, [pagedResult, totalPages]);
 
   function handlePageChange(nextPage: number) {
     setPage(Math.min(Math.max(nextPage, 1), totalPages));

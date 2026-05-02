@@ -1,9 +1,10 @@
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { Eye, EyeOff, Plus, Trash2 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { useAdminGetAllDepartments } from "@/api/generated/admins/admins";
 import { getGetAllQueryKey, useCreateDoctor } from "@/api/generated/doctors/doctors";
 import type { CreateDoctorCommand } from "@/api/model/CreateDoctorCommand";
 import { ApiError } from "@/api/ofetch-mutator";
@@ -34,6 +35,8 @@ const usernameRegex = /^[A-Za-z0-9_.]+$/;
 const phoneNumberRegex = /^\+\d{11,12}$/;
 const specialCharacterRegex = /[^a-zA-Z0-9]/;
 const malaysiaCountry = "Malaysia";
+// Defines how many active departments are loaded for doctor department dropdowns.
+const departmentSelectPageSize = 1000;
 const malaysiaStates: readonly string[] = [
   "Johor",
   "Kedah",
@@ -85,7 +88,7 @@ const optionalPhoneNumber = z
   .string()
   .refine(
     (value) => value.trim().length === 0 || phoneNumberRegex.test(value.trim()),
-    "Phone must be 12-13 characters starting with + followed by digits only",
+    "Phone number must be 12-13 characters starting with + followed by digits only",
   );
 
 const isValidDateOfBirth = (value: string) => {
@@ -220,6 +223,18 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
   const [showPassword, setShowPassword] = useState(false);
   const queryClient = useQueryClient();
   const { mutateAsync, isPending } = useCreateDoctor();
+  const {
+    data: departmentsResponse,
+    isError: isDepartmentsError,
+    isLoading: isDepartmentsLoading,
+  } = useAdminGetAllDepartments(
+    { Page: 1, PageSize: departmentSelectPageSize },
+    { query: { enabled: open } },
+  );
+  const departments = useMemo(
+    () => (departmentsResponse?.status === 200 ? departmentsResponse.data.items : []),
+    [departmentsResponse],
+  );
 
   const form = useForm({
     defaultValues: addDoctorDefaultValues,
@@ -434,11 +449,18 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                       <FieldLabel>Phone Number</FieldLabel>
                       <Input
                         value={field.state.value}
-                        onChange={(e) => field.handleChange(e.target.value)}
+                        onChange={(e) =>
+                          field.handleChange(
+                            e.target.value
+                              .replace(/[^\d+]/g, "")
+                              .replace(/(?!^)\+/g, "")
+                              .slice(0, 13),
+                          )
+                        }
                         onBlur={field.handleBlur}
-                        placeholder="10 digits"
-                        inputMode="numeric"
-                        maxLength={10}
+                        placeholder="+60162173366"
+                        inputMode="tel"
+                        maxLength={13}
                       />
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
@@ -523,12 +545,38 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                   {(field) => (
                     <Field>
                       <FieldLabel>Department</FieldLabel>
-                      <Input
+                      <Select
                         value={field.state.value}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        onBlur={field.handleBlur}
-                        placeholder="e.g. Cardiology Department"
-                      />
+                        onValueChange={(v) => field.handleChange(v ?? "")}
+                      >
+                        <SelectTrigger className="w-full" onBlur={field.handleBlur}>
+                          <SelectValue placeholder="Select department" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {isDepartmentsLoading && (
+                            <SelectItem value="__loading" disabled>
+                              Loading departments...
+                            </SelectItem>
+                          )}
+                          {isDepartmentsError && (
+                            <SelectItem value="__error" disabled>
+                              Failed to load departments
+                            </SelectItem>
+                          )}
+                          {!isDepartmentsLoading &&
+                            !isDepartmentsError &&
+                            departments.length === 0 && (
+                              <SelectItem value="__empty" disabled>
+                                No departments available
+                              </SelectItem>
+                            )}
+                          {departments.map((department) => (
+                            <SelectItem key={department.slug} value={department.name}>
+                              {department.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
                   )}
