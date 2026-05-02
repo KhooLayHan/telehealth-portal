@@ -1,4 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { motion, type Variants } from "framer-motion";
 import { Building2, Check, Clock, LoaderCircle, Pencil, Settings2, X } from "lucide-react";
 import type * as React from "react";
@@ -15,6 +16,14 @@ import type { AdminSettingsDto } from "@/api/model/AdminSettingsDto";
 import type { AdminUpdateSettingsCommand } from "@/api/model/AdminUpdateSettingsCommand";
 import { ApiError } from "@/api/ofetch-mutator";
 import { Badge } from "@/components/ui/badge";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -421,13 +430,26 @@ export function AdminSettingsPage() {
       initial="hidden"
       animate="show"
     >
-      <motion.div variants={cardAnim}>
-        <p className="text-xs text-muted-foreground">Dashboard &gt; Settings</p>
-        <h1 className="mt-0.5 font-bold text-2xl tracking-tight">Clinic Settings</h1>
-        <p className="text-muted-foreground text-sm">
-          Manage clinic information, operating hours, and appointment preferences.
-        </p>
-      </motion.div>
+      <motion.header className="space-y-2" variants={cardAnim}>
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink render={<Link to="/dashboard" />}>Dashboard</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Settings</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
+        <div className="space-y-1">
+          <h1 className="font-semibold text-3xl tracking-tight">Clinic Settings</h1>
+          <p className="text-lg text-muted-foreground">
+            Manage clinic information, operating hours, and appointment preferences.
+          </p>
+        </div>
+      </motion.header>
 
       {settingsQuery.isError ? (
         <motion.div variants={cardAnim}>
