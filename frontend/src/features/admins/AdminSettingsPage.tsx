@@ -430,7 +430,7 @@ export function AdminSettingsPage() {
       initial="hidden"
       animate="show"
     >
-      <motion.header className="space-y-2" variants={cardAnim}>
+      <motion.header className="space-y-6" variants={cardAnim}>
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
