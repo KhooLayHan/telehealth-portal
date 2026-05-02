@@ -80,8 +80,8 @@ type AdminUpdateProfilePayload = UpdateProfileCommand & {
 // ---------------------------------------------------------------------------
 
 const NAME_RE = /^[a-zA-Z ]+$/;
-const USERNAME_RE = /^[a-zA-Z0-9_]+$/;
-const PHONE_RE = /^\d{10}$/;
+const USERNAME_RE = /^[a-zA-Z0-9_.]+$/;
+const PHONE_RE = /^\+?\d+$/;
 const IC_RE = /^\d{12}$/;
 const POSTAL_RE = /^\d{5}$/;
 const ADDRESS_BANNED_RE = /[%$#@!&*^<>{}|[\]\\]/;
@@ -107,16 +107,19 @@ function validateProfile(data: AdminProfileFormData): AdminProfileFormErrors {
     errors.lastName = "Last name may only contain letters and spaces.";
   }
 
-  if (!data.username.trim()) {
+  const username = data.username.trim();
+  const phone = data.phone.trim();
+
+  if (!username) {
     errors.username = "Username is required.";
-  } else if (data.username.length < 3 || data.username.length > 20) {
+  } else if (username.length < 3 || username.length > 20) {
     errors.username = "Username must be 3–20 characters.";
-  } else if (!USERNAME_RE.test(data.username)) {
-    errors.username = "Username may only contain letters, numbers, and underscores.";
+  } else if (!USERNAME_RE.test(username)) {
+    errors.username = "Username may only contain letters, numbers, underscores, and dots.";
   }
 
-  if (data.phone && !PHONE_RE.test(data.phone)) {
-    errors.phone = "Phone number must be exactly 10 digits.";
+  if (phone && (phone.length < 12 || phone.length > 13 || !PHONE_RE.test(phone))) {
+    errors.phone = "Phone number must be 12-13 characters and contain only + and digits.";
   }
 
   if (!data.icNumber.trim()) {
