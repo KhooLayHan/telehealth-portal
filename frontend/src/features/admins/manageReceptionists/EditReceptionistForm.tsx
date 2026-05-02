@@ -28,25 +28,69 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+// Lists the gender codes accepted by the receptionist update API.
+const GENDERS = ["M", "F", "O", "N"] as const;
+
+// Matches Malaysian IC numbers in the backend format: 12 digits without dashes.
+const MALAYSIAN_IC_REGEX = /^\d{12}$/;
+
+// Checks that a form date string is not later than today's local date.
+function isNotFutureDate(value: string): boolean {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const selectedDate = new Date(`${value}T00:00:00`);
+
+  return !Number.isNaN(selectedDate.getTime()) && selectedDate <= today;
+}
+
 // Zod schema for validating the receptionist edit form
-const editReceptionistSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  username: z.string().min(1, "Username is required"),
-  email: z.string().email("Must be a valid email"),
-  icNumber: z
-    .string()
-    .min(1, "IC number is required")
-    .regex(/^\d{12}$/, "IC number must be exactly 12 digits without dashes"),
-  phoneNumber: z.string(),
-  gender: z.enum(["M", "F", "O", "N"], { message: "Select a gender" }),
-  dateOfBirth: z.string(),
-  street: z.string(),
-  city: z.string(),
-  state: z.string(),
-  postalCode: z.string(),
-  country: z.string(),
-});
+const editReceptionistSchema = z
+  .object({
+    firstName: z.string().trim().min(1, "First name is required").max(100),
+    lastName: z.string().trim().min(1, "Last name is required").max(100),
+    username: z.string().trim().min(1, "Username is required").max(50),
+    email: z.string().trim().min(1, "Email is required").email("Must be a valid email").max(254),
+    icNumber: z
+      .string()
+      .trim()
+      .regex(MALAYSIAN_IC_REGEX, "IC number must be exactly 12 digits without dashes"),
+    phoneNumber: z.string().trim().max(20, "Phone number must be 20 characters or fewer"),
+    gender: z.enum(GENDERS, { message: "Gender must be M, F, O, or N" }),
+    dateOfBirth: z
+      .string()
+      .min(1, "Date of birth is required")
+      .refine(isNotFutureDate, "Date of birth cannot be in the future"),
+    street: z.string().trim().max(200),
+    city: z.string().trim().max(100),
+    state: z.string().trim().max(100),
+    postalCode: z.string().trim().max(20),
+    country: z.string().trim().max(100),
+  })
+  .superRefine((value, context) => {
+    const addressFields = [
+      { field: "street", message: "Street is required", value: value.street },
+      { field: "city", message: "City is required", value: value.city },
+      { field: "state", message: "State is required", value: value.state },
+      { field: "postalCode", message: "Postal code is required", value: value.postalCode },
+      { field: "country", message: "Country is required", value: value.country },
+    ] as const;
+    const hasAddress = addressFields.some((field) => field.value.length > 0);
+
+    if (!hasAddress) {
+      return;
+    }
+
+    for (const field of addressFields) {
+      if (field.value.length === 0) {
+        context.addIssue({
+          code: "custom",
+          message: field.message,
+          path: [field.field],
+        });
+      }
+    }
+  });
 
 // Builds form defaults from the selected receptionist record
 function buildEditDefaultValues(receptionist: AdminReceptionistDto | null) {
@@ -102,26 +146,27 @@ export function EditReceptionistForm({
     onSubmit: async ({ value }) => {
       if (!receptionist?.publicId) return;
 
+      const address = {
+        street: value.street.trim(),
+        city: value.city.trim(),
+        state: value.state.trim(),
+        postalCode: value.postalCode.trim(),
+        country: value.country.trim(),
+      };
+      const hasAddress = Object.values(address).some((addressValue) => addressValue.length > 0);
+
       mutate({
         id: receptionist.publicId,
         data: {
-          firstName: value.firstName,
-          lastName: value.lastName,
-          username: value.username,
-          email: value.email,
-          icNumber: value.icNumber,
-          phoneNumber: value.phoneNumber || null,
+          firstName: value.firstName.trim(),
+          lastName: value.lastName.trim(),
+          username: value.username.trim(),
+          email: value.email.trim(),
+          icNumber: value.icNumber.trim(),
+          phoneNumber: value.phoneNumber.trim() || null,
           gender: value.gender,
           dateOfBirth: value.dateOfBirth,
-          address: value.street
-            ? {
-                street: value.street,
-                city: value.city,
-                state: value.state,
-                postalCode: value.postalCode,
-                country: value.country,
-              }
-            : null,
+          address: hasAddress ? address : null,
         },
       });
     },
