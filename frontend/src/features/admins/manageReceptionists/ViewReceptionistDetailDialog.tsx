@@ -143,7 +143,7 @@ export function ViewReceptionistDetailDialog({
                 {receptionist.firstName} {receptionist.lastName}
               </DialogTitle>
               <DialogDescription className="mt-1 text-sm">
-                @{receptionist.username} - {receptionist.phoneNumber || "No phone on record"}
+                {receptionist.phoneNumber || "No phone on record"}
               </DialogDescription>
             </div>
           </div>
@@ -158,16 +158,6 @@ export function ViewReceptionistDetailDialog({
             <DetailRow label="Date of Birth" value={formatDate(receptionist.dateOfBirth)} />
             <DetailRow label="Phone" value={receptionist.phoneNumber || "N/A"} />
             <DetailRow label="IC Number" value={receptionist.icNumber || "N/A"} />
-          </div>
-
-          <p className="mb-3 font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
-            Account Information
-          </p>
-          <div className="mb-5 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
-            <DetailRow label="Username" value={`@${receptionist.username}`} />
-            <DetailRow label="Email" value={receptionist.email} />
-            <DetailRow label="Slug" value={receptionist.slug} />
-            <DetailRow label="Joined" value={formatDate(receptionist.createdAt)} />
           </div>
 
           <p className="mb-3 font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
