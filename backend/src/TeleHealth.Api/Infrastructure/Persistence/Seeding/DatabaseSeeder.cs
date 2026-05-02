@@ -160,6 +160,7 @@ public sealed class DatabaseSeeder(
         var labReports = LabReportFaker.BuildLabReports(
             faker,
             consultations,
+            appointments,
             patients,
             labReportStatuses,
             _slugHelper

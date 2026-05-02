@@ -22,6 +22,7 @@ internal static class LabReportFaker
     internal static List<LabReport> BuildLabReports(
         Faker faker,
         List<Consultation> consultations,
+        List<Appointment> appointments,
         List<Patient> patients,
         Dictionary<string, LabReportStatus> labReportStatuses,
         SlugHelper slugHelper
@@ -36,7 +37,7 @@ internal static class LabReportFaker
             var reportType = faker.PickRandom(ReportTypes);
             var publicId = Guid.NewGuid();
             var slug = slugHelper.GenerateSlug($"lab-{publicId.ToString()[..8]}");
-            var patientId = faker.PickRandom(patients).Id;
+            var patientId = appointments.First(a => a.Id == consultation.AppointmentId).PatientId;
             var uploadedAt = now.Minus(Duration.FromDays(faker.Random.Int(1, 10)));
 
             labReports.Add(
@@ -88,121 +89,109 @@ internal static class LabReportFaker
     }
 
     /// Generates realistic biomarkers for the given report type.
-    private static List<Biomarker> GenerateBiomarkers(Faker faker, string reportType) =>
-        reportType switch
+    private static List<Biomarker> GenerateBiomarkers(Faker faker, string reportType)
+    {
+        switch (reportType)
         {
-            "Full Blood Count" =>
-            [
-                new(
-                    "Haemoglobin",
-                    $"{faker.Random.Double(11.5, 17.5):F1}",
-                    "g/dL",
-                    "12.0-17.5",
-                    faker.Random.Double(11.5, 17.5) < 12.0 ? "low" : "normal"
-                ),
-                new(
-                    "White Blood Cells",
-                    $"{faker.Random.Double(4.0, 11.0):F1}",
-                    "×10⁹/L",
-                    "4.0-11.0",
-                    "normal"
-                ),
-                new("Platelets", $"{faker.Random.Int(150, 400)}", "×10⁹/L", "150–400", "normal"),
-                new("Haematocrit", $"{faker.Random.Double(36, 50):F1}", "%", "36–50", "normal"),
-            ],
+            case "Full Blood Count":
+                var hb = faker.Random.Double(11.5, 17.5);
+                var wbc = faker.Random.Double(4.0, 11.0);
+                return
+                [
+                    new(
+                        "Haemoglobin",
+                        $"{hb:F1}",
+                        "g/dL",
+                        "12.0-17.5",
+                        hb < 12.0 ? "low" : "normal"
+                    ),
+                    new("White Blood Cells", $"{wbc:F1}", "10⁹/L", "4.0-11.0", "normal"),
+                    new("Platelets", $"{faker.Random.Int(150, 400)}", "10⁹/L", "150-400", "normal"),
+                    new("Haematocrit", $"{faker.Random.Double(36, 50):F1}", "%", "36-50", "normal"),
+                ];
 
-            "Liver Function Test" =>
-            [
-                new(
-                    "ALT",
-                    $"{faker.Random.Int(7, 70)}",
-                    "U/L",
-                    "7-56",
-                    faker.Random.Int(7, 70) > 56 ? "high" : "normal"
-                ),
-                new(
-                    "AST",
-                    $"{faker.Random.Int(10, 50)}",
-                    "U/L",
-                    "10-40",
-                    faker.Random.Int(10, 50) > 40 ? "high" : "normal"
-                ),
-                new("ALP", $"{faker.Random.Int(44, 147)}", "U/L", "44–147", "normal"),
-                new("Bilirubin", $"{faker.Random.Int(3, 21)}", "µmol/L", "3–21", "normal"),
-                new("Albumin", $"{faker.Random.Double(35, 50):F1}", "g/L", "35–50", "normal"),
-            ],
+            case "Liver Function Test":
+                var alt = faker.Random.Int(7, 70);
+                var ast = faker.Random.Int(10, 50);
+                return
+                [
+                    new("ALT", $"{alt}", "U/L", "7-56", alt > 56 ? "high" : "normal"),
+                    new("AST", $"{ast}", "U/L", "10-40", ast > 40 ? "high" : "normal"),
+                    new("ALP", $"{faker.Random.Int(44, 147)}", "U/L", "44-147", "normal"),
+                    new("Bilirubin", $"{faker.Random.Int(3, 21)}", "µmol/L", "3-21", "normal"),
+                    new("Albumin", $"{faker.Random.Double(35, 50):F1}", "g/L", "35-50", "normal"),
+                ];
 
-            "Lipid Panel" =>
-            [
-                new(
-                    "Total Cholesterol",
-                    $"{faker.Random.Double(3.5, 6.5):F1}",
-                    "mmol/L",
-                    "<5.2",
-                    faker.Random.Double(3.5, 6.5) > 5.2 ? "high" : "normal"
-                ),
-                new(
-                    "LDL",
-                    $"{faker.Random.Double(1.5, 4.5):F1}",
-                    "mmol/L",
-                    "<3.0",
-                    faker.Random.Double(1.5, 4.5) > 3.0 ? "high" : "normal"
-                ),
-                new(
-                    "HDL",
-                    $"{faker.Random.Double(0.9, 2.0):F1}",
-                    "mmol/L",
-                    ">1.0",
-                    faker.Random.Double(0.9, 2.0) < 1.0 ? "low" : "normal"
-                ),
-                new(
-                    "Triglycerides",
-                    $"{faker.Random.Double(0.5, 2.5):F1}",
-                    "mmol/L",
-                    "<1.7",
-                    faker.Random.Double(0.5, 2.5) > 1.7 ? "high" : "normal"
-                ),
-            ],
+            case "Lipid Panel":
+                var tc = faker.Random.Double(3.5, 6.5);
+                var ldl = faker.Random.Double(1.5, 4.5);
+                var hdl = faker.Random.Double(0.9, 2.0);
+                var tg = faker.Random.Double(0.5, 2.5);
+                return
+                [
+                    new(
+                        "Total Cholesterol",
+                        $"{tc:F1}",
+                        "mmol/L",
+                        "<5.2",
+                        tc > 5.2 ? "high" : "normal"
+                    ),
+                    new("LDL", $"{ldl:F1}", "mmol/L", "<3.0", ldl > 3.0 ? "high" : "normal"),
+                    new("HDL", $"{hdl:F1}", "mmol/L", ">1.0", hdl < 1.0 ? "low" : "normal"),
+                    new(
+                        "Triglycerides",
+                        $"{tg:F1}",
+                        "mmol/L",
+                        "<1.7",
+                        tg > 1.7 ? "high" : "normal"
+                    ),
+                ];
 
-            "HbA1c" =>
-            [
-                new(
-                    "HbA1c",
-                    $"{faker.Random.Double(4.5, 9.0):F1}",
-                    "%",
-                    "<5.7",
-                    faker.Random.Double(4.5, 9.0) > 6.5 ? "high" : "normal"
-                ),
-                new(
-                    "Est. Avg Glucose",
-                    $"{faker.Random.Int(80, 200)}",
-                    "mg/dL",
-                    "70-140",
-                    faker.Random.Int(80, 200) > 140 ? "high" : "normal"
-                ),
-            ],
+            case "HbA1c":
+                var hba1c = faker.Random.Double(4.5, 9.0);
+                var eag = faker.Random.Int(80, 200);
+                return
+                [
+                    new("HbA1c", $"{hba1c:F1}", "%", "<5.7", hba1c > 6.5 ? "high" : "normal"),
+                    new(
+                        "Est. Avg Glucose",
+                        $"{eag}",
+                        "mg/dL",
+                        "70-140",
+                        eag > 140 ? "high" : "normal"
+                    ),
+                ];
 
-            "Renal Function Test" =>
-            [
-                new(
-                    "Creatinine",
-                    $"{faker.Random.Double(60, 110):F0}",
-                    "µmol/L",
-                    "60-110",
-                    "normal"
-                ),
-                new("Urea", $"{faker.Random.Double(2.5, 8.0):F1}", "mmol/L", "2.5–8.0", "normal"),
-                new("eGFR", $"{faker.Random.Int(60, 120)}", "mL/min", ">60", "normal"),
-                new(
-                    "Potassium",
-                    $"{faker.Random.Double(3.5, 5.0):F1}",
-                    "mmol/L",
-                    "3.5-5.0",
-                    "normal"
-                ),
-                new("Sodium", $"{faker.Random.Int(136, 146)}", "mmol/L", "136–146", "normal"),
-            ],
+            case "Renal Function Test":
+                return
+                [
+                    new(
+                        "Creatinine",
+                        $"{faker.Random.Double(60, 110):F0}",
+                        "µmol/L",
+                        "60-110",
+                        "normal"
+                    ),
+                    new(
+                        "Urea",
+                        $"{faker.Random.Double(2.5, 8.0):F1}",
+                        "mmol/L",
+                        "2.5-8.0",
+                        "normal"
+                    ),
+                    new("eGFR", $"{faker.Random.Int(60, 120)}", "mL/min", ">60", "normal"),
+                    new(
+                        "Potassium",
+                        $"{faker.Random.Double(3.5, 5.0):F1}",
+                        "mmol/L",
+                        "3.5-5.0",
+                        "normal"
+                    ),
+                    new("Sodium", $"{faker.Random.Int(136, 146)}", "mmol/L", "136-146", "normal"),
+                ];
 
-            _ => [new("Result", faker.Lorem.Word(), "—", "See reference", "normal")],
-        };
+            default:
+                return [new("Result", faker.Lorem.Word(), "—", "See reference", "normal")];
+        }
+    }
 }
