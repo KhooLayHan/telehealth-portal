@@ -56,12 +56,12 @@ namespace TeleHealth.Api.Migrations
 
                         IF (TG_OP = 'INSERT') THEN
                             v_old_values   := NULL;
-                            v_new_values   := to_jsonb(NEW) - v_sanitize_keys;;
+                            v_new_values   := to_jsonb(NEW) - v_sanitize_keys;
                             v_changed_cols := NULL;
 
                         ELSIF (TG_OP = 'UPDATE') THEN
-                            v_old_values := to_jsonb(OLD) - v_sanitize_keys;;
-                            v_new_values := to_jsonb(NEW) - v_sanitize_keys;;
+                            v_old_values := to_jsonb(OLD) - v_sanitize_keys;
+                            v_new_values := to_jsonb(NEW) - v_sanitize_keys;
                             -- Collect only changed columns
                             SELECT array_agg(key)
                             INTO   v_changed_cols
@@ -69,7 +69,7 @@ namespace TeleHealth.Api.Migrations
                             WHERE  v_old_values->key IS DISTINCT FROM v_new_values->key;
 
                         ELSIF (TG_OP = 'DELETE') THEN
-                            v_old_values   := to_jsonb(OLD) - v_sanitize_keys;;
+                            v_old_values   := to_jsonb(OLD) - v_sanitize_keys;
                             v_new_values   := NULL;
                             v_changed_cols := NULL;
                         END IF;
