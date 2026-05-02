@@ -7,10 +7,14 @@ using TeleHealth.Api.Features.Admins.DeleteReceptionist;
 using TeleHealth.Api.Features.Admins.GetAllDepartments;
 using TeleHealth.Api.Features.Admins.GetAllLabTechs;
 using TeleHealth.Api.Features.Admins.GetAllReceptionists;
+using TeleHealth.Api.Features.Admins.GetAuditLogs;
+using TeleHealth.Api.Features.Admins.GetDashboardSummary;
 using TeleHealth.Api.Features.Admins.GetLabTech;
+using TeleHealth.Api.Features.Admins.GetSettings;
 using TeleHealth.Api.Features.Admins.UpdateDepartment;
 using TeleHealth.Api.Features.Admins.UpdateLabTech;
 using TeleHealth.Api.Features.Admins.UpdateReceptionist;
+using TeleHealth.Api.Features.Admins.UpdateSettings;
 using TeleHealth.Api.Features.Appointments.Book;
 using TeleHealth.Api.Features.Appointments.GetAllAppointments;
 using TeleHealth.Api.Features.Appointments.GetAppointmentByIdForDoctor;
@@ -47,6 +51,7 @@ using TeleHealth.Api.Features.Schedules.CreateSchedule;
 using TeleHealth.Api.Features.Schedules.DeleteSchedule;
 using TeleHealth.Api.Features.Schedules.GetAllAvailableSchedules;
 using TeleHealth.Api.Features.Schedules.GetDailySchedulesForReceptionist;
+using TeleHealth.Api.Features.SystemSettings.GetPublic;
 using TeleHealth.Api.Features.Users.Create;
 using TeleHealth.Api.Features.Users.DoctorProfile;
 using TeleHealth.Api.Features.Users.GetMe;
@@ -99,6 +104,10 @@ public static class EndpointMappingExtensions
         api.MapAdminCreateLabTechEndpoint();
         api.MapAdminUpdateLabTechEndpoint();
         api.MapAdminDeleteLabTechEndpoint();
+        api.MapAdminGetAuditLogsEndpoint();
+        api.MapAdminGetDashboardSummaryEndpoint();
+        api.MapAdminGetSettingsEndpoint();
+        api.MapAdminUpdateSettingsEndpoint();
         api.MapCreateDoctorEndpoint();
         api.MapGetAllDoctorsEndpoint();
         api.MapUpdateDoctorEndpoint();
@@ -121,6 +130,7 @@ public static class EndpointMappingExtensions
         api.MapDeletePatientEndpoint();
         api.MapGetDoctorPatientsEndpoint();
         api.MapGetDoctorPatientAppointmentsEndpoint();
+        api.MapGetPublicSystemSettingsEndpoint();
 
         return api;
     }
