@@ -237,7 +237,7 @@ export function AdminDoctorsPage() {
 
   return (
     <>
-      <div className="mb-6 space-y-2">
+      <div className="mb-6 space-y-6">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
