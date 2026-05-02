@@ -1,14 +1,5 @@
-using Amazon.S3;
-using FluentValidation;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using NodaTime;
-using NodaTime.Serialization.SystemTextJson;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Trace;
 using Scalar.AspNetCore;
 using Serilog;
-using TeleHealth.Api.Common;
 using TeleHealth.Api.Common.Extensions;
 using TeleHealth.Api.Common.Security;
 using TeleHealth.Api.Domain.Entities;
@@ -83,8 +74,6 @@ Log.Information("Starting TeleHealth API Boot Sequence...");
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog((context, config) => config.ReadFrom.Configuration(context.Configuration));
-
-builder.Services.AddProblemDetailsExceptionHandling();
 
 builder
     .Services.AddOpenTelemetry()
@@ -248,6 +237,16 @@ builder.Services.AddAWSService<IAmazonS3>();
 builder.Services.AddScoped<IS3Service, S3Service>();
 
 builder.Services.AddHttpContextAccessor();
+    .Services.AddProblemDetailsExceptionHandling()
+    .AddOpenTelemetryConfiguration()
+    .AddOpenApiConfiguration()
+    .AddDatabaseConfiguration(builder.Configuration, builder.Environment)
+    .AddJwtAuthentication(builder.Configuration)
+    .AddAuthorizationPolicies()
+    .AddCorsConfiguration(builder.Configuration)
+    .AddMassTransitConfiguration(builder.Configuration, builder.Environment)
+    .AddApiVersioningConfiguration()
+    .AddApplicationServices(builder.Configuration);
 
 var app = builder.Build();
 
@@ -260,9 +259,7 @@ if (app.Environment.IsDevelopment())
             .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
     );
 
-    using var scope = app.Services.CreateScope();
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    await dbContext.Database.MigrateAsync();
+    await app.MigrateAsync();
 }
 
 app.UseCors("AllowFrontend");
@@ -341,6 +338,7 @@ api.MapDeletePatientEndpoint();
 api.MapGetDoctorPatientsEndpoint();
 api.MapGetDoctorPatientAppointmentsEndpoint();
 api.MapGetPublicSystemSettingsEndpoint();
+api.MapAllEndpoints();
 
 Log.Information("TeleHealth API successfully started.");
 

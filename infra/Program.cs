@@ -34,8 +34,8 @@ return await Deployment.RunAsync(() =>
         ["DbSecretArn"] = db.DbSecret.Arn,
         ["XRayGroupArn"] = obs.XrayGroup.Arn,
         ["ApiLogGroupName"] = obs.ApiLogGroup.Name,
-        ["LambdaFunctionName"] = serverless.PdfProcessorLambda.Name,
-        ["ReminderLambdaName"] = serverless.ReminderLambda.Name,
+        // TODO: Will add back once tested is working without lambda
         // ["LambdaFunctionName"] = serverless.PdfProcessorLambda.Name,
+        // ["ReminderLambdaName"] = serverless.ReminderLambda.Name,
     };
 });

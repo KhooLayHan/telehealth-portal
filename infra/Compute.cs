@@ -262,6 +262,10 @@ public static class Compute
                     // -- App environment variables --
                     EbEnvVar("ASPNETCORE_ENVIRONMENT", "Production"),
                     EbEnvVar("ASPNETCORE_HTTP_PORTS", "8080"),
+                    EbEnvVar(
+                        "Cors__AllowedOrigins",
+                        storage.FrontendBucket.WebsiteEndpoint.Apply(ep => $"http://{ep}")
+                    ),
                     // DB connection — app resolves password from Secrets Manager at runtime
                     EbEnvVar("RDS_HOST", db.Instance.Address),
                     EbEnvVar("RDS_PORT", "5432"),
