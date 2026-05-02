@@ -267,16 +267,16 @@ export function AddDoctorScheduleForm({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg gap-0 overflow-hidden p-0">
-        <div className="absolute inset-x-0 top-0 h-px bg-border" />
+        <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
 
-        <DialogHeader className="px-6 pb-4 pt-7">
+        <DialogHeader className="px-6 pt-7 pb-4">
           <div className="flex items-start gap-4">
-            <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-muted text-foreground">
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
               <CalendarPlus className="size-5" />
             </div>
             <div className="min-w-0 flex-1">
-              <DialogTitle className="text-xl font-semibold leading-none">Add Schedule</DialogTitle>
-              <DialogDescription className="mt-1 text-sm text-muted-foreground">
+              <DialogTitle className="font-semibold text-xl leading-none">Add Schedule</DialogTitle>
+              <DialogDescription className="mt-1 text-sm">
                 Create a schedule slot for{" "}
                 <span className="font-medium text-foreground">{doctorName}</span>.
               </DialogDescription>
@@ -285,36 +285,24 @@ export function AddDoctorScheduleForm({
         </DialogHeader>
 
         <form
-          className="space-y-4 px-6 pb-6"
+          className="flex flex-col"
           onSubmit={(event) => {
             event.preventDefault();
             form.handleSubmit();
           }}
         >
-          <form.Field name="date">
-            {(field) => (
-              <Field data-invalid={field.state.meta.errors.length > 0}>
-                <FieldLabel htmlFor={field.name}>Date</FieldLabel>
-                <Input
-                  id={field.name}
-                  type="date"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(event) => field.handleChange(event.target.value)}
-                />
-                <FieldError errors={field.state.meta.errors} />
-              </Field>
-            )}
-          </form.Field>
+          <div className="max-h-[60vh] space-y-4 overflow-y-auto px-6 pb-6">
+            <p className="font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
+              Schedule Details
+            </p>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <form.Field name="startTime">
+            <form.Field name="date">
               {(field) => (
                 <Field data-invalid={field.state.meta.errors.length > 0}>
-                  <FieldLabel htmlFor={field.name}>Start Time</FieldLabel>
+                  <FieldLabel htmlFor={field.name}>Date</FieldLabel>
                   <Input
                     id={field.name}
-                    type="time"
+                    type="date"
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(event) => field.handleChange(event.target.value)}
@@ -324,66 +312,92 @@ export function AddDoctorScheduleForm({
               )}
             </form.Field>
 
-            <form.Subscribe>
-              {(state) => {
-                const endTime = getSlotEndTime(state.values.startTime, appointmentDurationMinutes);
-                const operatingHoursError = getOperatingHoursValidationMessage({
-                  date: state.values.date,
-                  endTime,
-                  operatingHours,
-                  startTime: state.values.startTime,
-                });
-                const endTimeError = settingsQuery.isError
-                  ? "Appointment duration settings could not be loaded."
-                  : appointmentDurationMinutes && !endTime
-                    ? "Choose an earlier start time."
-                    : operatingHoursError;
+            <div className="rounded-lg border border-border bg-muted/30 px-4 py-3">
+              <p className="mb-3 font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
+                Slot Timing
+              </p>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <form.Field name="startTime">
+                  {(field) => (
+                    <Field data-invalid={field.state.meta.errors.length > 0}>
+                      <FieldLabel htmlFor={field.name}>Start Time</FieldLabel>
+                      <Input
+                        id={field.name}
+                        type="time"
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(event) => field.handleChange(event.target.value)}
+                      />
+                      <FieldError errors={field.state.meta.errors} />
+                    </Field>
+                  )}
+                </form.Field>
 
-                return (
-                  <Field data-invalid={!!endTimeError}>
-                    <FieldLabel htmlFor="endTime">End Time</FieldLabel>
-                    <Input
-                      aria-invalid={!!endTimeError}
-                      disabled
-                      id="endTime"
-                      readOnly
-                      type="time"
-                      value={endTime}
-                    />
-                    <FieldError errors={endTimeError ? [{ message: endTimeError }] : []} />
-                  </Field>
-                );
-              }}
-            </form.Subscribe>
+                <form.Subscribe>
+                  {(state) => {
+                    const endTime = getSlotEndTime(
+                      state.values.startTime,
+                      appointmentDurationMinutes,
+                    );
+                    const operatingHoursError = getOperatingHoursValidationMessage({
+                      date: state.values.date,
+                      endTime,
+                      operatingHours,
+                      startTime: state.values.startTime,
+                    });
+                    const endTimeError = settingsQuery.isError
+                      ? "Appointment duration settings could not be loaded."
+                      : appointmentDurationMinutes && !endTime
+                        ? "Choose an earlier start time."
+                        : operatingHoursError;
+
+                    return (
+                      <Field data-invalid={!!endTimeError}>
+                        <FieldLabel htmlFor="endTime">End Time</FieldLabel>
+                        <Input
+                          aria-invalid={!!endTimeError}
+                          disabled
+                          id="endTime"
+                          readOnly
+                          type="time"
+                          value={endTime}
+                        />
+                        <FieldError errors={endTimeError ? [{ message: endTimeError }] : []} />
+                      </Field>
+                    );
+                  }}
+                </form.Subscribe>
+              </div>
+            </div>
+
+            <form.Field name="scheduleStatus">
+              {(field) => (
+                <Field data-invalid={field.state.meta.errors.length > 0}>
+                  <FieldLabel htmlFor={field.name}>Status</FieldLabel>
+                  <Select
+                    value={field.state.value}
+                    onValueChange={(value) =>
+                      field.handleChange(value === "Blocked" ? "Blocked" : "Available")
+                    }
+                  >
+                    <SelectTrigger
+                      className="w-full"
+                      aria-invalid={field.state.meta.errors.length > 0}
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Available">Available</SelectItem>
+                      <SelectItem value="Blocked">Blocked</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FieldError errors={field.state.meta.errors} />
+                </Field>
+              )}
+            </form.Field>
           </div>
 
-          <form.Field name="scheduleStatus">
-            {(field) => (
-              <Field data-invalid={field.state.meta.errors.length > 0}>
-                <FieldLabel htmlFor={field.name}>Status</FieldLabel>
-                <Select
-                  value={field.state.value}
-                  onValueChange={(value) =>
-                    field.handleChange(value === "Blocked" ? "Blocked" : "Available")
-                  }
-                >
-                  <SelectTrigger
-                    className="w-full"
-                    aria-invalid={field.state.meta.errors.length > 0}
-                  >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Available">Available</SelectItem>
-                    <SelectItem value="Blocked">Blocked</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FieldError errors={field.state.meta.errors} />
-              </Field>
-            )}
-          </form.Field>
-
-          <div className="flex justify-end gap-2 border-t border-border pt-4">
+          <div className="flex justify-end gap-2 border-t border-border px-6 py-4">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
