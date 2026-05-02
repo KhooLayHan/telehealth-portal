@@ -63,14 +63,26 @@ const USERNAME_REGEX = /^[A-Za-z0-9_.]+$/;
 // Matches international phone numbers with a + prefix and 11-12 digits.
 const PHONE_NUMBER_REGEX = /^\+\d{11,12}$/;
 
-// Checks that a form date string is not later than today's local date.
-function isNotFutureDate(value: string): boolean {
+// Checks that a form date string is earlier than today's local date.
+function isPastDate(value: string): boolean {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
   const selectedDate = new Date(`${value}T00:00:00`);
 
-  return !Number.isNaN(selectedDate.getTime()) && selectedDate <= today;
+  return !Number.isNaN(selectedDate.getTime()) && selectedDate < today;
+}
+
+// Gets the latest date of birth allowed by the form date picker.
+function getMaxDateOfBirth(): string {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  const year = yesterday.getFullYear();
+  const month = String(yesterday.getMonth() + 1).padStart(2, "0");
+  const day = String(yesterday.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 }
 
 // Zod schema for validating the add receptionist form
@@ -119,7 +131,7 @@ const addReceptionistSchema = z
     dateOfBirth: z
       .string()
       .min(1, "Date of birth is required")
-      .refine(isNotFutureDate, "Date of birth cannot be in the future"),
+      .refine(isPastDate, "Date of birth cannot be today or in the future"),
     street: z.string().trim().max(200),
     city: z.string().trim().max(100),
     state: z.union([z.literal(""), z.enum(MALAYSIA_STATES)]),
@@ -340,9 +352,10 @@ export function AddNewReceptionistForm({ open, onOpenChange }: AddNewReceptionis
                         value={field.state.value}
                         onChange={(event) => field.handleChange(event.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder="e.g. 0123456789"
-                        inputMode="numeric"
-                        maxLength={10}
+                        placeholder="e.g. +60162173366"
+                        inputMode="tel"
+                        minLength={12}
+                        maxLength={13}
                       />
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
@@ -382,6 +395,7 @@ export function AddNewReceptionistForm({ open, onOpenChange }: AddNewReceptionis
                       value={field.state.value}
                       onChange={(event) => field.handleChange(event.target.value)}
                       onBlur={field.handleBlur}
+                      max={getMaxDateOfBirth()}
                     />
                     <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                   </Field>
