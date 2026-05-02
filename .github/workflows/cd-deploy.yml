@@ -281,7 +281,7 @@ jobs:
           
           # Zip the output (The Native AOT binary is named 'bootstrap')
           cd publish
-          # zip -r ../../function.zip *
+          zip -r ../../function.zip *
 
       # ── Update the Lambda function code directly via AWS CLI ──
       - name: Deploy to AWS Lambda
