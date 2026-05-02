@@ -363,7 +363,7 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                       value={field.state.value}
                       onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
-                      placeholder="e.g. 820101-14-5678"
+                      placeholder="e.g. 820101145678"
                       className="font-mono"
                     />
                     <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
