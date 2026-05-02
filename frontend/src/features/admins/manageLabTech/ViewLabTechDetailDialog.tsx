@@ -173,6 +173,7 @@ export function ViewLabTechDetailDialog({
             <DetailRow label="Gender" value={genderLabel(displayedLabTech.gender)} />
             <DetailRow label="Date of Birth" value={formatDate(displayedLabTech.dateOfBirth)} />
             <DetailRow label="Phone" value={displayedLabTech.phoneNumber || "N/A"} />
+            <DetailRow label="IC Number" value={displayedLabTech.icNumber || "N/A"} />
           </div>
 
           <p className="mb-3 font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">

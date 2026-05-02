@@ -17,6 +17,7 @@ export interface AdminLabTechDto {
   /** @nullable */
   phoneNumber?: string | null;
   slug: string;
+  icNumber: string;
   /**
    * @minLength 1
    * @maxLength 1

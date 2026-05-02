@@ -27,6 +27,7 @@ public sealed class AdminGetLabTechHandler(ApplicationDbContext db)
                     Email = u.Email,
                     PhoneNumber = u.Phone,
                     Slug = u.Slug,
+                    IcNumber = u.IcNumber,
                     Gender = u.Gender,
                     DateOfBirth = u.DateOfBirth,
                     AvatarUrl = u.AvatarUrl,
