@@ -1,6 +1,6 @@
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { ChevronLeft, ChevronRight, Eye, Pencil, Search, Trash2 } from "lucide-react";
-import { useMemo } from "react";
+import { type ReactNode, useMemo } from "react";
 import type { AdminReceptionistDto } from "@/api/model/AdminReceptionistDto";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -174,6 +174,7 @@ interface ReceptionistTableProps extends ReceptionistTableMeta {
   onPageChange: (page: number) => void;
   search: string;
   onSearchChange: (value: string) => void;
+  toolbarActions?: ReactNode;
 }
 
 // Paginated and searchable data table for the receptionists list.
@@ -187,6 +188,7 @@ export function ReceptionistTable({
   onPageChange,
   search,
   onSearchChange,
+  toolbarActions,
   onView,
   onEdit,
   onDeactivate,
@@ -204,18 +206,21 @@ export function ReceptionistTable({
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative w-full sm:w-80">
-          <label htmlFor="receptionist-search" className="sr-only">
-            Search receptionists
-          </label>
-          <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            id="receptionist-search"
-            placeholder="Search by name..."
-            value={search}
-            onChange={(event) => onSearchChange(event.target.value)}
-            className="h-9 pl-9 text-sm"
-          />
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="relative w-full sm:w-80">
+            <label htmlFor="receptionist-search" className="sr-only">
+              Search receptionists
+            </label>
+            <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              id="receptionist-search"
+              placeholder="Search by name..."
+              value={search}
+              onChange={(event) => onSearchChange(event.target.value)}
+              className="h-9 pl-9 text-sm"
+            />
+          </div>
+          {toolbarActions}
         </div>
         <p className="text-sm text-muted-foreground" aria-live="polite">
           <span className="font-semibold text-foreground">{totalCount}</span>{" "}
