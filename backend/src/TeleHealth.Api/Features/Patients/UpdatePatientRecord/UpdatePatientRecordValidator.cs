@@ -4,14 +4,22 @@ namespace TeleHealth.Api.Features.Patients.UpdatePatientRecord;
 
 public class UpdatePatientRecordValidator : AbstractValidator<UpdatePatientRecordCommand>
 {
+    private static readonly char[] ValidGenders = ['M', 'F', 'O', 'N'];
+
     public UpdatePatientRecordValidator()
     {
         RuleFor(x => x.FirstName).NotEmpty().MaximumLength(100);
         RuleFor(x => x.LastName).NotEmpty().MaximumLength(100);
+        RuleFor(x => x.Username).NotEmpty().MaximumLength(50);
+        RuleFor(x => x.Email).NotEmpty().EmailAddress().MaximumLength(255);
+        RuleFor(x => x.IcNumber)
+            .NotEmpty()
+            .Matches(@"^\d{12}$")
+            .WithMessage("IC number must be exactly 12 digits.");
         RuleFor(x => x.DateOfBirth).NotEmpty();
         RuleFor(x => x.PhoneNumber).MaximumLength(16).When(x => x.PhoneNumber != null);
         RuleFor(x => x.Gender)
-            .Must(g => new[] { 'M', 'F', 'O', 'N' }.Contains(g))
+            .Must(g => Array.IndexOf(ValidGenders, g) >= 0)
             .WithMessage("Gender must be M, F, O, or N.");
 
         When(

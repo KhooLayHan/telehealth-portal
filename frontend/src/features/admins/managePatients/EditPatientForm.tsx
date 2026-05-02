@@ -45,6 +45,9 @@ const allergySchema = z.object({
 const editPatientSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
+  username: z.string().min(1, "Username is required").max(50, "Username is too long"),
+  email: z.string().email("Must be a valid email").max(255, "Email is too long"),
+  icNumber: z.string().regex(/^\d{12}$/, "IC number must be exactly 12 digits"),
   gender: z.string().min(1, "Gender is required"),
   dateOfBirth: z.string().min(1, "Date of birth is required"),
   phoneNumber: z.string(),
@@ -77,6 +80,9 @@ function buildEditPatientValues(patient: ClinicStaffPatientDto): EditPatientForm
   return {
     firstName: patient.firstName,
     lastName: patient.lastName,
+    username: patient.username,
+    email: patient.email,
+    icNumber: patient.icNumber,
     dateOfBirth: String(patient.dateOfBirth),
     phoneNumber: patient.phoneNumber || "",
     gender: patient.gender || "N",
@@ -148,6 +154,9 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
       const updatePayload: UpdatePatientRecordCommand = {
         firstName: value.firstName.trim(),
         lastName: value.lastName.trim(),
+        username: value.username.trim(),
+        email: value.email.trim(),
+        icNumber: value.icNumber.trim(),
         dateOfBirth: value.dateOfBirth,
         phoneNumber: value.phoneNumber.trim() || null,
         gender: value.gender || "N",
@@ -233,8 +242,9 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
           className="flex flex-col"
         >
           <Tabs defaultValue="personal" className="flex-1 px-6 pb-4">
-            <TabsList className="mb-5 grid w-full grid-cols-3">
+            <TabsList className="mb-5 grid w-full grid-cols-4">
               <TabsTrigger value="personal">Personal</TabsTrigger>
+              <TabsTrigger value="account">Account</TabsTrigger>
               <TabsTrigger value="allergies">Allergies</TabsTrigger>
               <TabsTrigger value="emergency">Emergency</TabsTrigger>
             </TabsList>
@@ -359,6 +369,67 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
                   )}
                 </form.Field>
               </div>
+            </TabsContent>
+
+            <TabsContent
+              value="account"
+              className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
+            >
+              <p className="font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
+                Account Information
+              </p>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <form.Field name="username">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Username</FieldLabel>
+                      <Input
+                        value={field.state.value}
+                        onChange={(event) => field.handleChange(event.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. patient.john"
+                        autoComplete="off"
+                      />
+                      <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                    </Field>
+                  )}
+                </form.Field>
+
+                <form.Field name="email">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Email</FieldLabel>
+                      <Input
+                        type="email"
+                        value={field.state.value}
+                        onChange={(event) => field.handleChange(event.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="e.g. patient@example.com"
+                        autoComplete="off"
+                      />
+                      <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                    </Field>
+                  )}
+                </form.Field>
+              </div>
+
+              <form.Field name="icNumber">
+                {(field) => (
+                  <Field>
+                    <FieldLabel>IC Number</FieldLabel>
+                    <Input
+                      value={field.state.value}
+                      onChange={(event) => field.handleChange(event.target.value)}
+                      onBlur={field.handleBlur}
+                      placeholder="12 digits without dashes"
+                      className="font-mono"
+                      autoComplete="off"
+                    />
+                    <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                  </Field>
+                )}
+              </form.Field>
             </TabsContent>
 
             <TabsContent value="allergies" className="mt-0 max-h-[52vh] overflow-y-auto pb-2 pr-1">
