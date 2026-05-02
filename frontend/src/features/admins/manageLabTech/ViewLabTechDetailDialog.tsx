@@ -152,7 +152,6 @@ export function ViewLabTechDetailDialog({
             <div className="min-w-0 flex-1">
               <DialogTitle className="font-semibold text-xl leading-none">{fullName}</DialogTitle>
               <DialogDescription className="mt-1 text-sm">
-                @{displayedLabTech.username} -{" "}
                 {displayedLabTech.phoneNumber || "No phone on record"}
               </DialogDescription>
               {(isFetching || isError) && (
@@ -174,16 +173,6 @@ export function ViewLabTechDetailDialog({
             <DetailRow label="Gender" value={genderLabel(displayedLabTech.gender)} />
             <DetailRow label="Date of Birth" value={formatDate(displayedLabTech.dateOfBirth)} />
             <DetailRow label="Phone" value={displayedLabTech.phoneNumber || "N/A"} />
-          </div>
-
-          <p className="mb-3 font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
-            Account Information
-          </p>
-          <div className="mb-5 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
-            <DetailRow label="Username" value={`@${displayedLabTech.username}`} />
-            <DetailRow label="Email" value={displayedLabTech.email} />
-            <DetailRow label="Slug" value={displayedLabTech.slug} />
-            <DetailRow label="Joined" value={formatDate(displayedLabTech.createdAt)} />
           </div>
 
           <p className="mb-3 font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
