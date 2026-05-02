@@ -7,7 +7,6 @@ import {
   Loader2,
   Lock,
   Mail,
-  MapPin,
   Pencil,
   Shield,
   User,
@@ -132,6 +131,137 @@ function SelectFieldRow({
         </SelectContent>
       </Select>
       {error && <p className="text-destructive text-xs">{error}</p>}
+    </div>
+  );
+}
+
+// Lists the Malaysian states and federal territories available for profile addresses.
+const MALAYSIA_STATES = [
+  "Johor",
+  "Kedah",
+  "Kelantan",
+  "Melaka",
+  "Negeri Sembilan",
+  "Pahang",
+  "Perak",
+  "Perlis",
+  "Pulau Pinang",
+  "Sabah",
+  "Sarawak",
+  "Selangor",
+  "Terengganu",
+  "Wilayah Persekutuan Kuala Lumpur",
+  "Wilayah Persekutuan Labuan",
+  "Wilayah Persekutuan Putrajaya",
+] as const;
+
+// Renders the profile address text input with the visual weight used in the address mockup.
+function AddressFieldRow({
+  label,
+  field,
+  value,
+  error,
+  placeholder,
+  readOnly = false,
+  className,
+  onChange,
+}: {
+  label: string;
+  field: keyof AdminProfileFormData;
+  value: string;
+  error?: string;
+  placeholder?: string;
+  readOnly?: boolean;
+  className?: string;
+  onChange: (field: keyof AdminProfileFormData, value: string) => void;
+}) {
+  const inputId = `admin-profile-${String(field)}`;
+
+  return (
+    <div className="flex flex-col gap-2">
+      <label htmlFor={inputId} className="font-medium text-sm">
+        {label}
+      </label>
+      <Input
+        id={inputId}
+        value={value}
+        onChange={(e) => onChange(field, e.target.value)}
+        placeholder={placeholder}
+        readOnly={readOnly}
+        aria-readonly={readOnly}
+        className={`${readOnly ? "bg-muted text-foreground" : ""} ${
+          error ? "border-destructive focus-visible:ring-destructive" : ""
+        } ${className ?? ""}`}
+      />
+      {error && <span className="font-normal text-destructive text-xs">{error}</span>}
+    </div>
+  );
+}
+
+// Renders the profile address select input with the same layout as address text fields.
+function AddressSelectFieldRow({
+  label,
+  field,
+  value,
+  error,
+  placeholder,
+  options,
+  onChange,
+}: {
+  label: string;
+  field: keyof AdminProfileFormData;
+  value: string;
+  error?: string;
+  placeholder?: string;
+  options: readonly string[];
+  onChange: (field: keyof AdminProfileFormData, value: string) => void;
+}) {
+  const triggerId = `admin-profile-${String(field)}`;
+
+  return (
+    <div className="flex flex-col gap-2">
+      <label htmlFor={triggerId} className="font-medium text-sm">
+        {label}
+      </label>
+      <Select value={value || undefined} onValueChange={(val) => onChange(field, val ?? "")}>
+        <SelectTrigger
+          id={triggerId}
+          className={`w-full ${error ? "border-destructive focus-visible:ring-destructive" : ""}`}
+        >
+          <SelectValue placeholder={placeholder ?? `Select ${label.toLowerCase()}`} />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((option) => (
+            <SelectItem key={option} value={option}>
+              {option}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      {error && <span className="font-normal text-destructive text-xs">{error}</span>}
+    </div>
+  );
+}
+
+// Displays a read-only address value using the same sizing as the editable address form.
+function AddressDisplayField({
+  label,
+  value,
+  className,
+}: {
+  label: string;
+  value?: string | null;
+  className?: string;
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="font-medium text-sm">{label}</span>
+      <Input
+        value={value || "—"}
+        readOnly
+        aria-readonly="true"
+        className={`bg-background ${className ?? ""}`}
+      />
     </div>
   );
 }
@@ -464,78 +594,74 @@ export function AdminProfilePage() {
         <Card className="relative overflow-hidden">
           <div className="absolute inset-x-0 top-0 h-0.75 bg-border" />
           <CardContent className="px-6 pb-6 pt-7">
-            <div className="mb-3 flex items-center gap-2">
-              <MapPin className="size-3.5 text-muted-foreground" />
+            <div className="mb-5">
               <SectionLabel>Address</SectionLabel>
             </div>
 
             {isEditing ? (
-              <div className="flex flex-col gap-4">
-                <FieldRow
-                  label="Address Line 1"
+              <div className="flex w-full max-w-sm flex-col gap-4">
+                <AddressFieldRow
+                  label="Street"
                   field="addressLine1"
                   value={formData.addressLine1}
                   error={formErrors.addressLine1}
-                  placeholder="Unit / floor / building name"
+                  placeholder="e.g. 123 Jalan Ampang"
                   onChange={handleFieldChange}
                 />
-                <FieldRow
-                  label="Address Line 2"
-                  field="addressLine2"
-                  value={formData.addressLine2}
-                  error={formErrors.addressLine2}
-                  placeholder="Street name (optional)"
-                  onChange={handleFieldChange}
-                />
-                <div className="grid grid-cols-3 gap-4">
-                  <FieldRow
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <AddressFieldRow
                     label="City"
                     field="city"
                     value={formData.city}
                     error={formErrors.city}
-                    placeholder="City"
+                    placeholder="e.g. Kuala Lumpur"
                     onChange={handleFieldChange}
                   />
-                  <FieldRow
+                  <AddressSelectFieldRow
                     label="State"
                     field="state"
                     value={formData.state}
                     error={formErrors.state}
-                    placeholder="State"
+                    placeholder="Select state"
+                    options={MALAYSIA_STATES}
                     onChange={handleFieldChange}
                   />
-                  <FieldRow
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <AddressFieldRow
                     label="Postal Code"
                     field="postalCode"
                     value={formData.postalCode}
                     error={formErrors.postalCode}
-                    placeholder="00000"
+                    placeholder="e.g. 50450"
+                    className="font-mono"
+                    onChange={handleFieldChange}
+                  />
+                  <AddressFieldRow
+                    label="Country"
+                    field="country"
+                    value={formData.country || "Malaysia"}
+                    error={formErrors.country}
+                    readOnly
                     onChange={handleFieldChange}
                   />
                 </div>
-                <FieldRow
-                  label="Country"
-                  field="country"
-                  value={formData.country}
-                  error={formErrors.country}
-                  placeholder="Country"
-                  onChange={handleFieldChange}
-                />
               </div>
             ) : (
-              <div className="flex flex-col gap-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <InfoRow label="Address Line 1" value={me.addressLine1} />
-                  <InfoRow label="Address Line 2" value={me.addressLine2} />
+              <div className="flex w-full max-w-sm flex-col gap-4">
+                <AddressDisplayField label="Street" value={me.addressLine1} />
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <AddressDisplayField label="City" value={me.city} />
+                  <AddressDisplayField label="State" value={me.state} />
                 </div>
-                <div className="h-px bg-border" />
-                <div className="grid grid-cols-3 gap-4">
-                  <InfoRow label="City" value={me.city} />
-                  <InfoRow label="State" value={me.state} />
-                  <InfoRow label="Postal Code" value={me.postalCode} />
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <AddressDisplayField
+                    label="Postal Code"
+                    value={me.postalCode}
+                    className="font-mono"
+                  />
+                  <AddressDisplayField label="Country" value={me.country ?? "Malaysia"} />
                 </div>
-                <div className="h-px bg-border" />
-                <InfoRow label="Country" value={me.country} />
               </div>
             )}
           </CardContent>

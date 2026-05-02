@@ -221,7 +221,7 @@ function toFormData(data: AdminMeData): AdminProfileFormData {
     city: data.city ?? "",
     state: data.state ?? "",
     postalCode: data.postalCode ?? "",
-    country: data.country ?? "",
+    country: data.country ?? "Malaysia",
   };
 }
 
@@ -282,7 +282,7 @@ const EMPTY_FORM_DATA: AdminProfileFormData = {
   city: "",
   state: "",
   postalCode: "",
-  country: "",
+  country: "Malaysia",
 };
 
 export function UseAdminProfile() {
