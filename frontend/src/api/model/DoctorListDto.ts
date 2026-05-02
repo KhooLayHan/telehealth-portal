@@ -15,6 +15,7 @@ export interface DoctorListDto {
   lastName?: string;
   username?: string;
   email?: string;
+  icNumber?: string;
   specialization?: string;
   departmentName?: string;
   licenseNumber?: string;

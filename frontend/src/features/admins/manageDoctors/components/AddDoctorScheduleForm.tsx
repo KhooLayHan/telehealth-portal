@@ -3,10 +3,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import { CalendarPlus } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { useAdminGetSettings } from "@/api/generated/admins/admins";
 import {
   getGetDailySchedulesForReceptionistQueryKey,
   useCreateSchedule,
 } from "@/api/generated/schedules/schedules";
+import type { AdminOperatingHourDto } from "@/api/model/AdminOperatingHourDto";
 import type { CreateScheduleCommand } from "@/api/model/CreateScheduleCommand";
 import { ApiError } from "@/api/ofetch-mutator";
 import { Button } from "@/components/ui/button";
@@ -27,21 +29,52 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const addDoctorScheduleSchema = z
-  .object({
-    date: z.string().min(1, "Required"),
-    startTime: z.string().min(1, "Required"),
-    endTime: z.string().min(1, "Required"),
-    scheduleStatus: z.enum(["Available", "Blocked"]),
-  })
-  .refine((value) => value.endTime > value.startTime, {
-    message: "End time must be after start time",
-    path: ["endTime"],
-  });
+const DEFAULT_START_TIME = "09:00";
+const MINUTES_PER_DAY = 24 * 60;
+const SCHEDULE_SETTINGS_STALE_TIME_MS = 5 * 60 * 1000;
+const DATE_INPUT_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const TIME_INPUT_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+const addDoctorScheduleSchema = z.object({
+  date: z.string().min(1, "Required"),
+  startTime: z.string().min(1, "Required"),
+  scheduleStatus: z.enum(["Available", "Blocked"]),
+});
 
 // Converts browser time input values into the LocalTime format expected by the API.
 function normalizeLocalTimeForApi(time: string): string {
   return time.length === 5 ? `${time}:00` : time;
+}
+
+// Converts a browser time input value into minutes after midnight.
+function getTimeInputMinutes(time: string): number | null {
+  if (!TIME_INPUT_PATTERN.test(time)) return null;
+
+  const [hours, minutes] = time.split(":").map(Number);
+  return hours * 60 + minutes;
+}
+
+// Formats minutes after midnight back into a browser time input value.
+function formatTimeInput(minutesAfterMidnight: number): string {
+  const hours = Math.floor(minutesAfterMidnight / 60)
+    .toString()
+    .padStart(2, "0");
+  const minutes = (minutesAfterMidnight % 60).toString().padStart(2, "0");
+
+  return `${hours}:${minutes}`;
+}
+
+// Calculates the end time for a same-day appointment slot.
+function getSlotEndTime(startTime: string, durationMinutes: null | number): string {
+  const startMinutes = getTimeInputMinutes(startTime);
+
+  if (startMinutes === null || durationMinutes === null || durationMinutes <= 0) {
+    return "";
+  }
+
+  const endMinutes = startMinutes + durationMinutes;
+
+  return endMinutes >= MINUTES_PER_DAY ? "" : formatTimeInput(endMinutes);
 }
 
 // Represents the validated values collected by the local schedule form.
@@ -63,6 +96,83 @@ interface AddDoctorScheduleFormProps {
   onOpenChange: (open: boolean) => void;
 }
 
+// Describes the values needed to validate a slot against clinic operating hours.
+interface OperatingHoursValidationInput {
+  date: string;
+  endTime: string;
+  operatingHours: AdminOperatingHourDto[];
+  startTime: string;
+}
+
+// Converts LocalTime values from the API into browser time input values.
+function toTimeInput(value?: null | string): string {
+  return value?.slice(0, 5) ?? "";
+}
+
+// Returns the API day-of-week number for a browser date input value.
+function getApiDayOfWeek(date: string): null | number {
+  if (!DATE_INPUT_PATTERN.test(date)) return null;
+
+  const [year, month, day] = date.split("-").map(Number);
+  const utcDay = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+
+  return utcDay === 0 ? 7 : utcDay;
+}
+
+// Finds the configured operating hours for the selected calendar day.
+function getOperatingHourForDate(
+  date: string,
+  operatingHours: AdminOperatingHourDto[],
+): AdminOperatingHourDto | null {
+  const dayOfWeek = getApiDayOfWeek(date);
+
+  if (dayOfWeek === null) return null;
+
+  return operatingHours.find((hour) => Number(hour.dayOfWeek) === dayOfWeek) ?? null;
+}
+
+// Builds the validation message when a schedule is outside operating hours.
+function getOperatingHoursValidationMessage({
+  date,
+  endTime,
+  operatingHours,
+  startTime,
+}: OperatingHoursValidationInput): string | undefined {
+  if (!(date && startTime && endTime)) return undefined;
+
+  if (getApiDayOfWeek(date) === null) {
+    return "Choose a valid date.";
+  }
+
+  const dayOperatingHours = getOperatingHourForDate(date, operatingHours);
+
+  if (!dayOperatingHours?.isOpen) {
+    return "Clinic is closed on this day.";
+  }
+
+  const openTime = toTimeInput(dayOperatingHours.openTime);
+  const closeTime = toTimeInput(dayOperatingHours.closeTime);
+  const openMinutes = getTimeInputMinutes(openTime);
+  const closeMinutes = getTimeInputMinutes(closeTime);
+  const startMinutes = getTimeInputMinutes(startTime);
+  const endMinutes = getTimeInputMinutes(endTime);
+
+  if (
+    openMinutes === null ||
+    closeMinutes === null ||
+    startMinutes === null ||
+    endMinutes === null
+  ) {
+    return "Operating hours settings could not be validated.";
+  }
+
+  if (startMinutes < openMinutes || endMinutes > closeMinutes) {
+    return `Choose a time between ${openTime} and ${closeTime}.`;
+  }
+
+  return undefined;
+}
+
 // Displays a form for creating a doctor schedule slot.
 export function AddDoctorScheduleForm({
   defaultDate,
@@ -72,11 +182,22 @@ export function AddDoctorScheduleForm({
 }: AddDoctorScheduleFormProps) {
   const queryClient = useQueryClient();
   const { mutateAsync, isPending } = useCreateSchedule();
+  const settingsQuery = useAdminGetSettings({
+    query: {
+      enabled: open,
+      staleTime: SCHEDULE_SETTINGS_STALE_TIME_MS,
+    },
+  });
+  const appointmentDurationMinutes =
+    settingsQuery.data?.status === 200
+      ? Number(settingsQuery.data.data.defaultAppointmentDurationMinutes)
+      : null;
+  const operatingHours =
+    settingsQuery.data?.status === 200 ? settingsQuery.data.data.operatingHours : [];
   const doctorName = `Dr. ${doctor?.firstName ?? ""} ${doctor?.lastName ?? ""}`.trim();
   const defaultValues: AddDoctorScheduleFormValues = {
     date: defaultDate,
-    startTime: "09:00",
-    endTime: "09:30",
+    startTime: DEFAULT_START_TIME,
     scheduleStatus: "Available",
   };
   const form = useForm({
@@ -88,11 +209,35 @@ export function AddDoctorScheduleForm({
         return;
       }
 
+      const endTime = getSlotEndTime(value.startTime, appointmentDurationMinutes);
+
+      if (!appointmentDurationMinutes) {
+        toast.error("Appointment duration settings could not be loaded.");
+        return;
+      }
+
+      if (!endTime) {
+        toast.error("Choose an earlier start time for this appointment duration.");
+        return;
+      }
+
+      const operatingHoursError = getOperatingHoursValidationMessage({
+        date: value.date,
+        endTime,
+        operatingHours,
+        startTime: value.startTime,
+      });
+
+      if (operatingHoursError) {
+        toast.error(operatingHoursError);
+        return;
+      }
+
       const payload: CreateScheduleCommand = {
         doctorPublicId: doctor.doctorPublicId,
         date: value.date,
         startTime: normalizeLocalTimeForApi(value.startTime),
-        endTime: normalizeLocalTimeForApi(value.endTime),
+        endTime: normalizeLocalTimeForApi(endTime),
         scheduleStatus: value.scheduleStatus.toLowerCase(),
       };
 
@@ -122,16 +267,16 @@ export function AddDoctorScheduleForm({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg gap-0 overflow-hidden p-0">
-        <div className="absolute inset-x-0 top-0 h-px bg-border" />
+        <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
 
-        <DialogHeader className="px-6 pb-4 pt-7">
+        <DialogHeader className="px-6 pt-7 pb-4">
           <div className="flex items-start gap-4">
-            <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-muted text-foreground">
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
               <CalendarPlus className="size-5" />
             </div>
             <div className="min-w-0 flex-1">
-              <DialogTitle className="text-xl font-semibold leading-none">Add Schedule</DialogTitle>
-              <DialogDescription className="mt-1 text-sm text-muted-foreground">
+              <DialogTitle className="font-semibold text-xl leading-none">Add Schedule</DialogTitle>
+              <DialogDescription className="mt-1 text-sm">
                 Create a schedule slot for{" "}
                 <span className="font-medium text-foreground">{doctorName}</span>.
               </DialogDescription>
@@ -140,36 +285,24 @@ export function AddDoctorScheduleForm({
         </DialogHeader>
 
         <form
-          className="space-y-4 px-6 pb-6"
+          className="flex flex-col"
           onSubmit={(event) => {
             event.preventDefault();
             form.handleSubmit();
           }}
         >
-          <form.Field name="date">
-            {(field) => (
-              <Field data-invalid={field.state.meta.errors.length > 0}>
-                <FieldLabel htmlFor={field.name}>Date</FieldLabel>
-                <Input
-                  id={field.name}
-                  type="date"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(event) => field.handleChange(event.target.value)}
-                />
-                <FieldError errors={field.state.meta.errors} />
-              </Field>
-            )}
-          </form.Field>
+          <div className="max-h-[60vh] space-y-4 overflow-y-auto px-6 pb-6">
+            <p className="font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
+              Schedule Details
+            </p>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <form.Field name="startTime">
+            <form.Field name="date">
               {(field) => (
                 <Field data-invalid={field.state.meta.errors.length > 0}>
-                  <FieldLabel htmlFor={field.name}>Start Time</FieldLabel>
+                  <FieldLabel htmlFor={field.name}>Date</FieldLabel>
                   <Input
                     id={field.name}
-                    type="time"
+                    type="date"
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(event) => field.handleChange(event.target.value)}
@@ -179,62 +312,121 @@ export function AddDoctorScheduleForm({
               )}
             </form.Field>
 
-            <form.Field name="endTime">
+            <div className="rounded-lg border border-border bg-muted/30 px-4 py-3">
+              <p className="mb-3 font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
+                Slot Timing
+              </p>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <form.Field name="startTime">
+                  {(field) => (
+                    <Field data-invalid={field.state.meta.errors.length > 0}>
+                      <FieldLabel htmlFor={field.name}>Start Time</FieldLabel>
+                      <Input
+                        id={field.name}
+                        type="time"
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(event) => field.handleChange(event.target.value)}
+                      />
+                      <FieldError errors={field.state.meta.errors} />
+                    </Field>
+                  )}
+                </form.Field>
+
+                <form.Subscribe>
+                  {(state) => {
+                    const endTime = getSlotEndTime(
+                      state.values.startTime,
+                      appointmentDurationMinutes,
+                    );
+                    const operatingHoursError = getOperatingHoursValidationMessage({
+                      date: state.values.date,
+                      endTime,
+                      operatingHours,
+                      startTime: state.values.startTime,
+                    });
+                    const endTimeError = settingsQuery.isError
+                      ? "Appointment duration settings could not be loaded."
+                      : appointmentDurationMinutes && !endTime
+                        ? "Choose an earlier start time."
+                        : operatingHoursError;
+
+                    return (
+                      <Field data-invalid={!!endTimeError}>
+                        <FieldLabel htmlFor="endTime">End Time</FieldLabel>
+                        <Input
+                          aria-invalid={!!endTimeError}
+                          disabled
+                          id="endTime"
+                          readOnly
+                          type="time"
+                          value={endTime}
+                        />
+                        <FieldError errors={endTimeError ? [{ message: endTimeError }] : []} />
+                      </Field>
+                    );
+                  }}
+                </form.Subscribe>
+              </div>
+            </div>
+
+            <form.Field name="scheduleStatus">
               {(field) => (
                 <Field data-invalid={field.state.meta.errors.length > 0}>
-                  <FieldLabel htmlFor={field.name}>End Time</FieldLabel>
-                  <Input
-                    id={field.name}
-                    type="time"
+                  <FieldLabel htmlFor={field.name}>Status</FieldLabel>
+                  <Select
                     value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => field.handleChange(event.target.value)}
-                  />
+                    onValueChange={(value) =>
+                      field.handleChange(value === "Blocked" ? "Blocked" : "Available")
+                    }
+                  >
+                    <SelectTrigger
+                      className="w-full"
+                      aria-invalid={field.state.meta.errors.length > 0}
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Available">Available</SelectItem>
+                      <SelectItem value="Blocked">Blocked</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FieldError errors={field.state.meta.errors} />
                 </Field>
               )}
             </form.Field>
           </div>
 
-          <form.Field name="scheduleStatus">
-            {(field) => (
-              <Field data-invalid={field.state.meta.errors.length > 0}>
-                <FieldLabel htmlFor={field.name}>Status</FieldLabel>
-                <Select
-                  value={field.state.value}
-                  onValueChange={(value) =>
-                    field.handleChange(value === "Blocked" ? "Blocked" : "Available")
-                  }
-                >
-                  <SelectTrigger
-                    className="w-full"
-                    aria-invalid={field.state.meta.errors.length > 0}
-                  >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Available">Available</SelectItem>
-                    <SelectItem value="Blocked">Blocked</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FieldError errors={field.state.meta.errors} />
-              </Field>
-            )}
-          </form.Field>
-
-          <div className="flex justify-end gap-2 border-t border-border pt-4">
+          <div className="flex justify-end gap-2 border-t border-border px-6 py-4">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
             <form.Subscribe>
-              {(state: { canSubmit: boolean; isSubmitting: boolean }) => (
-                <Button
-                  type="submit"
-                  disabled={!state.canSubmit || state.isSubmitting || isPending}
-                >
-                  {state.isSubmitting || isPending ? "Adding..." : "Add Schedule"}
-                </Button>
-              )}
+              {(state) => {
+                const endTime = getSlotEndTime(state.values.startTime, appointmentDurationMinutes);
+                const operatingHoursError = getOperatingHoursValidationMessage({
+                  date: state.values.date,
+                  endTime,
+                  operatingHours,
+                  startTime: state.values.startTime,
+                });
+                const isSettingsUnavailable =
+                  settingsQuery.isLoading ||
+                  !appointmentDurationMinutes ||
+                  !endTime ||
+                  !!operatingHoursError;
+
+                return (
+                  <Button
+                    type="submit"
+                    disabled={
+                      !state.canSubmit || state.isSubmitting || isPending || isSettingsUnavailable
+                    }
+                  >
+                    {state.isSubmitting || isPending ? "Adding..." : "Add Schedule"}
+                  </Button>
+                );
+              }}
             </form.Subscribe>
           </div>
         </form>

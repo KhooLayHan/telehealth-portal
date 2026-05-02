@@ -10,6 +10,9 @@ public sealed record EmergencyContactDto(string Name, string Relationship, strin
 public sealed record ClinicStaffPatientDto(
     Guid PatientPublicId,
     string Slug,
+    string Username,
+    string Email,
+    string IcNumber,
     string FirstName,
     string LastName,
     string FullName,
@@ -27,6 +30,9 @@ public sealed record ClinicStaffPatientDto(
         new(
             p.PublicId,
             p.User.Slug,
+            p.User.Username,
+            p.User.Email,
+            p.User.IcNumber,
             p.User.FirstName,
             p.User.LastName,
             $"{p.User.FirstName} {p.User.LastName}",

@@ -91,6 +91,7 @@ public sealed class AdminCreateLabTechHandler(
             Email = user.Email,
             PhoneNumber = user.Phone,
             Slug = user.Slug,
+            IcNumber = user.IcNumber,
             Gender = user.Gender,
             DateOfBirth = user.DateOfBirth,
             AvatarUrl = user.AvatarUrl,

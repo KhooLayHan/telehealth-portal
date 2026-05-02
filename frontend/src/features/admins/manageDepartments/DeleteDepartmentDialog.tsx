@@ -65,11 +65,11 @@ export function DeleteDepartmentDialog({
               <Trash2 className="size-5" />
             </div>
             <div className="min-w-0 space-y-1">
-              <DialogTitle className="text-xl font-semibold">Delete Department</DialogTitle>
+              <DialogTitle className="text-xl font-semibold">Remove Department</DialogTitle>
               <DialogDescription>
-                Are you sure you want to delete{" "}
+                Are you sure you want to remove{" "}
                 <span className="font-medium text-foreground">{department.name}</span>? This will
-                soft delete the department and remove it from active department lists.
+                deactivate the department and remove it from active department lists.
               </DialogDescription>
             </div>
           </div>
@@ -85,7 +85,7 @@ export function DeleteDepartmentDialog({
             disabled={isPending}
             onClick={handleConfirmDelete}
           >
-            {isPending ? "Deleting..." : "Delete"}
+            {isPending ? "Removing..." : "Remove"}
           </Button>
         </DialogFooter>
       </DialogContent>

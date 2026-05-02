@@ -13,6 +13,7 @@ export interface UpdateDoctorCommand {
   lastName: string;
   username: string;
   email: string;
+  icNumber: string;
   /** @nullable */
   phoneNumber: string | null;
   gender: string;

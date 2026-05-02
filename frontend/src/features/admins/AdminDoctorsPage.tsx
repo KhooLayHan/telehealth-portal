@@ -3,7 +3,8 @@ import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Download, Filter, Plus, Search, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { useGetAll } from "@/api/generated/doctors/doctors";
+import { useAdminGetAllDepartments } from "@/api/generated/admins/admins";
+import { getAll, useGetAll } from "@/api/generated/doctors/doctors";
 import type { DoctorListDto } from "@/api/model/DoctorListDto";
 import {
   Breadcrumb,
@@ -42,6 +43,7 @@ interface DoctorCsvColumn {
 // Lists the doctor fields exported by the CSV download.
 const DOCTOR_CSV_COLUMNS: DoctorCsvColumn[] = [
   { header: "Doctor Public ID", getValue: (doctor) => doctor.doctorPublicId },
+  { header: "Slug", getValue: (doctor) => doctor.slug },
   { header: "First Name", getValue: (doctor) => doctor.firstName },
   { header: "Last Name", getValue: (doctor) => doctor.lastName },
   { header: "Username", getValue: (doctor) => doctor.username },
@@ -53,7 +55,6 @@ const DOCTOR_CSV_COLUMNS: DoctorCsvColumn[] = [
   { header: "Department", getValue: (doctor) => doctor.departmentName },
   { header: "License Number", getValue: (doctor) => doctor.licenseNumber },
   { header: "Consultation Fee MYR", getValue: (doctor) => doctor.consultationFee },
-  { header: "Slug", getValue: (doctor) => doctor.slug },
   { header: "Address Street", getValue: (doctor) => doctor.address?.street },
   { header: "Address City", getValue: (doctor) => doctor.address?.city },
   { header: "Address State", getValue: (doctor) => doctor.address?.state },
@@ -121,36 +122,42 @@ export function AdminDoctorsPage() {
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
 
-  const { data, isLoading, isError } = useGetAll();
-  const allDoctors = data?.status === 200 ? data.data : [];
-  const departmentCount = useMemo(
-    () => new Set(allDoctors.map((d: DoctorListDto) => d.departmentName).filter(Boolean)).size,
-    [allDoctors],
-  );
+  const { data, isLoading, isError } = useGetAll({
+    Page: page,
+    PageSize: PAGE_SIZE,
+    Search: search || undefined,
+    Department: departmentFilter || undefined,
+    Specialization: specializationFilter || undefined,
+  });
+  const { data: directoryData } = useGetAll({ Page: 1, PageSize: 50 });
+  const { data: departmentsData } = useAdminGetAllDepartments({ Page: 1, PageSize: 50 });
+  const result = data?.status === 200 ? data.data : null;
+  const doctors = result?.items ?? [];
+  const directoryDoctors = directoryData?.status === 200 ? directoryData.data.items : [];
   const departmentOptions = useMemo(
     () =>
-      Array.from(
-        new Set(
-          allDoctors
-            .map((doctor: DoctorListDto) => doctor.departmentName)
-            .filter((department): department is string => Boolean(department)),
-        ),
-      ).sort((a, b) => a.localeCompare(b)),
-    [allDoctors],
+      (departmentsData?.status === 200 ? departmentsData.data.items : [])
+        .map((department) => department.name)
+        .filter((department): department is string => Boolean(department))
+        .sort((a, b) => a.localeCompare(b)),
+    [departmentsData],
   );
+  const departmentCount = departmentOptions.length;
   const specializationOptions = useMemo(
     () =>
       Array.from(
         new Set(
-          allDoctors
+          directoryDoctors
             .map((doctor: DoctorListDto) => doctor.specialization)
             .filter((specialization): specialization is string => Boolean(specialization)),
         ),
       ).sort((a, b) => a.localeCompare(b)),
-    [allDoctors],
+    [directoryDoctors],
   );
   const activeFilterCount =
     Number(Boolean(departmentFilter)) + Number(Boolean(specializationFilter));
+  const totalCount = result ? Number(result.totalCount) : 0;
+  const totalPages = Math.max(1, result ? Number(result.totalPages ?? 1) : 1);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -160,55 +167,77 @@ export function AdminDoctorsPage() {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase();
-    return allDoctors.filter((d: DoctorListDto) => {
-      const matchesSearch =
-        !q ||
-        `${d.firstName ?? ""} ${d.lastName ?? ""}`.toLowerCase().includes(q) ||
-        (d.email ?? "").toLowerCase().includes(q) ||
-        (d.username ?? "").toLowerCase().includes(q) ||
-        (d.specialization ?? "").toLowerCase().includes(q) ||
-        (d.departmentName ?? "").toLowerCase().includes(q) ||
-        (d.licenseNumber ?? "").toLowerCase().includes(q);
-      const matchesDepartment = !departmentFilter || d.departmentName === departmentFilter;
-      const matchesSpecialization =
-        !specializationFilter || d.specialization === specializationFilter;
+  useEffect(() => {
+    if (!(isLoading || isError) && page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [isError, isLoading, page, totalPages]);
 
-      return matchesSearch && matchesDepartment && matchesSpecialization;
-    });
-  }, [search, allDoctors, departmentFilter, specializationFilter]);
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-
-  const handleExportCsv = () => {
-    if (allDoctors.length === 0) {
+  const handleExportCsv = async () => {
+    if (totalCount === 0) {
       toast.info("No doctor records available to export.");
       return;
     }
 
-    const csv = buildDoctorsCsv(allDoctors);
-    const blob = new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    const today = new Date().toISOString().slice(0, 10);
+    try {
+      const exportPageSize = 50;
+      const firstResponse = await getAll({
+        Page: 1,
+        PageSize: exportPageSize,
+        Search: search || undefined,
+        Department: departmentFilter || undefined,
+        Specialization: specializationFilter || undefined,
+      });
 
-    link.href = url;
-    link.download = `doctors-${today}.csv`;
-    document.body.append(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
+      if (firstResponse.status !== 200) {
+        toast.error("Failed to export doctor records.");
+        return;
+      }
 
-    toast.success(
-      `Exported ${allDoctors.length} doctor record${allDoctors.length === 1 ? "" : "s"}.`,
-    );
+      const exportedDoctors = [...firstResponse.data.items];
+      const exportTotalPages = Number(firstResponse.data.totalPages ?? 1);
+
+      for (let exportPage = 2; exportPage <= exportTotalPages; exportPage++) {
+        const response = await getAll({
+          Page: exportPage,
+          PageSize: exportPageSize,
+          Search: search || undefined,
+          Department: departmentFilter || undefined,
+          Specialization: specializationFilter || undefined,
+        });
+
+        if (response.status !== 200) {
+          toast.error("Failed to export doctor records.");
+          return;
+        }
+
+        exportedDoctors.push(...response.data.items);
+      }
+
+      const csv = buildDoctorsCsv(exportedDoctors);
+      const blob = new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const today = new Date().toISOString().slice(0, 10);
+
+      link.href = url;
+      link.download = `doctors-${today}.csv`;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+
+      toast.success(
+        `Exported ${exportedDoctors.length} doctor record${exportedDoctors.length === 1 ? "" : "s"}.`,
+      );
+    } catch {
+      toast.error("Failed to export doctor records.");
+    }
   };
 
   return (
     <>
-      <div className="mb-6 space-y-2">
+      <div className="mb-6 space-y-6">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -226,7 +255,7 @@ export function AdminDoctorsPage() {
             <p className="text-lg text-muted-foreground">
               {isLoading
                 ? "Loading..."
-                : `Manage ${filtered.length} registered medical professional${filtered.length === 1 ? "" : "s"} across ${departmentCount} department${departmentCount === 1 ? "" : "s"}.`}
+                : `Manage ${totalCount} registered medical professional${totalCount === 1 ? "" : "s"} across ${departmentCount} department${departmentCount === 1 ? "" : "s"}.`}
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2 sm:ml-auto">
@@ -372,7 +401,7 @@ export function AdminDoctorsPage() {
         <p className="py-12 text-center text-sm text-muted-foreground">Loading doctors…</p>
       ) : isError ? (
         <p className="py-12 text-center text-sm text-destructive">Failed to load doctors.</p>
-      ) : paged.length === 0 ? (
+      ) : doctors.length === 0 ? (
         <p className="py-12 text-center text-sm text-muted-foreground">No doctors found.</p>
       ) : (
         <motion.div
@@ -381,7 +410,7 @@ export function AdminDoctorsPage() {
           transition={{ duration: 0.35, ease: "easeOut" }}
           className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
         >
-          {paged.map((doctor: DoctorListDto) => (
+          {doctors.map((doctor: DoctorListDto) => (
             <DoctorCard
               key={String(doctor.doctorPublicId)}
               doctor={{
@@ -397,28 +426,28 @@ export function AdminDoctorsPage() {
                 licenseNo: doctor.licenseNumber ?? "",
               }}
               onViewDetails={(id) => {
-                const d = allDoctors.find((x) => String(x.doctorPublicId) === id);
+                const d = doctors.find((x) => String(x.doctorPublicId) === id);
                 if (d) {
                   setSelectedDoctor(d);
                   setDetailsOpen(true);
                 }
               }}
               onEditProfile={(id) => {
-                const d = allDoctors.find((x) => String(x.doctorPublicId) === id);
+                const d = doctors.find((x) => String(x.doctorPublicId) === id);
                 if (d) {
                   setSelectedDoctorForEdit(d);
                   setEditOpen(true);
                 }
               }}
               onRemove={(id) => {
-                const d = allDoctors.find((x) => String(x.doctorPublicId) === id);
+                const d = doctors.find((x) => String(x.doctorPublicId) === id);
                 if (d) {
                   setSelectedDoctorForDelete(d);
                   setDeleteOpen(true);
                 }
               }}
               onSchedule={(id) => {
-                const d = allDoctors.find((x) => String(x.doctorPublicId) === id);
+                const d = doctors.find((x) => String(x.doctorPublicId) === id);
                 if (d) {
                   setSelectedDoctorForSchedule(d);
                   setScheduleOpen(true);

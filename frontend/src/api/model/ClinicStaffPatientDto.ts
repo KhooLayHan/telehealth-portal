@@ -12,6 +12,9 @@ import type { LocalDate } from "./LocalDate";
 export interface ClinicStaffPatientDto {
   patientPublicId: string;
   slug: string;
+  username: string;
+  email: string;
+  icNumber: string;
   firstName: string;
   lastName: string;
   fullName: string;

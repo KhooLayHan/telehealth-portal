@@ -12,6 +12,7 @@ export interface AdminUpdateLabTechCommand {
   lastName: string;
   username: string;
   email: string;
+  icNumber: string;
   /** @nullable */
   phoneNumber: string | null;
   /**

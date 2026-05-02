@@ -38,7 +38,7 @@ export function AdminDepartmentPage() {
 
   return (
     <div className="space-y-6">
-      <header className="space-y-2">
+      <header className="space-y-6">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -64,7 +64,7 @@ export function AdminDepartmentPage() {
               variant="outline"
               className="h-9 gap-1.5 bg-background"
               disabled={isExportDisabled}
-              onClick={exportDepartmentsCsv}
+              onClick={() => void exportDepartmentsCsv()}
             >
               <FileDown className="size-4" />
               Export CSV

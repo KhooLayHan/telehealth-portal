@@ -149,6 +149,7 @@ export function ViewPatientDetailDialog({
             <DetailRow label="Gender" value={genderLabel(patient.gender)} />
             <DetailRow label="Date of Birth" value={formatDate(patient.dateOfBirth)} />
             <DetailRow label="Phone" value={patient.phoneNumber || "N/A"} />
+            <DetailRow label="IC Number" value={patient.icNumber || "N/A"} />
             <DetailRow label="Blood Group" value={patient.bloodGroup || "N/A"} />
           </div>
 

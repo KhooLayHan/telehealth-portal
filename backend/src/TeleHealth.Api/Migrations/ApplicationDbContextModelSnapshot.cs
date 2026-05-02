@@ -1511,6 +1511,107 @@ namespace TeleHealth.Api.Migrations
                         });
                 });
 
+            modelBuilder.Entity("TeleHealth.Api.Domain.Entities.SystemOperatingHour", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<LocalTime?>("CloseTime")
+                        .HasColumnType("time")
+                        .HasColumnName("close_time");
+
+                    b.Property<Instant>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<short>("DayOfWeek")
+                        .HasColumnType("smallint")
+                        .HasColumnName("day_of_week");
+
+                    b.Property<bool>("IsOpen")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_open");
+
+                    b.Property<LocalTime?>("OpenTime")
+                        .HasColumnType("time")
+                        .HasColumnName("open_time");
+
+                    b.Property<long>("SystemSettingId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("system_settings_id");
+
+                    b.Property<Instant?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_system_operating_hours");
+
+                    b.HasIndex("SystemSettingId")
+                        .HasDatabaseName("ix_system_operating_hours_system_setting_id");
+
+                    b.ToTable("system_operating_hours", (string)null);
+                });
+
+            modelBuilder.Entity("TeleHealth.Api.Domain.Entities.SystemSetting", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("ClinicName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("clinic_name");
+
+                    b.Property<Instant>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<short>("DefaultAppointmentDurationMinutes")
+                        .HasColumnType("smallint")
+                        .HasColumnName("default_appointment_duration_minutes");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("slug");
+
+                    b.Property<string>("SupportEmail")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("support_email");
+
+                    b.Property<Instant?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_system_settings");
+
+                    b.HasIndex("Slug")
+                        .IsUnique()
+                        .HasDatabaseName("ix_system_settings_slug");
+
+                    b.ToTable("system_settings", (string)null);
+                });
+
             modelBuilder.Entity("TeleHealth.Api.Domain.Entities.User", b =>
                 {
                     b.Property<long>("Id")
@@ -1873,6 +1974,18 @@ namespace TeleHealth.Api.Migrations
                     b.Navigation("Consultation");
                 });
 
+            modelBuilder.Entity("TeleHealth.Api.Domain.Entities.SystemOperatingHour", b =>
+                {
+                    b.HasOne("TeleHealth.Api.Domain.Entities.SystemSetting", "SystemSetting")
+                        .WithMany("OperatingHours")
+                        .HasForeignKey("SystemSettingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_system_operating_hours_system_settings");
+
+                    b.Navigation("SystemSetting");
+                });
+
             modelBuilder.Entity("TeleHealth.Api.Domain.Entities.UserRole", b =>
                 {
                     b.HasOne("TeleHealth.Api.Domain.Entities.Role", null)
@@ -1946,6 +2059,11 @@ namespace TeleHealth.Api.Migrations
             modelBuilder.Entity("TeleHealth.Api.Domain.Entities.ScheduleStatus", b =>
                 {
                     b.Navigation("DoctorSchedules");
+                });
+
+            modelBuilder.Entity("TeleHealth.Api.Domain.Entities.SystemSetting", b =>
+                {
+                    b.Navigation("OperatingHours");
                 });
 
             modelBuilder.Entity("TeleHealth.Api.Domain.Entities.User", b =>

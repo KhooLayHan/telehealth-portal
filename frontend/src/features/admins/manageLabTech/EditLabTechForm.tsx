@@ -1,5 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
+import { Check } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import {
@@ -33,6 +34,10 @@ const editLabTechSchema = z.object({
   lastName: z.string().min(1, "Last name is required"),
   username: z.string().min(1, "Username is required"),
   email: z.string().email("Must be a valid email"),
+  icNumber: z
+    .string()
+    .min(1, "IC number is required")
+    .regex(/^\d{12}$/, "IC number must be exactly 12 digits without dashes"),
   phoneNumber: z.string(),
   gender: z.enum(["M", "F", "O", "N"], { message: "Select a gender" }),
   dateOfBirth: z.string(),
@@ -53,6 +58,7 @@ function buildEditDefaultValues(labTech: AdminLabTechDto): EditLabTechFormValues
     lastName: labTech.lastName,
     username: labTech.username,
     email: labTech.email,
+    icNumber: labTech.icNumber,
     phoneNumber: labTech.phoneNumber ?? "",
     gender: (labTech.gender ?? "N") as "M" | "F" | "O" | "N",
     dateOfBirth: labTech.dateOfBirth ?? "",
@@ -144,6 +150,7 @@ function EditLabTechFormContent({ labTech, open, onOpenChange }: EditLabTechForm
           lastName: value.lastName,
           username: value.username,
           email: value.email,
+          icNumber: value.icNumber,
           phoneNumber: value.phoneNumber || null,
           gender: value.gender,
           dateOfBirth: value.dateOfBirth,
@@ -171,18 +178,18 @@ function EditLabTechFormContent({ labTech, open, onOpenChange }: EditLabTechForm
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-2xl gap-0 overflow-hidden p-0">
-        <div className="absolute inset-x-0 top-0 h-px bg-border" />
+        <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
 
-        <DialogHeader className="px-6 pb-4 pt-7">
+        <DialogHeader className="px-6 pt-7 pb-4">
           <div className="flex items-start gap-4">
-            <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-muted text-lg font-bold text-foreground">
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary font-bold text-lg text-primary-foreground">
               {initials}
             </div>
             <div className="min-w-0 flex-1">
-              <DialogTitle className="text-xl font-semibold leading-none">
+              <DialogTitle className="font-semibold text-xl leading-none">
                 Edit {labTech.firstName} {labTech.lastName}
               </DialogTitle>
-              <DialogDescription className="mt-1 text-sm text-muted-foreground">
+              <DialogDescription className="mt-1 text-sm">
                 Update lab technician account details and save to apply changes.
               </DialogDescription>
             </div>
@@ -207,7 +214,7 @@ function EditLabTechFormContent({ labTech, open, onOpenChange }: EditLabTechForm
               value="personal"
               className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
             >
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <form.Field name="firstName">
                   {(field) => (
                     <Field>
@@ -239,7 +246,24 @@ function EditLabTechFormContent({ labTech, open, onOpenChange }: EditLabTechForm
                 </form.Field>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <form.Field name="icNumber">
+                {(field) => (
+                  <Field>
+                    <FieldLabel>IC Number</FieldLabel>
+                    <Input
+                      value={field.state.value}
+                      onChange={(event) => field.handleChange(event.target.value)}
+                      onBlur={field.handleBlur}
+                      placeholder="e.g. 900101011234"
+                      maxLength={12}
+                      className="font-mono"
+                    />
+                    <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                  </Field>
+                )}
+              </form.Field>
+
+              <div className="grid gap-4 sm:grid-cols-2">
                 <form.Field name="phoneNumber">
                   {(field) => (
                     <Field>
@@ -301,7 +325,7 @@ function EditLabTechFormContent({ labTech, open, onOpenChange }: EditLabTechForm
               value="account"
               className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
             >
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <form.Field name="username">
                   {(field) => (
                     <Field>
@@ -356,7 +380,7 @@ function EditLabTechFormContent({ labTech, open, onOpenChange }: EditLabTechForm
                 )}
               </form.Field>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <form.Field name="city">
                   {(field) => (
                     <Field>
@@ -388,7 +412,7 @@ function EditLabTechFormContent({ labTech, open, onOpenChange }: EditLabTechForm
                 </form.Field>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <form.Field name="postalCode">
                   {(field) => (
                     <Field>
@@ -432,8 +456,9 @@ function EditLabTechFormContent({ labTech, open, onOpenChange }: EditLabTechForm
                 <Button
                   type="submit"
                   disabled={!canSubmit || isSubmitting || isPending}
-                  className="bg-black text-white hover:bg-black/85"
+                  className="gap-1.5"
                 >
+                  <Check className="size-4" />
                   {isSubmitting || isPending ? "Saving..." : "Save Changes"}
                 </Button>
               )}

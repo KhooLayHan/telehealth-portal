@@ -1,3 +1,4 @@
+using Destructurama.Attributed;
 using NodaTime;
 using TeleHealth.Api.Domain.Entities;
 
@@ -9,6 +10,7 @@ public sealed record AdminUpdateReceptionistCommand(
     string LastName,
     string Username,
     string Email,
+    [property: NotLogged] string IcNumber,
     string? PhoneNumber,
     char Gender,
     LocalDate DateOfBirth,

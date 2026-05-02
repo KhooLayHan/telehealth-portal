@@ -28,12 +28,12 @@ import type {
 } from '../../model/CreateDoctorCommand';
 
 import type {
-  DoctorListDto
-} from '../../model/DoctorListDto';
-
-import type {
   DoctorScheduleResponse
 } from '../../model/DoctorScheduleResponse';
+
+import type {
+  GetAllParams
+} from '../../model/GetAllParams';
 
 import type {
   GetDoctorPatientAppointmentsResponse
@@ -50,6 +50,10 @@ import type {
 import type {
   GetDoctorScheduleParams
 } from '../../model/GetDoctorScheduleParams';
+
+import type {
+  PagedResultOfDoctorListDto
+} from '../../model/PagedResultOfDoctorListDto';
 
 import type {
   ProblemDetails
@@ -165,7 +169,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getCreateDoctorMutationOptions(options), queryClient);
     }
     export type getAllResponse200 = {
-  data: DoctorListDto[]
+  data: PagedResultOfDoctorListDto
   status: 200
 }
 
@@ -183,17 +187,24 @@ export type getAllResponseError = (getAllResponse401) & {
 
 export type getAllResponse = (getAllResponseSuccess | getAllResponseError)
 
-export const getGetAllUrl = () => {
+export const getGetAllUrl = (params?: GetAllParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/v1/doctors`
+  return stringifiedParams.length > 0 ? `/api/v1/doctors?${stringifiedParams}` : `/api/v1/doctors`
 }
 
-export const getAll = async ( options?: RequestInit): Promise<getAllResponse> => {
+export const getAll = async (params?: GetAllParams, options?: RequestInit): Promise<getAllResponse> => {
 
-  return ofetchMutator<getAllResponse>(getGetAllUrl(),
+  return ofetchMutator<getAllResponse>(getGetAllUrl(params),
   {
     ...options,
     method: 'GET'
@@ -206,23 +217,23 @@ export const getAll = async ( options?: RequestInit): Promise<getAllResponse> =>
 
 
 
-export const getGetAllQueryKey = () => {
+export const getGetAllQueryKey = (params?: GetAllParams,) => {
     return [
-    `/api/v1/doctors`
+    `/api/v1/doctors`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getGetAllQueryOptions = <TData = Awaited<ReturnType<typeof getAll>>, TError = ProblemDetails>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+export const getGetAllQueryOptions = <TData = Awaited<ReturnType<typeof getAll>>, TError = ProblemDetails>(params?: GetAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetAllQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetAllQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAll>>> = ({ signal }) => getAll({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAll>>> = ({ signal }) => getAll(params, { signal, ...requestOptions });
 
 
 
@@ -236,7 +247,7 @@ export type GetAllQueryError = ProblemDetails
 
 
 export function useGetAll<TData = Awaited<ReturnType<typeof getAll>>, TError = ProblemDetails>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>> & Pick<
+ params: undefined |  GetAllParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getAll>>,
           TError,
@@ -246,7 +257,7 @@ export function useGetAll<TData = Awaited<ReturnType<typeof getAll>>, TError = P
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetAll<TData = Awaited<ReturnType<typeof getAll>>, TError = ProblemDetails>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>> & Pick<
+ params?: GetAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getAll>>,
           TError,
@@ -256,16 +267,16 @@ export function useGetAll<TData = Awaited<ReturnType<typeof getAll>>, TError = P
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetAll<TData = Awaited<ReturnType<typeof getAll>>, TError = ProblemDetails>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ params?: GetAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
 export function useGetAll<TData = Awaited<ReturnType<typeof getAll>>, TError = ProblemDetails>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ params?: GetAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAll>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetAllQueryOptions(options)
+  const queryOptions = getGetAllQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

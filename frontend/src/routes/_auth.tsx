@@ -1,18 +1,21 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { Activity, Heart, Shield } from "lucide-react";
+import { useSystemName } from "@/features/system-settings/useSystemName";
 
 export const Route = createFileRoute("/_auth")({
   component: AuthLayout,
 });
 
 function AuthLayout() {
+  const { systemName } = useSystemName();
+
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       {/* Left branding panel */}
       <div className="relative hidden flex-col items-start justify-between overflow-hidden bg-primary p-10 text-primary-foreground lg:flex">
-        <div className="flex items-center gap-2 font-semibold text-lg">
+        <div className="flex min-w-0 items-center gap-2 font-semibold text-lg">
           <Heart className="size-5" />
-          <span>TeleHealth</span>
+          <span className="truncate">{systemName}</span>
         </div>
 
         <div className="space-y-5">
