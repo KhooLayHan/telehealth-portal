@@ -114,10 +114,24 @@ function getPatientColumns(): ColumnDef<ClinicStaffPatientDto>[] {
                 getInitials(patient)
               )}
             </div>
-            <span className="font-medium">{fullName}</span>
+            <div className="min-w-0">
+              <span className="block font-medium">{fullName}</span>
+              <span className="block truncate text-muted-foreground text-xs">
+                {patient.username || "No username"}
+              </span>
+            </div>
           </div>
         );
       },
+    },
+    {
+      accessorKey: "email",
+      header: "Email",
+      cell: ({ row }) => (
+        <span className="text-muted-foreground text-xs">
+          {row.getValue<string>("email") || "N/A"}
+        </span>
+      ),
     },
     {
       accessorKey: "phoneNumber",
