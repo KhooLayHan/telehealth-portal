@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
+  changePassword,
   getAvatarUploadUrl,
   getGetMeQueryKey,
   updateAvatar,
@@ -181,6 +182,10 @@ function validatePassword(data: AdminPasswordFormData): AdminPasswordFormErrors 
     errors.newPassword = "Password must contain at least one lowercase letter.";
   } else if (!/\d/.test(data.newPassword)) {
     errors.newPassword = "Password must contain at least one number.";
+  } else if (!/[^a-zA-Z0-9]/.test(data.newPassword)) {
+    errors.newPassword = "Password must contain at least one special character.";
+  } else if (data.currentPassword === data.newPassword) {
+    errors.newPassword = "New password must be different from the current password.";
   }
 
   if (!data.confirmPassword) {
@@ -461,10 +466,27 @@ export function UseAdminProfile() {
     }
 
     setIsSavingPassword(true);
-    await new Promise((resolve) => setTimeout(resolve, 600));
-    setIsSavingPassword(false);
-    setIsChangingPassword(false);
-    toast.success("Password changed successfully.");
+    try {
+      await changePassword({
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      });
+
+      setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      setPasswordErrors({});
+      setIsChangingPassword(false);
+      toast.success("Password changed successfully.");
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        setPasswordErrors({ currentPassword: "Current password is incorrect." });
+        toast.error("Current password is incorrect.");
+        return;
+      }
+
+      toast.error(getErrorMessage(error, "Failed to change password."));
+    } finally {
+      setIsSavingPassword(false);
+    }
   }
 
   return {

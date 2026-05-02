@@ -144,6 +144,7 @@ function PasswordFieldRow({
   value,
   error,
   placeholder,
+  autoComplete = "new-password",
   onChange,
 }: {
   label: string;
@@ -151,6 +152,7 @@ function PasswordFieldRow({
   value: string;
   error?: string;
   placeholder?: string;
+  autoComplete?: string;
   onChange: (field: keyof AdminPasswordFormData, value: string) => void;
 }) {
   const [visible, setVisible] = useState(false);
@@ -166,7 +168,7 @@ function PasswordFieldRow({
           onChange={(e) => onChange(field, e.target.value)}
           placeholder={placeholder}
           className={`pr-9 ${error ? "border-destructive focus-visible:ring-destructive" : ""}`}
-          autoComplete="new-password"
+          autoComplete={autoComplete}
         />
         <button
           type="button"
@@ -616,6 +618,7 @@ export function AdminProfilePage() {
                   value={passwordData.currentPassword}
                   error={passwordErrors.currentPassword}
                   placeholder="Enter current password"
+                  autoComplete="current-password"
                   onChange={handlePasswordFieldChange}
                 />
                 <PasswordFieldRow
@@ -623,7 +626,7 @@ export function AdminProfilePage() {
                   field="newPassword"
                   value={passwordData.newPassword}
                   error={passwordErrors.newPassword}
-                  placeholder="Min. 8 chars, uppercase, number"
+                  placeholder="Min. 8 chars, uppercase, number, symbol"
                   onChange={handlePasswordFieldChange}
                 />
                 <PasswordFieldRow
