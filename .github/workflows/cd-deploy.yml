@@ -248,9 +248,9 @@ jobs:
   # ──────────────────────────────────────────────────────────────
   # JOB 4 — Build & Deploy AWS Lambda (Task 2 Microservice)
   # ──────────────────────────────────────────────────────────────
-  # deploy-lambda:
-    # name: Lambda — Build Native AOT & Deploy
-    # runs-on: ubuntu-latest
+  deploy-lambda:
+    name: Lambda — Build Native AOT & Deploy
+    runs-on: ubuntu-latest
     # needs: deploy-infra
     # permissions:
     #   id-token: write
