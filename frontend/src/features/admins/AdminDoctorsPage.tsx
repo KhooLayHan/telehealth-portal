@@ -130,13 +130,13 @@ export function AdminDoctorsPage() {
     Specialization: specializationFilter || undefined,
   });
   const { data: directoryData } = useGetAll({ Page: 1, PageSize: 50 });
-  const { data: departmentsData } = useAdminGetAllDepartments();
+  const { data: departmentsData } = useAdminGetAllDepartments({ Page: 1, PageSize: 50 });
   const result = data?.status === 200 ? data.data : null;
   const doctors = result?.items ?? [];
   const directoryDoctors = directoryData?.status === 200 ? directoryData.data.items : [];
   const departmentOptions = useMemo(
     () =>
-      (departmentsData?.status === 200 ? departmentsData.data : [])
+      (departmentsData?.status === 200 ? departmentsData.data.items : [])
         .map((department) => department.name)
         .filter((department): department is string => Boolean(department))
         .sort((a, b) => a.localeCompare(b)),

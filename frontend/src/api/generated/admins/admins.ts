@@ -44,6 +44,10 @@ import type {
 } from '../../model/AdminDepartmentDto';
 
 import type {
+  AdminGetAllDepartmentsParams
+} from '../../model/AdminGetAllDepartmentsParams';
+
+import type {
   AdminGetAllLabTechsParams
 } from '../../model/AdminGetAllLabTechsParams';
 
@@ -88,6 +92,10 @@ import type {
 } from '../../model/PagedResultOfAdminAuditLogDto';
 
 import type {
+  PagedResultOfAdminDepartmentDto
+} from '../../model/PagedResultOfAdminDepartmentDto';
+
+import type {
   PagedResultOfAdminLabTechDto
 } from '../../model/PagedResultOfAdminLabTechDto';
 
@@ -107,7 +115,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 export type adminGetAllDepartmentsResponse200 = {
-  data: AdminDepartmentDto[]
+  data: PagedResultOfAdminDepartmentDto
   status: 200
 }
 
@@ -130,17 +138,24 @@ export type adminGetAllDepartmentsResponseError = (adminGetAllDepartmentsRespons
 
 export type adminGetAllDepartmentsResponse = (adminGetAllDepartmentsResponseSuccess | adminGetAllDepartmentsResponseError)
 
-export const getAdminGetAllDepartmentsUrl = () => {
+export const getAdminGetAllDepartmentsUrl = (params?: AdminGetAllDepartmentsParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/v1/admins/departments`
+  return stringifiedParams.length > 0 ? `/api/v1/admins/departments?${stringifiedParams}` : `/api/v1/admins/departments`
 }
 
-export const adminGetAllDepartments = async ( options?: RequestInit): Promise<adminGetAllDepartmentsResponse> => {
+export const adminGetAllDepartments = async (params?: AdminGetAllDepartmentsParams, options?: RequestInit): Promise<adminGetAllDepartmentsResponse> => {
 
-  return ofetchMutator<adminGetAllDepartmentsResponse>(getAdminGetAllDepartmentsUrl(),
+  return ofetchMutator<adminGetAllDepartmentsResponse>(getAdminGetAllDepartmentsUrl(params),
   {
     ...options,
     method: 'GET'
@@ -153,23 +168,23 @@ export const adminGetAllDepartments = async ( options?: RequestInit): Promise<ad
 
 
 
-export const getAdminGetAllDepartmentsQueryKey = () => {
+export const getAdminGetAllDepartmentsQueryKey = (params?: AdminGetAllDepartmentsParams,) => {
     return [
-    `/api/v1/admins/departments`
+    `/api/v1/admins/departments`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getAdminGetAllDepartmentsQueryOptions = <TData = Awaited<ReturnType<typeof adminGetAllDepartments>>, TError = ProblemDetails>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+export const getAdminGetAllDepartmentsQueryOptions = <TData = Awaited<ReturnType<typeof adminGetAllDepartments>>, TError = ProblemDetails>(params?: AdminGetAllDepartmentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getAdminGetAllDepartmentsQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getAdminGetAllDepartmentsQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetAllDepartments>>> = ({ signal }) => adminGetAllDepartments({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetAllDepartments>>> = ({ signal }) => adminGetAllDepartments(params, { signal, ...requestOptions });
 
 
 
@@ -183,7 +198,7 @@ export type AdminGetAllDepartmentsQueryError = ProblemDetails
 
 
 export function useAdminGetAllDepartments<TData = Awaited<ReturnType<typeof adminGetAllDepartments>>, TError = ProblemDetails>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>> & Pick<
+ params: undefined |  AdminGetAllDepartmentsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminGetAllDepartments>>,
           TError,
@@ -193,7 +208,7 @@ export function useAdminGetAllDepartments<TData = Awaited<ReturnType<typeof admi
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminGetAllDepartments<TData = Awaited<ReturnType<typeof adminGetAllDepartments>>, TError = ProblemDetails>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>> & Pick<
+ params?: AdminGetAllDepartmentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminGetAllDepartments>>,
           TError,
@@ -203,16 +218,16 @@ export function useAdminGetAllDepartments<TData = Awaited<ReturnType<typeof admi
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminGetAllDepartments<TData = Awaited<ReturnType<typeof adminGetAllDepartments>>, TError = ProblemDetails>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ params?: AdminGetAllDepartmentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
 export function useAdminGetAllDepartments<TData = Awaited<ReturnType<typeof adminGetAllDepartments>>, TError = ProblemDetails>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ params?: AdminGetAllDepartmentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getAdminGetAllDepartmentsQueryOptions(options)
+  const queryOptions = getAdminGetAllDepartmentsQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

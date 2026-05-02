@@ -64,7 +64,7 @@ export function AdminDepartmentPage() {
               variant="outline"
               className="h-9 gap-1.5 bg-background"
               disabled={isExportDisabled}
-              onClick={exportDepartmentsCsv}
+              onClick={() => void exportDepartmentsCsv()}
             >
               <FileDown className="size-4" />
               Export CSV

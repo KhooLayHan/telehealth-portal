@@ -1,9 +1,10 @@
 import { toast } from "sonner";
 
-import { useAdminGetAllDepartments } from "@/api/generated/admins/admins";
+import { adminGetAllDepartments, useAdminGetAllDepartments } from "@/api/generated/admins/admins";
 import type { AdminDepartmentDto } from "@/api/model/AdminDepartmentDto";
 
 const DEPARTMENTS_CSV_FILE_NAME = "departments.csv";
+const DEPARTMENTS_EXPORT_PAGE_SIZE = 50;
 const CSV_HEADERS = [
   "Slug",
   "Department Name",
@@ -18,7 +19,7 @@ const DOUBLE_QUOTE_PATTERN = /"/g;
 
 // Describes the CSV export controls exposed to the department page.
 interface UseDepartmentsCsvExportReturn {
-  exportDepartmentsCsv: () => void;
+  exportDepartmentsCsv: () => Promise<void>;
   isExportDisabled: boolean;
 }
 
@@ -78,11 +79,14 @@ function downloadCsvFile(fileName: string, csvContent: string): void {
   URL.revokeObjectURL(url);
 }
 
-// Fetches all departments from the cached admin query and exports them as CSV.
+// Fetches every department page from the generated API client and exports it as CSV.
 export function useDepartmentsCsvExport(): UseDepartmentsCsvExportReturn {
-  const { data, isError, isLoading } = useAdminGetAllDepartments();
+  const { data, isError, isLoading } = useAdminGetAllDepartments({
+    Page: 1,
+    PageSize: 1,
+  });
 
-  const exportDepartmentsCsv = () => {
+  const exportDepartmentsCsv = async () => {
     if (isLoading) {
       toast.info("Departments are still loading.");
       return;
@@ -93,8 +97,46 @@ export function useDepartmentsCsvExport(): UseDepartmentsCsvExportReturn {
       return;
     }
 
-    downloadCsvFile(DEPARTMENTS_CSV_FILE_NAME, buildDepartmentsCsv(data.data));
-    toast.success("Departments CSV downloaded.");
+    const totalCount = Number(data.data.totalCount ?? 0);
+
+    if (totalCount === 0) {
+      toast.info("No departments to export.");
+      return;
+    }
+
+    try {
+      const firstPage = await adminGetAllDepartments({
+        Page: 1,
+        PageSize: DEPARTMENTS_EXPORT_PAGE_SIZE,
+      });
+
+      if (firstPage.status !== 200) {
+        toast.error("Failed to export departments.");
+        return;
+      }
+
+      const departments = [...firstPage.data.items];
+      const totalPages = Number(firstPage.data.totalPages ?? 1);
+
+      for (let page = 2; page <= totalPages; page += 1) {
+        const pageResponse = await adminGetAllDepartments({
+          Page: page,
+          PageSize: DEPARTMENTS_EXPORT_PAGE_SIZE,
+        });
+
+        if (pageResponse.status !== 200) {
+          toast.error("Failed to export departments.");
+          return;
+        }
+
+        departments.push(...pageResponse.data.items);
+      }
+
+      downloadCsvFile(DEPARTMENTS_CSV_FILE_NAME, buildDepartmentsCsv(departments));
+      toast.success("Departments CSV downloaded.");
+    } catch {
+      toast.error("Failed to export departments.");
+    }
   };
 
   return {
