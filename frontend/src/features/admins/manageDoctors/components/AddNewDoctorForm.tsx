@@ -29,7 +29,29 @@ import { Textarea } from "@/components/ui/textarea";
 
 const icNumberRegex = /^\d{12}$/;
 const dateOfBirthRegex = /^\d{4}-\d{2}-\d{2}$/;
+const nameRegex = /^[A-Za-z ]+$/;
+const usernameRegex = /^[A-Za-z0-9_]+$/;
+const phoneNumberRegex = /^\d{10}$/;
 const specialCharacterRegex = /[^a-zA-Z0-9]/;
+const malaysiaCountry = "Malaysia";
+const malaysiaStates: readonly string[] = [
+  "Johor",
+  "Kedah",
+  "Kelantan",
+  "Melaka",
+  "Negeri Sembilan",
+  "Pahang",
+  "Perak",
+  "Perlis",
+  "Pulau Pinang",
+  "Sabah",
+  "Sarawak",
+  "Selangor",
+  "Terengganu",
+  "Kuala Lumpur",
+  "Labuan",
+  "Putrajaya",
+] as const;
 
 const requiredText = (maxLength: number) =>
   z
@@ -37,8 +59,34 @@ const requiredText = (maxLength: number) =>
     .refine((value) => value.trim().length > 0, "Required")
     .refine((value) => value.trim().length <= maxLength, `Max ${maxLength} characters`);
 
+const requiredName = z
+  .string()
+  .refine((value) => value.trim().length > 0, "Required")
+  .refine((value) => value.trim().length <= 20, "Max 20 characters")
+  .refine(
+    (value) => value.trim().length === 0 || nameRegex.test(value.trim()),
+    "Letters and spaces only",
+  );
+
+const requiredUsername = z
+  .string()
+  .refine((value) => value.trim().length > 0, "Required")
+  .refine((value) => value.trim().length >= 3, "Min 3 characters")
+  .refine((value) => value.trim().length <= 20, "Max 20 characters")
+  .refine(
+    (value) => value.trim().length === 0 || usernameRegex.test(value.trim()),
+    "Letters, numbers, and underscores only",
+  );
+
 const optionalText = (maxLength: number) =>
   z.string().refine((value) => value.trim().length <= maxLength, `Max ${maxLength} characters`);
+
+const optionalPhoneNumber = z
+  .string()
+  .refine(
+    (value) => value.trim().length === 0 || phoneNumberRegex.test(value.trim()),
+    "Phone must be exactly 10 digits",
+  );
 
 const isValidDateOfBirth = (value: string) => {
   if (!dateOfBirthRegex.test(value)) {
@@ -65,9 +113,9 @@ const isValidDateOfBirth = (value: string) => {
 
 const addDoctorSchema = z
   .object({
-    firstName: requiredText(100),
-    lastName: requiredText(100),
-    username: requiredText(50),
+    firstName: requiredName,
+    lastName: requiredName,
+    username: requiredUsername,
     email: z.string().trim().min(1, "Required").email("Invalid email").max(255),
     password: z
       .string()
@@ -83,8 +131,8 @@ const addDoctorSchema = z
         (value) => value.trim().length === 0 || icNumberRegex.test(value),
         "IC Number must be exactly 12 digits without dashes",
       ),
-    phoneNumber: optionalText(20),
-    gender: z.enum(["M", "F", "O", "N"], { message: "Required" }),
+    phoneNumber: optionalPhoneNumber,
+    gender: z.enum(["M", "F", "N"], { message: "Required" }),
     dateOfBirth: z
       .string()
       .min(1, "Required")
@@ -98,9 +146,14 @@ const addDoctorSchema = z
     departmentName: requiredText(100),
     addressStreet: optionalText(200),
     addressCity: optionalText(100),
-    addressState: optionalText(100),
+    addressState: z
+      .string()
+      .refine(
+        (value) => value.length === 0 || malaysiaStates.includes(value),
+        "Select a Malaysia state",
+      ),
     addressPostalCode: optionalText(20),
-    addressCountry: optionalText(100),
+    addressCountry: z.literal(malaysiaCountry),
     qualifications: z.array(
       z.object({
         degree: requiredText(100),
@@ -115,7 +168,6 @@ const addDoctorSchema = z
       ["addressCity", value.addressCity],
       ["addressState", value.addressState],
       ["addressPostalCode", value.addressPostalCode],
-      ["addressCountry", value.addressCountry],
     ] as const;
 
     const hasAnyAddressValue = addressFields.some(([, fieldValue]) => fieldValue.trim().length > 0);
@@ -154,7 +206,7 @@ const addDoctorDefaultValues = {
   addressCity: "",
   addressState: "",
   addressPostalCode: "",
-  addressCountry: "",
+  addressCountry: malaysiaCountry,
   qualifications: [] as Array<{ degree: string; institution: string; year: number }>,
 };
 
@@ -177,7 +229,9 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
       const addressCity = value.addressCity.trim();
       const addressState = value.addressState.trim();
       const addressPostalCode = value.addressPostalCode.trim();
-      const addressCountry = value.addressCountry.trim();
+      const hasAddress = [addressStreet, addressCity, addressState, addressPostalCode].some(
+        (addressPart) => addressPart.length > 0,
+      );
 
       const payload: CreateDoctorCommand = {
         firstName: value.firstName.trim(),
@@ -194,13 +248,13 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
         licenseNumber: value.licenseNumber.trim(),
         consultationFee: value.consultationFee,
         departmentName: value.departmentName.trim(),
-        address: addressStreet
+        address: hasAddress
           ? {
               street: addressStreet,
               city: addressCity,
               state: addressState,
               postalCode: addressPostalCode,
-              country: addressCountry,
+              country: malaysiaCountry,
             }
           : null,
         qualifications: value.qualifications.map((q) => ({
@@ -278,6 +332,7 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                         onChange={(e) => field.handleChange(e.target.value)}
                         onBlur={field.handleBlur}
                         placeholder="e.g. Ahmad"
+                        maxLength={20}
                       />
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
@@ -292,6 +347,7 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                         onChange={(e) => field.handleChange(e.target.value)}
                         onBlur={field.handleBlur}
                         placeholder="e.g. Rahman"
+                        maxLength={20}
                       />
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
@@ -307,7 +363,8 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                         value={field.state.value}
                         onChange={(e) => field.handleChange(e.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder="e.g. dr.ahmad"
+                        placeholder="e.g. dr_ahmad"
+                        maxLength={20}
                       />
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
@@ -379,7 +436,9 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                         value={field.state.value}
                         onChange={(e) => field.handleChange(e.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder="+601x-xxxxxxx"
+                        placeholder="10 digits"
+                        inputMode="numeric"
+                        maxLength={10}
                       />
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
@@ -399,7 +458,6 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                         <SelectContent>
                           <SelectItem value="M">Male</SelectItem>
                           <SelectItem value="F">Female</SelectItem>
-                          <SelectItem value="O">Other</SelectItem>
                           <SelectItem value="N">Prefer not to say</SelectItem>
                         </SelectContent>
                       </Select>
@@ -555,12 +613,21 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                   {(field) => (
                     <Field>
                       <FieldLabel>State</FieldLabel>
-                      <Input
+                      <Select
                         value={field.state.value}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        onBlur={field.handleBlur}
-                        placeholder="e.g. Wilayah Persekutuan"
-                      />
+                        onValueChange={(v) => field.handleChange(v ?? "")}
+                      >
+                        <SelectTrigger className="w-full" onBlur={field.handleBlur}>
+                          <SelectValue placeholder="Select state" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {malaysiaStates.map((state) => (
+                            <SelectItem key={state} value={state}>
+                              {state}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
                   )}
@@ -588,9 +655,10 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                       <FieldLabel>Country</FieldLabel>
                       <Input
                         value={field.state.value}
-                        onChange={(e) => field.handleChange(e.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder="e.g. Malaysia"
+                        readOnly
+                        aria-readonly="true"
+                        className="bg-muted/50"
                       />
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
