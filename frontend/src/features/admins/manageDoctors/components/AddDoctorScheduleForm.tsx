@@ -34,9 +34,28 @@ const MINUTES_PER_DAY = 24 * 60;
 const SCHEDULE_SETTINGS_STALE_TIME_MS = 5 * 60 * 1000;
 const DATE_INPUT_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_INPUT_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
+const PAST_DATE_VALIDATION_MESSAGE = "Choose today or a future date.";
+
+// Returns today's local calendar date in the browser date input format.
+function getTodayDateInputValue(): string {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = (today.getMonth() + 1).toString().padStart(2, "0");
+  const day = today.getDate().toString().padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+// Checks whether a browser date input value is earlier than today.
+function isPastDateInputValue(date: string): boolean {
+  return DATE_INPUT_PATTERN.test(date) && date < getTodayDateInputValue();
+}
 
 const addDoctorScheduleSchema = z.object({
-  date: z.string().min(1, "Required"),
+  date: z
+    .string()
+    .min(1, "Required")
+    .refine((date) => !isPastDateInputValue(date), PAST_DATE_VALIDATION_MESSAGE),
   startTime: z.string().min(1, "Required"),
   scheduleStatus: z.enum(["Available", "Blocked"]),
 });
@@ -144,6 +163,10 @@ function getOperatingHoursValidationMessage({
     return "Choose a valid date.";
   }
 
+  if (isPastDateInputValue(date)) {
+    return PAST_DATE_VALIDATION_MESSAGE;
+  }
+
   const dayOperatingHours = getOperatingHourForDate(date, operatingHours);
 
   if (!dayOperatingHours?.isOpen) {
@@ -200,6 +223,7 @@ export function AddDoctorScheduleForm({
     startTime: DEFAULT_START_TIME,
     scheduleStatus: "Available",
   };
+  const minimumScheduleDate = getTodayDateInputValue();
   const form = useForm({
     defaultValues,
     validators: { onSubmit: addDoctorScheduleSchema },
@@ -302,6 +326,7 @@ export function AddDoctorScheduleForm({
                   <FieldLabel htmlFor={field.name}>Date</FieldLabel>
                   <Input
                     id={field.name}
+                    min={minimumScheduleDate}
                     type="date"
                     value={field.state.value}
                     onBlur={field.handleBlur}
