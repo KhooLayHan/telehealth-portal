@@ -94,7 +94,7 @@ public static class Serverless
 
                 // Removed ReservedConcurrentExecutions — account lacks headroom.
                 // Use RDS Proxy or connection pooling to protect the database instead.
-                ReservedConcurrentExecutions = 5,
+                // ReservedConcurrentExecutions = 5,
 
                 // Dummy deployment package — CI/CD overwrites with the real build.
                 // This file must exist for Pulumi to create the Lambda resource.

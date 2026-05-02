@@ -10,9 +10,17 @@ namespace TeleHealth.Api.Features.Users.UpdateProfile;
 public sealed record UpdateProfileResult(
     string FirstName,
     string LastName,
+    string? Username,
     string? Phone,
     string IcNumber,
-    string? Address
+    LocalDate? DateOfBirth,
+    string? Gender,
+    string? AddressLine1,
+    string? AddressLine2,
+    string? City,
+    string? State,
+    string? PostalCode,
+    string? Country
 );
 
 public sealed class UpdateProfileHandler(ApplicationDbContext db)
@@ -31,6 +39,18 @@ public sealed class UpdateProfileHandler(ApplicationDbContext db)
             throw new UserNotFoundException(publicId);
 
         if (
+            !string.IsNullOrWhiteSpace(cmd.Username)
+            && !string.Equals(user.Username, cmd.Username, StringComparison.Ordinal)
+            && await db.Users.AnyAsync(
+                u => u.Username == cmd.Username && u.PublicId != publicId && u.DeletedAt == null,
+                ct
+            )
+        )
+        {
+            throw new DuplicateUsernameException();
+        }
+
+        if (
             !string.Equals(user.IcNumber, cmd.IcNumber, StringComparison.Ordinal)
             && await db.Users.AnyAsync(
                 u => u.IcNumber == cmd.IcNumber && u.PublicId != publicId && u.DeletedAt == null,
@@ -43,11 +63,14 @@ public sealed class UpdateProfileHandler(ApplicationDbContext db)
 
         user.FirstName = cmd.FirstName;
         user.LastName = cmd.LastName;
+        user.Username = string.IsNullOrWhiteSpace(cmd.Username) ? user.Username : cmd.Username;
         user.Phone = string.IsNullOrEmpty(cmd.Phone) ? null : cmd.Phone;
         user.IcNumber = cmd.IcNumber;
-        user.Address = string.IsNullOrEmpty(cmd.Address)
-            ? null
-            : new Address(cmd.Address, "-", "-", "-", "-");
+        user.DateOfBirth = cmd.DateOfBirth ?? user.DateOfBirth;
+        user.Gender = string.IsNullOrWhiteSpace(cmd.Gender)
+            ? user.Gender
+            : ToGenderCode(cmd.Gender);
+        user.Address = BuildAddress(cmd);
         user.UpdatedAt = SystemClock.Instance.GetCurrentInstant();
 
         await db.SaveChangesAsync(ct);
@@ -57,9 +80,63 @@ public sealed class UpdateProfileHandler(ApplicationDbContext db)
         return new UpdateProfileResult(
             user.FirstName,
             user.LastName,
+            user.Username,
             user.Phone,
             user.IcNumber,
-            user.Address?.Street
+            user.DateOfBirth,
+            ToGenderLabel(user.Gender),
+            user.Address?.Street,
+            null,
+            user.Address?.City,
+            user.Address?.State,
+            user.Address?.PostalCode,
+            user.Address?.Country
         );
     }
+
+    private static Address? BuildAddress(UpdateProfileCommand cmd)
+    {
+        var street = FirstNonEmpty(cmd.AddressLine1, cmd.Address);
+        var hasAddress =
+            !string.IsNullOrWhiteSpace(street)
+            || !string.IsNullOrWhiteSpace(cmd.City)
+            || !string.IsNullOrWhiteSpace(cmd.State)
+            || !string.IsNullOrWhiteSpace(cmd.PostalCode)
+            || !string.IsNullOrWhiteSpace(cmd.Country);
+
+        return hasAddress
+            ? new Address(
+                street ?? "-",
+                EmptyToPlaceholder(cmd.City),
+                EmptyToPlaceholder(cmd.State),
+                EmptyToPlaceholder(cmd.PostalCode),
+                EmptyToPlaceholder(cmd.Country)
+            )
+            : null;
+    }
+
+    private static string? FirstNonEmpty(params string?[] values) =>
+        values.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value));
+
+    private static string EmptyToPlaceholder(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? "-" : value;
+
+    private static char ToGenderCode(string gender) =>
+        gender switch
+        {
+            "male" or "M" => 'M',
+            "female" or "F" => 'F',
+            "other" or "O" => 'O',
+            "N" => 'N',
+            _ => 'N',
+        };
+
+    private static string ToGenderLabel(char gender) =>
+        gender switch
+        {
+            'M' => "male",
+            'F' => "female",
+            'O' => "other",
+            _ => "other",
+        };
 }

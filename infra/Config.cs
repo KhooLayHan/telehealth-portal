@@ -47,9 +47,7 @@ public sealed class StackConfig
         DbInstanceClass = config.Get("dbInstanceClass") ?? "db.t3.micro";
         DbName = config.Get("dbName") ?? "telehealth_dev";
         DbUsername = config.Get("dbUsername") ?? "telehealth_admin";
-
         JwtSecret = config.RequireSecret("jwtSecret");
-
         FrontendOrigin = config.Get("frontendOrigin") ?? "*";
 
         var awsConfig = new Config("aws");
