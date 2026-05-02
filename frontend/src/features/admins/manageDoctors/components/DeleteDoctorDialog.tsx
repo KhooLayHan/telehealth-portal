@@ -1,5 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
+import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
+
 import { getGetAllQueryKey, useDeleteDoctorById } from "@/api/generated/doctors/doctors";
 import type { DoctorListDto } from "@/api/model/DoctorListDto";
 import { ApiError } from "@/api/ofetch-mutator";
@@ -8,6 +10,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -45,24 +48,33 @@ export function DeleteDoctorDialog({ doctor, open, onOpenChange }: DeleteDoctorD
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md gap-0 overflow-hidden p-0">
         <div className="absolute inset-x-0 top-0 h-1 bg-destructive" />
+
         <DialogHeader className="px-6 pb-4 pt-7">
-          <DialogTitle className="text-lg font-semibold">Delete Doctor</DialogTitle>
-          <DialogDescription className="mt-1 text-sm text-muted-foreground">
-            Are you sure you want to delete{" "}
-            <span className="font-medium text-foreground">
-              Dr. {doctor.firstName ?? ""} {doctor.lastName ?? ""}
-            </span>
-            ? This action cannot be undone.
-          </DialogDescription>
+          <div className="flex items-start gap-3">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-destructive/10 text-destructive">
+              <Trash2 className="size-5" />
+            </div>
+            <div className="min-w-0 space-y-1">
+              <DialogTitle className="text-xl font-semibold">Remove Doctor</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to remove{" "}
+                <span className="font-medium text-foreground">
+                  Dr. {doctor.firstName ?? ""} {doctor.lastName ?? ""}
+                </span>
+                ? This will deactivate the doctor account and remove it from active doctor lists.
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
-        <div className="flex justify-end gap-2 border-t border-border px-6 py-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+
+        <DialogFooter className="border-t border-border px-6 py-4">
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button variant="destructive" disabled={isPending} onClick={handleConfirm}>
-            {isPending ? "Deleting..." : "Delete"}
+          <Button type="button" variant="destructive" disabled={isPending} onClick={handleConfirm}>
+            {isPending ? "Removing..." : "Remove"}
           </Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
