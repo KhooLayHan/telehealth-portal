@@ -123,6 +123,9 @@ export function AddNewPatientForm({ open, onOpenChange }: AddNewPatientFormProps
             const updatePayload: UpdatePatientRecordCommand = {
               firstName: value.firstName,
               lastName: value.lastName,
+              username: value.username,
+              email: value.email,
+              icNumber: value.icNumber,
               dateOfBirth: value.dateOfBirth,
               phoneNumber: value.phoneNumber || null,
               gender: value.gender || "N",

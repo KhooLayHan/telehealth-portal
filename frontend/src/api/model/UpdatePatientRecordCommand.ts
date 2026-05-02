@@ -11,6 +11,9 @@ import type { LocalDate } from "./LocalDate";
 export interface UpdatePatientRecordCommand {
   firstName: string;
   lastName: string;
+  username: string;
+  email: string;
+  icNumber: string;
   dateOfBirth: LocalDate;
   /** @nullable */
   phoneNumber: string | null;
