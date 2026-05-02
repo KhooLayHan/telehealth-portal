@@ -1,3 +1,5 @@
+import { Stethoscope } from "lucide-react";
+
 import type { DoctorListDto } from "@/api/model/DoctorListDto";
 import { Button } from "@/components/ui/button";
 import {
@@ -108,24 +110,32 @@ export function ViewDoctorDetailDialog({
 }: ViewDoctorDetailDialogProps) {
   if (!doctor) return null;
 
-  const initials = `${(doctor.firstName ?? "?")[0]}${(doctor.lastName ?? "?")[0]}`;
+  const initials = `${(doctor.firstName ?? "?")[0]}${(doctor.lastName ?? "?")[0]}`.toUpperCase();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl gap-0 overflow-hidden p-0">
-        <div className="absolute inset-x-0 top-0 h-px bg-border" />
+        <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
 
-        <DialogHeader className="px-6 pb-4 pt-7">
+        <DialogHeader className="px-6 pt-7 pb-4">
           <div className="flex items-start gap-4">
-            <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-muted text-lg font-bold text-foreground">
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary font-bold text-lg text-primary-foreground">
               {initials}
             </div>
 
             <div className="min-w-0 flex-1">
-              <DialogTitle className="text-xl font-semibold leading-none">
-                Dr. {doctor.firstName ?? ""} {doctor.lastName ?? ""}
-              </DialogTitle>
-              <DialogDescription className="mt-1 text-sm text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-2">
+                <DialogTitle className="font-semibold text-xl leading-none">
+                  Dr. {doctor.firstName ?? ""} {doctor.lastName ?? ""}
+                </DialogTitle>
+                {doctor.specialization && (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-primary bg-primary/10 px-2 py-0.5 font-semibold text-primary text-xs">
+                    <Stethoscope className="size-2.5" />
+                    {doctor.specialization}
+                  </span>
+                )}
+              </div>
+              <DialogDescription className="mt-1 text-sm">
                 Review profile details, professional information, address, and qualifications.
               </DialogDescription>
             </div>
@@ -133,7 +143,7 @@ export function ViewDoctorDetailDialog({
         </DialogHeader>
 
         <Tabs defaultValue="personal" className="flex-1 px-6 pb-2">
-          <TabsList className="mb-5 grid w-full grid-cols-4">
+          <TabsList className="mb-5 grid h-auto w-full grid-cols-2 rounded-lg border border-border bg-muted/30 p-1 sm:grid-cols-4">
             <TabsTrigger value="personal">Personal</TabsTrigger>
             <TabsTrigger value="professional">Professional</TabsTrigger>
             <TabsTrigger value="address">Address</TabsTrigger>
@@ -144,6 +154,9 @@ export function ViewDoctorDetailDialog({
             className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
             value="personal"
           >
+            <p className="font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
+              Personal Information
+            </p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <ReadOnlyField label="First Name" value={formatValue(doctor.firstName)} />
               <ReadOnlyField label="Last Name" value={formatValue(doctor.lastName)} />
@@ -164,6 +177,9 @@ export function ViewDoctorDetailDialog({
             className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
             value="professional"
           >
+            <p className="font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
+              Professional Details
+            </p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <ReadOnlyField label="Specialization" value={formatValue(doctor.specialization)} />
               <ReadOnlyField label="Department" value={formatValue(doctor.departmentName)} />
@@ -186,6 +202,9 @@ export function ViewDoctorDetailDialog({
             className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
             value="address"
           >
+            <p className="font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
+              Address
+            </p>
             <ReadOnlyField label="Street" value={formatValue(doctor.address?.street)} />
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <ReadOnlyField label="City" value={formatValue(doctor.address?.city)} />
@@ -202,9 +221,12 @@ export function ViewDoctorDetailDialog({
           </TabsContent>
 
           <TabsContent
-            className="mt-0 max-h-[52vh] overflow-y-auto pb-2 pr-1"
+            className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
             value="qualifications"
           >
+            <p className="font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
+              Qualifications
+            </p>
             <div className="space-y-3">
               {(doctor.qualifications ?? []).map((qualification) => (
                 <div
@@ -227,7 +249,7 @@ export function ViewDoctorDetailDialog({
               ))}
 
               {(doctor.qualifications ?? []).length === 0 && (
-                <p className="py-4 text-center text-sm text-muted-foreground">
+                <p className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-center text-muted-foreground text-sm">
                   No qualifications added yet.
                 </p>
               )}
