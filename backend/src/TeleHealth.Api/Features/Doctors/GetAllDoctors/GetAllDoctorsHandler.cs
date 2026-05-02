@@ -71,6 +71,7 @@ public sealed class GetAllDoctorsHandler(ApplicationDbContext db)
                 LastName = d.User.LastName,
                 Username = d.User.Username,
                 Email = d.User.Email,
+                IcNumber = d.User.IcNumber,
                 Specialization = d.Specialization,
                 DepartmentName = d.Department.Name,
                 LicenseNumber = d.LicenseNumber,

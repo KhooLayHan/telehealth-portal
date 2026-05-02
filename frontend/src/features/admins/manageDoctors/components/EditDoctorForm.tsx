@@ -33,6 +33,7 @@ const editDoctorSchema = z.object({
   lastName: z.string().min(1, "Required"),
   username: z.string().min(1, "Required"),
   email: z.string().email("Invalid email"),
+  icNumber: z.string().min(1, "Required"),
   phoneNumber: z.string(),
   gender: z.string().min(1, "Required"),
   dateOfBirth: z.string().min(1, "Required"),
@@ -61,6 +62,7 @@ function buildEditDefaultValues(doctor: DoctorListDto) {
     lastName: doctor.lastName ?? "",
     username: doctor.username ?? "",
     email: doctor.email ?? "",
+    icNumber: doctor.icNumber ?? "",
     phoneNumber: doctor.phoneNumber ?? "",
     gender: doctor.gender ?? "",
     dateOfBirth: String(doctor.dateOfBirth ?? ""),
@@ -106,6 +108,7 @@ export function EditDoctorForm({ doctor, open, onOpenChange }: EditDoctorFormPro
         lastName: value.lastName ?? "",
         username: value.username ?? "",
         email: value.email ?? "",
+        icNumber: value.icNumber ?? "",
         phoneNumber: value.phoneNumber || null,
         gender: (value.gender ?? "N")[0] ?? "N",
         dateOfBirth: value.dateOfBirth ?? "",
@@ -245,6 +248,21 @@ export function EditDoctorForm({ doctor, open, onOpenChange }: EditDoctorFormPro
                   )}
                 </form.Field>
               </div>
+              <form.Field name="icNumber">
+                {(field) => (
+                  <Field>
+                    <FieldLabel>IC Number</FieldLabel>
+                    <Input
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      placeholder="e.g. 820101-14-5678"
+                      className="font-mono"
+                    />
+                    <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                  </Field>
+                )}
+              </form.Field>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <form.Field name="phoneNumber">
                   {(field) => (

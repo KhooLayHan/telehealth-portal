@@ -7,6 +7,7 @@ public sealed record UpdateDoctorCommand(
     string LastName,
     string Username,
     string Email,
+    string IcNumber,
     string? PhoneNumber,
     string Gender,
     LocalDate DateOfBirth,

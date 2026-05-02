@@ -165,6 +165,11 @@ export function ViewDoctorDetailDialog({
               <ReadOnlyField label="Username" value={formatValue(doctor.username)} />
               <ReadOnlyField label="Email" value={formatValue(doctor.email)} />
             </div>
+            <ReadOnlyField
+              className="[&_input]:font-mono"
+              label="IC Number"
+              value={formatValue(doctor.icNumber)}
+            />
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <ReadOnlyField label="Phone Number" value={formatValue(doctor.phoneNumber)} />
               <ReadOnlyField label="Gender" value={formatValue(doctor.gender)} />
