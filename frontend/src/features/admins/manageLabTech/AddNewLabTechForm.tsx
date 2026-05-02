@@ -31,20 +31,76 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 // Matches Malaysian IC numbers in the backend format: 12 digits without dashes.
 const malaysianIcRegex = /^\d{12}$/;
 
+// Matches names that contain letters and spaces only.
+const nameRegex = /^[A-Za-z ]+$/;
+
+// Matches usernames that contain letters, numbers, and underscores only.
+const usernameRegex = /^[A-Za-z0-9_]+$/;
+
+// Matches phone numbers stored as exactly 10 digits.
+const phoneNumberRegex = /^\d{10}$/;
+
 // Matches any non-alphanumeric character required by the password policy.
 const specialCharacterRegex = /[^a-zA-Z0-9]/;
 
-// Validates required trimmed text fields against backend length limits.
-const requiredText = (fieldName: string, maxLength: number) =>
+// Stores the fixed country value used for lab technician addresses.
+const malaysiaCountry = "Malaysia";
+
+// Lists the selectable Malaysian states and federal territories.
+const malaysiaStates: readonly string[] = [
+  "Johor",
+  "Kedah",
+  "Kelantan",
+  "Melaka",
+  "Negeri Sembilan",
+  "Pahang",
+  "Perak",
+  "Perlis",
+  "Pulau Pinang",
+  "Sabah",
+  "Sarawak",
+  "Selangor",
+  "Terengganu",
+  "Kuala Lumpur",
+  "Labuan",
+  "Putrajaya",
+] as const;
+
+// Validates a required person name using the lab technician naming rules.
+const requiredName = (fieldName: string) =>
   z
     .string()
-    .trim()
-    .min(1, `${fieldName} is required`)
-    .max(maxLength, `${fieldName} must be ${maxLength} characters or fewer`);
+    .refine((value) => value.trim().length > 0, `${fieldName} is required`)
+    .refine((value) => value.trim().length <= 20, `${fieldName} must be 20 characters or fewer`)
+    .refine(
+      (value) => value.trim().length === 0 || nameRegex.test(value.trim()),
+      `${fieldName} may only contain letters and spaces`,
+    );
+
+// Validates usernames using the lab technician account naming rules.
+const requiredUsername = z
+  .string()
+  .refine((value) => value.trim().length > 0, "Username is required")
+  .refine((value) => value.trim().length === 0 || value.trim().length >= 3, {
+    message: "Username must be at least 3 characters",
+  })
+  .refine((value) => value.trim().length <= 20, "Username must be 20 characters or fewer")
+  .refine(
+    (value) => value.trim().length === 0 || usernameRegex.test(value.trim()),
+    "Username may only contain letters, numbers, and underscores",
+  );
 
 // Validates optional trimmed text fields against backend length limits.
 const optionalText = (fieldName: string, maxLength: number) =>
   z.string().trim().max(maxLength, `${fieldName} must be ${maxLength} characters or fewer`);
+
+// Validates an optional phone number only when one is provided.
+const optionalPhoneNumber = z
+  .string()
+  .trim()
+  .refine((value) => value.length === 0 || phoneNumberRegex.test(value), {
+    message: "Phone must be exactly 10 digits",
+  });
 
 // Checks that a date input value is a real date and not later than today's local date.
 function isValidDateOfBirth(value: string): boolean {
@@ -77,9 +133,9 @@ function isValidDateOfBirth(value: string): boolean {
 // Validates the add lab technician form before account creation.
 const addLabTechSchema = z
   .object({
-    firstName: requiredText("First name", 100),
-    lastName: requiredText("Last name", 100),
-    username: requiredText("Username", 50),
+    firstName: requiredName("First name"),
+    lastName: requiredName("Last name"),
+    username: requiredUsername,
     email: z
       .string()
       .trim()
@@ -98,8 +154,10 @@ const addLabTechSchema = z
       .string()
       .trim()
       .regex(malaysianIcRegex, "IC number must be exactly 12 digits without dashes"),
-    phoneNumber: optionalText("Phone number", 20),
-    gender: z.enum(["M", "F", "O", "N"], { message: "Select a gender" }),
+    phoneNumber: optionalPhoneNumber,
+    gender: z.enum(["M", "F", "N"], {
+      message: "Gender must be male, female, or prefer not to say",
+    }),
     dateOfBirth: z
       .string()
       .min(1, "Date of birth is required")
@@ -109,9 +167,14 @@ const addLabTechSchema = z
       ),
     street: optionalText("Street", 200),
     city: optionalText("City", 100),
-    state: optionalText("State", 100),
+    state: z
+      .string()
+      .refine(
+        (value) => value.length === 0 || malaysiaStates.includes(value),
+        "Select a Malaysia state",
+      ),
     postalCode: optionalText("Postal code", 20),
-    country: optionalText("Country", 100),
+    country: z.literal(malaysiaCountry),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
@@ -123,7 +186,6 @@ const addLabTechSchema = z
       { fieldName: "city", label: "City", value: data.city },
       { fieldName: "state", label: "State", value: data.state },
       { fieldName: "postalCode", label: "Postal code", value: data.postalCode },
-      { fieldName: "country", label: "Country", value: data.country },
     ] as const;
     const hasAnyAddressValue = addressFields.some((field) => field.value.length > 0);
 
@@ -161,7 +223,7 @@ const addLabTechDefaultValues: AddLabTechFormValues = {
   city: "",
   state: "",
   postalCode: "",
-  country: "",
+  country: malaysiaCountry,
 };
 
 // Describes the open state controls for the add lab technician dialog.
@@ -220,8 +282,7 @@ export function AddNewLabTechForm({ open, onOpenChange }: AddNewLabTechFormProps
       const city = value.city.trim();
       const state = value.state.trim();
       const postalCode = value.postalCode.trim();
-      const country = value.country.trim();
-      const hasAddress = [street, city, state, postalCode, country].some(
+      const hasAddress = [street, city, state, postalCode].some(
         (addressPart) => addressPart.length > 0,
       );
 
@@ -242,7 +303,7 @@ export function AddNewLabTechForm({ open, onOpenChange }: AddNewLabTechFormProps
                 city,
                 state,
                 postalCode,
-                country,
+                country: malaysiaCountry,
               }
             : null,
         },
@@ -304,6 +365,7 @@ export function AddNewLabTechForm({ open, onOpenChange }: AddNewLabTechFormProps
                         onChange={(event) => field.handleChange(event.target.value)}
                         onBlur={field.handleBlur}
                         placeholder="e.g. Nur"
+                        maxLength={20}
                       />
                       <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                     </Field>
@@ -318,6 +380,7 @@ export function AddNewLabTechForm({ open, onOpenChange }: AddNewLabTechFormProps
                         onChange={(event) => field.handleChange(event.target.value)}
                         onBlur={field.handleBlur}
                         placeholder="e.g. Aisyah"
+                        maxLength={20}
                       />
                       <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                     </Field>
@@ -351,7 +414,8 @@ export function AddNewLabTechForm({ open, onOpenChange }: AddNewLabTechFormProps
                         value={field.state.value}
                         onChange={(event) => field.handleChange(event.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder="+601x-xxxxxxx"
+                        placeholder="e.g. 0123456789"
+                        maxLength={10}
                       />
                       <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                     </Field>
@@ -364,7 +428,7 @@ export function AddNewLabTechForm({ open, onOpenChange }: AddNewLabTechFormProps
                       <Select
                         value={field.state.value}
                         onValueChange={(value) =>
-                          field.handleChange((value ?? "N") as "M" | "F" | "O" | "N")
+                          field.handleChange((value ?? "N") as "M" | "F" | "N")
                         }
                       >
                         <SelectTrigger className="w-full" onBlur={field.handleBlur}>
@@ -373,7 +437,6 @@ export function AddNewLabTechForm({ open, onOpenChange }: AddNewLabTechFormProps
                         <SelectContent>
                           <SelectItem value="M">Male</SelectItem>
                           <SelectItem value="F">Female</SelectItem>
-                          <SelectItem value="O">Other</SelectItem>
                           <SelectItem value="N">Prefer not to say</SelectItem>
                         </SelectContent>
                       </Select>
@@ -412,8 +475,9 @@ export function AddNewLabTechForm({ open, onOpenChange }: AddNewLabTechFormProps
                         value={field.state.value}
                         onChange={(event) => field.handleChange(event.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder="e.g. lab.nur"
+                        placeholder="e.g. lab_nur"
                         autoComplete="off"
+                        maxLength={20}
                       />
                       <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                     </Field>
@@ -522,12 +586,21 @@ export function AddNewLabTechForm({ open, onOpenChange }: AddNewLabTechFormProps
                   {(field) => (
                     <Field>
                       <FieldLabel>State</FieldLabel>
-                      <Input
+                      <Select
                         value={field.state.value}
-                        onChange={(event) => field.handleChange(event.target.value)}
-                        onBlur={field.handleBlur}
-                        placeholder="e.g. Wilayah Persekutuan"
-                      />
+                        onValueChange={(value) => field.handleChange(value ?? "")}
+                      >
+                        <SelectTrigger className="w-full" onBlur={field.handleBlur}>
+                          <SelectValue placeholder="Select state" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {malaysiaStates.map((state) => (
+                            <SelectItem key={state} value={state}>
+                              {state}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                     </Field>
                   )}
@@ -556,9 +629,9 @@ export function AddNewLabTechForm({ open, onOpenChange }: AddNewLabTechFormProps
                       <FieldLabel>Country</FieldLabel>
                       <Input
                         value={field.state.value}
-                        onChange={(event) => field.handleChange(event.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder="e.g. Malaysia"
+                        readOnly
+                        aria-readonly="true"
                       />
                       <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                     </Field>
