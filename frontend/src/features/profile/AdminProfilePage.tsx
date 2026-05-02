@@ -32,8 +32,6 @@ import {
   UseAdminProfile,
 } from "./UseAdminProfile";
 
-const ACCENT = "#0d9488";
-
 const container: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.08 } },
@@ -254,7 +252,7 @@ export function AdminProfilePage() {
       {/* Hero card */}
       <motion.div variants={cardAnim}>
         <Card className="relative overflow-hidden">
-          <div className="absolute inset-x-0 top-0 h-0.75" style={{ background: ACCENT }} />
+          <div className="absolute inset-x-0 top-0 h-0.75 bg-foreground" />
           <CardContent className="flex items-center gap-6 px-6 pb-6 pt-7">
             {/* Avatar */}
             <div className="relative shrink-0">
@@ -262,7 +260,7 @@ export function AdminProfilePage() {
                 type="button"
                 onClick={triggerFileSelect}
                 disabled={isUploading}
-                className="group relative flex size-20 items-center justify-center overflow-hidden rounded-full ring-2 ring-border transition-all hover:ring-[#0d9488] disabled:cursor-not-allowed"
+                className="group relative flex size-20 items-center justify-center overflow-hidden rounded-full ring-2 ring-border transition-all hover:ring-foreground disabled:cursor-not-allowed"
                 aria-label="Change profile photo"
               >
                 {me.avatarUrl ? (
@@ -327,8 +325,7 @@ export function AdminProfilePage() {
                     size="sm"
                     onClick={handleSave}
                     disabled={isSaving}
-                    style={{ backgroundColor: ACCENT }}
-                    className="gap-1.5 text-white hover:opacity-90"
+                    className="gap-1.5 bg-foreground text-background hover:bg-foreground/90"
                   >
                     {isSaving ? <Loader2 className="size-3.5 animate-spin" /> : null}
                     Save
@@ -548,7 +545,7 @@ export function AdminProfilePage() {
       {/* Account details */}
       <motion.div variants={cardAnim}>
         <Card className="relative overflow-hidden">
-          <div className="absolute inset-x-0 top-0 h-0.75" style={{ background: ACCENT }} />
+          <div className="absolute inset-x-0 top-0 h-0.75 bg-foreground" />
           <CardContent className="flex flex-col gap-5 px-6 pb-6 pt-7">
             <div className="flex items-center gap-2">
               <Shield className="size-3.5 text-muted-foreground" />
@@ -578,7 +575,7 @@ export function AdminProfilePage() {
                 type="button"
                 onClick={triggerFileSelect}
                 disabled={isUploading}
-                className="inline-flex w-fit items-center gap-1.5 rounded-md border border-[#0d9488] px-3 py-1.5 font-medium text-[#0d9488] text-xs transition-colors hover:bg-[#0d9488]/5 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex w-fit items-center gap-1.5 rounded-md border border-foreground px-3 py-1.5 font-medium text-foreground text-xs transition-colors hover:bg-foreground/5 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Camera className="size-3" />
                 {isUploading ? "Uploading..." : me.avatarUrl ? "Change Photo" : "Upload Photo"}
@@ -652,8 +649,7 @@ export function AdminProfilePage() {
                     size="sm"
                     onClick={handleSavePassword}
                     disabled={isSavingPassword}
-                    style={{ backgroundColor: ACCENT }}
-                    className="gap-1.5 text-white hover:opacity-90"
+                    className="gap-1.5 bg-foreground text-background hover:bg-foreground/90"
                   >
                     {isSavingPassword ? (
                       <Loader2 className="size-3.5 animate-spin" />
