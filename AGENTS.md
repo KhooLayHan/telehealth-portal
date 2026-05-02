@@ -1,202 +1,273 @@
-# TeleHealth Portal
+# Agent Instructions
 
-This is a full-stack TeleHealth platform with a React frontend, .NET 10 backend, AWS Lambda functions, and Pulumi infrastructure. Always follow these project-wide conventions.
+This is a full-stack TeleHealth application with React frontend, .NET backend, AWS Lambda functions, and Pulumi infrastructure.
 
-## Area-Specific Instructions
+## Quick Reference
 
-For detailed conventions on specific layers, read the relevant file in [`instructions/`](instructions/) before writing any code in that area:
+- **Format code**: `bun x ultracite fix` | `dotnet csharpier format .`
+- **Check for issues**: `bun x ultracite check` | `dotnet csharpier check .`
+- **Diagnose setup**: `bun x ultracite doctor`
 
-| File | Covers |
-|------|--------|
-| [instructions/backend-dotnet.instructions.md](instructions/backend-dotnet.instructions.md) | .NET Minimal API, Vertical Slice, MassTransit, NodaTime, EF Core patterns |
-| [instructions/database-ef.instructions.md](instructions/database-ef.instructions.md) | EF Core configuration, migrations, query filters, entity conventions |
-| [instructions/frontend-react.instructions.md](instructions/frontend-react.instructions.md) | React, TanStack Router/Query/Form, Zustand, shadcn/ui, Orval usage |
-| [instructions/infrastructure-pulumi.instructions.md](instructions/infrastructure-pulumi.instructions.md) | Pulumi C# stacks, AWS resource conventions, S3/SQS/SNS/Lambda |
-| [instructions/lambda-functions.instructions.md](instructions/lambda-functions.instructions.md) | AWS Lambda (.NET), SQS event handlers, S3 operations |
-| [instructions/testing.instructions.md](instructions/testing.instructions.md) | TUnit patterns, integration test setup, data-driven tests |
+Biome (the underlying engine) provides robust linting and formatting. Most issues are automatically fixable.
 
-## Project Overview
+## Build/Test/Lint Commands
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 19, TypeScript, TanStack Router/Query/Form, Zustand, shadcn/ui, Tailwind CSS 4, Orval |
-| Backend | .NET 10, Minimal APIs, Vertical Slice, EF Core 10, PostgreSQL 18, MassTransit, NodaTime |
-| Functions | AWS Lambda (.NET), SQS triggers, S3 operations |
-| Infrastructure | Pulumi C# on AWS (S3, SQS, SNS, Lambda) |
-| Dev Services | Docker Compose (LocalStack, Seq, PostgreSQL) |
+### Frontend (Bun + Vite)
 
-## Architecture Principles
+```bash
+cd frontend
+bun install          # Install dependencies
+bun run dev          # Start dev server
+bun run build        # Production build
+bun run check        # Lint check (ultracite/biome)
+bun run fix          # Auto-fix linting issues
+bun run test         # Run unit tests (vitest)
+bun run test:browser # Run browser tests (playwright)
+bun run coverage     # Run tests with coverage
+```
 
-- **Vertical Slice**: Backend features are self-contained slices in `Features/<Domain>/<Operation>/`. Each slice has Command + Validator + Handler + Endpoint.
-- **No Repository Pattern**: Handlers use `ApplicationDbContext` directly.
-- **Event-Driven**: State changes publish events via MassTransit + EF Core Outbox. Lambda functions consume from SQS.
-- **API-First**: OpenAPI spec drives frontend client generation (Orval). Never write manual HTTP calls on the frontend.
+**Run a single test file:**
 
-## Security Rules (Non-Negotiable)
+```bash
+cd frontend
+bun run test -- src/components/Button.test.tsx
+bun run test -- --test-name-pattern="should render"
+```
 
-- JWT tokens stored in **HttpOnly, Secure cookies only** — never in localStorage or sessionStorage
-- All API endpoints must have explicit `.RequireAuthorization()` unless explicitly public (login, register)
-- Use `AuthConstants.*Policy` for authorization — never use raw role strings
-- Validate all inputs: `ValidationFilter<T>` on backend, Zod on frontend
-- Sensitive configuration loaded from environment variables / AWS Secrets Manager — never hardcode secrets
-- S3 buckets: always block public access and enable server-side encryption
-- CORS: only allow the whitelisted frontend origin
+### Backend (.NET 10)
 
-## ID Strategy
+```bash
+cd backend
+bun run build        # Build solution
+dotnet restore --locked-mode                    # Restore packages
+dotnet csharpier check .                        # Check formatting
+dotnet csharpier format .                       # Format code
+dotnet tool restore                             # Restore local tools
+```
 
-Every entity has three identifiers:
-- `long Id` — internal primary key, **never exposed in API responses or URLs**
-- `Guid PublicId` — external identifier used in all API responses
-- `string Slug` — URL-friendly identifier for human-readable routes
+**Run tests:**
 
-## Date/Time
+```bash
+cd backend
+bun run test         # All unit tests
+dotnet test tests/TeleHealth.UnitTests         # All unit tests
+dotnet test --filter "FullyQualifiedName~BasicTests" # Single test class
+dotnet test --filter "Name~Add_ReturnsSum"             # Single test method
+```
 
-- **Always use NodaTime** — never `DateTime`, `DateTimeOffset`, or `DateOnly`
-- `Instant` for timestamps, `LocalDate` for date-only, `LocalTime` for time-only
-- NodaTime is configured on the JSON serializer, EF Core provider, and OpenAPI schema transformers
+### Global (root)
 
-## Soft Deletes
+```bash
+bun x ultracite fix     # Fix all frontend issues
+bun x ultracite check   # Check all frontend issues
+```
 
-- **Never hard delete** records — set `DeletedAt` to the current `Instant`
-- EF Core query filters (`HasQueryFilter`) exclude soft-deleted records automatically
-- Every entity that supports deletion must have the query filter in its configuration
+## Project Structure
 
-## Code Quality
+```text
+frontend/           # React 19 + TypeScript + Vite + Vitest
+backend/            # .NET 10 API + Tests (Unit/Integration/E2E)
+  src/
+    TeleHealth.Api/
+    TeleHealth.Contracts/    # Shared contracts library
+  tests/
+functions/          # AWS Lambda functions
+infra/              # Pulumi infrastructure (C#)
+```
 
-- All warnings treated as errors (backend: `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>`)
-- Backend formatting: **CSharpier** (enforced by lefthook pre-commit hook)
-- Frontend formatting/linting: **Biome** (enforced by lefthook pre-commit hook)
-- NuGet packages: centrally managed in `Directory.Packages.props` — never add `Version=` to individual `.csproj` files
-- .NET version pinned to `10.0.201` in `global.json`
+**Key Configuration Files:**
 
-## Build & Format Commands
+- `.editorconfig` - C# formatting rules enforced
+- `Directory.Build.props` - Shared MSBuild properties
+- `global.json` - .NET SDK version (10.0.100)
+- `frontend/vitest.config.ts` - Test projects: unit, browser, storybook
 
-| Task | Command |
-|------|---------|
-| Frontend install | `cd frontend && bun install` |
-| Frontend dev server | `cd frontend && bun run dev` |
-| Frontend build | `cd frontend && bun run build` |
-| Frontend lint check | `cd frontend && bun run check` |
-| Frontend lint fix | `cd frontend && bun run fix` |
-| Frontend tests | `cd frontend && bun run test` |
-| Frontend coverage | `cd frontend && bun run coverage` |
-| Backend build | `cd backend && bun run build` |
-| Backend tests | `cd backend && bun run test` |
-| Backend format check | `dotnet csharpier check .` |
-| Backend format fix | `dotnet csharpier format .` |
-| Global lint fix | `bun x ultracite fix` |
-| Global lint check | `bun x ultracite check` |
+## Code Style Guidelines
 
-## Naming Conventions
+### TypeScript/React (Frontend)
 
-| Context | Convention |
-|---------|-----------|
-| C# classes/methods | PascalCase |
-| C# private fields | `_camelCase` |
-| C# private static fields | `s_camelCase` |
-| Database tables/columns | snake_case (auto-converted by EF) |
-| TypeScript/TSX | PascalCase components, camelCase variables |
-| API routes | kebab-case (`/lab-reports`, `/doctor-schedules`) |
-| Slugs | kebab-case |
-| Role slugs | kebab-case (`"patient"`, `"lab-tech"`, `"doctor"`) |
+- **Formatter:** Biome via Ultracite
+- Use arrow functions for callbacks; prefer `for...of` over `.forEach()`
+- Use optional chaining (`?.`) and nullish coalescing (`??`)
+- Use `const` by default, `let` only when needed, never `var`
+- Call hooks at top level only, never conditionally
+- Use function components; React 19+ uses ref as prop (no `forwardRef`)
+- Use semantic HTML with ARIA attributes for accessibility
+- Remove `console.log` and `debugger` from production code
+- Prefer explicit types for function parameters and return values when they enhance clarity
+- Prefer `unknown` over `any` when the type is genuinely unknown
+- Use const assertions (`as const`) for immutable values and literal types
+- Leverage TypeScript's type narrowing instead of type assertions
+- Use meaningful variable names instead of magic numbers
+- Always `await` promises in async functions
+- Use `async/await` syntax instead of promise chains
+- Handle errors appropriately in async code with try-catch blocks
+- Use template literals over string concatenation
+- Use destructuring for object and array assignments
+- Use the `key` prop for elements in iterables (prefer unique IDs over array indices)
+- Nest children between opening and closing tags instead of passing as props
+- Don't define components inside other components
 
-## Error Handling
+**Accessibility (ARIA):**
 
-- Backend: throw `ProblemException` subclasses from handlers; `ProblemExceptionHandler` converts them to RFC 9457 Problem Details responses
-- Frontend: catch `ApiError` (from `@/api/ofetch-mutator`) in mutation `onError` callbacks; show user-friendly messages via `sonner` toast
-- Never swallow exceptions silently
+- Provide meaningful alt text for images
+- Use proper heading hierarchy
+- Add labels for form inputs
+- Include keyboard event handlers alongside mouse events
+- Use semantic elements (`<button>`, `<nav>`, etc.) instead of divs with roles
+
+### C# (Backend)
+
+- **Formatter:** CSharpier (enforced in CI)
+- **Target Framework:** .NET 10
+- **Nullable:** Enabled | **ImplicitUsings:** Enabled
+- **WarningsAsErrors:** Enabled | **AnalysisLevel:** latest-Recommended
+
+**Naming Conventions:**
+
+- PascalCase: types, interfaces (IPrefix), methods, properties, events, public fields
+- camelCase: local variables, parameters, local constants
+- _camelCase: private instance fields
+- s_camelCase: private static fields
+
+**Style Preferences:**
+
+- Use file-scoped namespaces
+- Use primary constructors where appropriate
+- Prefer `var` only when type is apparent (disabled by default)
+- Expression-bodied members for accessors/indexers
+- Static local functions preferred
+- Sort usings: System first, separate groups
+
+### Testing Standards
+
+**Frontend (Vitest):**
+
+- Write assertions in `it()` or `test()` blocks
+- Use async/await, avoid done callbacks
+- Don't commit `.only` or `.skip`
+- Keep test suites flat, avoid deep `describe` nesting
+
+**Backend (TUnit):**
+
+```csharp
+[Test]
+public async Task TestName()
+{
+    await Assert.That(result).IsEqualTo(expected);
+}
+```
+
+- Use `[Before(Class)]` / `[After(Class)]` for setup/teardown
+- Use `[Before(Test)]` / `[After(Test)]` for per-test hooks
+- Use AwesomeAssertions for assertions, NSubstitute for mocking
+
+## Error Handling & Debugging
+
+- Remove `console.log`, `debugger`, and `alert` statements from production code
+- Throw `Error` objects with descriptive messages, not strings or other values
+- Use `try-catch` blocks meaningfully - don't catch errors just to rethrow them
+- Prefer early returns over nested conditionals for error cases
+- Keep functions focused and under reasonable cognitive complexity limits
+- Extract complex conditions into well-named boolean variables
+- Use early returns to reduce nesting
+- Prefer simple conditionals over nested ternary operators
+- Group related code together and separate concerns
 
 ## PII & Sensitive Data Handling
 
-This is a healthcare application. All code must comply with GDPR and health data privacy standards (HIPAA). The following are PII/PHI and must **never** appear in logs, exception messages, or API responses:
+This is a healthcare application. All code must comply with general GDPR and general health data privacy standards (HIPAA). Treat the following as PII/PHI that must never appear in logs, exception messages, or API responses:
 
-**Always PII — never log or expose:** email addresses, IC numbers, full names combined with any other identifier, phone numbers, dates of birth combined with any other identifier, passwords or password hashes.
+**Always PII — never log or expose:**
 
-**Safe to log:** `PublicId` (GUIDs), `Slug` values, internal record/schedule/appointment IDs.
+- Email addresses
+- IC numbers  — also PHI under health data regulations
+- Full names in combination with any other identifier
+- Phone numbers
+- Dates of birth combined with any other identifier
+- Passwords or password hashes (any form)
+
+**Internal identifiers — safe to log:**
+
+- `PublicId` (GUIDs assigned by the system) — these are safe because they carry no real-world identity meaning on their own
+- `Slug` values
+- Appointment/schedule/record IDs
+
+### Logging Rules
 
 ```csharp
-// NEVER — logs PII
-Log.Warning("Login failed for {Email}", command.Email);
-
-// CORRECT — log intent only, no PII
+// NEVER — logs PII directly
+Log.Warning("Login failed for user: {Email}", command.Email);
+Log.Warning("Duplicate IC detected: {IcNumber}", cmd.IcNumber);
+Log.Information("Patient {Name} not found", patientName);
+ 
+// CORRECT — log intent and internal IDs only
 Log.Warning("Login failed — account not found.");
+Log.Warning("Duplicate IC number registration attempt detected.");
 Log.Warning("Patient not found. PatientId: {PatientId}", patient.PublicId);
 ```
 
-For auth failures, both "user not found" and "wrong password" must log the same generic message — distinguishing them is an enumeration risk.
+For auth failures specifically, **both** "user not found" and "wrong password" must log the same generic message with no email attached. Distinguishing them in logs is an enumeration risk.
 
-Exception `detail` fields surface in ProblemDetails API responses — never include PII there:
+### API Response Rules
+
+Exception `detail` fields are surfaced in ProblemDetails responses. Never include PII there:
 
 ```csharp
-// NEVER — PII in response
+// NEVER — PII in API response detail
 throw new ConflictException($"Email '{email}' is already registered.");
-
-// CORRECT — generic message, log internally
-Log.Warning("Duplicate email. Email: {Email}", email);
+throw new NotFoundException($"Patient '{patientId}' was not found.");
+ 
+// CORRECT — generic client detail, identifier in server log only
+Log.Warning("Duplicate email registration attempt. Email: {Email}", email);
 throw new DuplicateEmailException(); // detail: "An account with this email already exists."
 ```
 
-IC numbers are PHI — do not log them under any circumstances, even for debugging. Trace IC-related events via the audit log only.
+### IC Numbers — Extra Caution
 
-## Testing
+IC numbers are PHI. Do not log them under any circumstances, including for debugging duplicate-registration attempts. Trace those events via the audit log only. If you need to reference an IC-related event in application logs, log only that the event occurred — never the value.
 
-- Backend test framework: **TUnit** — never xUnit or NUnit attributes
-- All assertions: `await Assert.That(value).IsX()` pattern
-- Data-driven: `[Arguments]`, `[MethodDataSource]`, `[MatrixDataSource]`
-- DI in tests: `[ClassDataSource<T>]`
+---
 
-## File Locations Quick Reference
+## Security & Performance
 
-| What | Where |
-|------|-------|
-| API route constants | `backend/src/TeleHealth.Api/Common/ApiEndpoints.cs` |
-| Auth policy constants | `backend/src/TeleHealth.Api/Common/Security/AuthConstants.cs` |
-| Exception base classes | `backend/src/TeleHealth.Api/Common/Exceptions/` |
-| EF context | `backend/src/TeleHealth.Api/Infrastructure/Persistence/ApplicationDbContext.cs` |
-| Orval-generated hooks | `frontend/src/api/generated/<tag>/` |
-| Auth store | `frontend/src/store/useAuthStore.ts` |
-| UI components | `frontend/src/components/ui/` |
-| Routes | `frontend/src/routes/` |
-| Event contracts | `backend/src/TeleHealth.Contracts/` |
+- Add `rel="noopener"` on `target="_blank"` links
+- Avoid `dangerouslySetInnerHTML` and `eval()`
+- Validate and sanitize user input
+- Never commit secrets or API keys
+- Use Next.js `<Image>` component if using Next.js
+- Never use spread syntax in accumulators within loops
+- Use top-level regex literals instead of creating them in loops
+- Prefer specific imports over namespace imports
+- Avoid barrel files (index files that re-export everything)
 
-## Format & Lint Checks
+## Framework-Specific Guidance
 
-After touching any files, run the relevant sequence before committing:
+**Next.js:**
 
-| Layer | Command sequence |
-|-------|-----------------|
-| Frontend only | `cd frontend && bun run format` → `bun run check` (zero errors required) |
-| Backend only | `cd backend && bun run format` → `bun run check` (zero errors required) |
-| Both | Run both sequences above |
+- Use Next.js `<Image>` component for images
+- Use `next/head` or App Router metadata API for head elements
+- Use Server Components for async data fetching instead of async Client Components
 
-If `bun run check` reports errors, fix them and re-run until clean. Never skip or bypass with `--no-verify`.
+**React 19+:**
 
-## Feature Summary Format
+- Use ref as a prop instead of `React.forwardRef`
 
-When asked to list down what was done (e.g. "list down what we did"), always use this exact format:
+**Solid/Svelte/Vue/Qwik:**
 
-### Feature: [Feature Name] — [Layer: Backend / Frontend / Both]
+- Use `class` and `for` attributes (not `className` or `htmlFor`)
 
-**What this feature does**
-One or two sentences explaining the purpose in plain language.
+## When Biome Can't Help
 
-**Files Added**
-Table with columns: `#`, `Path` (as clickable markdown link), `Purpose` (one line, plain English)
+Biome's linter will catch most issues automatically. Focus your attention on:
 
-**Files Modified**
-Table with columns: `#`, `Path` (as clickable markdown link), `What changed` (one line)
+1. **Business logic correctness** - Biome can't validate your algorithms
+2. **Meaningful naming** - Use descriptive names for functions, variables, and types
+3. **Architecture decisions** - Component structure, data flow, and API design
+4. **Edge cases** - Handle boundary conditions and error states
+5. **User experience** - Accessibility, performance, and usability considerations
+6. **Documentation** - Add comments for complex logic, but prefer self-documenting code
 
-**Commands Run**
-Code block with each command, a short comment, and a ✅/❌ result
+---
 
-**API Endpoint Produced** *(backend features only)*
-Show the route, all query params with types and defaults, and auth requirement
-
-**Next Steps**
-Numbered list of what comes next, in order
-
-Rules:
-- All file paths must be clickable markdown links relative to repo root
-- Keep each table cell to one line — no paragraphs inside tables
-- Plain English only — no jargon the user hasn't seen before
-- Always include the commands section even if only format/check was run
+Most formatting and common issues are automatically fixed by Biome. Run `bun x ultracite fix` before committing to ensure compliance.
