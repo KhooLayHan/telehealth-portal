@@ -55,7 +55,7 @@ const navItems = [
     icon: Stethoscope,
     label: "Doctor Schedules",
     href: "/schedules",
-    allowedRoles: ["admin", "receptionist"],
+    allowedRoles: ["receptionist"],
   },
   {
     icon: FileText,
