@@ -1,7 +1,7 @@
 using Bogus;
 using TeleHealth.Api.Domain.Entities;
 
-namespace TeleHealth.Api.Infrastructure.Persistence.Seeding;
+namespace TeleHealth.Api.Infrastructure.Persistence.Seeding.Fakers;
 
 internal static class PrescriptionFaker
 {

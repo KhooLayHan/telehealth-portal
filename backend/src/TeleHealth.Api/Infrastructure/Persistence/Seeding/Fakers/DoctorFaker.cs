@@ -12,8 +12,6 @@ internal static class DoctorFaker
     private static readonly (string DeptSlug, string Specialization)[] Specializations =
     [
         ("general", "General Practice"),
-        ("general", "General Practice"),
-        ("cardiology", "Cardiology"),
         ("cardiology", "Cardiology"),
         ("pediatrics", "Pediatrics"),
         ("orthopedics", "Orthopedics"),
