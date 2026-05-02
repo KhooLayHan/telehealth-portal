@@ -279,6 +279,11 @@ public static class Compute
                     EbEnvVar("AWS_SQS_QUEUE_URL", msg.ProcessingQueue.Id),
                     EbEnvVar("SES_SENDER_EMAIL", "hongjx0321@gmail.com"),
                     EbEnvVar("SES_REGION", "us-east-1"),
+                    // JWT authentication
+                    EbEnvVar("Jwt__Secret", cfg.JwtSecret),
+                    EbEnvVar("Jwt__Issuer", "telehealth-api"),
+                    EbEnvVar("Jwt__Audience", "telehealth-web"),
+                    EbEnvVar("Jwt__ExpiryMinutes", "60"),
                     // -- VPC placement --
                     EbSetting("aws:ec2:vpc", "VPCId", net.VpcId),
                     EbSetting(
