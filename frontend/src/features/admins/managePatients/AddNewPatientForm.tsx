@@ -52,14 +52,26 @@ const USERNAME_REGEX = /^[\w.]+$/;
 // Matches international phone numbers with a + prefix and 11–12 digits (e.g. +60162173366).
 const PHONE_NUMBER_REGEX = /^\+\d{11,12}$/;
 
-// Checks that a form date string is not later than today's local date.
-function isNotFutureDate(value: string): boolean {
+// Checks that a form date string is before today's local date.
+function isPastDate(value: string): boolean {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
   const selectedDate = new Date(`${value}T00:00:00`);
 
-  return !Number.isNaN(selectedDate.getTime()) && selectedDate <= today;
+  return !Number.isNaN(selectedDate.getTime()) && selectedDate < today;
+}
+
+// Formats yesterday as a local date input value.
+function getYesterdayDateInputValue(): string {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  const year = yesterday.getFullYear();
+  const month = String(yesterday.getMonth() + 1).padStart(2, "0");
+  const day = String(yesterday.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 }
 
 // Validates a single allergy row in the add-patient form.
@@ -116,7 +128,7 @@ const addPatientSchema = z
     dateOfBirth: z
       .string()
       .min(1, "Date of birth is required")
-      .refine(isNotFutureDate, "Date of birth cannot be in the future"),
+      .refine(isPastDate, "Date of birth cannot be today or in the future"),
     phoneNumber: z
       .string()
       .trim()
@@ -131,7 +143,7 @@ const addPatientSchema = z
     allergies: z.array(allergySchema),
     emergencyContactName: z.string().trim().max(100),
     emergencyContactRelationship: z.string().trim().max(50),
-    emergencyContactPhone: z.string().trim().max(16, "Phone number must be 16 characters or fewer"),
+    emergencyContactPhone: z.string().trim(),
   })
   .superRefine((value, context) => {
     const emergencyContactFields = [
@@ -165,6 +177,17 @@ const addPatientSchema = z
           path: [field.field],
         });
       }
+    }
+
+    if (
+      value.emergencyContactPhone.length > 0 &&
+      !PHONE_NUMBER_REGEX.test(value.emergencyContactPhone)
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "Emergency contact phone must be 12-13 characters with + and digits only",
+        path: ["emergencyContactPhone"],
+      });
     }
   });
 
@@ -430,6 +453,7 @@ export function AddNewPatientForm({ open, onOpenChange }: AddNewPatientFormProps
                         value={field.state.value}
                         onChange={(event) => field.handleChange(event.target.value)}
                         onBlur={field.handleBlur}
+                        max={getYesterdayDateInputValue()}
                       />
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
@@ -468,7 +492,7 @@ export function AddNewPatientForm({ open, onOpenChange }: AddNewPatientFormProps
                         value={field.state.value}
                         onChange={(event) => field.handleChange(event.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder="+601x-xxxxxxx"
+                        placeholder="+60162173366"
                       />
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
@@ -674,7 +698,7 @@ export function AddNewPatientForm({ open, onOpenChange }: AddNewPatientFormProps
                         value={field.state.value}
                         onChange={(event) => field.handleChange(event.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder="+601x-xxxxxxx"
+                        placeholder="+60162173366"
                       />
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
