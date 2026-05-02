@@ -1,7 +1,7 @@
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { Heart, Plus, Trash2 } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -39,6 +39,29 @@ const GENDERS = ["M", "F", "N"] as const;
 
 // Lists the selectable allergy severities accepted by the patient record API.
 const ALLERGY_SEVERITIES = ["Mild", "Moderate", "Severe"] as const;
+
+// Lists the tab values available in the patient edit dialog.
+const EDIT_PATIENT_TABS = ["personal", "account", "allergies", "emergency"] as const;
+
+// Maps form root fields to the tab where the user can correct them.
+const EDIT_PATIENT_FIELD_TABS = {
+  firstName: "personal",
+  lastName: "personal",
+  dateOfBirth: "personal",
+  gender: "personal",
+  phoneNumber: "personal",
+  bloodGroup: "personal",
+  username: "account",
+  email: "account",
+  icNumber: "account",
+  allergies: "allergies",
+  emergencyContactName: "emergency",
+  emergencyContactRelationship: "emergency",
+  emergencyContactPhone: "emergency",
+} as const satisfies Record<string, EditPatientTab>;
+
+// Describes the tab ids used by the edit-patient form.
+type EditPatientTab = (typeof EDIT_PATIENT_TABS)[number];
 
 // Matches Malaysian IC numbers in the backend format: 12 digits without dashes.
 const MALAYSIAN_IC_REGEX = /^\d{12}$/;
@@ -202,6 +225,13 @@ function buildEditPatientValues(patient: ClinicStaffPatientDto): EditPatientForm
   };
 }
 
+// Builds stable React keys for editable allergy rows.
+function buildAllergyKeys(patient: ClinicStaffPatientDto): string[] {
+  return (patient.allergies ?? []).map(
+    (allergy, index) => `${allergy.allergen}-${allergy.severity}-${index}`,
+  );
+}
+
 // Builds stable initials for the selected patient avatar.
 function getInitials(patient: ClinicStaffPatientDto): string {
   const firstInitial = patient.firstName.trim().at(0) ?? "";
@@ -224,6 +254,59 @@ function toFieldErrors(errors: unknown[]): Array<{ message: string }> {
   }));
 }
 
+// Reads the root form field from a TanStack/Zod validation error object.
+function getErrorRootField(error: unknown): string | null {
+  if (typeof error !== "object" || error === null) {
+    return null;
+  }
+
+  if (
+    "path" in error &&
+    Array.isArray(error.path) &&
+    typeof error.path[0] === "string" &&
+    error.path[0].length > 0
+  ) {
+    return error.path[0];
+  }
+
+  for (const [key, value] of Object.entries(error)) {
+    if (key in EDIT_PATIENT_FIELD_TABS) {
+      return key;
+    }
+
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        const nestedField = getErrorRootField(item);
+
+        if (nestedField) {
+          return nestedField;
+        }
+      }
+    } else {
+      const nestedField = getErrorRootField(value);
+
+      if (nestedField) {
+        return nestedField;
+      }
+    }
+  }
+
+  return null;
+}
+
+// Finds the tab that contains the first invalid edit-patient field.
+function getFirstInvalidTab(errors: unknown[]): EditPatientTab | null {
+  for (const error of errors) {
+    const rootField = getErrorRootField(error);
+
+    if (rootField && rootField in EDIT_PATIENT_FIELD_TABS) {
+      return EDIT_PATIENT_FIELD_TABS[rootField as keyof typeof EDIT_PATIENT_FIELD_TABS];
+    }
+  }
+
+  return null;
+}
+
 // Renders the selected patient edit dialog when a table row is active.
 export function EditPatientForm({ patient, open, onOpenChange }: EditPatientFormProps) {
   if (!patient) {
@@ -243,16 +326,22 @@ export function EditPatientForm({ patient, open, onOpenChange }: EditPatientForm
 // Renders a prefilled form for editing patient details through the backend.
 function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientFormContentProps) {
   const queryClient = useQueryClient();
-  const allergyKeysRef = useRef<string[]>(
-    (patient.allergies ?? []).map(
-      (allergy, index) => `${allergy.allergen}-${allergy.severity}-${index}`,
-    ),
-  );
+  const [activeTab, setActiveTab] = useState<EditPatientTab>("personal");
+  const allergyKeysRef = useRef<string[]>(buildAllergyKeys(patient));
   const { mutateAsync, isPending } = useUpdatePatientRecord();
 
   const form = useForm({
     defaultValues: buildEditPatientValues(patient),
     validators: { onSubmit: editPatientSchema },
+    onSubmitInvalid: ({ formApi }) => {
+      const invalidTab = getFirstInvalidTab(formApi.state.errors);
+
+      if (invalidTab) {
+        setActiveTab(invalidTab);
+      }
+
+      toast.error("Please fix the highlighted fields before saving.");
+    },
     onSubmit: async ({ value }) => {
       const hasEmergencyContact = value.emergencyContactName.trim().length > 0;
       const updatePayload: UpdatePatientRecordCommand = {
@@ -303,6 +392,8 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) {
       form.reset(buildEditPatientValues(patient));
+      allergyKeysRef.current = buildAllergyKeys(patient);
+      setActiveTab("personal");
     }
 
     onOpenChange(nextOpen);
@@ -341,11 +432,15 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
         <form
           onSubmit={(event) => {
             event.preventDefault();
-            form.handleSubmit();
+            void form.handleSubmit();
           }}
           className="flex flex-col"
         >
-          <Tabs defaultValue="personal" className="flex-1 px-6 pb-4">
+          <Tabs
+            value={activeTab}
+            onValueChange={(value) => setActiveTab(value as EditPatientTab)}
+            className="flex-1 px-6 pb-4"
+          >
             <TabsList className="mb-5 grid w-full grid-cols-4">
               <TabsTrigger value="personal">Personal</TabsTrigger>
               <TabsTrigger value="account">Account</TabsTrigger>
@@ -355,6 +450,7 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
 
             <TabsContent
               value="personal"
+              keepMounted
               className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
             >
               <p className="font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
@@ -476,6 +572,7 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
 
             <TabsContent
               value="account"
+              keepMounted
               className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
             >
               <p className="font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
@@ -535,7 +632,11 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
               </form.Field>
             </TabsContent>
 
-            <TabsContent value="allergies" className="mt-0 max-h-[52vh] overflow-y-auto pb-2 pr-1">
+            <TabsContent
+              value="allergies"
+              keepMounted
+              className="mt-0 max-h-[52vh] overflow-y-auto pb-2 pr-1"
+            >
               <form.Field name="allergies" mode="array">
                 {(field) => (
                   <div className="space-y-3">
@@ -657,6 +758,7 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
 
             <TabsContent
               value="emergency"
+              keepMounted
               className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
             >
               <p className="font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
@@ -716,9 +818,9 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
             <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
               Cancel
             </Button>
-            <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting] as const}>
-              {([canSubmit, isSubmitting]) => (
-                <Button type="submit" disabled={!canSubmit || isSubmitting || isPending}>
+            <form.Subscribe selector={(state) => state.isSubmitting}>
+              {(isSubmitting) => (
+                <Button type="submit" disabled={isSubmitting || isPending}>
                   {isSubmitting || isPending ? "Saving..." : "Save Changes"}
                 </Button>
               )}
