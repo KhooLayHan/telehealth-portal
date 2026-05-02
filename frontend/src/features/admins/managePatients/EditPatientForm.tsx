@@ -1,6 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Heart, Plus, Trash2 } from "lucide-react";
 import { useRef } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -90,6 +90,15 @@ function buildEditPatientValues(patient: ClinicStaffPatientDto): EditPatientForm
     emergencyContactRelationship: patient.emergencyContact?.relationship ?? "",
     emergencyContactPhone: patient.emergencyContact?.phone ?? "",
   };
+}
+
+// Builds stable initials for the selected patient avatar.
+function getInitials(patient: ClinicStaffPatientDto): string {
+  const firstInitial = patient.firstName.trim().at(0) ?? "";
+  const lastInitial = patient.lastName.trim().at(0) ?? "";
+  const initials = `${firstInitial}${lastInitial}`.toUpperCase();
+
+  return initials || "P";
 }
 
 // Converts TanStack Form validation results into shadcn field error objects.
@@ -189,17 +198,27 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-2xl gap-0 overflow-hidden p-0">
-        <div className="absolute inset-x-0 top-0 h-px bg-border" />
+        <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
 
-        <DialogHeader className="px-6 pb-4 pt-7">
+        <DialogHeader className="px-6 pt-7 pb-4">
           <div className="flex items-start gap-4">
-            <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-muted text-foreground">
-              <Pencil className="size-6" />
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary font-bold text-lg text-primary-foreground">
+              {getInitials(patient)}
             </div>
 
             <div className="min-w-0 flex-1">
-              <DialogTitle className="text-xl font-semibold leading-none">Edit Patient</DialogTitle>
-              <DialogDescription className="mt-1 text-sm text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-2">
+                <DialogTitle className="font-semibold text-xl leading-none">
+                  {patient.firstName} {patient.lastName}
+                </DialogTitle>
+                {patient.bloodGroup && (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-primary bg-primary/10 px-2 py-0.5 font-semibold text-primary text-xs">
+                    <Heart className="size-2.5" />
+                    {patient.bloodGroup}
+                  </span>
+                )}
+              </div>
+              <DialogDescription className="mt-1 text-sm">
                 Update patient profile, allergy, and emergency contact details.
               </DialogDescription>
             </div>
@@ -213,18 +232,22 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
           }}
           className="flex flex-col"
         >
-          <Tabs defaultValue="personal" className="flex-1 px-6 pb-2">
+          <Tabs defaultValue="personal" className="flex-1 px-6 pb-4">
             <TabsList className="mb-5 grid w-full grid-cols-3">
               <TabsTrigger value="personal">Personal</TabsTrigger>
               <TabsTrigger value="allergies">Allergies</TabsTrigger>
-              <TabsTrigger value="emergency">Emergency Contact</TabsTrigger>
+              <TabsTrigger value="emergency">Emergency</TabsTrigger>
             </TabsList>
 
             <TabsContent
               value="personal"
               className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
             >
-              <div className="grid grid-cols-2 gap-4">
+              <p className="font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
+                Personal Information
+              </p>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <form.Field name="firstName">
                   {(field) => (
                     <Field>
@@ -256,7 +279,7 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
                 </form.Field>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <form.Field name="dateOfBirth">
                   {(field) => (
                     <Field>
@@ -296,7 +319,7 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
                 </form.Field>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <form.Field name="phoneNumber">
                   {(field) => (
                     <Field>
@@ -342,10 +365,14 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
               <form.Field name="allergies" mode="array">
                 {(field) => (
                   <div className="space-y-3">
+                    <p className="font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
+                      Allergies
+                    </p>
+
                     {field.state.value.map((_, index) => (
                       <div
                         key={allergyKeysRef.current[index]}
-                        className="relative rounded-lg border border-border bg-muted/30 p-4"
+                        className="relative rounded-lg border border-border bg-muted/30 px-4 py-3"
                       >
                         <Button
                           type="button"
@@ -361,7 +388,7 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
                           <Trash2 className="size-3.5" />
                         </Button>
 
-                        <div className="grid grid-cols-3 gap-3">
+                        <div className="grid grid-cols-1 gap-3 pr-8 sm:grid-cols-3">
                           <form.Field name={`allergies[${index}].allergen`}>
                             {(allergenField) => (
                               <Field>
@@ -431,7 +458,7 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
                     ))}
 
                     {field.state.value.length === 0 && (
-                      <p className="py-6 text-center text-sm text-muted-foreground">
+                      <p className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-muted-foreground text-sm">
                         No allergies recorded. Add one below.
                       </p>
                     )}
@@ -458,6 +485,10 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
               value="emergency"
               className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
             >
+              <p className="font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
+                Emergency Contact
+              </p>
+
               <form.Field name="emergencyContactName">
                 {(field) => (
                   <Field>
@@ -473,7 +504,7 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
                 )}
               </form.Field>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <form.Field name="emergencyContactRelationship">
                   {(field) => (
                     <Field>
@@ -513,11 +544,7 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
             </Button>
             <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting] as const}>
               {([canSubmit, isSubmitting]) => (
-                <Button
-                  type="submit"
-                  disabled={!canSubmit || isSubmitting || isPending}
-                  className="bg-black text-white hover:bg-black/85"
-                >
+                <Button type="submit" disabled={!canSubmit || isSubmitting || isPending}>
                   {isSubmitting || isPending ? "Saving..." : "Save Changes"}
                 </Button>
               )}

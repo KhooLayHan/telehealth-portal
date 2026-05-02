@@ -166,19 +166,19 @@ export function AddNewPatientForm({ open, onOpenChange }: AddNewPatientFormProps
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl gap-0 overflow-hidden p-0">
-        <div className="absolute inset-x-0 top-0 h-px bg-border" />
+        <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
 
-        <DialogHeader className="px-6 pb-4 pt-7">
+        <DialogHeader className="px-6 pt-7 pb-4">
           <div className="flex items-start gap-4">
-            <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-muted text-foreground">
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
               <Plus className="size-6" />
             </div>
 
             <div className="min-w-0 flex-1">
-              <DialogTitle className="text-xl font-semibold leading-none">
+              <DialogTitle className="font-semibold text-xl leading-none">
                 Add New Patient
               </DialogTitle>
-              <DialogDescription className="mt-1 text-sm text-muted-foreground">
+              <DialogDescription className="mt-1 text-sm">
                 Creates a new patient account. Allergies and emergency contacts are optional.
               </DialogDescription>
             </div>
@@ -192,18 +192,22 @@ export function AddNewPatientForm({ open, onOpenChange }: AddNewPatientFormProps
           }}
           className="flex flex-col"
         >
-          <Tabs defaultValue="personal" className="flex-1 px-6 pb-2">
+          <Tabs defaultValue="personal" className="flex-1 px-6 pb-4">
             <TabsList className="mb-5 grid w-full grid-cols-3">
               <TabsTrigger value="personal">Personal</TabsTrigger>
               <TabsTrigger value="allergies">Allergies</TabsTrigger>
-              <TabsTrigger value="emergency">Emergency Contact</TabsTrigger>
+              <TabsTrigger value="emergency">Emergency</TabsTrigger>
             </TabsList>
 
             <TabsContent
               value="personal"
               className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
             >
-              <div className="grid grid-cols-2 gap-4">
+              <p className="font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
+                Personal Information
+              </p>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <form.Field name="firstName">
                   {(field) => (
                     <Field>
@@ -235,7 +239,7 @@ export function AddNewPatientForm({ open, onOpenChange }: AddNewPatientFormProps
                 </form.Field>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <form.Field name="username">
                   {(field) => (
                     <Field>
@@ -270,7 +274,7 @@ export function AddNewPatientForm({ open, onOpenChange }: AddNewPatientFormProps
                 </form.Field>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <form.Field name="password">
                   {(field) => (
                     <Field>
@@ -304,7 +308,7 @@ export function AddNewPatientForm({ open, onOpenChange }: AddNewPatientFormProps
                 </form.Field>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <form.Field name="dateOfBirth">
                   {(field) => (
                     <Field>
@@ -344,7 +348,7 @@ export function AddNewPatientForm({ open, onOpenChange }: AddNewPatientFormProps
                 </form.Field>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <form.Field name="phoneNumber">
                   {(field) => (
                     <Field>
@@ -390,10 +394,14 @@ export function AddNewPatientForm({ open, onOpenChange }: AddNewPatientFormProps
               <form.Field name="allergies" mode="array">
                 {(field) => (
                   <div className="space-y-3">
+                    <p className="font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
+                      Allergies
+                    </p>
+
                     {field.state.value.map((_, index) => (
                       <div
                         key={allergyKeysRef.current[index]}
-                        className="relative rounded-lg border border-border bg-muted/30 p-4"
+                        className="relative rounded-lg border border-border bg-muted/30 px-4 py-3"
                       >
                         <Button
                           type="button"
@@ -409,7 +417,7 @@ export function AddNewPatientForm({ open, onOpenChange }: AddNewPatientFormProps
                           <Trash2 className="size-3.5" />
                         </Button>
 
-                        <div className="grid grid-cols-3 gap-3">
+                        <div className="grid grid-cols-1 gap-3 pr-8 sm:grid-cols-3">
                           <form.Field name={`allergies[${index}].allergen`}>
                             {(allergenField) => (
                               <Field>
@@ -485,7 +493,7 @@ export function AddNewPatientForm({ open, onOpenChange }: AddNewPatientFormProps
                     ))}
 
                     {field.state.value.length === 0 && (
-                      <p className="py-6 text-center text-sm text-muted-foreground">
+                      <p className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-muted-foreground text-sm">
                         No allergies recorded. Add one below.
                       </p>
                     )}
@@ -512,6 +520,10 @@ export function AddNewPatientForm({ open, onOpenChange }: AddNewPatientFormProps
               value="emergency"
               className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
             >
+              <p className="font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
+                Emergency Contact
+              </p>
+
               <form.Field name="emergencyContactName">
                 {(field) => (
                   <Field>
@@ -527,7 +539,7 @@ export function AddNewPatientForm({ open, onOpenChange }: AddNewPatientFormProps
                 )}
               </form.Field>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <form.Field name="emergencyContactRelationship">
                   {(field) => (
                     <Field>
@@ -567,11 +579,7 @@ export function AddNewPatientForm({ open, onOpenChange }: AddNewPatientFormProps
             </Button>
             <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting] as const}>
               {([canSubmit, isSubmitting]) => (
-                <Button
-                  type="submit"
-                  disabled={!canSubmit || isSubmitting || isPending}
-                  className="bg-black text-white hover:bg-black/85"
-                >
+                <Button type="submit" disabled={!canSubmit || isSubmitting || isPending}>
                   {isSubmitting || isPending ? "Adding..." : "Add Patient"}
                 </Button>
               )}
