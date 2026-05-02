@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using TeleHealth.Api.Common;
-using TeleHealth.Api.Common.Security;
 
 namespace TeleHealth.Api.Features.Users.UpdateProfile;
 
@@ -28,9 +27,9 @@ public static class UpdateProfileEndpoint
             )
             .WithName("UpdateProfile")
             .WithTags("Users")
-            .RequireAuthorization(AuthConstants.DoctorPolicy)
+            .RequireAuthorization()
+            .Produces<UpdateProfileResult>()
             .ProducesProblem(StatusCodes.Status401Unauthorized)
-            .ProducesProblem(StatusCodes.Status403Forbidden)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status409Conflict)
             .ProducesProblem(StatusCodes.Status422UnprocessableEntity)

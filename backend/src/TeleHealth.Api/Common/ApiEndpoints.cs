@@ -130,6 +130,8 @@ public static class ApiEndpoints
 
     public static class Users
     {
+        public const string GetMe = "me";
+
         private const string Me = "users/me";
 
         public const string GetAvatarUploadUrl = $"{Me}/avatar/upload-url";
@@ -137,6 +139,8 @@ public static class ApiEndpoints
         public const string UpdateAvatar = $"{Me}/avatar";
 
         public const string UpdateProfile = $"{Me}/profile";
+
+        public const string ChangePassword = $"{Me}/password";
 
         public const string GetDoctorProfile = $"{Me}/doctor";
 

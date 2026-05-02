@@ -15,6 +15,9 @@ public sealed class StackConfig
     public string DbName { get; }
     public string DbUsername { get; }
 
+    // JWT authentication
+    public Output<string> JwtSecret { get; }
+
     // AWS
     public string AwsRegion { get; }
 
@@ -46,6 +49,8 @@ public sealed class StackConfig
         DbInstanceClass = config.Get("dbInstanceClass") ?? "db.t3.micro";
         DbName = config.Get("dbName") ?? "telehealth_dev";
         DbUsername = config.Get("dbUsername") ?? "telehealth_admin";
+        JwtSecret = config.RequireSecret("jwtSecret");
+
         JwtSecret = config.RequireSecret("jwtSecret");
 
         FrontendOrigin = config.Get("frontendOrigin") ?? "*";
