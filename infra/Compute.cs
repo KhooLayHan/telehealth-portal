@@ -266,11 +266,15 @@ public static class Compute
                         "Cors__AllowedOrigins",
                         storage.FrontendBucket.WebsiteEndpoint.Apply(ep => $"http://{ep}")
                     ),
-                    // DB connection — app resolves password from Secrets Manager at runtime
-                    EbEnvVar("RDS_HOST", db.Instance.Address),
-                    EbEnvVar("RDS_PORT", "5432"),
-                    EbEnvVar("RDS_DB", cfg.DbName),
-                    EbEnvVar("RDS_USERNAME", cfg.DbUsername),
+                    // DB connection — full Npgsql connection string for ASP.NET Core
+                    EbEnvVar(
+                        "ConnectionStrings__Database",
+                        Output
+                            .Tuple(db.Instance.Address, cfg.DbPassword)
+                            .Apply(t =>
+                                $"Host={t.Item1};Port=5432;Database={cfg.DbName};Username={cfg.DbUsername};Password={t.Item2};SSL Mode=Prefer"
+                            )
+                    ),
                     EbEnvVar("DB_SECRET_ARN", db.DbSecret.Arn),
                     // AWS service references
                     EbEnvVar("AWS_REGION", cfg.AwsRegion),
