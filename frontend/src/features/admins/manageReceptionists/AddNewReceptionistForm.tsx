@@ -57,11 +57,11 @@ const MALAYSIAN_IC_REGEX = /^\d{12}$/;
 // Matches names that contain only ASCII letters and spaces.
 const NAME_REGEX = /^[A-Za-z ]+$/;
 
-// Matches usernames that contain only letters, numbers, and underscores.
-const USERNAME_REGEX = /^[A-Za-z0-9_]+$/;
+// Matches usernames that contain only letters, numbers, underscores, and dots.
+const USERNAME_REGEX = /^[A-Za-z0-9_.]+$/;
 
-// Matches optional Malaysian-style phone input as exactly 10 digits.
-const PHONE_NUMBER_REGEX = /^\d{10}$/;
+// Matches international phone numbers with a + prefix and 11-12 digits.
+const PHONE_NUMBER_REGEX = /^\+\d{11,12}$/;
 
 // Checks that a form date string is not later than today's local date.
 function isNotFutureDate(value: string): boolean {
@@ -91,9 +91,10 @@ const addReceptionistSchema = z
     username: z
       .string()
       .trim()
+      .min(1, "Username is required")
       .min(3, "Username must be at least 3 characters")
       .max(20, "Username must be 20 characters or fewer")
-      .regex(USERNAME_REGEX, "Username can contain letters, numbers, and underscores only"),
+      .regex(USERNAME_REGEX, "Username can contain letters, numbers, underscores, and dots only"),
     email: z.string().trim().min(1, "Email is required").email("Must be a valid email").max(254),
     password: z
       .string()
@@ -112,7 +113,7 @@ const addReceptionistSchema = z
       .trim()
       .refine(
         (value) => value.length === 0 || PHONE_NUMBER_REGEX.test(value),
-        "Phone number must be exactly 10 digits",
+        "Phone number must be 12-13 characters starting with + followed by digits only",
       ),
     gender: z.enum(GENDERS, { message: "Gender must be male, female, or prefer not to say" }),
     dateOfBirth: z

@@ -30,8 +30,8 @@ import { Textarea } from "@/components/ui/textarea";
 const icNumberRegex = /^\d{12}$/;
 const dateOfBirthRegex = /^\d{4}-\d{2}-\d{2}$/;
 const nameRegex = /^[A-Za-z ]+$/;
-const usernameRegex = /^[A-Za-z0-9_]+$/;
-const phoneNumberRegex = /^\d{10}$/;
+const usernameRegex = /^[A-Za-z0-9_.]+$/;
+const phoneNumberRegex = /^\+\d{11,12}$/;
 const specialCharacterRegex = /[^a-zA-Z0-9]/;
 const malaysiaCountry = "Malaysia";
 const malaysiaStates: readonly string[] = [
@@ -75,7 +75,7 @@ const requiredUsername = z
   .refine((value) => value.trim().length <= 20, "Max 20 characters")
   .refine(
     (value) => value.trim().length === 0 || usernameRegex.test(value.trim()),
-    "Letters, numbers, and underscores only",
+    "Letters, numbers, underscores, and dots only",
   );
 
 const optionalText = (maxLength: number) =>
@@ -85,7 +85,7 @@ const optionalPhoneNumber = z
   .string()
   .refine(
     (value) => value.trim().length === 0 || phoneNumberRegex.test(value.trim()),
-    "Phone must be exactly 10 digits",
+    "Phone must be 12-13 characters starting with + followed by digits only",
   );
 
 const isValidDateOfBirth = (value: string) => {

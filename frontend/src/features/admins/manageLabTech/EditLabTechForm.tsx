@@ -34,11 +34,11 @@ const malaysianIcRegex = /^\d{12}$/;
 // Matches names that contain letters and spaces only.
 const nameRegex = /^[A-Za-z ]+$/;
 
-// Matches usernames that contain letters, numbers, and underscores only.
-const usernameRegex = /^[A-Za-z0-9_]+$/;
+// Matches usernames that contain letters, numbers, underscores, and dots only.
+const usernameRegex = /^[A-Za-z0-9_.]+$/;
 
-// Matches phone numbers stored as exactly 10 digits.
-const phoneNumberRegex = /^\d{10}$/;
+// Matches international phone numbers with a + prefix and 11-12 digits.
+const phoneNumberRegex = /^\+\d{11,12}$/;
 
 // Stores the fixed country value used for lab technician addresses.
 const malaysiaCountry = "Malaysia";
@@ -84,7 +84,7 @@ const requiredUsername = z
   .refine((value) => value.trim().length <= 20, "Username must be 20 characters or fewer")
   .refine(
     (value) => value.trim().length === 0 || usernameRegex.test(value.trim()),
-    "Username may only contain letters, numbers, and underscores",
+    "Username may only contain letters, numbers, underscores, and dots",
   );
 
 // Validates optional trimmed text fields against backend length limits.
@@ -96,7 +96,7 @@ const optionalPhoneNumber = z
   .string()
   .trim()
   .refine((value) => value.length === 0 || phoneNumberRegex.test(value), {
-    message: "Phone must be exactly 10 digits",
+    message: "Phone must be 12-13 characters starting with + followed by digits only",
   });
 
 // Checks that a date input value is a real date and not later than today's local date.

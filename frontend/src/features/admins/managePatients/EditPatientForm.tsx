@@ -46,11 +46,11 @@ const MALAYSIAN_IC_REGEX = /^\d{12}$/;
 // Matches names containing only letters and spaces.
 const PATIENT_NAME_REGEX = /^[A-Za-z ]+$/;
 
-// Matches usernames containing only letters, numbers, and underscores.
-const USERNAME_REGEX = /^\w+$/;
+// Matches usernames containing only letters, numbers, underscores, and dots.
+const USERNAME_REGEX = /^[A-Za-z0-9_.]+$/;
 
-// Matches local phone numbers in the add-patient form.
-const PHONE_NUMBER_REGEX = /^\d{10}$/;
+// Matches international phone numbers with a + prefix and 11-12 digits.
+const PHONE_NUMBER_REGEX = /^\+\d{11,12}$/;
 
 // Checks that a form date string is not later than today's local date.
 function isNotFutureDate(value: string): boolean {
@@ -92,9 +92,10 @@ const editPatientSchema = z
     username: z
       .string()
       .trim()
+      .min(1, "Username is required")
       .min(3, "Username must be at least 3 characters")
       .max(20, "Username must be 20 characters or fewer")
-      .regex(USERNAME_REGEX, "Username can only contain letters, numbers, and underscores"),
+      .regex(USERNAME_REGEX, "Username can only contain letters, numbers, underscores, and dots"),
     email: z.string().trim().email("Valid email is required").max(255),
     icNumber: z
       .string()
@@ -115,7 +116,7 @@ const editPatientSchema = z
       .trim()
       .refine((phoneNumber) => {
         return phoneNumber.length === 0 || PHONE_NUMBER_REGEX.test(phoneNumber);
-      }, "Phone number must be exactly 10 digits"),
+      }, "Phone number must be 12-13 characters starting with + followed by digits only"),
     bloodGroup: z.string().refine((bloodGroup) => {
       return (
         bloodGroup === "" || BLOOD_GROUPS.includes(bloodGroup as (typeof BLOOD_GROUPS)[number])
