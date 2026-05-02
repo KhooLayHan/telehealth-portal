@@ -7,6 +7,7 @@
 
 export type GetAllPatientsForClinicStaffParams = {
   Search?: string;
+  Gender?: string;
   /**
    * @pattern ^-?(?:0|[1-9]\d*)$
    */

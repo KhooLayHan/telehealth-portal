@@ -9,7 +9,7 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
-import { useMemo } from "react";
+import { type ReactNode, useMemo } from "react";
 
 import type { ClinicStaffPatientDto } from "@/api/model/ClinicStaffPatientDto";
 import { Button } from "@/components/ui/button";
@@ -41,6 +41,7 @@ interface PatientTableProps extends PatientTableActions {
   search: string;
   onSearchChange: (value: string) => void;
   onAddNew?: () => void;
+  toolbarActions?: ReactNode;
 }
 
 // Extends generated patient rows with the avatar URL returned by the API.
@@ -113,10 +114,24 @@ function getPatientColumns(): ColumnDef<ClinicStaffPatientDto>[] {
                 getInitials(patient)
               )}
             </div>
-            <span className="font-medium">{fullName}</span>
+            <div className="min-w-0">
+              <span className="block font-medium">{fullName}</span>
+              <span className="block truncate text-muted-foreground text-xs">
+                {patient.username || "No username"}
+              </span>
+            </div>
           </div>
         );
       },
+    },
+    {
+      accessorKey: "email",
+      header: "Email",
+      cell: ({ row }) => (
+        <span className="text-muted-foreground text-xs">
+          {row.getValue<string>("email") || "N/A"}
+        </span>
+      ),
     },
     {
       accessorKey: "phoneNumber",
@@ -207,6 +222,7 @@ export function PatientTable({
   onEdit,
   onRemove,
   onAddNew,
+  toolbarActions,
 }: PatientTableProps) {
   const columns = useMemo(() => getPatientColumns(), []);
   const table = useReactTable({
@@ -221,7 +237,7 @@ export function PatientTable({
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <div className="relative w-full sm:w-80">
             <label htmlFor="patient-search" className="sr-only">
               Search patients
@@ -235,7 +251,10 @@ export function PatientTable({
               className="h-9 pl-9 text-sm"
             />
           </div>
-          {isLoading && <Loader2 className="size-4 animate-spin text-muted-foreground" />}
+          <div className="flex items-center gap-2">
+            {toolbarActions}
+            {isLoading && <Loader2 className="size-4 animate-spin text-muted-foreground" />}
+          </div>
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">

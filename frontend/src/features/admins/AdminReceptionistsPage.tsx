@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { FileDown, Plus } from "lucide-react";
+import { FileDown, Filter, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAdminGetAllReceptionists } from "@/api/generated/admins/admins";
+import type { AdminGetAllReceptionistsParams } from "@/api/model/AdminGetAllReceptionistsParams";
 import type { AdminReceptionistDto } from "@/api/model/AdminReceptionistDto";
 import {
   Breadcrumb,
@@ -13,6 +14,14 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { AddNewReceptionistForm } from "@/features/admins/manageReceptionists/AddNewReceptionistForm";
 import { DeleteReceptionistDialog } from "@/features/admins/manageReceptionists/DeleteReceptionistDialog";
 import { EditReceptionistForm } from "@/features/admins/manageReceptionists/EditReceptionistForm";
@@ -22,11 +31,20 @@ import { ViewReceptionistDetailDialog } from "@/features/admins/manageReceptioni
 
 const PAGE_SIZE = 5;
 
+// Lists the receptionist gender filters supported by the admin receptionist endpoint.
+const GENDER_FILTER_OPTIONS = [
+  { label: "Male", value: "M" },
+  { label: "Female", value: "F" },
+  { label: "Other", value: "O" },
+  { label: "Not specified", value: "N" },
+] as const;
+
 // Admin page displaying a paginated, searchable list of all receptionists
 export function AdminReceptionistsPage() {
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
+  const [genderFilter, setGenderFilter] = useState("");
   const [selectedReceptionist, setSelectedReceptionist] = useState<AdminReceptionistDto | null>(
     null,
   );
@@ -38,6 +56,7 @@ export function AdminReceptionistsPage() {
     null,
   );
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
+  const activeFilterCount = Number(Boolean(genderFilter));
 
   const handleDeactivate = (receptionist: AdminReceptionistDto) => {
     setDeactivateReceptionist(receptionist);
@@ -62,11 +81,14 @@ export function AdminReceptionistsPage() {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
-  const { data, isLoading, isError } = useAdminGetAllReceptionists({
+  const receptionistListParams: AdminGetAllReceptionistsParams & { Gender?: string } = {
     Page: page,
     PageSize: PAGE_SIZE,
-    Search: search || undefined,
-  });
+    Search: search.trim() || undefined,
+    Gender: genderFilter || undefined,
+  };
+
+  const { data, isLoading, isError } = useAdminGetAllReceptionists(receptionistListParams);
 
   const result = data?.status === 200 ? data.data : null;
   const receptionists = result?.items ?? [];
@@ -80,7 +102,7 @@ export function AdminReceptionistsPage() {
 
   return (
     <div className="space-y-6">
-      <header className="space-y-2">
+      <header className="space-y-6">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -146,6 +168,80 @@ export function AdminReceptionistsPage() {
             onPageChange={setPage}
             search={searchInput}
             onSearchChange={setSearchInput}
+            toolbarActions={
+              <Popover>
+                <PopoverTrigger
+                  render={
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-9 w-fit gap-1.5 bg-background"
+                      aria-label="Filter receptionists"
+                    >
+                      <Filter className="size-4" />
+                      Filters
+                      {activeFilterCount > 0 && (
+                        <span className="ml-0.5 inline-flex size-5 items-center justify-center rounded-full bg-primary text-[11px] text-primary-foreground">
+                          {activeFilterCount}
+                        </span>
+                      )}
+                    </Button>
+                  }
+                />
+                <PopoverContent align="start" className="w-80 gap-4 p-4">
+                  <PopoverHeader>
+                    <PopoverTitle>Receptionist filters</PopoverTitle>
+                  </PopoverHeader>
+
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Gender</Label>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        type="button"
+                        variant={genderFilter ? "outline" : "default"}
+                        size="sm"
+                        onClick={() => {
+                          setGenderFilter("");
+                          setPage(1);
+                        }}
+                      >
+                        All
+                      </Button>
+                      {GENDER_FILTER_OPTIONS.map((option) => (
+                        <Button
+                          key={option.value}
+                          type="button"
+                          variant={genderFilter === option.value ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => {
+                            setGenderFilter(genderFilter === option.value ? "" : option.value);
+                            setPage(1);
+                          }}
+                        >
+                          {option.label}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {activeFilterCount > 0 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="w-fit gap-1.5 text-muted-foreground"
+                      onClick={() => {
+                        setGenderFilter("");
+                        setPage(1);
+                      }}
+                    >
+                      <X className="size-3.5" />
+                      Clear filters
+                    </Button>
+                  )}
+                </PopoverContent>
+              </Popover>
+            }
             onView={handleView}
             onEdit={handleEdit}
             onDeactivate={handleDeactivate}

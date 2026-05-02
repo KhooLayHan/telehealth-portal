@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { useSystemName } from "@/features/system-settings/useSystemName";
 import { BrandingHeader } from "./components/BrandingHeader";
 import { FormError } from "./components/FormError";
 import { RegisterAccountSection } from "./components/RegisterAccountSection";
@@ -11,6 +12,7 @@ import { useRegisterForm } from "./hooks/useRegisterForm";
 
 export function RegisterForm() {
   const { form, globalError, acceptTerms, setAcceptTerms } = useRegisterForm();
+  const { systemName } = useSystemName();
 
   return (
     <div className="space-y-6">
@@ -19,7 +21,7 @@ export function RegisterForm() {
       <Card className="shadow-sm">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl">Create an account</CardTitle>
-          <CardDescription>Join TeleHealth to access quality healthcare</CardDescription>
+          <CardDescription>Join {systemName} to access quality healthcare</CardDescription>
         </CardHeader>
 
         <CardContent>

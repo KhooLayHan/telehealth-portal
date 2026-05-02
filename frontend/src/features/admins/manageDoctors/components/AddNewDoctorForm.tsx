@@ -44,7 +44,7 @@ const addDoctorSchema = z.object({
   bio: z.string(),
   specialization: z.string().min(1, "Required"),
   licenseNumber: z.string().min(1, "Required"),
-  consultationFee: z.number().nonnegative("Must be ≥ 0").nullable(),
+  consultationFee: z.number().nonnegative("Must be >= 0").nullable(),
   departmentName: z.string().min(1, "Required"),
   addressStreet: z.string(),
   addressCity: z.string(),
@@ -147,18 +147,18 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl gap-0 overflow-hidden p-0">
-        <div className="absolute inset-x-0 top-0 h-px bg-border" />
+        <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
 
-        <DialogHeader className="px-6 pb-4 pt-7">
+        <DialogHeader className="px-6 pt-7 pb-4">
           <div className="flex items-start gap-4">
-            <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-muted text-lg font-bold text-foreground">
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary font-bold text-lg text-primary-foreground">
               <Plus className="size-6" />
             </div>
             <div className="min-w-0 flex-1">
-              <DialogTitle className="text-xl font-semibold leading-none">
+              <DialogTitle className="font-semibold text-xl leading-none">
                 Add New Doctor
               </DialogTitle>
-              <DialogDescription className="mt-1 text-sm text-muted-foreground">
+              <DialogDescription className="mt-1 text-sm">
                 Fill in the doctor&apos;s details to register them in the system.
               </DialogDescription>
             </div>
@@ -173,7 +173,7 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
           className="flex flex-col"
         >
           <Tabs defaultValue="personal" className="flex-1 px-6 pb-2">
-            <TabsList className="mb-5 grid w-full grid-cols-4">
+            <TabsList className="mb-5 grid h-auto w-full grid-cols-2 rounded-lg border border-border bg-muted/30 p-1 sm:grid-cols-4">
               <TabsTrigger value="personal">Personal</TabsTrigger>
               <TabsTrigger value="professional">Professional</TabsTrigger>
               <TabsTrigger value="address">Address</TabsTrigger>
@@ -184,7 +184,10 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
               value="personal"
               className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
             >
-              <div className="grid grid-cols-2 gap-4">
+              <p className="font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
+                Personal Information
+              </p>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <form.Field name="firstName">
                   {(field) => (
                     <Field>
@@ -214,7 +217,7 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                   )}
                 </form.Field>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <form.Field name="username">
                   {(field) => (
                     <Field>
@@ -286,7 +289,7 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                   </Field>
                 )}
               </form.Field>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <form.Field name="phoneNumber">
                   {(field) => (
                     <Field>
@@ -347,7 +350,7 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                       onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
                       rows={3}
-                      placeholder="Brief professional bio…"
+                      placeholder="Brief professional bio..."
                     />
                     <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                   </Field>
@@ -359,7 +362,10 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
               value="professional"
               className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
             >
-              <div className="grid grid-cols-2 gap-4">
+              <p className="font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
+                Professional Details
+              </p>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <form.Field name="specialization">
                   {(field) => (
                     <Field>
@@ -389,7 +395,7 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                   )}
                 </form.Field>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <form.Field name="licenseNumber">
                   {(field) => (
                     <Field>
@@ -432,6 +438,9 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
               value="address"
               className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
             >
+              <p className="font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
+                Address
+              </p>
               <form.Field name="addressStreet">
                 {(field) => (
                   <Field>
@@ -446,7 +455,7 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                   </Field>
                 )}
               </form.Field>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <form.Field name="addressCity">
                   {(field) => (
                     <Field>
@@ -476,7 +485,7 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                   )}
                 </form.Field>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <form.Field name="addressPostalCode">
                   {(field) => (
                     <Field>
@@ -511,8 +520,11 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
 
             <TabsContent
               value="qualifications"
-              className="mt-0 max-h-[52vh] overflow-y-auto pb-2 pr-1"
+              className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
             >
+              <p className="font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
+                Qualifications
+              </p>
               <form.Field name="qualifications" mode="array">
                 {(field) => (
                   <div className="space-y-3">
@@ -535,7 +547,7 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                           <Trash2 className="size-3.5" />
                         </Button>
 
-                        <div className="grid grid-cols-3 gap-3">
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                           <form.Field name={`qualifications[${i}].degree`}>
                             {(degreeField) => (
                               <Field>
@@ -599,7 +611,7 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                     ))}
 
                     {field.state.value.length === 0 && (
-                      <p className="py-4 text-center text-sm text-muted-foreground">
+                      <p className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-center text-muted-foreground text-sm">
                         No qualifications added yet.
                       </p>
                     )}
@@ -633,12 +645,8 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
             </Button>
             <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting] as const}>
               {([canSubmit, isSubmitting]) => (
-                <Button
-                  type="submit"
-                  disabled={!canSubmit || isSubmitting || isPending}
-                  className="bg-black text-white hover:bg-black/85"
-                >
-                  {isSubmitting || isPending ? "Adding…" : "Add Doctor"}
+                <Button type="submit" disabled={!canSubmit || isSubmitting || isPending}>
+                  {isSubmitting || isPending ? "Adding..." : "Add Doctor"}
                 </Button>
               )}
             </form.Subscribe>

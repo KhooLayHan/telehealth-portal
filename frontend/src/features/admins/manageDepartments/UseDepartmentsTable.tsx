@@ -5,11 +5,6 @@ import type { Instant } from "@/api/model/Instant";
 
 const DEPARTMENTS_PAGE_SIZE = 5;
 
-// Extends the generated department DTO until the API client is regenerated.
-type AdminDepartmentWithCreatedAt = AdminDepartmentDto & {
-  createdAt?: Instant;
-};
-
 // Represents one department row shown in the admin department table.
 export interface DepartmentTableRow {
   id: string;
@@ -20,7 +15,7 @@ export interface DepartmentTableRow {
 }
 
 // Converts the API department response into the row shape used by the table.
-function toDepartmentTableRow(department: AdminDepartmentWithCreatedAt): DepartmentTableRow {
+function toDepartmentTableRow(department: AdminDepartmentDto): DepartmentTableRow {
   return {
     id: department.slug,
     name: department.name,
@@ -30,41 +25,33 @@ function toDepartmentTableRow(department: AdminDepartmentWithCreatedAt): Departm
   };
 }
 
-// Checks whether a department row matches the visible search text.
-function matchesDepartmentSearch(department: DepartmentTableRow, search: string): boolean {
-  const searchableText = [
-    department.name,
-    department.description,
-    department.staffMembers.toString(),
-  ].join(" ");
-
-  return searchableText.toLowerCase().includes(search);
-}
-
-// Fetches departments and exposes local pagination state for the table.
+// Fetches departments with backend pagination and exposes table state handlers.
 export function useDepartmentsTable(search: string) {
   const [page, setPage] = useState(1);
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
   const previousSearch = useRef("");
-  const { data, isError, isLoading } = useAdminGetAllDepartments();
-  const normalizedSearch = search.trim().toLowerCase();
+  const normalizedSearch = debouncedSearch.trim();
+  const { data, isError, isLoading } = useAdminGetAllDepartments({
+    Page: page,
+    PageSize: DEPARTMENTS_PAGE_SIZE,
+    Search: normalizedSearch || undefined,
+  });
 
-  const allDepartments = useMemo(
-    () => (data?.status === 200 ? data.data.map(toDepartmentTableRow) : []),
-    [data],
+  const pagedResult = data?.status === 200 ? data.data : null;
+  const departments = useMemo(
+    () => (pagedResult?.items ?? []).map(toDepartmentTableRow),
+    [pagedResult],
   );
+  const totalCount = Number(pagedResult?.totalCount ?? 0);
+  const totalPages = Math.max(1, Number(pagedResult?.totalPages ?? 1));
 
-  const filteredDepartments = useMemo(() => {
-    if (!normalizedSearch) {
-      return allDepartments;
-    }
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 400);
 
-    return allDepartments.filter((department) =>
-      matchesDepartmentSearch(department, normalizedSearch),
-    );
-  }, [allDepartments, normalizedSearch]);
-
-  const totalCount = filteredDepartments.length;
-  const totalPages = Math.max(1, Math.ceil(totalCount / DEPARTMENTS_PAGE_SIZE));
+    return () => clearTimeout(timer);
+  }, [search]);
 
   useEffect(() => {
     if (previousSearch.current !== normalizedSearch) {
@@ -76,11 +63,6 @@ export function useDepartmentsTable(search: string) {
   useEffect(() => {
     setPage((currentPage) => Math.min(currentPage, totalPages));
   }, [totalPages]);
-
-  const departments = useMemo(() => {
-    const startIndex = (page - 1) * DEPARTMENTS_PAGE_SIZE;
-    return filteredDepartments.slice(startIndex, startIndex + DEPARTMENTS_PAGE_SIZE);
-  }, [filteredDepartments, page]);
 
   function handlePageChange(nextPage: number) {
     setPage(Math.min(Math.max(nextPage, 1), totalPages));

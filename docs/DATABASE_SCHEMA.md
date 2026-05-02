@@ -5,7 +5,7 @@
 > **ORM:** Entity Framework Core  
 > **Auth:** ASP.NET Core Identity  
 > **UUID Generation:** Native PostgreSQL `uuidv7()` function  
-> **Last Updated:** 2026-03-17
+> **Last Updated:** 2026-04-28
 
 ---
 
@@ -39,7 +39,7 @@
 
 ## Table Summary
 
-### Core Tables (16 Total)
+### Core Tables (18 Total)
 
 | Category | Count | Tables |
 | ---------- | --- | -------- |
@@ -47,7 +47,7 @@
 | **Lookup Tables** | 4 | departments, appointment_statuses, schedule_statuses, lab_report_statuses |
 | **Identity Profiles** | 2 | doctors, patients |
 | **Clinic Operations** | 5 | doctor_schedules, appointments, consultations, prescriptions, lab_reports |
-| **System & Audit** | 2 | notifications, audit_logs |
+| **System & Audit** | 4 | system_settings, system_operating_hours, notifications, audit_logs |
 
 ---
 
@@ -475,6 +475,52 @@ INSERT INTO lab_reports (slug, consultation_id, patient_id, status_id, report_ty
 
 ### 5. System & Audit Tables
 
+#### system_settings
+
+Singleton-style system configuration for clinic-wide settings.
+
+| Column | Type | Constraints | Notes |
+| -------- | ------ | ------------- | ------- |
+| id | BIGINT | PRIMARY KEY, GENERATED ALWAYS AS IDENTITY | Internal ID |
+| slug | VARCHAR(50) | NOT NULL, UNIQUE | URL-friendly identifier for the settings record |
+| clinic_name | VARCHAR(100) | NOT NULL | Display name for the clinic |
+| support_email | VARCHAR(255) | NOT NULL | Support contact email shown to users |
+| default_appointment_duration_minutes | SMALLINT | NOT NULL | Default length for new appointment slots |
+| created_at | TIMESTAMPTZ | NOT NULL, DEFAULT NOW() | Creation timestamp |
+| updated_at | TIMESTAMPTZ | | Last update (trigger-managed) |
+
+**Constraints:**
+
+- `system_settings_slug_key`: UNIQUE (slug)
+
+**Indexes:**
+
+- `system_settings_pkey`: UNIQUE (id)
+- `system_settings_slug_key_index`: UNIQUE (slug)
+
+#### system_operating_hours
+
+Weekly operating hours attached to the system settings record.
+
+| Column | Type | Constraints | Notes |
+| -------- | ------ | ------------- | ------- |
+| id | BIGINT | PRIMARY KEY, GENERATED ALWAYS AS IDENTITY | Internal ID |
+| system_settings_id | BIGINT | NOT NULL, REFERENCES system_settings(id) | Parent settings record |
+| day_of_week | SMALLINT | NOT NULL | Day of week value used by the application |
+| is_open | BOOLEAN | NOT NULL, DEFAULT TRUE | Whether the clinic is open on this day |
+| open_time | TIME | | Opening time when `is_open` is true |
+| close_time | TIME | | Closing time when `is_open` is true |
+| created_at | TIMESTAMPTZ | NOT NULL, DEFAULT NOW() | Creation timestamp |
+| updated_at | TIMESTAMPTZ | | Last update (trigger-managed) |
+
+**Constraints:**
+
+- `fk_system_operating_hours_system_settings`: FOREIGN KEY (system_settings_id) REFERENCES system_settings(id)
+
+**Indexes:**
+
+- `system_operating_hours_pkey`: UNIQUE (id)
+
 #### notifications
 
 Immutable log of all outbound SNS notifications.
@@ -579,6 +625,14 @@ CREATE TRIGGER trg_prescriptions_updated_at
 
 CREATE TRIGGER trg_lab_reports_updated_at
     BEFORE UPDATE ON lab_reports
+    FOR EACH ROW EXECUTE FUNCTION fn_set_updated_at();
+
+CREATE TRIGGER trg_system_settings_updated_at
+    BEFORE UPDATE ON system_settings
+    FOR EACH ROW EXECUTE FUNCTION fn_set_updated_at();
+
+CREATE TRIGGER trg_system_operating_hours_updated_at
+    BEFORE UPDATE ON system_operating_hours
     FOR EACH ROW EXECUTE FUNCTION fn_set_updated_at();
 
 CREATE TRIGGER trg_notifications_updated_at
@@ -720,11 +774,12 @@ Execute migrations in this order to respect foreign key dependencies:
 6. **Appointments**: `appointments` (depends on patients, doctors, doctor_schedules, appointment_statuses, users)
 7. **Medical records**: `consultations` (depends on appointments)
 8. **Prescriptions & Lab**: `prescriptions` (depends on consultations), `lab_reports` (depends on consultations, patients, lab_report_statuses)
-9. **System tables**: `notifications` (depends on users), `audit_logs` (depends on users)
-10. **Seed data**: Insert lookup values
-11. **Triggers**: Create `fn_set_updated_at`, `fn_audit_log` and all triggers
+9. **System configuration**: `system_settings`, `system_operating_hours` (depends on system_settings)
+10. **System tables**: `notifications` (depends on users), `audit_logs` (depends on users)
+11. **Seed data**: Insert lookup values
+12. **Triggers**: Create `fn_set_updated_at`, `fn_audit_log` and all triggers
 
 ---
 
-_Last Updated: March 2026_  
-_Schema Version: 1.0_
+_Last Updated: April 2026_  
+_Schema Version: 1.1_

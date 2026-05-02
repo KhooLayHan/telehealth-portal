@@ -36,8 +36,16 @@ import type {
 } from '../../model/AdminCreateReceptionistCommand';
 
 import type {
+  AdminDashboardSummaryDto
+} from '../../model/AdminDashboardSummaryDto';
+
+import type {
   AdminDepartmentDto
 } from '../../model/AdminDepartmentDto';
+
+import type {
+  AdminGetAllDepartmentsParams
+} from '../../model/AdminGetAllDepartmentsParams';
 
 import type {
   AdminGetAllLabTechsParams
@@ -48,12 +56,20 @@ import type {
 } from '../../model/AdminGetAllReceptionistsParams';
 
 import type {
+  AdminGetAuditLogsParams
+} from '../../model/AdminGetAuditLogsParams';
+
+import type {
   AdminLabTechDto
 } from '../../model/AdminLabTechDto';
 
 import type {
   AdminReceptionistDto
 } from '../../model/AdminReceptionistDto';
+
+import type {
+  AdminSettingsDto
+} from '../../model/AdminSettingsDto';
 
 import type {
   AdminUpdateDepartmentCommand
@@ -66,6 +82,18 @@ import type {
 import type {
   AdminUpdateReceptionistCommand
 } from '../../model/AdminUpdateReceptionistCommand';
+
+import type {
+  AdminUpdateSettingsCommand
+} from '../../model/AdminUpdateSettingsCommand';
+
+import type {
+  PagedResultOfAdminAuditLogDto
+} from '../../model/PagedResultOfAdminAuditLogDto';
+
+import type {
+  PagedResultOfAdminDepartmentDto
+} from '../../model/PagedResultOfAdminDepartmentDto';
 
 import type {
   PagedResultOfAdminLabTechDto
@@ -87,7 +115,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 export type adminGetAllDepartmentsResponse200 = {
-  data: AdminDepartmentDto[]
+  data: PagedResultOfAdminDepartmentDto
   status: 200
 }
 
@@ -110,17 +138,24 @@ export type adminGetAllDepartmentsResponseError = (adminGetAllDepartmentsRespons
 
 export type adminGetAllDepartmentsResponse = (adminGetAllDepartmentsResponseSuccess | adminGetAllDepartmentsResponseError)
 
-export const getAdminGetAllDepartmentsUrl = () => {
+export const getAdminGetAllDepartmentsUrl = (params?: AdminGetAllDepartmentsParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/v1/admins/departments`
+  return stringifiedParams.length > 0 ? `/api/v1/admins/departments?${stringifiedParams}` : `/api/v1/admins/departments`
 }
 
-export const adminGetAllDepartments = async ( options?: RequestInit): Promise<adminGetAllDepartmentsResponse> => {
+export const adminGetAllDepartments = async (params?: AdminGetAllDepartmentsParams, options?: RequestInit): Promise<adminGetAllDepartmentsResponse> => {
 
-  return ofetchMutator<adminGetAllDepartmentsResponse>(getAdminGetAllDepartmentsUrl(),
+  return ofetchMutator<adminGetAllDepartmentsResponse>(getAdminGetAllDepartmentsUrl(params),
   {
     ...options,
     method: 'GET'
@@ -133,23 +168,23 @@ export const adminGetAllDepartments = async ( options?: RequestInit): Promise<ad
 
 
 
-export const getAdminGetAllDepartmentsQueryKey = () => {
+export const getAdminGetAllDepartmentsQueryKey = (params?: AdminGetAllDepartmentsParams,) => {
     return [
-    `/api/v1/admins/departments`
+    `/api/v1/admins/departments`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getAdminGetAllDepartmentsQueryOptions = <TData = Awaited<ReturnType<typeof adminGetAllDepartments>>, TError = ProblemDetails>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+export const getAdminGetAllDepartmentsQueryOptions = <TData = Awaited<ReturnType<typeof adminGetAllDepartments>>, TError = ProblemDetails>(params?: AdminGetAllDepartmentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getAdminGetAllDepartmentsQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getAdminGetAllDepartmentsQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetAllDepartments>>> = ({ signal }) => adminGetAllDepartments({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetAllDepartments>>> = ({ signal }) => adminGetAllDepartments(params, { signal, ...requestOptions });
 
 
 
@@ -163,7 +198,7 @@ export type AdminGetAllDepartmentsQueryError = ProblemDetails
 
 
 export function useAdminGetAllDepartments<TData = Awaited<ReturnType<typeof adminGetAllDepartments>>, TError = ProblemDetails>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>> & Pick<
+ params: undefined |  AdminGetAllDepartmentsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminGetAllDepartments>>,
           TError,
@@ -173,7 +208,7 @@ export function useAdminGetAllDepartments<TData = Awaited<ReturnType<typeof admi
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminGetAllDepartments<TData = Awaited<ReturnType<typeof adminGetAllDepartments>>, TError = ProblemDetails>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>> & Pick<
+ params?: AdminGetAllDepartmentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminGetAllDepartments>>,
           TError,
@@ -183,16 +218,16 @@ export function useAdminGetAllDepartments<TData = Awaited<ReturnType<typeof admi
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminGetAllDepartments<TData = Awaited<ReturnType<typeof adminGetAllDepartments>>, TError = ProblemDetails>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ params?: AdminGetAllDepartmentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
 export function useAdminGetAllDepartments<TData = Awaited<ReturnType<typeof adminGetAllDepartments>>, TError = ProblemDetails>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ params?: AdminGetAllDepartmentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAllDepartments>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getAdminGetAllDepartmentsQueryOptions(options)
+  const queryOptions = getAdminGetAllDepartmentsQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -818,6 +853,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
+  return  { mutationFn, ...mutationOptions }}
 
   return  { mutationFn, ...mutationOptions }}
 
@@ -1079,46 +1115,45 @@ export type adminCreateLabTechResponse409 = {
 
 export type adminCreateLabTechResponse422 = {
   data: ProblemDetails
-  status: 422
+  status: 404
 }
 
-export type adminCreateLabTechResponseSuccess = (adminCreateLabTechResponse201) & {
+export type adminDeactivateReceptionistResponseSuccess = (adminDeactivateReceptionistResponse204) & {
   headers: Headers;
 };
-export type adminCreateLabTechResponseError = (adminCreateLabTechResponse400 | adminCreateLabTechResponse401 | adminCreateLabTechResponse403 | adminCreateLabTechResponse409 | adminCreateLabTechResponse422) & {
+export type adminDeactivateReceptionistResponseError = (adminDeactivateReceptionistResponse401 | adminDeactivateReceptionistResponse403 | adminDeactivateReceptionistResponse404) & {
   headers: Headers;
 };
 
-export type adminCreateLabTechResponse = (adminCreateLabTechResponseSuccess | adminCreateLabTechResponseError)
+export type adminDeactivateReceptionistResponse = (adminDeactivateReceptionistResponseSuccess | adminDeactivateReceptionistResponseError)
 
-export const getAdminCreateLabTechUrl = () => {
-
-
+export const getAdminDeactivateReceptionistUrl = (id: string,) => {
 
 
-  return `/api/v1/admins/lab-techs`
+
+
+  return `/api/v1/admins/receptionists/${id}/deactivate`
 }
 
-export const adminCreateLabTech = async (adminCreateLabTechCommand: AdminCreateLabTechCommand, options?: RequestInit): Promise<adminCreateLabTechResponse> => {
+export const adminDeactivateReceptionist = async (id: string, options?: RequestInit): Promise<adminDeactivateReceptionistResponse> => {
 
-  return ofetchMutator<adminCreateLabTechResponse>(getAdminCreateLabTechUrl(),
+  return ofetchMutator<adminDeactivateReceptionistResponse>(getAdminDeactivateReceptionistUrl(id),
   {
     ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      adminCreateLabTechCommand,)
+    method: 'PATCH'
+
+
   }
 );}
 
 
 
 
-export const getAdminCreateLabTechMutationOptions = <TError = ProblemDetails,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCreateLabTech>>, TError,{data: AdminCreateLabTechCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof adminCreateLabTech>>, TError,{data: AdminCreateLabTechCommand}, TContext> => {
+export const getAdminDeactivateReceptionistMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDeactivateReceptionist>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminDeactivateReceptionist>>, TError,{id: string}, TContext> => {
 
-const mutationKey = ['adminCreateLabTech'];
+const mutationKey = ['adminDeactivateReceptionist'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -1128,10 +1163,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCreateLabTech>>, {data: AdminCreateLabTechCommand}> = (props) => {
-          const {data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminDeactivateReceptionist>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
 
-          return  adminCreateLabTech(data,requestOptions)
+          return  adminDeactivateReceptionist(id,requestOptions)
         }
 
 
@@ -1141,19 +1176,19 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type AdminCreateLabTechMutationResult = NonNullable<Awaited<ReturnType<typeof adminCreateLabTech>>>
-    export type AdminCreateLabTechMutationBody = AdminCreateLabTechCommand
-    export type AdminCreateLabTechMutationError = ProblemDetails
+    export type AdminDeactivateReceptionistMutationResult = NonNullable<Awaited<ReturnType<typeof adminDeactivateReceptionist>>>
 
-    export const useAdminCreateLabTech = <TError = ProblemDetails,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCreateLabTech>>, TError,{data: AdminCreateLabTechCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+    export type AdminDeactivateReceptionistMutationError = ProblemDetails
+
+    export const useAdminDeactivateReceptionist = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDeactivateReceptionist>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof adminCreateLabTech>>,
+        Awaited<ReturnType<typeof adminDeactivateReceptionist>>,
         TError,
-        {data: AdminCreateLabTechCommand},
+        {id: string},
         TContext
       > => {
-      return useMutation(getAdminCreateLabTechMutationOptions(options), queryClient);
+      return useMutation(getAdminDeactivateReceptionistMutationOptions(options), queryClient);
     }
     export type adminGetLabTechResponse200 = {
   data: AdminLabTechDto
@@ -1186,10 +1221,16 @@ export type adminGetLabTechResponse = (adminGetLabTechResponseSuccess | adminGet
 
 export const getAdminGetLabTechUrl = (id: string,) => {
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/v1/admins/lab-techs/${id}`
+  return stringifiedParams.length > 0 ? `/api/v1/admins/lab-techs?${stringifiedParams}` : `/api/v1/admins/lab-techs`
 }
 
 export const adminGetLabTech = async (id: string, options?: RequestInit): Promise<adminGetLabTechResponse> => {
@@ -1382,57 +1423,78 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   status: 204
 }
 
-export type adminDeactivateLabTechResponse401 = {
+
+
+
+
+
+export type adminCreateLabTechResponse201 = {
+  data: AdminLabTechDto
+  status: 201
+}
+
+export type adminCreateLabTechResponse400 = {
+  data: ProblemDetails
+  status: 400
+}
+
+export type adminCreateLabTechResponse401 = {
   data: ProblemDetails
   status: 401
 }
 
-export type adminDeactivateLabTechResponse403 = {
+export type adminCreateLabTechResponse403 = {
   data: ProblemDetails
   status: 403
 }
 
-export type adminDeactivateLabTechResponse404 = {
+export type adminCreateLabTechResponse409 = {
   data: ProblemDetails
-  status: 404
+  status: 409
 }
 
-export type adminDeactivateLabTechResponseSuccess = (adminDeactivateLabTechResponse204) & {
-  headers: Headers;
-};
-export type adminDeactivateLabTechResponseError = (adminDeactivateLabTechResponse401 | adminDeactivateLabTechResponse403 | adminDeactivateLabTechResponse404) & {
-  headers: Headers;
-};
-
-export type adminDeactivateLabTechResponse = (adminDeactivateLabTechResponseSuccess | adminDeactivateLabTechResponseError)
-
-export const getAdminDeactivateLabTechUrl = (id: string,) => {
-
-
-
-
-  return `/api/v1/admins/lab-techs/${id}/deactivate`
+export type adminCreateLabTechResponse422 = {
+  data: ProblemDetails
+  status: 422
 }
 
-export const adminDeactivateLabTech = async (id: string, options?: RequestInit): Promise<adminDeactivateLabTechResponse> => {
+export type adminCreateLabTechResponseSuccess = (adminCreateLabTechResponse201) & {
+  headers: Headers;
+};
+export type adminCreateLabTechResponseError = (adminCreateLabTechResponse400 | adminCreateLabTechResponse401 | adminCreateLabTechResponse403 | adminCreateLabTechResponse409 | adminCreateLabTechResponse422) & {
+  headers: Headers;
+};
 
-  return ofetchMutator<adminDeactivateLabTechResponse>(getAdminDeactivateLabTechUrl(id),
+export type adminCreateLabTechResponse = (adminCreateLabTechResponseSuccess | adminCreateLabTechResponseError)
+
+export const getAdminCreateLabTechUrl = () => {
+
+
+
+
+  return `/api/v1/admins/lab-techs`
+}
+
+export const adminCreateLabTech = async (adminCreateLabTechCommand: AdminCreateLabTechCommand, options?: RequestInit): Promise<adminCreateLabTechResponse> => {
+
+  return ofetchMutator<adminCreateLabTechResponse>(getAdminCreateLabTechUrl(),
   {
     ...options,
-    method: 'PATCH'
-
-
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      adminCreateLabTechCommand,)
   }
 );}
 
 
 
 
-export const getAdminDeactivateLabTechMutationOptions = <TError = ProblemDetails,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDeactivateLabTech>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof adminDeactivateLabTech>>, TError,{id: string}, TContext> => {
+export const getAdminCreateLabTechMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCreateLabTech>>, TError,{data: AdminCreateLabTechCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminCreateLabTech>>, TError,{data: AdminCreateLabTechCommand}, TContext> => {
 
-const mutationKey = ['adminDeactivateLabTech'];
+const mutationKey = ['adminCreateLabTech'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -1442,10 +1504,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminDeactivateLabTech>>, {id: string}> = (props) => {
-          const {id} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCreateLabTech>>, {data: AdminCreateLabTechCommand}> = (props) => {
+          const {data} = props ?? {};
 
-          return  adminDeactivateLabTech(id,requestOptions)
+          return  adminCreateLabTech(data,requestOptions)
         }
 
 
@@ -1455,17 +1517,474 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type AdminDeactivateLabTechMutationResult = NonNullable<Awaited<ReturnType<typeof adminDeactivateLabTech>>>
+    export type AdminCreateLabTechMutationResult = NonNullable<Awaited<ReturnType<typeof adminCreateLabTech>>>
+    export type AdminCreateLabTechMutationBody = AdminCreateLabTechCommand
+    export type AdminCreateLabTechMutationError = ProblemDetails
 
-    export type AdminDeactivateLabTechMutationError = ProblemDetails
-
-    export const useAdminDeactivateLabTech = <TError = ProblemDetails,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDeactivateLabTech>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+    export const useAdminCreateLabTech = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCreateLabTech>>, TError,{data: AdminCreateLabTechCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof adminDeactivateLabTech>>,
+        Awaited<ReturnType<typeof adminCreateLabTech>>,
         TError,
-        {id: string},
+        {data: AdminCreateLabTechCommand},
         TContext
       > => {
-      return useMutation(getAdminDeactivateLabTechMutationOptions(options), queryClient);
+      return useMutation(getAdminCreateLabTechMutationOptions(options), queryClient);
+    }
+    export type adminGetAuditLogsResponse200 = {
+  data: PagedResultOfAdminAuditLogDto
+  status: 200
+}
+
+export type adminGetAuditLogsResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type adminGetAuditLogsResponse403 = {
+  data: ProblemDetails
+  status: 403
+}
+
+export type adminGetAuditLogsResponseSuccess = (adminGetAuditLogsResponse200) & {
+  headers: Headers;
+};
+export type adminGetAuditLogsResponseError = (adminGetAuditLogsResponse401 | adminGetAuditLogsResponse403) & {
+  headers: Headers;
+};
+
+export type adminGetAuditLogsResponse = (adminGetAuditLogsResponseSuccess | adminGetAuditLogsResponseError)
+
+export const getAdminGetAuditLogsUrl = (params?: AdminGetAuditLogsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/v1/admins/audit-logs?${stringifiedParams}` : `/api/v1/admins/audit-logs`
+}
+
+export const adminGetAuditLogs = async (params?: AdminGetAuditLogsParams, options?: RequestInit): Promise<adminGetAuditLogsResponse> => {
+
+  return ofetchMutator<adminGetAuditLogsResponse>(getAdminGetAuditLogsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminGetAuditLogsQueryKey = (params?: AdminGetAuditLogsParams,) => {
+    return [
+    `/api/v1/admins/audit-logs`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getAdminGetAuditLogsQueryOptions = <TData = Awaited<ReturnType<typeof adminGetAuditLogs>>, TError = ProblemDetails>(params?: AdminGetAuditLogsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAuditLogs>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminGetAuditLogsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetAuditLogs>>> = ({ signal }) => adminGetAuditLogs(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetAuditLogs>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type AdminGetAuditLogsQueryResult = NonNullable<Awaited<ReturnType<typeof adminGetAuditLogs>>>
+export type AdminGetAuditLogsQueryError = ProblemDetails
+
+
+export function useAdminGetAuditLogs<TData = Awaited<ReturnType<typeof adminGetAuditLogs>>, TError = ProblemDetails>(
+ params: undefined |  AdminGetAuditLogsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAuditLogs>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminGetAuditLogs>>,
+          TError,
+          Awaited<ReturnType<typeof adminGetAuditLogs>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminGetAuditLogs<TData = Awaited<ReturnType<typeof adminGetAuditLogs>>, TError = ProblemDetails>(
+ params?: AdminGetAuditLogsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAuditLogs>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminGetAuditLogs>>,
+          TError,
+          Awaited<ReturnType<typeof adminGetAuditLogs>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminGetAuditLogs<TData = Awaited<ReturnType<typeof adminGetAuditLogs>>, TError = ProblemDetails>(
+ params?: AdminGetAuditLogsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAuditLogs>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useAdminGetAuditLogs<TData = Awaited<ReturnType<typeof adminGetAuditLogs>>, TError = ProblemDetails>(
+ params?: AdminGetAuditLogsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetAuditLogs>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getAdminGetAuditLogsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export type adminGetDashboardSummaryResponse200 = {
+  data: AdminDashboardSummaryDto
+  status: 200
+}
+
+export type adminGetDashboardSummaryResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type adminGetDashboardSummaryResponse403 = {
+  data: ProblemDetails
+  status: 403
+}
+
+export type adminGetDashboardSummaryResponseSuccess = (adminGetDashboardSummaryResponse200) & {
+  headers: Headers;
+};
+export type adminGetDashboardSummaryResponseError = (adminGetDashboardSummaryResponse401 | adminGetDashboardSummaryResponse403) & {
+  headers: Headers;
+};
+
+export type adminGetDashboardSummaryResponse = (adminGetDashboardSummaryResponseSuccess | adminGetDashboardSummaryResponseError)
+
+export const getAdminGetDashboardSummaryUrl = () => {
+
+
+
+
+  return `/api/v1/admins/dashboard-summary`
+}
+
+export const adminGetDashboardSummary = async ( options?: RequestInit): Promise<adminGetDashboardSummaryResponse> => {
+
+  return ofetchMutator<adminGetDashboardSummaryResponse>(getAdminGetDashboardSummaryUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminGetDashboardSummaryQueryKey = () => {
+    return [
+    `/api/v1/admins/dashboard-summary`
+    ] as const;
+    }
+
+export const getAdminGetLabTechQueryOptions = <TData = Awaited<ReturnType<typeof adminGetLabTech>>, TError = ProblemDetails>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetLabTech>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+) => {
+
+export const getAdminGetDashboardSummaryQueryOptions = <TData = Awaited<ReturnType<typeof adminGetDashboardSummary>>, TError = ProblemDetails>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetDashboardSummary>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminGetDashboardSummaryQueryKey();
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetLabTech>>> = ({ signal }) => adminGetLabTech(id, { signal, ...requestOptions });
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetDashboardSummary>>> = ({ signal }) => adminGetDashboardSummary({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetDashboardSummary>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type AdminGetDashboardSummaryQueryResult = NonNullable<Awaited<ReturnType<typeof adminGetDashboardSummary>>>
+export type AdminGetDashboardSummaryQueryError = ProblemDetails
+
+
+export function useAdminGetDashboardSummary<TData = Awaited<ReturnType<typeof adminGetDashboardSummary>>, TError = ProblemDetails>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetDashboardSummary>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminGetDashboardSummary>>,
+          TError,
+          Awaited<ReturnType<typeof adminGetDashboardSummary>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminGetDashboardSummary<TData = Awaited<ReturnType<typeof adminGetDashboardSummary>>, TError = ProblemDetails>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetDashboardSummary>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminGetDashboardSummary>>,
+          TError,
+          Awaited<ReturnType<typeof adminGetDashboardSummary>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminGetDashboardSummary<TData = Awaited<ReturnType<typeof adminGetDashboardSummary>>, TError = ProblemDetails>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetDashboardSummary>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useAdminGetDashboardSummary<TData = Awaited<ReturnType<typeof adminGetDashboardSummary>>, TError = ProblemDetails>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetDashboardSummary>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getAdminGetDashboardSummaryQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export type adminGetSettingsResponse200 = {
+  data: AdminSettingsDto
+  status: 200
+}
+
+export type adminGetSettingsResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type adminGetSettingsResponse403 = {
+  data: ProblemDetails
+  status: 403
+}
+
+export type adminGetSettingsResponseSuccess = (adminGetSettingsResponse200) & {
+  headers: Headers;
+};
+export type adminGetSettingsResponseError = (adminGetSettingsResponse401 | adminGetSettingsResponse403) & {
+  headers: Headers;
+};
+
+export type adminGetSettingsResponse = (adminGetSettingsResponseSuccess | adminGetSettingsResponseError)
+
+export const getAdminGetSettingsUrl = () => {
+
+
+
+
+  return `/api/v1/admins/settings`
+}
+
+export const adminGetSettings = async ( options?: RequestInit): Promise<adminGetSettingsResponse> => {
+
+  return ofetchMutator<adminGetSettingsResponse>(getAdminGetSettingsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminGetSettingsQueryKey = () => {
+    return [
+    `/api/v1/admins/settings`
+    ] as const;
+    }
+
+
+export const getAdminGetSettingsQueryOptions = <TData = Awaited<ReturnType<typeof adminGetSettings>>, TError = ProblemDetails>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetSettings>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminGetSettingsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetSettings>>> = ({ signal }) => adminGetSettings({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetSettings>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type AdminGetSettingsQueryResult = NonNullable<Awaited<ReturnType<typeof adminGetSettings>>>
+export type AdminGetSettingsQueryError = ProblemDetails
+
+
+export function useAdminGetSettings<TData = Awaited<ReturnType<typeof adminGetSettings>>, TError = ProblemDetails>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetSettings>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminGetSettings>>,
+          TError,
+          Awaited<ReturnType<typeof adminGetSettings>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminGetSettings<TData = Awaited<ReturnType<typeof adminGetSettings>>, TError = ProblemDetails>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetSettings>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminGetSettings>>,
+          TError,
+          Awaited<ReturnType<typeof adminGetSettings>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminGetSettings<TData = Awaited<ReturnType<typeof adminGetSettings>>, TError = ProblemDetails>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetSettings>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useAdminGetSettings<TData = Awaited<ReturnType<typeof adminGetSettings>>, TError = ProblemDetails>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetSettings>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getAdminGetSettingsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export type adminUpdateSettingsResponse200 = {
+  data: AdminSettingsDto
+  status: 200
+}
+
+export type adminUpdateSettingsResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type adminUpdateSettingsResponse403 = {
+  data: ProblemDetails
+  status: 403
+}
+
+export type adminUpdateSettingsResponse422 = {
+  data: ProblemDetails
+  status: 422
+}
+
+export type adminUpdateSettingsResponseSuccess = (adminUpdateSettingsResponse200) & {
+  headers: Headers;
+};
+export type adminUpdateSettingsResponseError = (adminUpdateSettingsResponse401 | adminUpdateSettingsResponse403 | adminUpdateSettingsResponse422) & {
+  headers: Headers;
+};
+
+export type adminUpdateSettingsResponse = (adminUpdateSettingsResponseSuccess | adminUpdateSettingsResponseError)
+
+export const getAdminUpdateSettingsUrl = () => {
+
+
+
+
+  return `/api/v1/admins/settings`
+}
+
+export const adminUpdateSettings = async (adminUpdateSettingsCommand: AdminUpdateSettingsCommand, options?: RequestInit): Promise<adminUpdateSettingsResponse> => {
+
+  return ofetchMutator<adminUpdateSettingsResponse>(getAdminUpdateSettingsUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      adminUpdateSettingsCommand,)
+  }
+);}
+
+
+
+
+export const getAdminUpdateSettingsMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateSettings>>, TError,{data: AdminUpdateSettingsCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateSettings>>, TError,{data: AdminUpdateSettingsCommand}, TContext> => {
+
+const mutationKey = ['adminUpdateSettings'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateSettings>>, {data: AdminUpdateSettingsCommand}> = (props) => {
+          const {data} = props ?? {};
+
+          return  adminUpdateSettings(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminUpdateSettingsMutationResult = NonNullable<Awaited<ReturnType<typeof adminUpdateSettings>>>
+    export type AdminUpdateSettingsMutationBody = AdminUpdateSettingsCommand
+    export type AdminUpdateSettingsMutationError = ProblemDetails
+
+    export const useAdminUpdateSettings = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateSettings>>, TError,{data: AdminUpdateSettingsCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminUpdateSettings>>,
+        TError,
+        {data: AdminUpdateSettingsCommand},
+        TContext
+      > => {
+      return useMutation(getAdminUpdateSettingsMutationOptions(options), queryClient);
     }

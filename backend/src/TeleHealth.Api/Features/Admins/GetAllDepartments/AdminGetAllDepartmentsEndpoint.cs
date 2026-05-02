@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using TeleHealth.Api.Common;
+using TeleHealth.Api.Common.Models;
 using TeleHealth.Api.Common.Security;
 
 namespace TeleHealth.Api.Features.Admins.GetAllDepartments;
@@ -12,12 +13,13 @@ public static class AdminGetAllDepartmentsEndpoint
         group
             .MapGet(
                 ApiEndpoints.Admins.GetAllDepartments,
-                async Task<Ok<IReadOnlyList<AdminDepartmentDto>>> (
+                async Task<Ok<PagedResult<AdminDepartmentDto>>> (
+                    [AsParameters] AdminGetAllDepartmentsQuery query,
                     AdminGetAllDepartmentsHandler handler,
                     CancellationToken ct
                 ) =>
                 {
-                    var result = await handler.HandleAsync(ct);
+                    var result = await handler.HandleAsync(query, ct);
                     return TypedResults.Ok(result);
                 }
             )

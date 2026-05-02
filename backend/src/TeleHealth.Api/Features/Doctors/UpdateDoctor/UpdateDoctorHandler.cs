@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using NodaTime;
 using Serilog;
 using TeleHealth.Api.Common.Exceptions.Doctors;
+using TeleHealth.Api.Common.Exceptions.Users;
 using TeleHealth.Api.Domain.Entities;
 using TeleHealth.Api.Infrastructure.Persistence;
 
@@ -24,6 +25,21 @@ public sealed class UpdateDoctorHandler(ApplicationDbContext db)
         {
             Log.Warning("Doctor not found. DoctorPublicId: {DoctorPublicId}", doctorPublicId);
             throw new DoctorNotFoundException(doctorPublicId.ToString());
+        }
+
+        var hasDuplicateIcNumber =
+            !string.Equals(doctor.User.IcNumber, cmd.IcNumber, StringComparison.Ordinal)
+            && await db.Users.AnyAsync(
+                u =>
+                    u.IcNumber == cmd.IcNumber
+                    && u.PublicId != doctor.User.PublicId
+                    && u.DeletedAt == null,
+                ct
+            );
+
+        if (hasDuplicateIcNumber)
+        {
+            throw new DuplicateIcNumberException();
         }
 
         // Resolve or create the department by name
@@ -49,6 +65,7 @@ public sealed class UpdateDoctorHandler(ApplicationDbContext db)
         user.LastName = cmd.LastName;
         user.Username = cmd.Username;
         user.Email = cmd.Email;
+        user.IcNumber = cmd.IcNumber;
         user.Phone = cmd.PhoneNumber;
         user.Gender = cmd.Gender[0];
         user.DateOfBirth = cmd.DateOfBirth;

@@ -31,6 +31,12 @@ public sealed class ClinicStaffGetAllPatientsHandler(ApplicationDbContext db)
             q = q.Where(p => EF.Functions.ILike(p.User.FirstName + " " + p.User.LastName, pattern));
         }
 
+        var genderFilter = query.Gender?.Trim().ToUpperInvariant();
+        if (genderFilter is "M" or "F" or "O" or "N")
+        {
+            q = q.Where(p => p.User.Gender == genderFilter[0]);
+        }
+
         q = string.Equals(query.SortOrder, "desc", StringComparison.OrdinalIgnoreCase)
             ? q.OrderByDescending(p => p.User.LastName)
                 .ThenByDescending(p => p.User.FirstName)

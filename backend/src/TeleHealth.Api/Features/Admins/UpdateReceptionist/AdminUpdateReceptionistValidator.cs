@@ -14,6 +14,10 @@ public sealed class AdminUpdateReceptionistValidator
         RuleFor(x => x.LastName).NotEmpty().MaximumLength(100);
         RuleFor(x => x.Username).NotEmpty().MaximumLength(50);
         RuleFor(x => x.Email).NotEmpty().EmailAddress().MaximumLength(254);
+        RuleFor(x => x.IcNumber)
+            .NotEmpty()
+            .Matches(@"^\d{12}$")
+            .WithMessage("Malaysian IC Number must be exactly 12 digits without dashes.");
         RuleFor(x => x.PhoneNumber).MaximumLength(20).When(x => x.PhoneNumber is not null);
         RuleFor(x => x.Gender)
             .Must(g => Array.IndexOf(ValidGenders, g) >= 0)
