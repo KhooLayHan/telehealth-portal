@@ -28,33 +28,120 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
-const editDoctorSchema = z.object({
-  firstName: z.string().min(1, "Required"),
-  lastName: z.string().min(1, "Required"),
-  username: z.string().min(1, "Required"),
-  email: z.string().email("Invalid email"),
-  icNumber: z.string().min(1, "Required"),
-  phoneNumber: z.string(),
-  gender: z.string().min(1, "Required"),
-  dateOfBirth: z.string().min(1, "Required"),
-  bio: z.string(),
-  specialization: z.string().min(1, "Required"),
-  licenseNumber: z.string().min(1, "Required"),
-  consultationFee: z.number().nonnegative("Must be >= 0").nullable(),
-  departmentName: z.string().min(1, "Required"),
-  addressStreet: z.string(),
-  addressCity: z.string(),
-  addressState: z.string(),
-  addressPostalCode: z.string(),
-  addressCountry: z.string(),
-  qualifications: z.array(
-    z.object({
-      degree: z.string().min(1, "Required"),
-      institution: z.string().min(1, "Required"),
-      year: z.number().int().min(1900, "Min 1900").max(2100, "Max 2100"),
-    }),
-  ),
-});
+const icNumberRegex = /^\d{12}$/;
+const dateOfBirthRegex = /^\d{4}-\d{2}-\d{2}$/;
+
+const requiredText = (maxLength: number) =>
+  z
+    .string()
+    .refine((value) => value.trim().length > 0, "Required")
+    .refine((value) => value.trim().length <= maxLength, `Max ${maxLength} characters`);
+
+const optionalText = (maxLength: number) =>
+  z.string().refine((value) => value.trim().length <= maxLength, `Max ${maxLength} characters`);
+
+const isValidDateOfBirth = (value: string) => {
+  if (!dateOfBirthRegex.test(value)) {
+    return false;
+  }
+
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+  const isRealDate =
+    date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
+
+  if (!isRealDate) {
+    return false;
+  }
+
+  const today = new Date();
+  const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(
+    2,
+    "0",
+  )}-${String(today.getDate()).padStart(2, "0")}`;
+
+  return value <= todayKey;
+};
+
+const normalizeGender = (value?: string) => {
+  if (!value) {
+    return "";
+  }
+
+  const genderMap: Record<string, string> = {
+    Female: "F",
+    Male: "M",
+    Other: "O",
+    "Prefer not to say": "N",
+  };
+
+  return genderMap[value] ?? value;
+};
+
+const editDoctorSchema = z
+  .object({
+    firstName: requiredText(100),
+    lastName: requiredText(100),
+    username: requiredText(50),
+    email: z.string().trim().min(1, "Required").email("Invalid email").max(255),
+    icNumber: z
+      .string()
+      .refine((value) => value.trim().length > 0, "Required")
+      .refine(
+        (value) => value.trim().length === 0 || icNumberRegex.test(value),
+        "IC Number must be exactly 12 digits without dashes",
+      ),
+    phoneNumber: optionalText(20),
+    gender: z.enum(["M", "F", "O", "N"], { message: "Required" }),
+    dateOfBirth: z
+      .string()
+      .min(1, "Required")
+      .refine((value) => value.length === 0 || isValidDateOfBirth(value), {
+        message: "Date of birth cannot be in the future",
+      }),
+    bio: optionalText(2000),
+    specialization: requiredText(100),
+    licenseNumber: requiredText(50),
+    consultationFee: z.number().nonnegative("Must be >= 0").nullable(),
+    departmentName: requiredText(100),
+    addressStreet: optionalText(200),
+    addressCity: optionalText(100),
+    addressState: optionalText(100),
+    addressPostalCode: optionalText(20),
+    addressCountry: optionalText(100),
+    qualifications: z.array(
+      z.object({
+        degree: requiredText(100),
+        institution: requiredText(200),
+        year: z.number().int().min(1900, "Min 1900").max(2100, "Max 2100"),
+      }),
+    ),
+  })
+  .superRefine((value, ctx) => {
+    const addressFields = [
+      ["addressStreet", value.addressStreet],
+      ["addressCity", value.addressCity],
+      ["addressState", value.addressState],
+      ["addressPostalCode", value.addressPostalCode],
+      ["addressCountry", value.addressCountry],
+    ] as const;
+
+    const hasAnyAddressValue = addressFields.some(([, fieldValue]) => fieldValue.trim().length > 0);
+
+    if (!hasAnyAddressValue) {
+      return;
+    }
+
+    for (const [fieldName, fieldValue] of addressFields) {
+      if (fieldValue.trim().length === 0) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Required",
+          path: [fieldName],
+        });
+      }
+    }
+  });
 
 function buildEditDefaultValues(doctor: DoctorListDto) {
   return {
@@ -64,12 +151,12 @@ function buildEditDefaultValues(doctor: DoctorListDto) {
     email: doctor.email ?? "",
     icNumber: doctor.icNumber ?? "",
     phoneNumber: doctor.phoneNumber ?? "",
-    gender: doctor.gender ?? "",
+    gender: normalizeGender(doctor.gender),
     dateOfBirth: String(doctor.dateOfBirth ?? ""),
     bio: doctor.bio ?? "",
     specialization: doctor.specialization ?? "",
     licenseNumber: doctor.licenseNumber ?? "",
-    consultationFee: doctor.consultationFee ?? null,
+    consultationFee: doctor.consultationFee == null ? null : Number(doctor.consultationFee),
     departmentName: doctor.departmentName ?? "",
     addressStreet: doctor.address?.street ?? "",
     addressCity: doctor.address?.city ?? "",
@@ -103,32 +190,38 @@ export function EditDoctorForm({ doctor, open, onOpenChange }: EditDoctorFormPro
     defaultValues: buildEditDefaultValues(doctor),
     validators: { onSubmit: editDoctorSchema },
     onSubmit: async ({ value }) => {
+      const addressStreet = value.addressStreet.trim();
+      const addressCity = value.addressCity.trim();
+      const addressState = value.addressState.trim();
+      const addressPostalCode = value.addressPostalCode.trim();
+      const addressCountry = value.addressCountry.trim();
+
       const payload: UpdateDoctorCommand = {
-        firstName: value.firstName ?? "",
-        lastName: value.lastName ?? "",
-        username: value.username ?? "",
-        email: value.email ?? "",
-        icNumber: value.icNumber ?? "",
-        phoneNumber: value.phoneNumber || null,
-        gender: (value.gender ?? "N")[0] ?? "N",
-        dateOfBirth: value.dateOfBirth ?? "",
-        bio: value.bio || null,
-        specialization: value.specialization ?? "",
-        licenseNumber: value.licenseNumber ?? "",
-        consultationFee: value.consultationFee ?? null,
-        departmentName: value.departmentName ?? "",
-        address: value.addressStreet
+        firstName: value.firstName.trim(),
+        lastName: value.lastName.trim(),
+        username: value.username.trim(),
+        email: value.email.trim(),
+        icNumber: value.icNumber.trim(),
+        phoneNumber: value.phoneNumber.trim() || null,
+        gender: value.gender,
+        dateOfBirth: value.dateOfBirth,
+        bio: value.bio.trim() || null,
+        specialization: value.specialization.trim(),
+        licenseNumber: value.licenseNumber.trim(),
+        consultationFee: value.consultationFee,
+        departmentName: value.departmentName.trim(),
+        address: addressStreet
           ? {
-              street: value.addressStreet,
-              city: value.addressCity,
-              state: value.addressState,
-              postalCode: value.addressPostalCode,
-              country: value.addressCountry,
+              street: addressStreet,
+              city: addressCity,
+              state: addressState,
+              postalCode: addressPostalCode,
+              country: addressCountry,
             }
           : null,
         qualifications: value.qualifications.map((q) => ({
-          degree: q.degree,
-          institution: q.institution,
+          degree: q.degree.trim(),
+          institution: q.institution.trim(),
           year: q.year,
         })),
       };
@@ -290,10 +383,10 @@ export function EditDoctorForm({ doctor, open, onOpenChange }: EditDoctorFormPro
                           <SelectValue placeholder="Select gender" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Male">Male</SelectItem>
-                          <SelectItem value="Female">Female</SelectItem>
-                          <SelectItem value="Other">Other</SelectItem>
-                          <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
+                          <SelectItem value="M">Male</SelectItem>
+                          <SelectItem value="F">Female</SelectItem>
+                          <SelectItem value="O">Other</SelectItem>
+                          <SelectItem value="N">Prefer not to say</SelectItem>
                         </SelectContent>
                       </Select>
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
