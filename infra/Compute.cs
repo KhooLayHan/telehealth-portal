@@ -263,7 +263,7 @@ public static class Compute
                     EbEnvVar("ASPNETCORE_ENVIRONMENT", "Production"),
                     EbEnvVar("ASPNETCORE_HTTP_PORTS", "8080"),
                     EbEnvVar(
-                        "Cors__AllowedOrigins__0",
+                        "Cors__AllowedOrigins",
                         storage.FrontendBucket.WebsiteEndpoint.Apply(ep => $"http://{ep}")
                     ),
                     // DB connection — app resolves password from Secrets Manager at runtime
