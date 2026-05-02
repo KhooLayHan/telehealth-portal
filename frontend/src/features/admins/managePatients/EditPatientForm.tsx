@@ -35,13 +35,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"] as const;
 
 // Lists the gender codes accepted by the patient registration API.
-const GENDERS = ["M", "F", "O", "N"] as const;
+const GENDERS = ["M", "F", "N"] as const;
 
 // Lists the selectable allergy severities accepted by the patient record API.
 const ALLERGY_SEVERITIES = ["Mild", "Moderate", "Severe"] as const;
 
 // Matches Malaysian IC numbers in the backend format: 12 digits without dashes.
 const MALAYSIAN_IC_REGEX = /^\d{12}$/;
+
+// Matches names containing only letters and spaces.
+const PATIENT_NAME_REGEX = /^[A-Za-z ]+$/;
+
+// Matches usernames containing only letters, numbers, and underscores.
+const USERNAME_REGEX = /^\w+$/;
+
+// Matches local phone numbers in the add-patient form.
+const PHONE_NUMBER_REGEX = /^\d{10}$/;
 
 // Checks that a form date string is not later than today's local date.
 function isNotFutureDate(value: string): boolean {
@@ -68,9 +77,24 @@ const allergySchema = z.object({
 // Validates the full patient edit form before saving the record.
 const editPatientSchema = z
   .object({
-    firstName: z.string().trim().min(1, "First name is required").max(100),
-    lastName: z.string().trim().min(1, "Last name is required").max(100),
-    username: z.string().trim().min(3, "Username must be at least 3 characters").max(50),
+    firstName: z
+      .string()
+      .trim()
+      .min(1, "First name is required")
+      .max(20, "First name must be 20 characters or fewer")
+      .regex(PATIENT_NAME_REGEX, "First name can only contain letters and spaces"),
+    lastName: z
+      .string()
+      .trim()
+      .min(1, "Last name is required")
+      .max(20, "Last name must be 20 characters or fewer")
+      .regex(PATIENT_NAME_REGEX, "Last name can only contain letters and spaces"),
+    username: z
+      .string()
+      .trim()
+      .min(3, "Username must be at least 3 characters")
+      .max(20, "Username must be 20 characters or fewer")
+      .regex(USERNAME_REGEX, "Username can only contain letters, numbers, and underscores"),
     email: z.string().trim().email("Valid email is required").max(255),
     icNumber: z
       .string()
@@ -80,13 +104,18 @@ const editPatientSchema = z
       .string()
       .refine(
         (gender) => GENDERS.includes(gender as (typeof GENDERS)[number]),
-        "Gender must be M, F, O, or N",
+        "Gender must be male, female, or prefer not to say",
       ),
     dateOfBirth: z
       .string()
       .min(1, "Date of birth is required")
       .refine(isNotFutureDate, "Date of birth cannot be in the future"),
-    phoneNumber: z.string().trim().max(16, "Phone number must be 16 characters or fewer"),
+    phoneNumber: z
+      .string()
+      .trim()
+      .refine((phoneNumber) => {
+        return phoneNumber.length === 0 || PHONE_NUMBER_REGEX.test(phoneNumber);
+      }, "Phone number must be exactly 10 digits"),
     bloodGroup: z.string().refine((bloodGroup) => {
       return (
         bloodGroup === "" || BLOOD_GROUPS.includes(bloodGroup as (typeof BLOOD_GROUPS)[number])
@@ -393,8 +422,7 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
                         <SelectContent>
                           <SelectItem value="M">Male</SelectItem>
                           <SelectItem value="F">Female</SelectItem>
-                          <SelectItem value="O">Other</SelectItem>
-                          <SelectItem value="N">Not Specified</SelectItem>
+                          <SelectItem value="N">Prefer not to say</SelectItem>
                         </SelectContent>
                       </Select>
                       <FieldError errors={toFieldErrors(field.state.meta.errors)} />
