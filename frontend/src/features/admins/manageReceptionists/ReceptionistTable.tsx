@@ -83,10 +83,18 @@ function getReceptionistColumns(): ColumnDef<AdminReceptionistDto>[] {
                 getReceptionistInitials(receptionist)
               )}
             </div>
-            <span className="font-medium">{fullName}</span>
+            <div className="min-w-0">
+              <p className="truncate font-medium">{fullName}</p>
+              <p className="truncate text-muted-foreground text-xs">{receptionist.username}</p>
+            </div>
           </div>
         );
       },
+    },
+    {
+      accessorKey: "email",
+      header: "Email",
+      cell: ({ row }) => <span className="text-xs">{row.getValue<string>("email") || "N/A"}</span>,
     },
     {
       accessorKey: "phoneNumber",
