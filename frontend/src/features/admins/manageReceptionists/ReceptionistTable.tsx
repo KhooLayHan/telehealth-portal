@@ -1,5 +1,6 @@
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { ChevronLeft, ChevronRight, Eye, Pencil, Search, UserX } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, Pencil, Search, Trash2 } from "lucide-react";
+import { useMemo } from "react";
 import type { AdminReceptionistDto } from "@/api/model/AdminReceptionistDto";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,167 +12,159 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { cn } from "@/lib/utils";
 
-// Keeps receptionist table columns stable across different data lengths.
-const COLUMN_STYLES: Record<string, { cell: string; header: string }> = {
-  firstName: {
-    header: "min-w-56 w-[28%]",
-    cell: "min-w-56 w-[28%]",
-  },
-  email: {
-    header: "min-w-64 w-[30%]",
-    cell: "min-w-64 w-[30%]",
-  },
-  phoneNumber: {
-    header: "w-40",
-    cell: "w-40",
-  },
-  createdAt: {
-    header: "w-36",
-    cell: "w-36",
-  },
-  actions: {
-    header: "w-32 text-right",
-    cell: "w-32",
-  },
-};
+// Formats a date string as "15 Apr 1982".
+function formatDate(value: unknown): string {
+  const date = new Date(String(value));
 
-// Returns the width and alignment classes for a table column.
-function getColumnStyle(columnId: string, part: "cell" | "header"): string {
-  return COLUMN_STYLES[columnId]?.[part] ?? "";
-}
+  if (Number.isNaN(date.getTime())) {
+    return "N/A";
+  }
 
-// Formats a date string as "15 Apr 1982"
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-GB", {
+  return date.toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",
     year: "numeric",
   });
 }
 
-// Builds a two-letter fallback for receptionist avatars.
-function getReceptionistInitials(receptionist: AdminReceptionistDto): string {
-  return `${receptionist.firstName[0] ?? ""}${receptionist.lastName[0] ?? ""}`.toUpperCase();
+// Converts the stored gender code into a readable table label.
+function genderLabel(code: string | null): string {
+  if (!code) {
+    return "N/A";
+  }
+
+  const map: Record<string, string> = {
+    F: "Female",
+    M: "Male",
+    N: "Not Specified",
+    O: "Other",
+  };
+
+  return map[code] ?? code;
 }
 
-// Column definitions for the receptionists data table
-const columns: ColumnDef<AdminReceptionistDto>[] = [
-  {
-    accessorKey: "firstName",
-    header: "Name",
-    cell: ({ row }) => {
-      const receptionist = row.original;
-      const fullName = `${receptionist.firstName} ${receptionist.lastName}`;
+// Builds a two-letter fallback for receptionist avatars.
+function getReceptionistInitials(receptionist: AdminReceptionistDto): string {
+  const firstInitial = receptionist.firstName.trim().at(0) ?? "";
+  const lastInitial = receptionist.lastName.trim().at(0) ?? "";
+  const initials = `${firstInitial}${lastInitial}`.toUpperCase();
 
-      return (
-        <div className="flex min-w-0 items-center gap-3">
-          <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-xs font-semibold text-foreground">
-            {receptionist.avatarUrl ? (
-              <img
-                src={receptionist.avatarUrl}
-                alt={`${fullName} avatar`}
-                className="size-full object-cover"
-              />
-            ) : (
-              getReceptionistInitials(receptionist)
-            )}
+  return initials || "R";
+}
+
+// Describes optional table actions supplied by the parent page.
+interface ReceptionistTableMeta {
+  onView?: (receptionist: AdminReceptionistDto) => void;
+  onEdit?: (receptionist: AdminReceptionistDto) => void;
+  onDeactivate?: (receptionist: AdminReceptionistDto) => void;
+}
+
+// Builds the receptionist table columns with row actions.
+function getReceptionistColumns(): ColumnDef<AdminReceptionistDto>[] {
+  return [
+    {
+      accessorKey: "firstName",
+      header: "Name",
+      cell: ({ row }) => {
+        const receptionist = row.original;
+        const fullName = `${receptionist.firstName} ${receptionist.lastName}`;
+
+        return (
+          <div className="flex min-w-48 items-center gap-3">
+            <div className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary font-semibold text-primary-foreground text-xs">
+              {receptionist.avatarUrl ? (
+                <img
+                  src={receptionist.avatarUrl}
+                  alt={fullName}
+                  className="size-full object-cover"
+                />
+              ) : (
+                getReceptionistInitials(receptionist)
+              )}
+            </div>
+            <span className="font-medium">{fullName}</span>
           </div>
-          <div className="flex min-w-0 flex-col gap-0.5">
-            <span className="truncate font-medium">{fullName}</span>
-            <span className="truncate font-mono text-xs text-muted-foreground">
-              @{receptionist.username}
-            </span>
-          </div>
-        </div>
-      );
+        );
+      },
     },
-  },
-  {
-    accessorKey: "email",
-    header: "Email",
-    cell: ({ row }) => (
-      <span className="block truncate text-muted-foreground text-xs">{row.getValue("email")}</span>
-    ),
-  },
-  {
-    accessorKey: "phoneNumber",
-    header: "Phone",
-    cell: ({ row }) => (
-      <span className="font-mono text-xs">{row.getValue("phoneNumber") || "—"}</span>
-    ),
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Joined",
-    cell: ({ row }) => (
-      <span className="text-xs text-muted-foreground">{formatDate(row.getValue("createdAt"))}</span>
-    ),
-  },
-  {
-    id: "actions",
-    header: "Actions",
-    cell: ({ row, table }) => (
-      <div className="flex items-center justify-end gap-1">
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
-          title="View details"
-          onClick={() =>
-            (
-              table.options.meta as {
-                onView: (r: AdminReceptionistDto) => void;
-                onEdit: (r: AdminReceptionistDto) => void;
-              }
-            ).onView(row.original)
-          }
-        >
-          <Eye className="size-3.5" />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
-          title="Edit receptionist"
-          onClick={() =>
-            (
-              table.options.meta as {
-                onView: (r: AdminReceptionistDto) => void;
-                onEdit: (r: AdminReceptionistDto) => void;
-              }
-            ).onEdit(row.original)
-          }
-        >
-          <Pencil className="size-3.5" />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
-          title="Remove receptionist"
-          onClick={() =>
-            (
-              table.options.meta as {
-                onView: (r: AdminReceptionistDto) => void;
-                onEdit: (r: AdminReceptionistDto) => void;
-                onDeactivate: (r: AdminReceptionistDto) => void;
-              }
-            ).onDeactivate(row.original)
-          }
-        >
-          <UserX className="size-3.5" />
-        </Button>
-      </div>
-    ),
-  },
-];
+    {
+      accessorKey: "phoneNumber",
+      header: "Phone",
+      cell: ({ row }) => (
+        <span className="font-mono text-xs">{row.getValue<string>("phoneNumber") || "N/A"}</span>
+      ),
+    },
+    {
+      accessorKey: "dateOfBirth",
+      header: "Date of Birth",
+      cell: ({ row }) => <span className="text-xs">{formatDate(row.getValue("dateOfBirth"))}</span>,
+    },
+    {
+      accessorKey: "gender",
+      header: "Gender",
+      cell: ({ row }) => (
+        <span className="text-xs">{genderLabel(row.getValue<string | null>("gender"))}</span>
+      ),
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Joined At",
+      cell: ({ row }) => <span className="text-xs">{formatDate(row.getValue("createdAt"))}</span>,
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row, table }) => {
+        const meta = table.options.meta as ReceptionistTableMeta;
 
-interface ReceptionistTableProps {
+        return (
+          <div className="flex items-center gap-1">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+              disabled={!meta.onView}
+              aria-label="View receptionist details"
+              title="View receptionist details"
+              onClick={() => meta.onView?.(row.original)}
+            >
+              <Eye className="size-3.5" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+              disabled={!meta.onEdit}
+              aria-label="Edit receptionist"
+              title="Edit receptionist"
+              onClick={() => meta.onEdit?.(row.original)}
+            >
+              <Pencil className="size-3.5" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+              disabled={!meta.onDeactivate}
+              aria-label="Remove receptionist record"
+              title="Remove receptionist record"
+              onClick={() => meta.onDeactivate?.(row.original)}
+            >
+              <Trash2 className="size-3.5" />
+            </Button>
+          </div>
+        );
+      },
+    },
+  ];
+}
+
+// Describes the data and controls needed by the receptionist table.
+interface ReceptionistTableProps extends ReceptionistTableMeta {
   data: AdminReceptionistDto[];
   page: number;
   totalCount: number;
@@ -181,12 +174,9 @@ interface ReceptionistTableProps {
   onPageChange: (page: number) => void;
   search: string;
   onSearchChange: (value: string) => void;
-  onView: (receptionist: AdminReceptionistDto) => void;
-  onEdit: (receptionist: AdminReceptionistDto) => void;
-  onDeactivate: (receptionist: AdminReceptionistDto) => void;
 }
 
-// Paginated and searchable data table for the receptionists list
+// Paginated and searchable data table for the receptionists list.
 export function ReceptionistTable({
   data,
   page,
@@ -201,6 +191,7 @@ export function ReceptionistTable({
   onEdit,
   onDeactivate,
 }: ReceptionistTableProps) {
+  const columns = useMemo(() => getReceptionistColumns(), []);
   const table = useReactTable({
     data,
     columns,
@@ -214,11 +205,15 @@ export function ReceptionistTable({
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:w-80">
+          <label htmlFor="receptionist-search" className="sr-only">
+            Search receptionists
+          </label>
           <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search by name, email, department or ID…"
+            id="receptionist-search"
+            placeholder="Search by name..."
             value={search}
-            onChange={(e) => onSearchChange(e.target.value)}
+            onChange={(event) => onSearchChange(event.target.value)}
             className="h-9 pl-9 text-sm"
           />
         </div>
@@ -228,8 +223,8 @@ export function ReceptionistTable({
         </p>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-border">
-        <Table className="min-w-[52rem]">
+      <div className="overflow-x-auto rounded-lg border border-border">
+        <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow
@@ -239,10 +234,7 @@ export function ReceptionistTable({
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
-                    className={cn(
-                      "px-5 py-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-background/70",
-                      getColumnStyle(header.column.id, "header"),
-                    )}
+                    className="px-5 py-3.5 font-semibold text-[11px] text-background/70 uppercase tracking-[0.15em]"
                   >
                     {header.isPlaceholder
                       ? null
@@ -261,10 +253,7 @@ export function ReceptionistTable({
                   style={{ animationDelay: `${i * 30}ms` }}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      className={cn("px-5 py-3.5 text-sm", getColumnStyle(cell.column.id, "cell"))}
-                    >
+                    <TableCell key={cell.id} className="px-5 py-3.5 text-sm">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
@@ -274,7 +263,7 @@ export function ReceptionistTable({
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-32 text-center">
                   <p className="text-sm text-muted-foreground">No receptionists found.</p>
-                  <p className="mt-1 text-xs text-muted-foreground/60">
+                  <p className="mt-1 text-muted-foreground/60 text-xs">
                     Try adjusting your search.
                   </p>
                 </TableCell>
@@ -285,17 +274,18 @@ export function ReceptionistTable({
       </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between pt-1">
-          <p className="text-xs text-muted-foreground">
+        <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-muted-foreground text-xs">
             Page <span className="font-medium text-foreground">{page}</span> of{" "}
             <span className="font-medium text-foreground">{totalPages}</span>
+            <span className="hidden sm:inline"> - {totalCount} total</span>
           </p>
           <div className="flex items-center gap-1.5">
             <Button
               variant="outline"
               size="sm"
               className="h-8 w-8 p-0"
-              disabled={!hasPreviousPage}
+              disabled={hasPreviousPage === false || page === 1}
               onClick={() => onPageChange(page - 1)}
             >
               <ChevronLeft className="size-4" />
@@ -304,15 +294,19 @@ export function ReceptionistTable({
             {Array.from({ length: totalPages }, (_, i) => i + 1)
               .filter((p) => p === 1 || p === totalPages || (p >= page - 1 && p <= page + 1))
               .reduce<(number | string)[]>((acc, p, idx, arr) => {
-                if (idx > 0 && p - (arr[idx - 1] as number) > 1)
-                  acc.push(`ellipsis-after-${arr[idx - 1]}`);
+                const previousPage = arr[idx - 1];
+
+                if (previousPage && p - previousPage > 1) {
+                  acc.push(`ellipsis-after-${previousPage}`);
+                }
+
                 acc.push(p);
                 return acc;
               }, [])
               .map((item) =>
                 typeof item === "string" ? (
-                  <span key={item} className="px-1 text-xs text-muted-foreground">
-                    …
+                  <span key={item} className="px-1 text-muted-foreground text-xs">
+                    ...
                   </span>
                 ) : (
                   <Button
@@ -331,7 +325,7 @@ export function ReceptionistTable({
               variant="outline"
               size="sm"
               className="h-8 w-8 p-0"
-              disabled={!hasNextPage}
+              disabled={hasNextPage === false || page === totalPages}
               onClick={() => onPageChange(page + 1)}
             >
               <ChevronRight className="size-4" />
