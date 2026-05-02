@@ -40,6 +40,9 @@ public static class MassTransitExtensions
                         options.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb)
                     );
 
+                    cfg.Message<LabReportCompletedEvent>(m =>
+                        m.SetEntityName("medical-alerts-topic")
+                    );
                     cfg.ConfigureEndpoints(ctx);
                 }
             );
