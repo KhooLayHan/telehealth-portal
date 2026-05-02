@@ -31,6 +31,12 @@ public sealed class AdminGetAllLabTechsHandler(ApplicationDbContext db)
             );
         }
 
+        var genderFilter = query.Gender?.Trim().ToUpperInvariant();
+        if (genderFilter is "M" or "F" or "O" or "N")
+        {
+            q = q.Where(u => u.Gender == genderFilter[0]);
+        }
+
         q =
             query.SortOrder?.ToLowerInvariant() == "desc"
                 ? q.OrderByDescending(u => u.LastName).ThenByDescending(u => u.FirstName)
@@ -49,6 +55,7 @@ public sealed class AdminGetAllLabTechsHandler(ApplicationDbContext db)
                 Email = u.Email,
                 PhoneNumber = u.Phone,
                 Slug = u.Slug,
+                IcNumber = u.IcNumber,
                 Gender = u.Gender,
                 DateOfBirth = u.DateOfBirth,
                 AvatarUrl = u.AvatarUrl,

@@ -9,6 +9,7 @@ public sealed record AdminUpdateLabTechCommand(
     string LastName,
     string Username,
     string Email,
+    string IcNumber,
     string? PhoneNumber,
     char Gender,
     LocalDate DateOfBirth,

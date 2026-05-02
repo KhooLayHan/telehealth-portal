@@ -1,5 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
+import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
+
 import {
   getAdminGetAllReceptionistsQueryKey,
   useAdminDeactivateReceptionist,
@@ -15,7 +17,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
 
 // Describes the open state controls and selected receptionist for the delete dialog
 interface DeleteReceptionistDialogProps {
@@ -52,19 +53,27 @@ export function DeleteReceptionistDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md gap-0 overflow-hidden p-0">
         <div className="absolute inset-x-0 top-0 h-1 bg-destructive" />
+
         <DialogHeader className="px-6 pb-4 pt-7">
-          <DialogTitle className="text-xl font-semibold">Remove Receptionist</DialogTitle>
-          <DialogDescription className="text-sm text-muted-foreground">
-            Are you sure you want to remove{" "}
-            <span className="font-medium text-foreground">
-              {receptionist.firstName} {receptionist.lastName}
-            </span>
-            ? Their account will be disabled and they will no longer be able to log in. This action
-            cannot be undone from the portal.
-          </DialogDescription>
+          <div className="flex items-start gap-3">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-destructive/10 text-destructive">
+              <Trash2 className="size-5" />
+            </div>
+            <div className="min-w-0 space-y-1">
+              <DialogTitle className="text-xl font-semibold">Remove Receptionist</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to remove{" "}
+                <span className="font-medium text-foreground">
+                  {receptionist.firstName} {receptionist.lastName}
+                </span>
+                ? This will deactivate the receptionist account and remove it from active
+                receptionist lists.
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
-        <Separator />
-        <DialogFooter className="px-6 py-4">
+
+        <DialogFooter className="border-t border-border px-6 py-4">
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>

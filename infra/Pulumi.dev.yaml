@@ -1,2 +1,5 @@
 environment:
   - telehealth/config-dev
+config:
+  telehealth:jwtSecret:
+    secure: AAABAG1w7+IMDS4Sho9grBanMJVYnVmKx36bgTKdf44Ewa2SSn0K6nACsykTLkZp0rdmL+cURGOH87hDNZflGJ0eYBZE+YKG5eMd

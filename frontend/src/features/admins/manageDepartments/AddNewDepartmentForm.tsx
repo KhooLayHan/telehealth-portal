@@ -110,17 +110,19 @@ export function AddNewDepartmentForm({ open, onOpenChange }: AddNewDepartmentFor
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-xl gap-0 overflow-hidden p-0">
+      <DialogContent className="max-w-2xl gap-0 overflow-hidden p-0">
         <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
 
-        <DialogHeader className="px-6 pb-4 pt-7">
-          <div className="flex items-start gap-3">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <Building2 className="size-5" />
+        <DialogHeader className="px-6 pt-7 pb-4">
+          <div className="flex items-start gap-4">
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+              <Building2 className="size-6" />
             </div>
-            <div className="min-w-0 space-y-1">
-              <DialogTitle className="text-xl font-semibold">Add New Department</DialogTitle>
-              <DialogDescription>
+            <div className="min-w-0 flex-1">
+              <DialogTitle className="font-semibold text-xl leading-none">
+                Add New Department
+              </DialogTitle>
+              <DialogDescription className="mt-1 text-sm">
                 Create a department profile for staff assignment and coverage tracking.
               </DialogDescription>
             </div>
@@ -134,6 +136,10 @@ export function AddNewDepartmentForm({ open, onOpenChange }: AddNewDepartmentFor
           }}
         >
           <div className="space-y-5 px-6 pb-6">
+            <p className="font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
+              Department Information
+            </p>
+
             <form.Field name="name">
               {(field) => {
                 const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;

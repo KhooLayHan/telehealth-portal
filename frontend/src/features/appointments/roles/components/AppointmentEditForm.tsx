@@ -33,8 +33,8 @@ export function AppointmentEditForm({
   const { data: statusesData } = useGetAllStatuses();
   const statuses = statusesData?.status === 200 ? statusesData.data : [];
 
-  const { data: doctorsData } = useGetAll();
-  const doctors = doctorsData?.status === 200 ? doctorsData.data : [];
+  const { data: doctorsData } = useGetAll({ Page: 1, PageSize: 50 });
+  const doctors = doctorsData?.status === 200 ? doctorsData.data.items : [];
 
   const { data: schedulesData } = useGetAllAvailable(
     { Date: scheduleDate, DoctorPublicId: selectedDoctorId },

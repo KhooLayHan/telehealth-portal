@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useSystemName } from "@/features/system-settings/useSystemName";
 import { BrandingHeader } from "./components/BrandingHeader";
 import { FormError } from "./components/FormError";
 import { LoginEmailField } from "./components/LoginEmailField";
@@ -12,6 +13,7 @@ import { loginSchema } from "./schemas/loginSchema";
 
 export function LoginForm() {
   const { form, globalError } = useLoginForm();
+  const { systemName } = useSystemName();
   const [rememberMe, setRememberMe] = useState(false);
 
   return (
@@ -21,7 +23,7 @@ export function LoginForm() {
       <Card className="shadow-sm">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl">Welcome back</CardTitle>
-          <CardDescription>Sign in to your TeleHealth account</CardDescription>
+          <CardDescription>Sign in to your {systemName} account</CardDescription>
         </CardHeader>
 
         <CardContent>

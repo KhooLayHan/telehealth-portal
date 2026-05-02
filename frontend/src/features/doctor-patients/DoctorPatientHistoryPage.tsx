@@ -58,7 +58,7 @@ function PrescriptionCard({ rx }: { rx: PrescriptionSummaryDto }) {
           <div className="col-span-2">
             <span className="text-muted-foreground">Warnings</span>
             <div className="flex flex-wrap gap-1 mt-1">
-              {rx.warnings!.map((w) => (
+              {rx.warnings?.map((w) => (
                 <span
                   key={w}
                   className="rounded-full bg-amber-50 border border-amber-200 px-2 py-0.5 text-[10px] text-amber-700"
@@ -116,11 +116,11 @@ function ConsultationSection({ consultation }: { consultation: ConsultationSumma
           <div className="flex items-center gap-2 mb-3">
             <Pill className="size-4" style={{ color: ACCENT }} />
             <span className="text-xs font-semibold tracking-[0.15em] uppercase text-muted-foreground">
-              Prescriptions ({consultation.prescriptions!.length})
+              Prescriptions ({consultation.prescriptions?.length})
             </span>
           </div>
           <div className="space-y-2">
-            {consultation.prescriptions!.map((rx) => (
+            {consultation.prescriptions?.map((rx) => (
               <PrescriptionCard key={rx.publicId} rx={rx} />
             ))}
           </div>
@@ -132,7 +132,6 @@ function ConsultationSection({ consultation }: { consultation: ConsultationSumma
 
 function AppointmentCard({ appt, index }: { appt: DoctorPatientAppointmentDto; index: number }) {
   const [expanded, setExpanded] = useState(index === 0);
-  const hasConsultation = Boolean(appt.consultation);
   const color = appt.statusColorCode || ACCENT;
 
   return (
@@ -206,7 +205,7 @@ function AppointmentCard({ appt, index }: { appt: DoctorPatientAppointmentDto; i
                       Symptoms
                     </p>
                     <div className="flex flex-wrap gap-1.5">
-                      {appt.symptoms!.map((s) => (
+                      {appt.symptoms?.map((s) => (
                         <span
                           key={s.name}
                           className="inline-flex items-center gap-1 rounded-full bg-muted border border-border px-2.5 py-0.5 text-xs"
@@ -223,8 +222,8 @@ function AppointmentCard({ appt, index }: { appt: DoctorPatientAppointmentDto; i
                 )}
 
                 {/* Consultation */}
-                {hasConsultation ? (
-                  <ConsultationSection consultation={appt.consultation!} />
+                {appt.consultation ? (
+                  <ConsultationSection consultation={appt.consultation} />
                 ) : (
                   <p className="text-xs text-muted-foreground italic">
                     No consultation notes recorded.
@@ -240,8 +239,7 @@ function AppointmentCard({ appt, index }: { appt: DoctorPatientAppointmentDto; i
 }
 
 export function DoctorPatientHistoryPage() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { id } = useParams({ strict: false }) as any;
+  const { id } = useParams({ strict: false }) as { id: string };
   const { data, isLoading, isError } = useGetDoctorPatientAppointments(id);
 
   const result = data?.status === 200 ? data.data : null;

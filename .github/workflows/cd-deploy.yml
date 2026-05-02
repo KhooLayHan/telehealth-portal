@@ -56,7 +56,7 @@ jobs:
         id: pulumi
         with:
           command: up
-          stack-name: dev
+          stack-name: prod
           work-dir: infra
           upsert: true    # creates the stack on first run
           refresh: true   # reconciles state before the update
@@ -225,7 +225,7 @@ jobs:
           aws elasticbeanstalk create-application-version \
             --application-name "$EB_APP_NAME" \
             --version-label "$VERSION_LABEL" \
-            --source-bundle Bucket="$ARTIFACTS_BUCKET",Key="$S3_KEY" \
+            --source-bundle S3Bucket="$ARTIFACTS_BUCKET",S3Key="$S3_KEY" \
             --description "SHA ${{ github.sha }} — run #${{ github.run_number }}"
 
           # Trigger the environment update
@@ -271,7 +271,7 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
-      # ── Build the Lambda function using Native AOT for Amazon Linux 2023 ──
+      # ─- Build the Lambda function using Native AOT for Amazon Linux 2023 ──
       - name: Publish Lambda (Native AOT)
         working-directory: functions/lab-pdf-processor
         run: |

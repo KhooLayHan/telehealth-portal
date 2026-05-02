@@ -262,6 +262,10 @@ public static class Compute
                     // -- App environment variables --
                     EbEnvVar("ASPNETCORE_ENVIRONMENT", "Production"),
                     EbEnvVar("ASPNETCORE_HTTP_PORTS", "8080"),
+                    EbEnvVar(
+                        "Cors__AllowedOrigins",
+                        storage.FrontendBucket.WebsiteEndpoint.Apply(ep => $"http://{ep}")
+                    ),
                     // DB connection — app resolves password from Secrets Manager at runtime
                     EbEnvVar("RDS_HOST", db.Instance.Address),
                     EbEnvVar("RDS_PORT", "5432"),
@@ -275,6 +279,11 @@ public static class Compute
                     EbEnvVar("AWS_SQS_QUEUE_URL", msg.ProcessingQueue.Id),
                     EbEnvVar("SES_SENDER_EMAIL", "hongjx0321@gmail.com"),
                     EbEnvVar("SES_REGION", "us-east-1"),
+                    // JWT authentication
+                    EbEnvVar("Jwt__Secret", cfg.JwtSecret),
+                    EbEnvVar("Jwt__Issuer", "telehealth-api"),
+                    EbEnvVar("Jwt__Audience", "telehealth-web"),
+                    EbEnvVar("Jwt__ExpiryMinutes", "60"),
                     // -- VPC placement --
                     EbSetting("aws:ec2:vpc", "VPCId", net.VpcId),
                     EbSetting(

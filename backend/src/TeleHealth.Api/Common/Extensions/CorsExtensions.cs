@@ -7,11 +7,19 @@ public static class CorsExtensions
         IConfiguration configuration
     )
     {
-        var allowedOrigins =
-            configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
-            ?? throw new InvalidOperationException(
-                "Cors:AllowedOrigins configuration is required."
-            );
+        var allowedOriginsString = configuration["Cors:AllowedOrigins"];
+
+        // 2. Fallback for local development if the env var isn't set
+        if (string.IsNullOrWhiteSpace(allowedOriginsString))
+        {
+            allowedOriginsString = "http://localhost:5173,http://localhost:5174";
+        }
+
+        // 3. Split it safely into an array
+        var allowedOrigins = allowedOriginsString.Split(
+            ',',
+            StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries
+        );
 
         services.AddCors(options =>
         {

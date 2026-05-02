@@ -35,10 +35,26 @@ public sealed class AdminUpdateLabTechHandler(ApplicationDbContext db)
             throw new UserNotFoundException(labTechPublicId);
         }
 
+        var hasDuplicateIcNumber =
+            !string.Equals(user.IcNumber, cmd.IcNumber, StringComparison.Ordinal)
+            && await db.Users.AnyAsync(
+                u =>
+                    u.IcNumber == cmd.IcNumber
+                    && u.PublicId != user.PublicId
+                    && u.DeletedAt == null,
+                ct
+            );
+
+        if (hasDuplicateIcNumber)
+        {
+            throw new DuplicateIcNumberException();
+        }
+
         user.FirstName = cmd.FirstName;
         user.LastName = cmd.LastName;
         user.Username = cmd.Username;
         user.Email = cmd.Email;
+        user.IcNumber = cmd.IcNumber;
         user.Phone = cmd.PhoneNumber;
         user.Gender = cmd.Gender;
         user.DateOfBirth = cmd.DateOfBirth;
@@ -61,6 +77,7 @@ public sealed class AdminUpdateLabTechHandler(ApplicationDbContext db)
             Email = user.Email,
             PhoneNumber = user.Phone,
             Slug = user.Slug,
+            IcNumber = user.IcNumber,
             Gender = user.Gender,
             DateOfBirth = user.DateOfBirth,
             AvatarUrl = user.AvatarUrl,

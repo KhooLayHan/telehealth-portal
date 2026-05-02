@@ -16,7 +16,6 @@ const APPOINTMENTS_CSV_HEADERS = [
   "Specialization",
   "Visit Reason",
   "Status",
-  "Status Slug",
 ] as const;
 const CSV_SPECIAL_CHARACTERS_PATTERN = /[",\n]/;
 const WINDOWS_NEWLINES_PATTERN = /\r\n/g;
@@ -61,7 +60,6 @@ function buildAppointmentsCsv(appointments: ReceptionistAppointmentDto[]): strin
       appointment.specialization ?? "",
       appointment.visitReason,
       appointment.status ?? "",
-      appointment.statusSlug ?? "",
     ]),
   ];
 

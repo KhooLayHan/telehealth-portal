@@ -7,6 +7,7 @@ import {
   FileText,
   Heart,
   LayoutDashboard,
+  LifeBuoy,
   LogOut,
   Microscope,
   Search,
@@ -16,7 +17,7 @@ import {
   UserCog,
   Users,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -27,6 +28,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { SupportDialog } from "@/features/system-settings/SupportDialog";
+import { useSystemName } from "@/features/system-settings/useSystemName";
 import { useAuthStore } from "@/store/useAuthStore";
 
 const navItems = [
@@ -52,19 +55,13 @@ const navItems = [
     icon: Stethoscope,
     label: "Doctor Schedules",
     href: "/schedules",
-    allowedRoles: ["admin", "receptionist"],
+    allowedRoles: ["receptionist"],
   },
   {
     icon: FileText,
     label: "Lab Reports",
     href: "/lab-reports",
-    allowedRoles: ["doctor", "lab-tech", "patient"],
-  },
-  {
-    icon: User,
-    label: "Profile",
-    href: "/profile",
-    allowedRoles: ["doctor", "receptionist", "admin", "patient"],
+    allowedRoles: ["lab-tech", "patient"],
   },
   {
     icon: UserCog,
@@ -96,10 +93,18 @@ const navItems = [
     href: "/settings",
     allowedRoles: ["admin"],
   },
+  {
+    icon: User,
+    label: "Profile",
+    href: "/profile",
+    allowedRoles: ["doctor", "receptionist", "admin", "patient"],
+  },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
+  const [isSupportDialogOpen, setIsSupportDialogOpen] = useState(false);
+  const { systemName } = useSystemName();
   const { user, logout } = useAuthStore();
 
   const normalizedRole = user?.role?.toLowerCase();
@@ -120,7 +125,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <aside className="flex w-60 shrink-0 flex-col border-border border-r bg-card">
         <div className="flex h-16 items-center gap-2 border-border border-b px-6">
           <Heart className="size-5 text-primary" />
-          <span className="font-bold text-base">TeleHealth</span>
+          <span className="truncate font-bold text-base">{systemName}</span>
         </div>
 
         <nav className="flex-1 space-y-0.5 overflow-y-auto p-3">
@@ -139,6 +144,17 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Link>
           ))}
         </nav>
+
+        <div className="p-3 pt-0">
+          <button
+            type="button"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left font-medium text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            onClick={() => setIsSupportDialogOpen(true)}
+          >
+            <LifeBuoy className="size-4 shrink-0" />
+            Support
+          </button>
+        </div>
 
         <div className="border-border border-t p-3">
           <div className="mb-1 flex items-center gap-3 rounded-lg px-3 py-2">
@@ -258,6 +274,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </div>
+      <SupportDialog open={isSupportDialogOpen} onOpenChange={setIsSupportDialogOpen} />
     </div>
   );
 }

@@ -27,6 +27,7 @@ public static class AuthorizationExtensions
                 AuthConstants.ClinicStaffPolicy,
                 policy => policy.RequireRole("admin", "doctor", "receptionist", "lab-tech")
             );
+            options.AddPolicy(AuthConstants.AnyRole, policy => policy.RequireAuthenticatedUser());
         });
 
         return services;
