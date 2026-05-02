@@ -30,9 +30,11 @@ if (app.Environment.IsDevelopment())
             .WithTitle("TeleHealth API")
             .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
     );
-
-    await app.MigrateAsync();
 }
+
+// Run EF Core migrations on startup for all environments so that
+// production databases are kept in sync with the codebase schema.
+await app.MigrateAsync();
 
 app.UseCors("AllowFrontend");
 
