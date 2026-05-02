@@ -111,8 +111,20 @@ const isValidDateOfBirth = (value: string) => {
     "0",
   )}-${String(today.getDate()).padStart(2, "0")}`;
 
-  return value <= todayKey;
+  return value < todayKey;
 };
+
+// Formats yesterday as a local date input value.
+function getYesterdayDateInputValue(): string {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  const year = yesterday.getFullYear();
+  const month = String(yesterday.getMonth() + 1).padStart(2, "0");
+  const day = String(yesterday.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
 
 const addDoctorSchema = z
   .object({
@@ -140,7 +152,7 @@ const addDoctorSchema = z
       .string()
       .min(1, "Required")
       .refine((value) => value.length === 0 || isValidDateOfBirth(value), {
-        message: "Date of birth cannot be in the future",
+        message: "Date of birth cannot be today or in the future",
       }),
     bio: optionalText(2000),
     specialization: requiredText(100),
@@ -497,6 +509,7 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                       value={field.state.value}
                       onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
+                      max={getYesterdayDateInputValue()}
                     />
                     <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                   </Field>
