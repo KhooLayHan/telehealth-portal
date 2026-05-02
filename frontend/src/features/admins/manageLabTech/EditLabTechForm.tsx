@@ -28,25 +28,104 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Validates the lab technician edit form before local save.
-const editLabTechSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  username: z.string().min(1, "Username is required"),
-  email: z.string().email("Must be a valid email"),
-  icNumber: z
+// Matches Malaysian IC numbers in the backend format: 12 digits without dashes.
+const malaysianIcRegex = /^\d{12}$/;
+
+// Validates required trimmed text fields against backend length limits.
+const requiredText = (fieldName: string, maxLength: number) =>
+  z
     .string()
-    .min(1, "IC number is required")
-    .regex(/^\d{12}$/, "IC number must be exactly 12 digits without dashes"),
-  phoneNumber: z.string(),
-  gender: z.enum(["M", "F", "O", "N"], { message: "Select a gender" }),
-  dateOfBirth: z.string(),
-  street: z.string(),
-  city: z.string(),
-  state: z.string(),
-  postalCode: z.string(),
-  country: z.string(),
-});
+    .trim()
+    .min(1, `${fieldName} is required`)
+    .max(maxLength, `${fieldName} must be ${maxLength} characters or fewer`);
+
+// Validates optional trimmed text fields against backend length limits.
+const optionalText = (fieldName: string, maxLength: number) =>
+  z.string().trim().max(maxLength, `${fieldName} must be ${maxLength} characters or fewer`);
+
+// Checks that a date input value is a real date and not later than today's local date.
+function isValidDateOfBirth(value: string): boolean {
+  const dateOfBirthRegex = /^\d{4}-\d{2}-\d{2}$/;
+
+  if (!dateOfBirthRegex.test(value)) {
+    return false;
+  }
+
+  const [year, month, day] = value.split("-").map(Number);
+  const selectedDate = new Date(year, month - 1, day);
+  const isRealDate =
+    selectedDate.getFullYear() === year &&
+    selectedDate.getMonth() === month - 1 &&
+    selectedDate.getDate() === day;
+
+  if (!isRealDate) {
+    return false;
+  }
+
+  const today = new Date();
+  const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(
+    2,
+    "0",
+  )}-${String(today.getDate()).padStart(2, "0")}`;
+
+  return value <= todayKey;
+}
+
+// Validates the lab technician edit form before local save.
+const editLabTechSchema = z
+  .object({
+    firstName: requiredText("First name", 100),
+    lastName: requiredText("Last name", 100),
+    username: requiredText("Username", 50),
+    email: z
+      .string()
+      .trim()
+      .min(1, "Email is required")
+      .email("Must be a valid email")
+      .max(254, "Email must be 254 characters or fewer"),
+    icNumber: z
+      .string()
+      .trim()
+      .regex(malaysianIcRegex, "IC number must be exactly 12 digits without dashes"),
+    phoneNumber: optionalText("Phone number", 20),
+    gender: z.enum(["M", "F", "O", "N"], { message: "Select a gender" }),
+    dateOfBirth: z
+      .string()
+      .min(1, "Date of birth is required")
+      .refine(
+        (value) => value.length === 0 || isValidDateOfBirth(value),
+        "Date of birth cannot be in the future",
+      ),
+    street: optionalText("Street", 200),
+    city: optionalText("City", 100),
+    state: optionalText("State", 100),
+    postalCode: optionalText("Postal code", 20),
+    country: optionalText("Country", 100),
+  })
+  .superRefine((data, context) => {
+    const addressFields = [
+      { fieldName: "street", label: "Street", value: data.street },
+      { fieldName: "city", label: "City", value: data.city },
+      { fieldName: "state", label: "State", value: data.state },
+      { fieldName: "postalCode", label: "Postal code", value: data.postalCode },
+      { fieldName: "country", label: "Country", value: data.country },
+    ] as const;
+    const hasAnyAddressValue = addressFields.some((field) => field.value.length > 0);
+
+    if (!hasAnyAddressValue) {
+      return;
+    }
+
+    for (const field of addressFields) {
+      if (field.value.length === 0) {
+        context.addIssue({
+          code: "custom",
+          message: `${field.label} is required when address is provided`,
+          path: [field.fieldName],
+        });
+      }
+    }
+  });
 
 // Describes the values collected by the edit lab technician form.
 type EditLabTechFormValues = z.infer<typeof editLabTechSchema>;
@@ -143,24 +222,39 @@ function EditLabTechFormContent({ labTech, open, onOpenChange }: EditLabTechForm
         return;
       }
 
+      const firstName = value.firstName.trim();
+      const lastName = value.lastName.trim();
+      const username = value.username.trim();
+      const email = value.email.trim();
+      const icNumber = value.icNumber.trim();
+      const phoneNumber = value.phoneNumber.trim();
+      const street = value.street.trim();
+      const city = value.city.trim();
+      const state = value.state.trim();
+      const postalCode = value.postalCode.trim();
+      const country = value.country.trim();
+      const hasAddress = [street, city, state, postalCode, country].some(
+        (addressPart) => addressPart.length > 0,
+      );
+
       await mutateAsync({
         id: labTech.publicId,
         data: {
-          firstName: value.firstName,
-          lastName: value.lastName,
-          username: value.username,
-          email: value.email,
-          icNumber: value.icNumber,
-          phoneNumber: value.phoneNumber || null,
+          firstName,
+          lastName,
+          username,
+          email,
+          icNumber,
+          phoneNumber: phoneNumber || null,
           gender: value.gender,
           dateOfBirth: value.dateOfBirth,
-          address: value.street
+          address: hasAddress
             ? {
-                street: value.street,
-                city: value.city,
-                state: value.state,
-                postalCode: value.postalCode,
-                country: value.country,
+                street,
+                city,
+                state,
+                postalCode,
+                country,
               }
             : null,
         },
