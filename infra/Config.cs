@@ -40,8 +40,6 @@ public sealed class StackConfig
     /// </summary>
     public bool SkipFinalSnapshot { get; }
 
-    public Output<string> JwtSecret { get; }
-
     public StackConfig()
     {
         var config = new Config("telehealth");
@@ -50,9 +48,6 @@ public sealed class StackConfig
         DbName = config.Get("dbName") ?? "telehealth_dev";
         DbUsername = config.Get("dbUsername") ?? "telehealth_admin";
         JwtSecret = config.RequireSecret("jwtSecret");
-
-        JwtSecret = config.RequireSecret("jwtSecret");
-
         FrontendOrigin = config.Get("frontendOrigin") ?? "*";
 
         var awsConfig = new Config("aws");
