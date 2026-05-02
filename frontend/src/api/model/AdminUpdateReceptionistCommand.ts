@@ -12,6 +12,7 @@ export interface AdminUpdateReceptionistCommand {
   lastName: string;
   username: string;
   email: string;
+  icNumber: string;
   /** @nullable */
   phoneNumber: string | null;
   /**

@@ -37,10 +37,26 @@ public sealed class AdminUpdateReceptionistHandler(ApplicationDbContext db)
             throw new UserNotFoundException(receptionistPublicId);
         }
 
+        var hasDuplicateIcNumber =
+            !string.Equals(user.IcNumber, cmd.IcNumber, StringComparison.Ordinal)
+            && await db.Users.AnyAsync(
+                u =>
+                    u.IcNumber == cmd.IcNumber
+                    && u.PublicId != user.PublicId
+                    && u.DeletedAt == null,
+                ct
+            );
+
+        if (hasDuplicateIcNumber)
+        {
+            throw new DuplicateIcNumberException();
+        }
+
         user.FirstName = cmd.FirstName;
         user.LastName = cmd.LastName;
         user.Username = cmd.Username;
         user.Email = cmd.Email;
+        user.IcNumber = cmd.IcNumber;
         user.Phone = cmd.PhoneNumber;
         user.Gender = cmd.Gender;
         user.DateOfBirth = cmd.DateOfBirth;

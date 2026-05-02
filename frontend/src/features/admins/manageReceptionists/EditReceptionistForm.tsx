@@ -34,6 +34,10 @@ const editReceptionistSchema = z.object({
   lastName: z.string().min(1, "Last name is required"),
   username: z.string().min(1, "Username is required"),
   email: z.string().email("Must be a valid email"),
+  icNumber: z
+    .string()
+    .min(1, "IC number is required")
+    .regex(/^\d{12}$/, "IC number must be exactly 12 digits without dashes"),
   phoneNumber: z.string(),
   gender: z.enum(["M", "F", "O", "N"], { message: "Select a gender" }),
   dateOfBirth: z.string(),
@@ -51,6 +55,7 @@ function buildEditDefaultValues(receptionist: AdminReceptionistDto | null) {
     lastName: receptionist?.lastName ?? "",
     username: receptionist?.username ?? "",
     email: receptionist?.email ?? "",
+    icNumber: receptionist?.icNumber ?? "",
     phoneNumber: receptionist?.phoneNumber ?? "",
     gender: (receptionist?.gender ?? "N") as "M" | "F" | "O" | "N",
     dateOfBirth: receptionist?.dateOfBirth ?? "",
@@ -104,6 +109,7 @@ export function EditReceptionistForm({
           lastName: value.lastName,
           username: value.username,
           email: value.email,
+          icNumber: value.icNumber,
           phoneNumber: value.phoneNumber || null,
           gender: value.gender,
           dateOfBirth: value.dateOfBirth,
@@ -195,6 +201,23 @@ export function EditReceptionistForm({
                   )}
                 </form.Field>
               </div>
+
+              <form.Field name="icNumber">
+                {(field) => (
+                  <Field>
+                    <FieldLabel>IC Number</FieldLabel>
+                    <Input
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      placeholder="e.g. 900101011234"
+                      maxLength={12}
+                      className="font-mono"
+                    />
+                    <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
+                  </Field>
+                )}
+              </form.Field>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <form.Field name="phoneNumber">
