@@ -1,5 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
+import { Check } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import {
@@ -127,18 +128,18 @@ export function EditReceptionistForm({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl gap-0 overflow-hidden p-0">
-        <div className="absolute inset-x-0 top-0 h-px bg-border" />
+        <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
 
-        <DialogHeader className="px-6 pb-4 pt-7">
+        <DialogHeader className="px-6 pt-7 pb-4">
           <div className="flex items-start gap-4">
-            <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-muted text-lg font-bold text-foreground">
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary font-bold text-lg text-primary-foreground">
               {initials}
             </div>
             <div className="min-w-0 flex-1">
-              <DialogTitle className="text-xl font-semibold leading-none">
+              <DialogTitle className="font-semibold text-xl leading-none">
                 Edit {receptionist.firstName} {receptionist.lastName}
               </DialogTitle>
-              <DialogDescription className="mt-1 text-sm text-muted-foreground">
+              <DialogDescription className="mt-1 text-sm">
                 Update account details and save to apply changes.
               </DialogDescription>
             </div>
@@ -163,7 +164,7 @@ export function EditReceptionistForm({
               value="personal"
               className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
             >
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <form.Field name="firstName">
                   {(field) => (
                     <Field>
@@ -195,7 +196,7 @@ export function EditReceptionistForm({
                 </form.Field>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <form.Field name="phoneNumber">
                   {(field) => (
                     <Field>
@@ -257,7 +258,7 @@ export function EditReceptionistForm({
               value="account"
               className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
             >
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <form.Field name="username">
                   {(field) => (
                     <Field>
@@ -312,7 +313,7 @@ export function EditReceptionistForm({
                 )}
               </form.Field>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <form.Field name="city">
                   {(field) => (
                     <Field>
@@ -344,7 +345,7 @@ export function EditReceptionistForm({
                 </form.Field>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <form.Field name="postalCode">
                   {(field) => (
                     <Field>
@@ -388,8 +389,9 @@ export function EditReceptionistForm({
                 <Button
                   type="submit"
                   disabled={!canSubmit || isSubmitting || isPending}
-                  className="bg-black text-white hover:bg-black/85"
+                  className="gap-1.5"
                 >
+                  <Check className="size-4" />
                   {isSubmitting || isPending ? "Saving..." : "Save Changes"}
                 </Button>
               )}

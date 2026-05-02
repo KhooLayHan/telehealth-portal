@@ -7,31 +7,41 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Field, FieldLabel } from "@/components/ui/field";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Maps gender code to a readable label.
-function genderLabel(code: string): string {
+function genderLabel(code: string | null | undefined): string {
+  if (!code) {
+    return "N/A";
+  }
+
   const map: Record<string, string> = { M: "Male", F: "Female", O: "Other", N: "Not specified" };
   return map[code] ?? code;
 }
 
-// Formats a date string as "15 Apr 1982".
-function formatDate(iso?: string): string {
-  if (!iso) {
-    return "-";
+// Formats an API date value for display in the lab technician detail dialog.
+function formatDate(value: unknown): string {
+  if (!value) {
+    return "N/A";
   }
 
-  return new Date(iso).toLocaleDateString("en-GB", {
+  const date = new Date(String(value));
+
+  if (Number.isNaN(date.getTime())) {
+    return "N/A";
+  }
+
+  return date.toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",
     year: "numeric",
   });
 }
 
-// Builds a two-letter fallback for lab technician avatars.
+// Builds stable initials for the selected lab technician avatar.
 function getLabTechInitials(labTech: AdminLabTechDto): string {
-  const initials = `${labTech.firstName[0] ?? ""}${labTech.lastName[0] ?? ""}`.toUpperCase();
+  const firstInitial = labTech.firstName.trim().at(0) ?? "";
+  const lastInitial = labTech.lastName.trim().at(0) ?? "";
+  const initials = `${firstInitial}${lastInitial}`.toUpperCase();
 
   return initials || "LT";
 }
@@ -42,15 +52,52 @@ interface DetailRowProps {
   value: string;
 }
 
-// Shows a read-only label and value pair in the lab technician detail dialog.
+// A single labelled row rendered inside the lab technician detail dialog.
 function DetailRow({ label, value }: DetailRowProps) {
   return (
-    <Field>
-      <FieldLabel>{label}</FieldLabel>
-      <div className="min-h-9 rounded-md border border-input bg-muted/30 px-3 py-2 text-sm text-foreground">
-        {value}
+    <div className="flex flex-col gap-0.5">
+      <span className="font-semibold text-[10px] text-muted-foreground uppercase tracking-widest">
+        {label}
+      </span>
+      <span className="text-foreground text-sm">{value}</span>
+    </div>
+  );
+}
+
+// Shows a muted information panel when optional lab technician details are missing.
+function EmptyDetailPanel({ children }: { children: string }) {
+  return (
+    <p className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-muted-foreground text-sm">
+      {children}
+    </p>
+  );
+}
+
+// Shows the lab technician address in the same compact section style as patient details.
+function AddressSection({ labTech }: { labTech: AdminLabTechDto }) {
+  if (!labTech.address) {
+    return <EmptyDetailPanel>No address on record.</EmptyDetailPanel>;
+  }
+
+  const fullAddress = `${labTech.address.street}, ${labTech.address.city}, ${labTech.address.state} ${labTech.address.postalCode}, ${labTech.address.country}`;
+
+  return (
+    <>
+      <div className="mb-4 rounded-lg border border-border bg-muted/30 px-4 py-3">
+        <span className="font-semibold text-[10px] text-muted-foreground uppercase tracking-widest">
+          Full Address
+        </span>
+        <p className="mt-1 text-foreground text-sm">{fullAddress}</p>
       </div>
-    </Field>
+
+      <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
+        <DetailRow label="Street" value={labTech.address.street} />
+        <DetailRow label="City" value={labTech.address.city} />
+        <DetailRow label="State" value={labTech.address.state} />
+        <DetailRow label="Postal Code" value={labTech.address.postalCode} />
+        <DetailRow label="Country" value={labTech.address.country} />
+      </div>
+    </>
   );
 }
 
@@ -82,37 +129,31 @@ export function ViewLabTechDetailDialog({
 
   const initials = getLabTechInitials(displayedLabTech);
   const fullName = `${displayedLabTech.firstName} ${displayedLabTech.lastName}`;
-  const fullAddress = displayedLabTech.address
-    ? `${displayedLabTech.address.street}, ${displayedLabTech.address.city}, ${displayedLabTech.address.state} ${displayedLabTech.address.postalCode}, ${displayedLabTech.address.country}`
-    : "-";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl gap-0 overflow-hidden p-0">
-        <div className="absolute inset-x-0 top-0 h-px bg-border" />
+        <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
 
-        <DialogHeader className="px-6 pb-4 pt-7">
+        <DialogHeader className="px-6 pt-7 pb-4">
           <div className="flex items-start gap-4">
             {displayedLabTech.avatarUrl ? (
               <img
                 src={displayedLabTech.avatarUrl}
                 alt={fullName}
-                className="size-14 shrink-0 rounded-full object-cover"
+                className="size-14 shrink-0 rounded-full border border-border object-cover"
               />
             ) : (
-              <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-muted text-lg font-bold text-foreground">
+              <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary font-bold text-lg text-primary-foreground">
                 {initials}
               </div>
             )}
 
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <DialogTitle className="text-xl font-semibold leading-none">{fullName}</DialogTitle>
-              </div>
-              <DialogDescription className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
-                <span className="font-mono text-xs text-muted-foreground">
-                  @{displayedLabTech.username}
-                </span>
+              <DialogTitle className="font-semibold text-xl leading-none">{fullName}</DialogTitle>
+              <DialogDescription className="mt-1 text-sm">
+                @{displayedLabTech.username} -{" "}
+                {displayedLabTech.phoneNumber || "No phone on record"}
               </DialogDescription>
               {(isFetching || isError) && (
                 <p className="mt-2 text-muted-foreground text-xs" aria-live="polite">
@@ -125,65 +166,31 @@ export function ViewLabTechDetailDialog({
           </div>
         </DialogHeader>
 
-        <Tabs defaultValue="personal" className="flex-1 px-6 pb-6">
-          <TabsList className="mb-5 grid w-full grid-cols-3">
-            <TabsTrigger value="personal">Personal</TabsTrigger>
-            <TabsTrigger value="account">Account</TabsTrigger>
-            <TabsTrigger value="address">Address</TabsTrigger>
-          </TabsList>
+        <div className="max-h-[60vh] overflow-y-auto px-6 pb-6">
+          <p className="mb-3 font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
+            Personal Information
+          </p>
+          <div className="mb-5 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
+            <DetailRow label="Gender" value={genderLabel(displayedLabTech.gender)} />
+            <DetailRow label="Date of Birth" value={formatDate(displayedLabTech.dateOfBirth)} />
+            <DetailRow label="Phone" value={displayedLabTech.phoneNumber || "N/A"} />
+          </div>
 
-          <TabsContent
-            value="personal"
-            className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
-          >
-            <div className="grid gap-4 sm:grid-cols-2">
-              <DetailRow label="First Name" value={displayedLabTech.firstName} />
-              <DetailRow label="Last Name" value={displayedLabTech.lastName} />
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <DetailRow label="Gender" value={genderLabel(displayedLabTech.gender)} />
-              <DetailRow label="Date of Birth" value={formatDate(displayedLabTech.dateOfBirth)} />
-            </div>
-          </TabsContent>
-
-          <TabsContent
-            value="account"
-            className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
-          >
-            <div className="grid gap-4 sm:grid-cols-2">
-              <DetailRow label="Username" value={`@${displayedLabTech.username}`} />
-              <DetailRow label="Email" value={displayedLabTech.email} />
-            </div>
-
-            <DetailRow label="Phone Number" value={displayedLabTech.phoneNumber ?? "-"} />
+          <p className="mb-3 font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
+            Account Information
+          </p>
+          <div className="mb-5 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
+            <DetailRow label="Username" value={`@${displayedLabTech.username}`} />
+            <DetailRow label="Email" value={displayedLabTech.email} />
             <DetailRow label="Slug" value={displayedLabTech.slug} />
             <DetailRow label="Joined" value={formatDate(displayedLabTech.createdAt)} />
-          </TabsContent>
+          </div>
 
-          <TabsContent
-            value="address"
-            className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
-          >
-            <DetailRow label="Full Address" value={fullAddress} />
-
-            {displayedLabTech.address && (
-              <>
-                <DetailRow label="Street" value={displayedLabTech.address.street} />
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <DetailRow label="City" value={displayedLabTech.address.city} />
-                  <DetailRow label="State" value={displayedLabTech.address.state} />
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <DetailRow label="Postal Code" value={displayedLabTech.address.postalCode} />
-                  <DetailRow label="Country" value={displayedLabTech.address.country} />
-                </div>
-              </>
-            )}
-          </TabsContent>
-        </Tabs>
+          <p className="mb-3 font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
+            Address
+          </p>
+          <AddressSection labTech={displayedLabTech} />
+        </div>
       </DialogContent>
     </Dialog>
   );
