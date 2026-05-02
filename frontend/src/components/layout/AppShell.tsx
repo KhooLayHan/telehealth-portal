@@ -64,12 +64,6 @@ const navItems = [
     allowedRoles: ["doctor", "lab-tech", "patient"],
   },
   {
-    icon: User,
-    label: "Profile",
-    href: "/profile",
-    allowedRoles: ["doctor", "receptionist", "admin", "patient"],
-  },
-  {
     icon: UserCog,
     label: "Doctor List",
     href: "/doctors",
@@ -98,6 +92,12 @@ const navItems = [
     label: "System Settings",
     href: "/settings",
     allowedRoles: ["admin"],
+  },
+  {
+    icon: User,
+    label: "Profile",
+    href: "/profile",
+    allowedRoles: ["doctor", "receptionist", "admin", "patient"],
   },
 ];
 
