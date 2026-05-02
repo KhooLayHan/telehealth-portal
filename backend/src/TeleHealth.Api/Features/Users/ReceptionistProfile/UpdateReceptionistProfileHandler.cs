@@ -55,6 +55,20 @@ public sealed class UpdateReceptionistProfileHandler(ApplicationDbContext db)
 
         Log.Information("Receptionist profile update successful. UserId: {UserId}", publicId);
 
-        return new UpdateProfileResult(cmd.FirstName, cmd.LastName, phone, cmd.IcNumber, null);
+        return new UpdateProfileResult(
+            cmd.FirstName,
+            cmd.LastName,
+            null,
+            phone,
+            cmd.IcNumber,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
     }
 }

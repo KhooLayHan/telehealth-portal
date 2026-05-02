@@ -57,6 +57,7 @@ using TeleHealth.Api.Features.Schedules.DeleteSchedule;
 using TeleHealth.Api.Features.Schedules.GetAllAvailableSchedules;
 using TeleHealth.Api.Features.Schedules.GetDailySchedulesForReceptionist;
 using TeleHealth.Api.Features.SystemSettings.GetPublic;
+using TeleHealth.Api.Features.Users.ChangePassword;
 using TeleHealth.Api.Features.Users.Create;
 using TeleHealth.Api.Features.Users.DoctorProfile;
 using TeleHealth.Api.Features.Users.GetMe;
@@ -139,6 +140,7 @@ public static class ApplicationServicesExtensions
         services.AddScoped<DeletePatientHandler>();
         services.AddScoped<UpdateProfileHandler>();
         services.AddScoped<UpdateReceptionistProfileHandler>();
+        services.AddScoped<ChangePasswordHandler>();
         services.AddScoped<GetPublicSystemSettingsHandler>();
 
         services.AddDefaultAWSOptions(configuration.GetAWSOptions());

@@ -52,6 +52,7 @@ using TeleHealth.Api.Features.Schedules.DeleteSchedule;
 using TeleHealth.Api.Features.Schedules.GetAllAvailableSchedules;
 using TeleHealth.Api.Features.Schedules.GetDailySchedulesForReceptionist;
 using TeleHealth.Api.Features.SystemSettings.GetPublic;
+using TeleHealth.Api.Features.Users.ChangePassword;
 using TeleHealth.Api.Features.Users.Create;
 using TeleHealth.Api.Features.Users.DoctorProfile;
 using TeleHealth.Api.Features.Users.GetMe;
@@ -80,6 +81,7 @@ public static class EndpointMappingExtensions
         api.MapGetAvatarUploadUrlEndpoint();
         api.MapUpdateAvatarEndpoint();
         api.MapUpdateProfileEndpoint();
+        api.MapChangePasswordEndpoint();
         api.MapGetAllAppointmentsEndpoint();
         api.MapGetAllAppointmentsForReceptionistEndpoint();
         api.MapGetAppointmentByIdForReceptionistEndpoint();
