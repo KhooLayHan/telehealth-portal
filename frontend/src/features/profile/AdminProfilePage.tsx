@@ -185,7 +185,7 @@ function PasswordFieldRow({
 const GENDER_OPTIONS = [
   { value: "male", label: "Male" },
   { value: "female", label: "Female" },
-  { value: "other", label: "Other / Prefer not to say" },
+  { value: "N", label: "Prefer not to say" },
 ];
 
 export function AdminProfilePage() {

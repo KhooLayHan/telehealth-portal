@@ -27,7 +27,7 @@ export type AdminMeData = {
   phone: string | null;
   icNumber: string;
   dateOfBirth: string | null; // ISO "YYYY-MM-DD"
-  gender: "male" | "female" | "other" | null;
+  gender: "male" | "female" | "N" | null;
   addressLine1: string | null;
   addressLine2: string | null;
   city: string | null;
@@ -134,7 +134,7 @@ function validateProfile(data: AdminProfileFormData): AdminProfileFormErrors {
     }
   }
 
-  if (data.gender && !["male", "female", "other"].includes(data.gender)) {
+  if (data.gender && !["male", "female", "N"].includes(data.gender)) {
     errors.gender = "Please select a valid gender.";
   }
 
@@ -225,6 +225,11 @@ function toFormData(data: AdminMeData): AdminProfileFormData {
   };
 }
 
+// Converts the legacy backend gender label into the current profile form value.
+function normalizeGender(gender: string | null): AdminMeData["gender"] {
+  return gender === "other" ? "N" : (gender as AdminMeData["gender"]);
+}
+
 // Converts the editable admin form into the shared profile update API payload.
 function toUpdatePayload(data: AdminProfileFormData): AdminUpdateProfilePayload {
   const addressLine1 = emptyToNull(data.addressLine1);
@@ -312,9 +317,14 @@ export function UseAdminProfile() {
   useEffect(() => {
     if (!profileQuery.data) return;
 
-    setMe(profileQuery.data);
+    const profileData = {
+      ...profileQuery.data,
+      gender: normalizeGender(profileQuery.data.gender),
+    };
+
+    setMe(profileData);
     if (!isEditing) {
-      setFormData(toFormData(profileQuery.data));
+      setFormData(toFormData(profileData));
     }
   }, [isEditing, profileQuery.data]);
 
