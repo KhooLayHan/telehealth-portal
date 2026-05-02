@@ -28,11 +28,40 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Lists the gender codes accepted by the receptionist registration API.
-const GENDERS = ["M", "F", "O", "N"] as const;
+// Lists the gender codes accepted by the receptionist registration UI.
+const GENDERS = ["M", "F", "N"] as const;
+
+// Lists the Malaysian states and federal territories available for addresses.
+const MALAYSIA_STATES = [
+  "Johor",
+  "Kedah",
+  "Kelantan",
+  "Melaka",
+  "Negeri Sembilan",
+  "Pahang",
+  "Perak",
+  "Perlis",
+  "Pulau Pinang",
+  "Sabah",
+  "Sarawak",
+  "Selangor",
+  "Terengganu",
+  "Wilayah Persekutuan Kuala Lumpur",
+  "Wilayah Persekutuan Labuan",
+  "Wilayah Persekutuan Putrajaya",
+] as const;
 
 // Matches Malaysian IC numbers in the backend format: 12 digits without dashes.
 const MALAYSIAN_IC_REGEX = /^\d{12}$/;
+
+// Matches names that contain only ASCII letters and spaces.
+const NAME_REGEX = /^[A-Za-z ]+$/;
+
+// Matches usernames that contain only letters, numbers, and underscores.
+const USERNAME_REGEX = /^[A-Za-z0-9_]+$/;
+
+// Matches optional Malaysian-style phone input as exactly 10 digits.
+const PHONE_NUMBER_REGEX = /^\d{10}$/;
 
 // Checks that a form date string is not later than today's local date.
 function isNotFutureDate(value: string): boolean {
@@ -47,9 +76,24 @@ function isNotFutureDate(value: string): boolean {
 // Zod schema for validating the add receptionist form
 const addReceptionistSchema = z
   .object({
-    firstName: z.string().trim().min(1, "First name is required").max(100),
-    lastName: z.string().trim().min(1, "Last name is required").max(100),
-    username: z.string().trim().min(1, "Username is required").max(50),
+    firstName: z
+      .string()
+      .trim()
+      .min(1, "First name is required")
+      .max(20, "First name must be 20 characters or fewer")
+      .regex(NAME_REGEX, "First name can contain letters and spaces only"),
+    lastName: z
+      .string()
+      .trim()
+      .min(1, "Last name is required")
+      .max(20, "Last name must be 20 characters or fewer")
+      .regex(NAME_REGEX, "Last name can contain letters and spaces only"),
+    username: z
+      .string()
+      .trim()
+      .min(3, "Username must be at least 3 characters")
+      .max(20, "Username must be 20 characters or fewer")
+      .regex(USERNAME_REGEX, "Username can contain letters, numbers, and underscores only"),
     email: z.string().trim().min(1, "Email is required").email("Must be a valid email").max(254),
     password: z
       .string()
@@ -63,17 +107,23 @@ const addReceptionistSchema = z
       .string()
       .trim()
       .regex(MALAYSIAN_IC_REGEX, "IC number must be exactly 12 digits without dashes"),
-    phoneNumber: z.string().trim().max(20, "Phone number must be 20 characters or fewer"),
-    gender: z.enum(GENDERS, { message: "Gender must be M, F, O, or N" }),
+    phoneNumber: z
+      .string()
+      .trim()
+      .refine(
+        (value) => value.length === 0 || PHONE_NUMBER_REGEX.test(value),
+        "Phone number must be exactly 10 digits",
+      ),
+    gender: z.enum(GENDERS, { message: "Gender must be male, female, or prefer not to say" }),
     dateOfBirth: z
       .string()
       .min(1, "Date of birth is required")
       .refine(isNotFutureDate, "Date of birth cannot be in the future"),
     street: z.string().trim().max(200),
     city: z.string().trim().max(100),
-    state: z.string().trim().max(100),
+    state: z.union([z.literal(""), z.enum(MALAYSIA_STATES)]),
     postalCode: z.string().trim().max(20),
-    country: z.string().trim().max(100),
+    country: z.literal("Malaysia"),
   })
   .superRefine((value, context) => {
     if (value.password !== value.confirmPassword) {
@@ -89,7 +139,6 @@ const addReceptionistSchema = z
       { field: "city", message: "City is required", value: value.city },
       { field: "state", message: "State is required", value: value.state },
       { field: "postalCode", message: "Postal code is required", value: value.postalCode },
-      { field: "country", message: "Country is required", value: value.country },
     ] as const;
     const hasAddress = addressFields.some((field) => field.value.length > 0);
 
@@ -108,8 +157,11 @@ const addReceptionistSchema = z
     }
   });
 
+// Describes the values collected by the add receptionist form.
+type AddReceptionistFormValues = z.infer<typeof addReceptionistSchema>;
+
 // Default values used whenever the add receptionist dialog is opened
-const addReceptionistDefaultValues = {
+const addReceptionistDefaultValues: AddReceptionistFormValues = {
   firstName: "",
   lastName: "",
   username: "",
@@ -118,13 +170,13 @@ const addReceptionistDefaultValues = {
   confirmPassword: "",
   icNumber: "",
   phoneNumber: "",
-  gender: "N" as "M" | "F" | "O" | "N",
+  gender: "N",
   dateOfBirth: "",
   street: "",
   city: "",
   state: "",
   postalCode: "",
-  country: "",
+  country: "Malaysia",
 };
 
 // Describes the open state controls for the add receptionist dialog
@@ -161,9 +213,11 @@ export function AddNewReceptionistForm({ open, onOpenChange }: AddNewReceptionis
         city: value.city.trim(),
         state: value.state.trim(),
         postalCode: value.postalCode.trim(),
-        country: value.country.trim(),
+        country: value.country,
       };
-      const hasAddress = Object.values(address).some((addressValue) => addressValue.length > 0);
+      const hasAddress = [address.street, address.city, address.state, address.postalCode].some(
+        (addressValue) => addressValue.length > 0,
+      );
 
       mutate({
         data: {
@@ -236,6 +290,7 @@ export function AddNewReceptionistForm({ open, onOpenChange }: AddNewReceptionis
                         onChange={(event) => field.handleChange(event.target.value)}
                         onBlur={field.handleBlur}
                         placeholder="e.g. Nur"
+                        maxLength={20}
                       />
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
@@ -250,6 +305,7 @@ export function AddNewReceptionistForm({ open, onOpenChange }: AddNewReceptionis
                         onChange={(event) => field.handleChange(event.target.value)}
                         onBlur={field.handleBlur}
                         placeholder="e.g. Aisyah"
+                        maxLength={20}
                       />
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
@@ -283,7 +339,9 @@ export function AddNewReceptionistForm({ open, onOpenChange }: AddNewReceptionis
                         value={field.state.value}
                         onChange={(event) => field.handleChange(event.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder="+601x-xxxxxxx"
+                        placeholder="e.g. 0123456789"
+                        inputMode="numeric"
+                        maxLength={10}
                       />
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
@@ -296,7 +354,7 @@ export function AddNewReceptionistForm({ open, onOpenChange }: AddNewReceptionis
                       <Select
                         value={field.state.value}
                         onValueChange={(value) =>
-                          field.handleChange((value ?? "N") as "M" | "F" | "O" | "N")
+                          field.handleChange((value ?? "N") as AddReceptionistFormValues["gender"])
                         }
                       >
                         <SelectTrigger className="w-full" onBlur={field.handleBlur}>
@@ -305,7 +363,6 @@ export function AddNewReceptionistForm({ open, onOpenChange }: AddNewReceptionis
                         <SelectContent>
                           <SelectItem value="M">Male</SelectItem>
                           <SelectItem value="F">Female</SelectItem>
-                          <SelectItem value="O">Other</SelectItem>
                           <SelectItem value="N">Prefer not to say</SelectItem>
                         </SelectContent>
                       </Select>
@@ -344,8 +401,9 @@ export function AddNewReceptionistForm({ open, onOpenChange }: AddNewReceptionis
                         value={field.state.value}
                         onChange={(event) => field.handleChange(event.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder="e.g. reception.nur"
+                        placeholder="e.g. reception_nur"
                         autoComplete="off"
+                        maxLength={20}
                       />
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
@@ -454,12 +512,23 @@ export function AddNewReceptionistForm({ open, onOpenChange }: AddNewReceptionis
                   {(field) => (
                     <Field>
                       <FieldLabel>State</FieldLabel>
-                      <Input
+                      <Select
                         value={field.state.value}
-                        onChange={(event) => field.handleChange(event.target.value)}
-                        onBlur={field.handleBlur}
-                        placeholder="e.g. Wilayah Persekutuan"
-                      />
+                        onValueChange={(value) =>
+                          field.handleChange(value as AddReceptionistFormValues["state"])
+                        }
+                      >
+                        <SelectTrigger className="w-full" onBlur={field.handleBlur}>
+                          <SelectValue placeholder="Select state" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {MALAYSIA_STATES.map((state) => (
+                            <SelectItem key={state} value={state}>
+                              {state}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
                   )}
@@ -488,9 +557,10 @@ export function AddNewReceptionistForm({ open, onOpenChange }: AddNewReceptionis
                       <FieldLabel>Country</FieldLabel>
                       <Input
                         value={field.state.value}
-                        onChange={(event) => field.handleChange(event.target.value)}
+                        readOnly
                         onBlur={field.handleBlur}
-                        placeholder="e.g. Malaysia"
+                        aria-readonly="true"
+                        className="bg-muted text-muted-foreground"
                       />
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
