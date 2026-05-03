@@ -104,7 +104,7 @@ public static class Compute
             );
         }
 
-        // Scoped inline policy: SQS — only the processing queue
+        // Scoped inline policy: SQS — processing queue + MassTransit queue management
         _ = new Aws.Iam.RolePolicy(
             "policy-sqs-scoped",
             new Aws.Iam.RolePolicyArgs
@@ -113,17 +113,37 @@ public static class Compute
                 Policy = msg.ProcessingQueue.Arn.Apply(queueArn =>
                     $@"{{
                         ""Version"": ""2012-10-17"",
-                        ""Statement"": [{{
-                            ""Effect"": ""Allow"",
-                            ""Action"": [""sqs:SendMessage"",""sqs:ReceiveMessage"",""sqs:DeleteMessage"",""sqs:GetQueueAttributes""],
-                            ""Resource"": ""{queueArn}""
-                        }}]
+                        ""Statement"": [
+                            {{
+                                ""Sid"": ""ProcessingQueue"",
+                                ""Effect"": ""Allow"",
+                                ""Action"": [""sqs:SendMessage"",""sqs:ReceiveMessage"",""sqs:DeleteMessage"",""sqs:GetQueueAttributes""],
+                                ""Resource"": ""{queueArn}""
+                            }},
+                            {{
+                                ""Sid"": ""MassTransitSqsManagement"",
+                                ""Effect"": ""Allow"",
+                                ""Action"": [
+                                    ""sqs:CreateQueue"",
+                                    ""sqs:DeleteQueue"",
+                                    ""sqs:GetQueueUrl"",
+                                    ""sqs:GetQueueAttributes"",
+                                    ""sqs:SetQueueAttributes"",
+                                    ""sqs:PurgeQueue"",
+                                    ""sqs:ListQueues"",
+                                    ""sqs:SendMessage"",
+                                    ""sqs:ReceiveMessage"",
+                                    ""sqs:DeleteMessage""
+                                ],
+                                ""Resource"": ""arn:aws:sqs:{cfg.AwsRegion}:*:*""
+                            }}
+                        ]
                     }}"
                 ),
             }
         );
 
-        // Scoped inline policy: SNS — only the medical alerts topic
+        // Scoped inline policy: SNS — publish + MassTransit topic management
         _ = new Aws.Iam.RolePolicy(
             "policy-sns-scoped",
             new Aws.Iam.RolePolicyArgs
@@ -132,11 +152,29 @@ public static class Compute
                 Policy = msg.MedicalAlertsTopic.Arn.Apply(topicArn =>
                     $@"{{
                         ""Version"": ""2012-10-17"",
-                        ""Statement"": [{{
-                            ""Effect"": ""Allow"",
-                            ""Action"": [""sns:Publish""],
-                            ""Resource"": ""{topicArn}""
-                        }}]
+                        ""Statement"": [
+                            {{
+                                ""Sid"": ""MedicalAlertsTopic"",
+                                ""Effect"": ""Allow"",
+                                ""Action"": [""sns:Publish""],
+                                ""Resource"": ""{topicArn}""
+                            }},
+                            {{
+                                ""Sid"": ""MassTransitSnsManagement"",
+                                ""Effect"": ""Allow"",
+                                ""Action"": [
+                                    ""sns:CreateTopic"",
+                                    ""sns:DeleteTopic"",
+                                    ""sns:GetTopicAttributes"",
+                                    ""sns:SetTopicAttributes"",
+                                    ""sns:ListTopics"",
+                                    ""sns:Subscribe"",
+                                    ""sns:Unsubscribe"",
+                                    ""sns:Publish""
+                                ],
+                                ""Resource"": ""arn:aws:sns:{cfg.AwsRegion}:*:*""
+                            }}
+                        ]
                     }}"
                 ),
             }
