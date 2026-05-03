@@ -1,0 +1,97 @@
+name: CD — Lambda Functions
+
+on:
+  workflow_call:
+    inputs:
+      aws-region:
+        required: true
+        type: string
+      lambda-function-name:
+        required: true
+        type: string
+      reminder-lambda-name:
+        required: true
+        type: string
+      notifications-lambda-name:
+        required: true
+        type: string
+    secrets:
+      AWS_DEPLOY_ROLE_ARN:
+        required: true
+
+jobs:
+  deploy-lambda:
+    name: Lambda — Build Native AOT & Deploy
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ inputs.aws-region }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      # ── Build the Lambda function using Native AOT for Amazon Linux 2023 ──
+      - name: Publish Lambda (Native AOT)
+        working-directory: functions/lab-pdf-processor/src/LabPdfProcessor-dev-ProcessPdfDocument
+        run: |
+          # Publish for Linux ARM64 (Graviton) or x64 depending on your preference.
+          # Assuming x64 here to match standard Lambda provided.al2023
+          dotnet publish -c Release -r linux-x64 --self-contained true -o ./publish
+
+          # Zip the output (The Native AOT binary is named 'bootstrap')
+          cd publish
+          zip -r ../../../function.zip *
+
+      # ── Update the Lambda function code directly via AWS CLI ──
+      - name: Deploy to AWS Lambda
+        env:
+          LAMBDA_NAME: ${{ inputs.lambda-function-name }}
+        run: |
+          aws lambda update-function-code \
+            --function-name "$LAMBDA_NAME" \
+            --zip-file fileb://functions/lab-pdf-processor/function.zip
+
+          echo "✅ Lab PDF processor Lambda deployment complete."
+
+      - name: Publish appointment-reminder Lambda
+        working-directory: functions/appointment-reminder/src/AppointmentReminder-dev-SentReminder
+        run: |
+          dotnet publish -c Release -r linux-x64 --self-contained true -o ./publish
+          cd publish && zip -r ../../../function.zip *
+
+      - name: Deploy appointment-reminder to AWS Lambda
+        env:
+          LAMBDA_NAME: ${{ inputs.reminder-lambda-name }}
+        run: |
+          aws lambda update-function-code \
+            --function-name "$LAMBDA_NAME" \
+            --zip-file fileb://functions/appointment-reminder/function.zip
+
+          echo "✅ Appointment reminder Lambda deployment complete."
+
+      - name: Publish appointment-notifications Lambda
+        working-directory: functions/appointment-notifications/src/AppointmentNotifications
+        run: |
+          dotnet publish -c Release -r linux-x64 --self-contained true -o ./publish
+          cd publish && zip -r ../../../function.zip *
+
+      - name: Deploy appointment-notifications to AWS Lambda
+        env:
+          LAMBDA_NAME: ${{ inputs.notifications-lambda-name }}
+        run: |
+          aws lambda update-function-code \
+            --function-name "$LAMBDA_NAME" \
+            --zip-file fileb://functions/appointment-notifications/function.zip
+
+          echo "✅ Appointment notifications Lambda deployment complete."
