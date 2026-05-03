@@ -9,6 +9,7 @@ on:
       - "backend/**"
       - "frontend/**"
       - "infra/**"
+      - "functions/**"
       - ".github/workflows/cd-deploy.yml"
 
 concurrency:
@@ -36,6 +37,8 @@ jobs:
       eb-env-name:          ${{ steps.pulumi.outputs.EbEnvName }}
       ecr-url:              ${{ steps.pulumi.outputs.EcrRepositoryUrl }}
       lambda-function-name: ${{ steps.pulumi.outputs.LambdaFunctionName }}
+      reminder-lambda-name:        ${{ steps.pulumi.outputs.ReminderLambdaName }}
+      notifications-lambda-name:   ${{ steps.pulumi.outputs.NotificationsLambdaName }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -283,5 +286,37 @@ jobs:
           aws lambda update-function-code \
             --function-name "$LAMBDA_NAME" \
             --zip-file fileb://functions/lab-pdf-processor/function.zip
-            
-          echo "✅ Lambda deployment complete."
+          
+          echo "✅ Lab PDF processor Lambda deployment complete."
+
+      - name: Publish appointment-reminder Lambda
+        working-directory: functions/appointment-reminder/src/AppointmentReminder-dev-SentReminder
+        run: |
+          dotnet publish -c Release -r linux-x64 --self-contained true -o ./publish
+          cd publish && zip -r ../../../function.zip *
+
+      - name: Deploy appointment-reminder to AWS Lambda
+        env:
+          LAMBDA_NAME: ${{ needs.deploy-infra.outputs.reminder-lambda-name }}
+        run: |
+          aws lambda update-function-code \
+            --function-name "$LAMBDA_NAME" \
+            --zip-file fileb://functions/appointment-reminder/function.zip
+          
+          echo "✅ Appointment reminder Lambda deployment complete."
+
+      - name: Publish appointment-notifications Lambda
+        working-directory: functions/appointment-notifications/src/AppointmentNotifications
+        run: |
+          dotnet publish -c Release -r linux-x64 --self-contained true -o ./publish
+          cd publish && zip -r ../../../function.zip *
+
+      - name: Deploy appointment-notifications to AWS Lambda
+        env:
+          LAMBDA_NAME: ${{ needs.deploy-infra.outputs.notifications-lambda-name }}
+        run: |
+          aws lambda update-function-code \
+            --function-name "$LAMBDA_NAME" \
+            --zip-file fileb://functions/appointment-notifications/function.zip
+          
+          echo "✅ Appointment notifications Lambda deployment complete."

@@ -68,7 +68,8 @@ public sealed class CancelAppointmentHandler(
             AppointmentPublicId: appointment.PublicId,
             PatientPublicId: appointment.Patient.PublicId,
             Reason: cmd.CancellationReason,
-            OccurredAt: SystemClock.Instance.GetCurrentInstant()
+            OccurredAt: SystemClock.Instance.GetCurrentInstant(),
+            PatientEmail: appointment.Patient.User.Email
         );
 
         await db.SaveChangesAsync(ct);

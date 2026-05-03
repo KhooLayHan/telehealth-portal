@@ -19,6 +19,7 @@ public static class Serverless
     {
         public required Aws.Lambda.Function PdfProcessorLambda { get; init; }
         public required Aws.Lambda.Function ReminderLambda { get; init; }
+        public required Aws.Lambda.Function NotificationsLambda { get; init; }
     }
 
     public static Result Create(StackConfig cfg, Messaging.Result msg, Storage.Result storage)
@@ -217,8 +218,7 @@ public static class Serverless
                 Action = "lambda:InvokeFunction",
                 Function = reminderLambda.Arn,
                 Principal = "sns.amazonaws.com",
-                SourceArn =
-                    "arn:aws:sns:us-east-1:920263653571:TeleHealth_Contracts-AppointmentBookedEvent",
+                SourceArn = msg.AppointmentBookedTopic.Arn,
             }
         );
 
@@ -227,10 +227,122 @@ public static class Serverless
             "reminder-sns-sub",
             new Aws.Sns.TopicSubscriptionArgs
             {
-                Topic =
-                    "arn:aws:sns:us-east-1:920263653571:TeleHealth_Contracts-AppointmentBookedEvent",
+                Topic = msg.AppointmentBookedTopic.Arn,
                 Protocol = "lambda",
                 Endpoint = reminderLambda.Arn,
+            }
+        );
+
+        // ── IAM role for Appointment Notifications Lambda ──
+        var notificationsRole = new Aws.Iam.Role(
+            "lambda-notifications-role",
+            new Aws.Iam.RoleArgs
+            {
+                AssumeRolePolicy =
+                    @"{
+                    ""Version"": ""2012-10-17"",
+                    ""Statement"": [{
+                        ""Action"": ""sts:AssumeRole"",
+                        ""Principal"": { ""Service"": ""lambda.amazonaws.com"" },
+                        ""Effect"": ""Allow""
+                    }]
+                }",
+                Tags = cfg.Tags,
+            }
+        );
+
+        _ = new Aws.Iam.RolePolicyAttachment(
+            "notifications-basic-execution",
+            new Aws.Iam.RolePolicyAttachmentArgs
+            {
+                Role = notificationsRole.Name,
+                PolicyArn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+            }
+        );
+
+        _ = new Aws.Iam.RolePolicy(
+            "notifications-ses-send",
+            new Aws.Iam.RolePolicyArgs
+            {
+                Role = notificationsRole.Name,
+                Policy =
+                    @"{
+                        ""Version"": ""2012-10-17"",
+                        ""Statement"": [{
+                            ""Effect"": ""Allow"",
+                            ""Action"": [""ses:SendEmail"", ""ses:SendRawEmail""],
+                            ""Resource"": ""*""
+                        }]
+                    }",
+            }
+        );
+
+        // ── Appointment Notifications Lambda (cancelled + rescheduled) ──
+        var notificationsLambda = new Aws.Lambda.Function(
+            "appointment-notifications",
+            new Aws.Lambda.FunctionArgs
+            {
+                Name = $"telehealth-appointment-notifications-{cfg.StackName}",
+                Role = notificationsRole.Arn,
+                Runtime = "dotnet10",
+                Handler =
+                    "AppointmentNotifications::AppointmentNotifications.Function::FunctionHandler",
+                MemorySize = 256,
+                Timeout = 60,
+                Code = new FileArchive("./dummy-lambda"),
+                Environment = new Aws.Lambda.Inputs.FunctionEnvironmentArgs
+                {
+                    Variables = new InputMap<string>
+                    {
+                        { "ENVIRONMENT", cfg.StackName },
+                        { "SES_SENDER_EMAIL", "hongjx0321@gmail.com" },
+                        { "SES_REGION", "us-east-1" },
+                    },
+                },
+                Tags = cfg.Tags,
+            },
+            new CustomResourceOptions { IgnoreChanges = { "sourceCodeHash" } }
+        );
+
+        _ = new Aws.Lambda.Permission(
+            "notifications-cancelled-sns-invoke",
+            new Aws.Lambda.PermissionArgs
+            {
+                Action = "lambda:InvokeFunction",
+                Function = notificationsLambda.Arn,
+                Principal = "sns.amazonaws.com",
+                SourceArn = msg.AppointmentCancelledTopic.Arn,
+            }
+        );
+
+        _ = new Aws.Lambda.Permission(
+            "notifications-rescheduled-sns-invoke",
+            new Aws.Lambda.PermissionArgs
+            {
+                Action = "lambda:InvokeFunction",
+                Function = notificationsLambda.Arn,
+                Principal = "sns.amazonaws.com",
+                SourceArn = msg.AppointmentRescheduledTopic.Arn,
+            }
+        );
+
+        _ = new Aws.Sns.TopicSubscription(
+            "notifications-cancelled-sns-sub",
+            new Aws.Sns.TopicSubscriptionArgs
+            {
+                Topic = msg.AppointmentCancelledTopic.Arn,
+                Protocol = "lambda",
+                Endpoint = notificationsLambda.Arn,
+            }
+        );
+
+        _ = new Aws.Sns.TopicSubscription(
+            "notifications-rescheduled-sns-sub",
+            new Aws.Sns.TopicSubscriptionArgs
+            {
+                Topic = msg.AppointmentRescheduledTopic.Arn,
+                Protocol = "lambda",
+                Endpoint = notificationsLambda.Arn,
             }
         );
 
@@ -238,6 +350,7 @@ public static class Serverless
         {
             PdfProcessorLambda = pdfProcessorLambda,
             ReminderLambda = reminderLambda,
+            NotificationsLambda = notificationsLambda,
         };
     }
 }

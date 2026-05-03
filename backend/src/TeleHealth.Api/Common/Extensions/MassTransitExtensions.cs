@@ -27,14 +27,7 @@ public static class MassTransitExtensions
             x.UsingAmazonSqs(
                 (ctx, cfg) =>
                 {
-                    cfg.Host(
-                        configuration["Aws:Region"]!,
-                        h =>
-                        {
-                            h.AccessKey(configuration["Aws:AccessKey"]!);
-                            h.SecretKey(configuration["Aws:SecretKey"]!);
-                        }
-                    );
+                    cfg.Host(configuration["Aws:Region"]!, _ => { });
 
                     cfg.ConfigureJsonSerializerOptions(options =>
                         options.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb)
@@ -42,6 +35,15 @@ public static class MassTransitExtensions
 
                     cfg.Message<LabReportCompletedEvent>(m =>
                         m.SetEntityName("medical-alerts-topic")
+                    );
+                    cfg.Message<AppointmentBookedEvent>(m =>
+                        m.SetEntityName("appointment-booked-topic")
+                    );
+                    cfg.Message<AppointmentCancelledEvent>(m =>
+                        m.SetEntityName("appointment-notifications-cancelled-topic")
+                    );
+                    cfg.Message<AppointmentRescheduledEvent>(m =>
+                        m.SetEntityName("appointment-notifications-rescheduled-topic")
                     );
                     cfg.ConfigureEndpoints(ctx);
                 }

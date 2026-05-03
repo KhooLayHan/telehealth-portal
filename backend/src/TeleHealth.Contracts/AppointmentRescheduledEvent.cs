@@ -9,5 +9,6 @@ public sealed record AppointmentRescheduledEvent(
     string OldTime,
     string NewDate,
     string NewTime,
-    Instant OccurredAt
+    Instant OccurredAt,
+    string PatientEmail
 );

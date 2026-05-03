@@ -853,6 +853,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
+
   return  { mutationFn, ...mutationOptions }}
 
     export type AdminUpdateReceptionistMutationResult = NonNullable<Awaited<ReturnType<typeof adminUpdateReceptionist>>>
@@ -1086,7 +1087,110 @@ export function useAdminGetAllLabTechs<TData = Awaited<ReturnType<typeof adminGe
 
 
 
-export type adminGetLabTechResponse200 = {
+export type adminCreateLabTechResponse201 = {
+  data: AdminLabTechDto
+  status: 201
+}
+
+export type adminCreateLabTechResponse400 = {
+  data: ProblemDetails
+  status: 400
+}
+
+export type adminCreateLabTechResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type adminCreateLabTechResponse403 = {
+  data: ProblemDetails
+  status: 403
+}
+
+export type adminCreateLabTechResponse409 = {
+  data: ProblemDetails
+  status: 409
+}
+
+export type adminCreateLabTechResponse422 = {
+  data: ProblemDetails
+  status: 422
+}
+
+export type adminCreateLabTechResponseSuccess = (adminCreateLabTechResponse201) & {
+  headers: Headers;
+};
+export type adminCreateLabTechResponseError = (adminCreateLabTechResponse400 | adminCreateLabTechResponse401 | adminCreateLabTechResponse403 | adminCreateLabTechResponse409 | adminCreateLabTechResponse422) & {
+  headers: Headers;
+};
+
+export type adminCreateLabTechResponse = (adminCreateLabTechResponseSuccess | adminCreateLabTechResponseError)
+
+export const getAdminCreateLabTechUrl = () => {
+
+
+
+
+  return `/api/v1/admins/lab-techs`
+}
+
+export const adminCreateLabTech = async (adminCreateLabTechCommand: AdminCreateLabTechCommand, options?: RequestInit): Promise<adminCreateLabTechResponse> => {
+
+  return ofetchMutator<adminCreateLabTechResponse>(getAdminCreateLabTechUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      adminCreateLabTechCommand,)
+  }
+);}
+
+
+
+
+export const getAdminCreateLabTechMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCreateLabTech>>, TError,{data: AdminCreateLabTechCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminCreateLabTech>>, TError,{data: AdminCreateLabTechCommand}, TContext> => {
+
+const mutationKey = ['adminCreateLabTech'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCreateLabTech>>, {data: AdminCreateLabTechCommand}> = (props) => {
+          const {data} = props ?? {};
+
+          return  adminCreateLabTech(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminCreateLabTechMutationResult = NonNullable<Awaited<ReturnType<typeof adminCreateLabTech>>>
+    export type AdminCreateLabTechMutationBody = AdminCreateLabTechCommand
+    export type AdminCreateLabTechMutationError = ProblemDetails
+
+    export const useAdminCreateLabTech = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCreateLabTech>>, TError,{data: AdminCreateLabTechCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminCreateLabTech>>,
+        TError,
+        {data: AdminCreateLabTechCommand},
+        TContext
+      > => {
+      return useMutation(getAdminCreateLabTechMutationOptions(options), queryClient);
+    }
+    export type adminGetLabTechResponse200 = {
   data: AdminLabTechDto
   status: 200
 }
@@ -1116,6 +1220,9 @@ export type adminGetLabTechResponseError = (adminGetLabTechResponse401 | adminGe
 export type adminGetLabTechResponse = (adminGetLabTechResponseSuccess | adminGetLabTechResponseError)
 
 export const getAdminGetLabTechUrl = (id: string,) => {
+
+
+
 
   return `/api/v1/admins/lab-techs/${id}`
 }
@@ -1397,115 +1504,6 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getAdminDeactivateLabTechMutationOptions(options), queryClient);
     }
-
-
-
-
-
-
-export type adminCreateLabTechResponse201 = {
-  data: AdminLabTechDto
-  status: 201
-}
-
-export type adminCreateLabTechResponse400 = {
-  data: ProblemDetails
-  status: 400
-}
-
-export type adminCreateLabTechResponse401 = {
-  data: ProblemDetails
-  status: 401
-}
-
-export type adminCreateLabTechResponse403 = {
-  data: ProblemDetails
-  status: 403
-}
-
-export type adminCreateLabTechResponse409 = {
-  data: ProblemDetails
-  status: 409
-}
-
-export type adminCreateLabTechResponse422 = {
-  data: ProblemDetails
-  status: 422
-}
-
-export type adminCreateLabTechResponseSuccess = (adminCreateLabTechResponse201) & {
-  headers: Headers;
-};
-export type adminCreateLabTechResponseError = (adminCreateLabTechResponse400 | adminCreateLabTechResponse401 | adminCreateLabTechResponse403 | adminCreateLabTechResponse409 | adminCreateLabTechResponse422) & {
-  headers: Headers;
-};
-
-export type adminCreateLabTechResponse = (adminCreateLabTechResponseSuccess | adminCreateLabTechResponseError)
-
-export const getAdminCreateLabTechUrl = () => {
-
-
-
-
-  return `/api/v1/admins/lab-techs`
-}
-
-export const adminCreateLabTech = async (adminCreateLabTechCommand: AdminCreateLabTechCommand, options?: RequestInit): Promise<adminCreateLabTechResponse> => {
-
-  return ofetchMutator<adminCreateLabTechResponse>(getAdminCreateLabTechUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      adminCreateLabTechCommand,)
-  }
-);}
-
-
-
-
-export const getAdminCreateLabTechMutationOptions = <TError = ProblemDetails,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCreateLabTech>>, TError,{data: AdminCreateLabTechCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof adminCreateLabTech>>, TError,{data: AdminCreateLabTechCommand}, TContext> => {
-
-const mutationKey = ['adminCreateLabTech'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCreateLabTech>>, {data: AdminCreateLabTechCommand}> = (props) => {
-          const {data} = props ?? {};
-
-          return  adminCreateLabTech(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type AdminCreateLabTechMutationResult = NonNullable<Awaited<ReturnType<typeof adminCreateLabTech>>>
-    export type AdminCreateLabTechMutationBody = AdminCreateLabTechCommand
-    export type AdminCreateLabTechMutationError = ProblemDetails
-
-    export const useAdminCreateLabTech = <TError = ProblemDetails,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCreateLabTech>>, TError,{data: AdminCreateLabTechCommand}, TContext>, request?: SecondParameter<typeof ofetchMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof adminCreateLabTech>>,
-        TError,
-        {data: AdminCreateLabTechCommand},
-        TContext
-      > => {
-      return useMutation(getAdminCreateLabTechMutationOptions(options), queryClient);
-    }
     export type adminGetAuditLogsResponse200 = {
   data: PagedResultOfAdminAuditLogDto
   status: 200
@@ -1684,12 +1682,14 @@ export const getAdminGetDashboardSummaryQueryKey = () => {
     ] as const;
     }
 
+
 export const getAdminGetDashboardSummaryQueryOptions = <TData = Awaited<ReturnType<typeof adminGetDashboardSummary>>, TError = ProblemDetails>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetDashboardSummary>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getAdminGetDashboardSummaryQueryKey();
+
 
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetDashboardSummary>>> = ({ signal }) => adminGetDashboardSummary({ signal, ...requestOptions });

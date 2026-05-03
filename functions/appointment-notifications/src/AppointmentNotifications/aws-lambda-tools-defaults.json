@@ -1,0 +1,10 @@
+{
+  "profile": "",
+  "region": "",
+  "configuration": "Release",
+  "function-architecture": "x86_64",
+  "function-runtime": "dotnet10",
+  "function-memory-size": 256,
+  "function-timeout": 60,
+  "function-handler": "AppointmentNotifications::AppointmentNotifications.Function::FunctionHandler"
+}

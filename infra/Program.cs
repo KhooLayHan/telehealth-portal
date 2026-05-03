@@ -36,5 +36,6 @@ return await Deployment.RunAsync(() =>
         ["ApiLogGroupName"] = obs.ApiLogGroup.Name,
         ["LambdaFunctionName"] = serverless.PdfProcessorLambda.Name,
         ["ReminderLambdaName"] = serverless.ReminderLambda.Name,
+        ["NotificationsLambdaName"] = serverless.NotificationsLambda.Name,
     };
 });
