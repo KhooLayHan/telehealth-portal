@@ -265,13 +265,9 @@ public static class Compute
                     EbSetting(
                         "aws:elasticbeanstalk:environment:process:default",
                         "HealthCheckPath",
-                        "/health"
+                        "/live"
                     ),
-                    EbSetting(
-                        "aws:elasticbeanstalk:environment:process:default",
-                        "Port",
-                        "8080"
-                    ),
+                    EbSetting("aws:elasticbeanstalk:environment:process:default", "Port", "8080"),
                     EbSetting(
                         "aws:elasticbeanstalk:environment:process:default",
                         "Protocol",

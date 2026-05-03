@@ -22,7 +22,10 @@ builder
     .AddApiVersioningConfiguration()
     .AddApplicationServices(builder.Configuration)
     .AddHealthChecks()
-    .AddNpgSql();
+    .AddNpgSql(
+        builder.Configuration.GetConnectionString("Database")
+            ?? throw new InvalidOperationException("Missing 'Database' connection string.")
+    );
 
 var s3BucketName =
     builder.Configuration["AWS_S3_LAB_REPORTS_BUCKET"]
@@ -70,6 +73,15 @@ app.UseStatusCodePages();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapHealthChecks(
+    "/live",
+    new HealthCheckOptions
+    {
+        Predicate = _ => false,
+        ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
+    }
+);
 
 app.MapHealthChecks(
     "/health",
