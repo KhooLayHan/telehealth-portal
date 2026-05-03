@@ -95,6 +95,7 @@ public static class Compute
                 ("eb-web-tier", "arn:aws:iam::aws:policy/AWSElasticBeanstalkWebTier"),
                 ("eb-ecr-readonly", "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"),
                 ("eb-xray", "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"),
+                ("eb-ssm", "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"),
             }
         )
         {
