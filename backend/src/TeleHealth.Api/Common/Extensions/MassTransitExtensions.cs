@@ -39,6 +39,12 @@ public static class MassTransitExtensions
                     cfg.Message<AppointmentBookedEvent>(m =>
                         m.SetEntityName("appointment-booked-topic")
                     );
+                    cfg.Message<AppointmentCancelledEvent>(m =>
+                        m.SetEntityName("appointment-notifications-cancelled-topic")
+                    );
+                    cfg.Message<AppointmentRescheduledEvent>(m =>
+                        m.SetEntityName("appointment-notifications-rescheduled-topic")
+                    );
                     cfg.ConfigureEndpoints(ctx);
                 }
             );

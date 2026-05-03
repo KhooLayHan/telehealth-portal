@@ -77,7 +77,8 @@ public sealed class RescheduleAppointmentHandler(
                 OldTime: oldSchedule.StartTime.ToString("HH:mm", null),
                 NewDate: newSchedule.Date.ToString("yyyy-MM-dd", null),
                 NewTime: newSchedule.StartTime.ToString("HH:mm", null),
-                OccurredAt: SystemClock.Instance.GetCurrentInstant()
+                OccurredAt: SystemClock.Instance.GetCurrentInstant(),
+                PatientEmail: appointment.Patient.User.Email
             );
             await publishEndpoint.Publish(rescheduledEvent, ct);
 

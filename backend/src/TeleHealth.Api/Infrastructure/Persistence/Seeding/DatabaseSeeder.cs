@@ -26,6 +26,7 @@ public sealed class DatabaseSeeder(
                 "TRUNCATE TABLE users, system_settings RESTART IDENTITY CASCADE",
                 ct
             );
+            db.ChangeTracker.Clear();
             Log.Warning("Truncation complete. Proceeding with seeding.");
         }
         else if (await db.Users.AnyAsync(ct))
@@ -141,22 +142,28 @@ public sealed class DatabaseSeeder(
         );
         db.DoctorSchedules.AddRange(schedules);
         await db.SaveChangesAsync(ct);
+        db.ChangeTracker.Clear();
 
         // Phase 4: Appointments
         var patients = patientData.Select(p => p.Patient).ToList();
 
-        var (appointments, touchedSchedules) = AppointmentFaker.BuildAppointments(
+        var bookedScheduleStatusId = scheduleStatuses["booked"].Id;
+
+        var (appointments, touchedScheduleIds) = AppointmentFaker.BuildAppointments(
             faker,
             doctors,
             patients,
             schedules,
             doctorData[0].User,
-            appointmentStatuses,
-            scheduleStatuses
+            appointmentStatuses
         );
 
-        foreach (var schedule in touchedSchedules)
-            db.Entry(schedule).Property(s => s.StatusId).IsModified = true;
+        await db
+            .DoctorSchedules.Where(s => touchedScheduleIds.Contains(s.Id))
+            .ExecuteUpdateAsync(s => s.SetProperty(x => x.StatusId, bookedScheduleStatusId), ct);
+
+        db.Appointments.AddRange(appointments);
+        await db.SaveChangesAsync(ct);
 
         db.Appointments.AddRange(appointments);
         await db.SaveChangesAsync(ct);
