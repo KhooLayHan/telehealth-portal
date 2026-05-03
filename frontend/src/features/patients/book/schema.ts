@@ -64,3 +64,7 @@ export const getMinDate = () => {
 export function isValidSlot(slot: AvailableScheduleDto): slot is Required<AvailableScheduleDto> {
   return !!slot.publicId && !!slot.startTime && !!slot.endTime;
 }
+
+export function isPastSlot(slot: Pick<AvailableScheduleDto, "date" | "startTime">): boolean {
+  return new Date(`${slot.date}T${slot.startTime}`) < new Date();
+}
