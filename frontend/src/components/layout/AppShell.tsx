@@ -1,6 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
-  Bell,
   Building2,
   Calendar,
   ClipboardList,
@@ -10,7 +9,6 @@ import {
   LifeBuoy,
   LogOut,
   Microscope,
-  Search,
   Settings,
   Stethoscope,
   User,
@@ -27,7 +25,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { SupportDialog } from "@/features/system-settings/SupportDialog";
 import { useSystemName } from "@/features/system-settings/useSystemName";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -218,15 +215,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* ── Main area ── */}
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-16 shrink-0 items-center justify-between border-border border-b bg-card px-6">
-          <div className="relative w-72">
-            <Search className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input className="h-9 pl-9" placeholder="Search patients, appointments..." />
-          </div>
+        <header className="flex h-16 shrink-0 items-center justify-end border-border border-b bg-card px-6">
           <div className="flex items-center gap-2">
-            <Button size="icon" variant="ghost">
-              <Bell className="size-4" />
-            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger>
                 <div className="flex size-8 items-center justify-center overflow-hidden rounded-full bg-primary font-semibold text-primary-foreground text-xs cursor-pointer">
