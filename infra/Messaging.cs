@@ -13,6 +13,8 @@ public static class Messaging
     public sealed class Result
     {
         public required Aws.Sns.Topic MedicalAlertsTopic { get; init; }
+        public required Aws.Sns.Topic AppointmentBookedTopic { get; init; }
+        public required Aws.Sns.Topic OpsAlertsTopic { get; init; }
         public required Aws.Sqs.Queue ProcessingQueue { get; init; }
         public required Aws.Sqs.Queue DeadLetterQueue { get; init; }
     }
@@ -44,7 +46,7 @@ public static class Messaging
             new Aws.Sqs.QueueArgs
             {
                 SqsManagedSseEnabled = true, // Server-side encryption with SQS-managed keys
-                VisibilityTimeoutSeconds = 180,
+                VisibilityTimeoutSeconds = 360,
                 RedrivePolicy = deadLetterQueue.Arn.Apply(dlqArn =>
                     $@"{{""deadLetterTargetArn"":""{dlqArn}"",""maxReceiveCount"":3}}"
                 ),
@@ -64,6 +66,16 @@ public static class Messaging
         );
 
         // Allow SNS to send messages to the SQS queue
+        var appointmentBookedTopic = new Aws.Sns.Topic(
+            "appointment-booked-topic",
+            new Aws.Sns.TopicArgs { KmsMasterKeyId = "alias/aws/sns", Tags = cfg.Tags }
+        );
+
+        var opsAlertsTopic = new Aws.Sns.Topic(
+            "ops-alerts-topic",
+            new Aws.Sns.TopicArgs { KmsMasterKeyId = "alias/aws/sns", Tags = cfg.Tags }
+        );
+
         _ = new Aws.Sqs.QueuePolicy(
             "queue-policy",
             new Aws.Sqs.QueuePolicyArgs
@@ -89,6 +101,8 @@ public static class Messaging
         return new Result
         {
             MedicalAlertsTopic = medicalAlertsTopic,
+            AppointmentBookedTopic = appointmentBookedTopic,
+            OpsAlertsTopic = opsAlertsTopic,
             ProcessingQueue = processingQueue,
             DeadLetterQueue = deadLetterQueue,
         };

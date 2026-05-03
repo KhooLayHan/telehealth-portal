@@ -217,8 +217,7 @@ public static class Serverless
                 Action = "lambda:InvokeFunction",
                 Function = reminderLambda.Arn,
                 Principal = "sns.amazonaws.com",
-                SourceArn =
-                    "arn:aws:sns:us-east-1:920263653571:TeleHealth_Contracts-AppointmentBookedEvent",
+                SourceArn = msg.AppointmentBookedTopic.Arn,
             }
         );
 
@@ -227,8 +226,7 @@ public static class Serverless
             "reminder-sns-sub",
             new Aws.Sns.TopicSubscriptionArgs
             {
-                Topic =
-                    "arn:aws:sns:us-east-1:920263653571:TeleHealth_Contracts-AppointmentBookedEvent",
+                Topic = msg.AppointmentBookedTopic.Arn,
                 Protocol = "lambda",
                 Endpoint = reminderLambda.Arn,
             }
