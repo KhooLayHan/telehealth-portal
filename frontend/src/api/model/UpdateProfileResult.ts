@@ -6,16 +6,14 @@
  */
 import type { LocalDate } from "./LocalDate";
 
-export interface UpdateProfileCommand {
+export interface UpdateProfileResult {
   firstName: string;
   lastName: string;
   /** @nullable */
+  username: string | null;
+  /** @nullable */
   phone: string | null;
   icNumber: string;
-  /** @nullable */
-  address: string | null;
-  /** @nullable */
-  username: string | null;
   dateOfBirth: null | LocalDate;
   /** @nullable */
   gender: string | null;

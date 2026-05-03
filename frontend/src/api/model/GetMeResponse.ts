@@ -6,17 +6,18 @@
  */
 import type { LocalDate } from "./LocalDate";
 
-export interface UpdateProfileCommand {
+export interface GetMeResponse {
+  publicId: string;
+  email: string;
   firstName: string;
   lastName: string;
+  username: string;
+  /** @nullable */
+  avatarUrl: string | null;
   /** @nullable */
   phone: string | null;
   icNumber: string;
-  /** @nullable */
-  address: string | null;
-  /** @nullable */
-  username: string | null;
-  dateOfBirth: null | LocalDate;
+  dateOfBirth: LocalDate;
   /** @nullable */
   gender: string | null;
   /** @nullable */
@@ -31,4 +32,5 @@ export interface UpdateProfileCommand {
   postalCode: string | null;
   /** @nullable */
   country: string | null;
+  roles: string[];
 }
