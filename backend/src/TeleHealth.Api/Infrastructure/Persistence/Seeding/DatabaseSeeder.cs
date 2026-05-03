@@ -23,7 +23,21 @@ public sealed class DatabaseSeeder(
         {
             Log.Warning("Seed:TruncateOnStartup is enabled — truncating all tables...");
             await db.Database.ExecuteSqlRawAsync(
-                "TRUNCATE TABLE users, system_settings RESTART IDENTITY CASCADE",
+                """
+                TRUNCATE TABLE
+                    lab_reports,
+                    prescriptions,
+                    consultations,
+                    appointments,
+                    doctor_schedules,
+                    user_roles,
+                    doctors,
+                    patients,
+                    users,
+                    system_operating_hours,
+                    system_settings
+                RESTART IDENTITY CASCADE
+                """,
                 ct
             );
             db.ChangeTracker.Clear();
@@ -161,9 +175,6 @@ public sealed class DatabaseSeeder(
         await db
             .DoctorSchedules.Where(s => touchedScheduleIds.Contains(s.Id))
             .ExecuteUpdateAsync(s => s.SetProperty(x => x.StatusId, bookedScheduleStatusId), ct);
-
-        db.Appointments.AddRange(appointments);
-        await db.SaveChangesAsync(ct);
 
         db.Appointments.AddRange(appointments);
         await db.SaveChangesAsync(ct);

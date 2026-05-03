@@ -194,7 +194,7 @@ internal static class AppointmentFaker
 
         // Cancelled — 5 cancelled appointments
         var cancelledSchedules = schedules
-            .Where(s => s.Date >= today)
+            .Where(s => s.Date > today) // ← consistent with upcoming filter
             .Skip(upcomingSchedules.Count)
             .Take(5)
             .ToList();
