@@ -1,7 +1,7 @@
 namespace TeleHealth.Infra;
 
 using Pulumi;
-using Aws = Pulumi.Aws;
+using Aws = Pulumi.Aws;  
 
 /// <summary>
 /// ECR repository, IAM role with scoped policies, instance profile,
