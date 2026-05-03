@@ -108,7 +108,7 @@ jobs:
       # upload index.html with no-cache so browsers always fetch the latest entry point.
       - name: Sync to S3
         env:
-          BUCKET: ${{ needs.deploy-infra.outputs.frontend-bucket }}
+          BUCKET: www.telehealth.foo
         run: |
           # Hashed JS/CSS/images — immutable, cache 1 year
           aws s3 sync frontend/dist s3://$BUCKET \
