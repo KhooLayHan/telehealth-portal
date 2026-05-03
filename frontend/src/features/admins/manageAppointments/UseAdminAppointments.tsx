@@ -22,8 +22,8 @@ export interface AppointmentListFilters {
 // Helpers
 // ---------------------------------------------------------------------------
 
-// Sets how often the admin calendar refreshes appointment data.
-const APPOINTMENT_CALENDAR_REFETCH_INTERVAL_MS = 1000;
+// Sets how often the admin appointment views refresh appointment data.
+const APPOINTMENT_REFETCH_INTERVAL_MS = 1000;
 
 // Converts year/month/day to ISO "YYYY-MM-DD" string for API date params
 function toIsoDate(year: number, month: number, day: number): string {
@@ -61,6 +61,7 @@ export function useAdminAppointments(
   search = "",
   filters: AppointmentListFilters = { status: "", todayOnly: false },
   shouldPollCalendar = true,
+  shouldPollList = false,
 ) {
   const today = new Date();
   const todayIso = toIsoDate(today.getFullYear(), today.getMonth(), today.getDate());
@@ -77,7 +78,7 @@ export function useAdminAppointments(
     },
     {
       query: {
-        refetchInterval: shouldPollCalendar ? APPOINTMENT_CALENDAR_REFETCH_INTERVAL_MS : false,
+        refetchInterval: shouldPollCalendar ? APPOINTMENT_REFETCH_INTERVAL_MS : false,
       },
     },
   );
@@ -97,14 +98,21 @@ export function useAdminAppointments(
   );
 
   // Paginated query for the list view tab (separate from the month overview)
-  const listQuery = useGetAllAppointmentsForReceptionist({
-    PageSize: 5,
-    Page: listPage,
-    SortOrder: "asc",
-    ...(search.trim() ? { Search: search.trim() } : {}),
-    ...(filters.status ? { Status: filters.status } : {}),
-    ...(filters.todayOnly ? { From: todayIso, To: todayIso } : {}),
-  });
+  const listQuery = useGetAllAppointmentsForReceptionist(
+    {
+      PageSize: 5,
+      Page: listPage,
+      SortOrder: "asc",
+      ...(search.trim() ? { Search: search.trim() } : {}),
+      ...(filters.status ? { Status: filters.status } : {}),
+      ...(filters.todayOnly ? { From: todayIso, To: todayIso } : {}),
+    },
+    {
+      query: {
+        refetchInterval: shouldPollList ? APPOINTMENT_REFETCH_INTERVAL_MS : false,
+      },
+    },
+  );
 
   const statusQuery = useGetAllStatuses();
 

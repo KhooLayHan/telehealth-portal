@@ -53,6 +53,7 @@ export function AdminAppointmentPage() {
       todayOnly,
     },
     viewMode === "calendar",
+    viewMode === "list",
   );
   const { exportAppointmentsCsv, isExportDisabled } = useAppointmentsCsvExport();
   const activeFilterCount = Number(Boolean(statusFilter)) + Number(todayOnly);
