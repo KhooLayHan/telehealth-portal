@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select";
 import { FormError } from "@/features/auth/components/FormError";
 import { DatePicker } from "@/features/patients/book/components/ui/DatePicker";
+import { isPastSlot } from "@/features/patients/book/schema";
 import type { useRescheduleForm } from "../hooks/useRescheduleForm";
 
 type RescheduleAppointmentFormProps = {
@@ -97,7 +98,11 @@ export function RescheduleAppointmentForm({
               </SelectTrigger>
               <SelectContent>
                 {availableSchedules.map((slot) => (
-                  <SelectItem key={slot.publicId} value={slot.publicId ?? ""}>
+                  <SelectItem
+                    key={slot.publicId}
+                    value={slot.publicId ?? ""}
+                    disabled={isPastSlot(slot)}
+                  >
                     {slot.startTime?.slice(0, 5)} - {slot.endTime?.slice(0, 5)}
                   </SelectItem>
                 ))}

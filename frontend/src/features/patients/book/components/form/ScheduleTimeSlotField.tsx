@@ -3,7 +3,7 @@ import { CardContent, CardDescription, CardHeader, CardTitle } from "@/component
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import type { BookingFormInstance } from "../../schema";
-import { bookingSchema, isValidSlot } from "../../schema";
+import { bookingSchema, isPastSlot, isValidSlot } from "../../schema";
 import { TimeSlotGrid } from "../ui/TimeSlotGrid";
 
 type ScheduleTimeSlotFieldProps = {
@@ -40,6 +40,7 @@ export function ScheduleTimeSlotField({
   }
 
   const validSlots = availableSchedules.filter(isValidSlot);
+  const disabledIds = new Set(validSlots.filter(isPastSlot).map((s) => s.publicId));
 
   return (
     <form.Field
@@ -56,6 +57,7 @@ export function ScheduleTimeSlotField({
               slots={validSlots}
               selectedId={field.state.value}
               onSelect={(id) => field.handleChange(id)}
+              disabledIds={disabledIds}
             />
             <FieldError>{field.state.meta.errors[0]?.message}</FieldError>
           </Field>
