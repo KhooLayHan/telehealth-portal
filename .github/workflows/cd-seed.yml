@@ -1,0 +1,85 @@
+name: CD — Database Seed
+
+# Injects Seed__EnableOnStartup=true as an EB environment variable,
+# waits for the environment to stabilise, then removes the variable
+# so subsequent restarts don't re-seed.
+#
+# The seeder is idempotent — it skips if db.Users.Any() is true,
+# so accidental re-runs are safe.
+
+on:
+  workflow_call:
+    inputs:
+      aws-region:
+        required: true
+        type: string
+      eb-env-name:
+        required: true
+        type: string
+    secrets:
+      AWS_DEPLOY_ROLE_ARN:
+        required: true
+
+jobs:
+  seed-database:
+    name: Database — Apply Seed Data
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ inputs.aws-region }}
+
+      - name: Snapshot RDS before seeding
+        env:
+          DB_INSTANCE: telehealth-dbfe5a2f2
+        run: |
+          SNAPSHOT_ID="pre-seed-$(date +%Y%m%d-%H%M%S)"
+          echo "Creating RDS snapshot: $SNAPSHOT_ID"
+          aws rds create-db-snapshot \
+            --db-instance-identifier "$DB_INSTANCE" \
+            --db-snapshot-identifier "$SNAPSHOT_ID"
+          aws rds wait db-snapshot-available \
+            --db-snapshot-identifier "$SNAPSHOT_ID"
+          echo "Snapshot $SNAPSHOT_ID is available."
+
+      - name: Enable seeding via EB environment variable
+        env:
+          EB_ENV_NAME: ${{ inputs.eb-env-name }}
+        run: |
+          # Resolve the EB environment name from the input; fall back to
+          # a describe call if the input is empty.
+          if [ -z "$EB_ENV_NAME" ]; then
+            EB_ENV_NAME=$(aws elasticbeanstalk describe-environments \
+              --query "Environments[?Status=='Ready']|[0].EnvironmentName" \
+              --output text)
+          fi
+          echo "EB_ENV_NAME=$EB_ENV_NAME" >> "$GITHUB_ENV"
+
+          echo "Injecting Seed__EnableOnStartup=true into $EB_ENV_NAME"
+          aws elasticbeanstalk update-environment \
+            --environment-name "$EB_ENV_NAME" \
+            --option-settings \
+              "Namespace=aws:elasticbeanstalk:application:environment,OptionName=Seed__EnableOnStartup,Value=true"
+
+          echo "Waiting for environment to be Ready..."
+          aws elasticbeanstalk wait environment-updated \
+            --environment-names "$EB_ENV_NAME"
+          echo "Environment is Ready — seeder has executed on startup."
+
+      - name: Remove seed flag from EB environment
+        run: |
+          echo "Removing Seed__EnableOnStartup from $EB_ENV_NAME"
+          aws elasticbeanstalk update-environment \
+            --environment-name "$EB_ENV_NAME" \
+            --option-settings \
+              "Namespace=aws:elasticbeanstalk:application:environment,OptionName=Seed__EnableOnStartup,Value=false"
+
+          echo "Waiting for environment to stabilise..."
+          aws elasticbeanstalk wait environment-updated \
+            --environment-names "$EB_ENV_NAME"
+          echo "Seed flag removed. Database seeding complete."

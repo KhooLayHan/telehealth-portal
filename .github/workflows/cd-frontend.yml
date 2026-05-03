@@ -1,0 +1,68 @@
+name: CD — Frontend
+
+on:
+  workflow_call:
+    inputs:
+      aws-region:
+        required: true
+        type: string
+    secrets:
+      AWS_DEPLOY_ROLE_ARN:
+        required: true
+
+jobs:
+  deploy-frontend:
+    name: Frontend — Build & Sync to S3
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ inputs.aws-region }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          restore-keys: ${{ runner.os }}-bun-
+
+      - name: Resolve API URL
+        run: |
+          echo "VITE_API_URL=https://api.telehealth.foo" >> "$GITHUB_ENV"
+
+      - name: Install & Build
+        working-directory: frontend
+        run: |
+          bun install --frozen-lockfile
+          bun run build
+
+      # Upload hashed assets with a long cache TTL;
+      # upload index.html with no-cache so browsers always fetch the latest entry point.
+      - name: Sync to S3
+        env:
+          BUCKET: www.telehealth.foo
+        run: |
+          # Hashed JS/CSS/images — immutable, cache 1 year
+          aws s3 sync frontend/dist s3://$BUCKET \
+            --delete \
+            --exclude "*.html" \
+            --cache-control "public, max-age=31536000, immutable"
+
+          # HTML files — always revalidate
+          aws s3 sync frontend/dist s3://$BUCKET \
+            --exclude "*" \
+            --include "*.html" \
+            --cache-control "no-cache, no-store, must-revalidate"

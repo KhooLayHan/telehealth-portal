@@ -11,6 +11,17 @@ on:
       - "infra/**"
       - "functions/**"
       - ".github/workflows/cd-deploy.yml"
+      - ".github/workflows/cd-infra.yml"
+      - ".github/workflows/cd-frontend.yml"
+      - ".github/workflows/cd-backend.yml"
+      - ".github/workflows/cd-lambda.yml"
+      - ".github/workflows/cd-seed.yml"
+  workflow_dispatch:
+    inputs:
+      seed:
+        description: "Seed the production database with initial data"
+        type: boolean
+        default: false
 
 concurrency:
   group: cd-deploy-${{ github.ref }}
@@ -20,302 +31,55 @@ env:
   AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
 
 jobs:
-  # ──────────────────────────────────────────────────────────────
-  # JOB 1 — Provision / update AWS infrastructure via Pulumi
-  #         Outputs the bucket/EB/ECR names needed by later jobs.
-  # ──────────────────────────────────────────────────────────────
-  deploy-infra:
-    name: Pulumi — Provision Infrastructure
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write   # Required for OIDC → AWS
-      contents: read
-    outputs:
-      frontend-bucket:      ${{ steps.pulumi.outputs.FrontendBucketName }}
-      artifacts-bucket:     ${{ steps.pulumi.outputs.S3ArtifactsBucket }}
-      eb-app-name:          ${{ steps.pulumi.outputs.EbAppName }}
-      eb-env-name:          ${{ steps.pulumi.outputs.EbEnvName }}
-      ecr-url:              ${{ steps.pulumi.outputs.EcrRepositoryUrl }}
-      lambda-function-name: ${{ steps.pulumi.outputs.LambdaFunctionName }}
-      reminder-lambda-name:        ${{ steps.pulumi.outputs.ReminderLambdaName }}
-      notifications-lambda-name:   ${{ steps.pulumi.outputs.NotificationsLambdaName }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+  # ── 1. Infrastructure ──────────────────────────────────────────
+  infra:
+    uses: ./.github/workflows/cd-infra.yml
+    with:
+      aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+    secrets:
+      AWS_DEPLOY_ROLE_ARN: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+      PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
-      - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
+  # ── 2. Frontend (runs in parallel with backend & lambda) ───────
+  frontend:
+    uses: ./.github/workflows/cd-frontend.yml
+    with:
+      aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+    secrets:
+      AWS_DEPLOY_ROLE_ARN: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
 
-      - name: Setup .NET (required by Pulumi C# program)
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: "9.0.x"
+  # ── 3. Backend (needs infra outputs) ───────────────────────────
+  backend:
+    needs: infra
+    uses: ./.github/workflows/cd-backend.yml
+    with:
+      aws-region:        ${{ vars.AWS_REGION || 'us-east-1' }}
+      ecr-url:           ${{ needs.infra.outputs.ecr-url }}
+      eb-app-name:       ${{ needs.infra.outputs.eb-app-name }}
+      eb-env-name:       ${{ needs.infra.outputs.eb-env-name }}
+      artifacts-bucket:  ${{ needs.infra.outputs.artifacts-bucket }}
+    secrets:
+      AWS_DEPLOY_ROLE_ARN: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
 
-      - name: Pulumi up
-        uses: pulumi/actions@v6
-        id: pulumi
-        with:
-          command: up
-          stack-name: prod
-          work-dir: infra
-          upsert: true    # creates the stack on first run
-          refresh: true   # reconciles state before the update
-        env:
-          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+  # ── 4. Lambda functions (needs infra outputs) ──────────────────
+  lambda:
+    needs: infra
+    uses: ./.github/workflows/cd-lambda.yml
+    with:
+      aws-region:                ${{ vars.AWS_REGION || 'us-east-1' }}
+      lambda-function-name:      ${{ needs.infra.outputs.lambda-function-name }}
+      reminder-lambda-name:      ${{ needs.infra.outputs.reminder-lambda-name }}
+      notifications-lambda-name: ${{ needs.infra.outputs.notifications-lambda-name }}
+    secrets:
+      AWS_DEPLOY_ROLE_ARN: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
 
-  # ──────────────────────────────────────────────────────────────
-  # JOB 2 — Build frontend and sync to S3
-  # ──────────────────────────────────────────────────────────────
-  deploy-frontend:
-    name: Frontend — Build & Sync to S3
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Cache Bun dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
-          restore-keys: ${{ runner.os }}-bun-
-
-      - name: Resolve API URL
-        run: |
-          echo "VITE_API_URL=https://api.telehealth.foo" >> "$GITHUB_ENV"
-      - name: Install & Build
-        working-directory: frontend
-        run: |
-          bun install --frozen-lockfile
-          bun run build
-
-      # Upload hashed assets with a long cache TTL;
-      # upload index.html with no-cache so browsers always fetch the latest entry point.
-      - name: Sync to S3
-        env:
-          BUCKET: www.telehealth.foo
-        run: |
-          # Hashed JS/CSS/images — immutable, cache 1 year
-          aws s3 sync frontend/dist s3://$BUCKET \
-            --delete \
-            --exclude "*.html" \
-            --cache-control "public, max-age=31536000, immutable"
-
-          # HTML files — always revalidate
-          aws s3 sync frontend/dist s3://$BUCKET \
-            --exclude "*" \
-            --include "*.html" \
-            --cache-control "no-cache, no-store, must-revalidate"
-
-  # ──────────────────────────────────────────────────────────────
-  # JOB 3 — Build & publish the backend, push Docker image to ECR,
-  #          then deploy to Elastic Beanstalk via Dockerrun.aws.json.
-  #
-  #  "dotnet publish" runs INSIDE the multi-stage Dockerfile so CI
-  #  never ships source code — only a pre-built, self-contained image.
-  #
-  #  Pipeline:
-  #    dotnet publish (in Dockerfile) → Docker image → ECR push
-  #    → Dockerrun.aws.json → S3 → EB application version → EB deploy
-  # ──────────────────────────────────────────────────────────────
-  deploy-backend:
-    name: Backend — Publish, Push to ECR & Deploy to EB
-    runs-on: ubuntu-latest
-    needs: deploy-infra
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      # ── Build Docker image (Dockerfile runs `dotnet publish` internally) ──
-      - name: Log in to Amazon ECR
-        id: ecr-login
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Build, tag & push image to ECR
-        id: build-image
-        env:
-          ECR_REPOSITORY_URL: ${{ needs.deploy-infra.outputs.ecr-url }}
-        run: |
-          SHORT_SHA="${GITHUB_SHA:0:8}"
-          VERSION_LABEL="telehealth-${{ github.run_number }}-${{ github.run_attempt }}-${SHORT_SHA}"
-          IMAGE_URI="${ECR_REPOSITORY_URL}:${SHORT_SHA}"
-
-          # Build from repo root so the Dockerfile can COPY backend/** correctly.
-          # The multi-stage Dockerfile handles `dotnet restore` + `dotnet publish`
-          # so no separate SDK setup is needed in CI.
-          docker build \
-            --file backend/src/TeleHealth.Api/Dockerfile \
-            --build-arg BUILD_CONFIGURATION=Release \
-            --tag "$IMAGE_URI" \
-            --tag "${ECR_REPOSITORY_URL}:latest" \
-            .
-
-          docker push "$IMAGE_URI"
-          docker push "${ECR_REPOSITORY_URL}:latest"
-
-          # Pass image URI and version label to subsequent steps
-          echo "image_uri=$IMAGE_URI" >> "$GITHUB_OUTPUT"
-          echo "version_label=$VERSION_LABEL" >> "$GITHUB_OUTPUT"
-
-      # ── Create a Dockerrun.aws.json that points EB at the ECR image ──
-      - name: Create Dockerrun.aws.json
-        env:
-          IMAGE_URI: ${{ steps.build-image.outputs.image_uri }}
-        run: |
-          cat > Dockerrun.aws.json <<EOF
-          {
-            "AWSEBDockerrunVersion": "1",
-            "Image": {
-              "Name": "$IMAGE_URI",
-              "Update": "true"
-            },
-            "Ports": [
-              { "ContainerPort": 8080, "HostPort": 80 }
-            ],
-            "Logging": "/var/log/app-logs"
-          }
-          EOF
-
-      # ── Upload artifact to S3, create EB version, trigger deployment ──
-      - name: Deploy to Elastic Beanstalk
-        env:
-          VERSION_LABEL:    ${{ steps.build-image.outputs.version_label }}
-          EB_APP_NAME:      ${{ needs.deploy-infra.outputs.eb-app-name }}
-          EB_ENV_NAME:      ${{ needs.deploy-infra.outputs.eb-env-name }}
-          ARTIFACTS_BUCKET: ${{ needs.deploy-infra.outputs.artifacts-bucket }}
-        run: |
-          S3_KEY="eb-deployments/Dockerrun-${VERSION_LABEL}.json"
-
-          # Upload the deployment manifest to the artifacts bucket
-          aws s3 cp Dockerrun.aws.json "s3://${ARTIFACTS_BUCKET}/${S3_KEY}"
-
-          # Register a new application version in EB
-          aws elasticbeanstalk create-application-version \
-            --application-name "$EB_APP_NAME" \
-            --version-label "$VERSION_LABEL" \
-            --source-bundle S3Bucket="$ARTIFACTS_BUCKET",S3Key="$S3_KEY" \
-            --description "SHA ${{ github.sha }} — run #${{ github.run_number }}"
-
-          # Trigger the environment update
-          aws elasticbeanstalk update-environment \
-            --environment-name "$EB_ENV_NAME" \
-            --version-label "$VERSION_LABEL"
-
-          echo "Waiting for environment update to complete..."
-
-          # Poll EB until the environment is back to Ready (up to 10 min)
-          aws elasticbeanstalk wait environment-updated \
-            --environment-names "$EB_ENV_NAME"
-
-          echo "Deployment complete."
-          echo "API URL: $(aws elasticbeanstalk describe-environments \
-            --environment-names "$EB_ENV_NAME" \
-            --query 'Environments[0].CNAME' \
-            --output text)"
-
-  # ──────────────────────────────────────────────────────────────
-  # JOB 4 — Build & Deploy AWS Lambda (Task 2 Microservice)
-  # ──────────────────────────────────────────────────────────────
-  deploy-lambda:
-    name: Lambda — Build Native AOT & Deploy
-    runs-on: ubuntu-latest
-    needs: deploy-infra
-    permissions:
-      id-token: write
-      contents: read
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: "10.0.x"
-
-      # ─- Build the Lambda function using Native AOT for Amazon Linux 2023 ──
-      - name: Publish Lambda (Native AOT)
-        working-directory: functions/lab-pdf-processor/src/LabPdfProcessor-dev-ProcessPdfDocument
-        run: |
-          # Publish for Linux ARM64 (Graviton) or x64 depending on your preference. 
-          # Assuming x64 here to match standard Lambda provided.al2023
-          dotnet publish -c Release -r linux-x64 --self-contained true -o ./publish
-          
-          # Zip the output (The Native AOT binary is named 'bootstrap')
-          cd publish
-          zip -r ../../../function.zip *
-
-      # ── Update the Lambda function code directly via AWS CLI ──
-      - name: Deploy to AWS Lambda
-        env:
-          LAMBDA_NAME: ${{ needs.deploy-infra.outputs.lambda-function-name }}
-        run: |
-          aws lambda update-function-code \
-            --function-name "$LAMBDA_NAME" \
-            --zip-file fileb://functions/lab-pdf-processor/function.zip
-          
-          echo "✅ Lab PDF processor Lambda deployment complete."
-
-      - name: Publish appointment-reminder Lambda
-        working-directory: functions/appointment-reminder/src/AppointmentReminder-dev-SentReminder
-        run: |
-          dotnet publish -c Release -r linux-x64 --self-contained true -o ./publish
-          cd publish && zip -r ../../../function.zip *
-
-      - name: Deploy appointment-reminder to AWS Lambda
-        env:
-          LAMBDA_NAME: ${{ needs.deploy-infra.outputs.reminder-lambda-name }}
-        run: |
-          aws lambda update-function-code \
-            --function-name "$LAMBDA_NAME" \
-            --zip-file fileb://functions/appointment-reminder/function.zip
-          
-          echo "✅ Appointment reminder Lambda deployment complete."
-
-      - name: Publish appointment-notifications Lambda
-        working-directory: functions/appointment-notifications/src/AppointmentNotifications
-        run: |
-          dotnet publish -c Release -r linux-x64 --self-contained true -o ./publish
-          cd publish && zip -r ../../../function.zip *
-
-      - name: Deploy appointment-notifications to AWS Lambda
-        env:
-          LAMBDA_NAME: ${{ needs.deploy-infra.outputs.notifications-lambda-name }}
-        run: |
-          aws lambda update-function-code \
-            --function-name "$LAMBDA_NAME" \
-            --zip-file fileb://functions/appointment-notifications/function.zip
-          
-          echo "✅ Appointment notifications Lambda deployment complete."
+  # ── 5. Database seed (manual trigger only, after backend) ──────
+  seed:
+    needs: [infra, backend]
+    if: ${{ github.event.inputs.seed == 'true' }}
+    uses: ./.github/workflows/cd-seed.yml
+    with:
+      aws-region:  ${{ vars.AWS_REGION || 'us-east-1' }}
+      eb-env-name: ${{ needs.infra.outputs.eb-env-name }}
+    secrets:
+      AWS_DEPLOY_ROLE_ARN: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
