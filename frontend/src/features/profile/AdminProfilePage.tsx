@@ -442,7 +442,7 @@ export function AdminProfilePage() {
                     field="username"
                     value={formData.username}
                     error={formErrors.username}
-                    placeholder="e.g. alex.admin"
+                    placeholder="e.g. alex_admin"
                     onChange={handleFieldChange}
                   />
                   <div className="h-px bg-border" />
@@ -451,7 +451,7 @@ export function AdminProfilePage() {
                     field="phone"
                     value={formData.phone}
                     error={formErrors.phone}
-                    placeholder="+60162173366"
+                    placeholder="0123456789"
                     type="tel"
                     onChange={handleFieldChange}
                   />

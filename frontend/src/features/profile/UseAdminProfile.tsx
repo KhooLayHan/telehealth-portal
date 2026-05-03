@@ -80,51 +80,59 @@ type AdminUpdateProfilePayload = UpdateProfileCommand & {
 // ---------------------------------------------------------------------------
 
 const NAME_RE = /^[a-zA-Z ]+$/;
-const USERNAME_RE = /^[a-zA-Z0-9_.]+$/;
-const PHONE_RE = /^\+?\d+$/;
+const USERNAME_RE = /^[a-zA-Z0-9_]+$/;
+const PHONE_RE = /^\d{10}$/;
 const IC_RE = /^\d{12}$/;
-const POSTAL_RE = /^\d{5}$/;
 const ADDRESS_BANNED_RE = /[%$#@!&*^<>{}|[\]\\]/;
+const VALID_GENDERS = new Set(["male", "female", "other", "M", "F", "O", "N"]);
 const ALLOWED_AVATAR_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
 
 function validateProfile(data: AdminProfileFormData): AdminProfileFormErrors {
   const errors: AdminProfileFormErrors = {};
+  const firstName = data.firstName.trim();
+  const lastName = data.lastName.trim();
+  const username = data.username.trim();
+  const phone = data.phone.trim();
+  const icNumber = data.icNumber.trim();
+  const addressLine1 = data.addressLine1.trim();
+  const addressLine2 = data.addressLine2.trim();
+  const city = data.city.trim();
+  const state = data.state.trim();
+  const postalCode = data.postalCode.trim();
+  const country = data.country.trim();
 
-  if (!data.firstName.trim()) {
+  if (!firstName) {
     errors.firstName = "First name is required.";
-  } else if (data.firstName.length > 20) {
+  } else if (firstName.length > 20) {
     errors.firstName = "First name must be 20 characters or less.";
-  } else if (!NAME_RE.test(data.firstName)) {
+  } else if (!NAME_RE.test(firstName)) {
     errors.firstName = "First name may only contain letters and spaces.";
   }
 
-  if (!data.lastName.trim()) {
+  if (!lastName) {
     errors.lastName = "Last name is required.";
-  } else if (data.lastName.length > 20) {
+  } else if (lastName.length > 20) {
     errors.lastName = "Last name must be 20 characters or less.";
-  } else if (!NAME_RE.test(data.lastName)) {
+  } else if (!NAME_RE.test(lastName)) {
     errors.lastName = "Last name may only contain letters and spaces.";
   }
 
-  const username = data.username.trim();
-  const phone = data.phone.trim();
-
   if (!username) {
     errors.username = "Username is required.";
-  } else if (username.length < 3 || username.length > 20) {
-    errors.username = "Username must be 3–20 characters.";
+  } else if (username.length < 3 || username.length > 50) {
+    errors.username = "Username must be 3-50 characters.";
   } else if (!USERNAME_RE.test(username)) {
-    errors.username = "Username may only contain letters, numbers, underscores, and dots.";
+    errors.username = "Username may only contain letters, numbers, and underscores.";
   }
 
-  if (phone && (phone.length < 12 || phone.length > 13 || !PHONE_RE.test(phone))) {
-    errors.phone = "Phone number must be 12-13 characters and contain only + and digits.";
+  if (phone && !PHONE_RE.test(phone)) {
+    errors.phone = "Phone number must be exactly 10 digits.";
   }
 
-  if (!data.icNumber.trim()) {
+  if (!icNumber) {
     errors.icNumber = "IC number is required.";
-  } else if (!IC_RE.test(data.icNumber)) {
+  } else if (!IC_RE.test(icNumber)) {
     errors.icNumber = "IC number must be exactly 12 digits.";
   }
 
@@ -137,31 +145,43 @@ function validateProfile(data: AdminProfileFormData): AdminProfileFormErrors {
     }
   }
 
-  if (data.gender && !["male", "female", "N"].includes(data.gender)) {
-    errors.gender = "Please select a valid gender.";
+  if (data.gender && !VALID_GENDERS.has(data.gender)) {
+    errors.gender = "Gender must be male, female, or other.";
   }
 
-  if (data.addressLine1 && ADDRESS_BANNED_RE.test(data.addressLine1)) {
-    errors.addressLine1 = "Address may not contain special characters.";
+  if (addressLine1.length > 200) {
+    errors.addressLine1 = "Address must be 200 characters or less.";
+  } else if (addressLine1 && ADDRESS_BANNED_RE.test(addressLine1)) {
+    errors.addressLine1 =
+      "Address may not contain special characters like % $ # @ ! & * ^ < > { } | \\ [ ].";
   }
 
-  if (data.addressLine2 && ADDRESS_BANNED_RE.test(data.addressLine2)) {
-    errors.addressLine2 = "Address may not contain special characters.";
+  if (addressLine2.length > 200) {
+    errors.addressLine2 = "Address line 2 must be 200 characters or less.";
+  } else if (addressLine2 && ADDRESS_BANNED_RE.test(addressLine2)) {
+    errors.addressLine2 =
+      "Address may not contain special characters like % $ # @ ! & * ^ < > { } | \\ [ ].";
   }
 
-  if (data.city && !NAME_RE.test(data.city)) {
+  if (city.length > 100) {
+    errors.city = "City must be 100 characters or less.";
+  } else if (city && !NAME_RE.test(city)) {
     errors.city = "City may only contain letters and spaces.";
   }
 
-  if (data.state && !NAME_RE.test(data.state)) {
+  if (state.length > 100) {
+    errors.state = "State must be 100 characters or less.";
+  } else if (state && !NAME_RE.test(state)) {
     errors.state = "State may only contain letters and spaces.";
   }
 
-  if (data.postalCode && !POSTAL_RE.test(data.postalCode)) {
-    errors.postalCode = "Postal code must be exactly 5 digits.";
+  if (postalCode.length > 20) {
+    errors.postalCode = "Postal code must be 20 characters or less.";
   }
 
-  if (data.country && !NAME_RE.test(data.country)) {
+  if (country.length > 100) {
+    errors.country = "Country must be 100 characters or less.";
+  } else if (country && !NAME_RE.test(country)) {
     errors.country = "Country may only contain letters and spaces.";
   }
 
