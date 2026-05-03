@@ -4,7 +4,7 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { Instant } from "./Instant";
+import type { Instant } from './Instant';
 
 export interface AdminDepartmentDto {
   slug: string;

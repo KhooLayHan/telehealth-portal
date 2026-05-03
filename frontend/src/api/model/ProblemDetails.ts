@@ -11,9 +11,9 @@ export interface ProblemDetails {
   /** @nullable */
   title?: string | null;
   /**
-   * @nullable
-   * @pattern ^-?(?:0|[1-9]\d*)$
-   */
+     * @nullable
+     * @pattern ^-?(?:0|[1-9]\d*)$
+     */
   status?: number | string | null;
   /** @nullable */
   detail?: string | null;

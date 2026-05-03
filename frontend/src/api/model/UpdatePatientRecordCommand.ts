@@ -4,9 +4,9 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { Allergy } from "./Allergy";
-import type { EmergencyContact } from "./EmergencyContact";
-import type { LocalDate } from "./LocalDate";
+import type { Allergy } from './Allergy';
+import type { EmergencyContact } from './EmergencyContact';
+import type { LocalDate } from './LocalDate';
 
 export interface UpdatePatientRecordCommand {
   firstName: string;
@@ -18,9 +18,9 @@ export interface UpdatePatientRecordCommand {
   /** @nullable */
   phoneNumber: string | null;
   /**
-   * @minLength 1
-   * @maxLength 1
-   */
+     * @minLength 1
+     * @maxLength 1
+     */
   gender: string;
   /** @nullable */
   bloodGroup: string | null;

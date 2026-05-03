@@ -6,14 +6,15 @@
  */
 
 export type AdminGetAllReceptionistsParams = {
-  Search?: string;
-  /**
-   * @pattern ^-?(?:0|[1-9]\d*)$
-   */
-  Page?: number | string;
-  /**
-   * @pattern ^-?(?:0|[1-9]\d*)$
-   */
-  PageSize?: number | string;
-  SortOrder?: string;
+Search?: string;
+Gender?: string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+Page?: number | string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+PageSize?: number | string;
+SortOrder?: string;
 };

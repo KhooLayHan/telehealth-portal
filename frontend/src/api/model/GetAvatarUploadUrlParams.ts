@@ -6,5 +6,5 @@
  */
 
 export type GetAvatarUploadUrlParams = {
-  contentType: string;
+contentType: string;
 };
