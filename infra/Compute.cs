@@ -262,6 +262,21 @@ public static class Compute
                     // -- App environment variables --
                     EbEnvVar("ASPNETCORE_ENVIRONMENT", "Production"),
                     EbEnvVar("ASPNETCORE_HTTP_PORTS", "8080"),
+                    EbSetting(
+                        "aws:elasticbeanstalk:environment:process:default",
+                        "HealthCheckPath",
+                        "/health"
+                    ),
+                    EbSetting(
+                        "aws:elasticbeanstalk:environment:process:default",
+                        "Port",
+                        "8080"
+                    ),
+                    EbSetting(
+                        "aws:elasticbeanstalk:environment:process:default",
+                        "Protocol",
+                        "HTTP"
+                    ),
                     EbEnvVar(
                         "Cors__AllowedOrigins",
                         storage.FrontendBucket.WebsiteEndpoint.Apply(ep => $"http://{ep}")

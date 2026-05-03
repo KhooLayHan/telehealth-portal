@@ -2,6 +2,11 @@
   <ItemGroup>
     <PackageReference Include="Asp.Versioning.Http" />
     <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" />
+    <PackageReference Include="AspNetCore.HealthChecks.Aws.S3" />
+    <PackageReference Include="AspNetCore.HealthChecks.Aws.Sns" />
+    <PackageReference Include="AspNetCore.HealthChecks.Aws.Sqs" />
+    <PackageReference Include="AspNetCore.HealthChecks.NpgSql" />
+    <PackageReference Include="AspNetCore.HealthChecks.UI.Client" />
     <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" />
     <PackageReference Include="AWSSDK.S3" />
     <PackageReference Include="AWSSDK.SimpleEmailV2" />
