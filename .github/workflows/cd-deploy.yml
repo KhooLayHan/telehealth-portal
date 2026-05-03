@@ -72,7 +72,6 @@ jobs:
   deploy-frontend:
     name: Frontend — Build & Sync to S3
     runs-on: ubuntu-latest
-    needs: deploy-infra
     permissions:
       id-token: write
       contents: read
