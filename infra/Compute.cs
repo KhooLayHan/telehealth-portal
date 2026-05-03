@@ -262,7 +262,12 @@ public static class Compute
                     // -- App environment variables --
                     EbEnvVar("ASPNETCORE_ENVIRONMENT", "Production"),
                     EbEnvVar("ASPNETCORE_HTTP_PORTS", "8080"),
-                    EbEnvVar("Cors__AllowedOrigins", "https://www.telehealth.foo,https://telehealth.foo"),
+                    EbEnvVar(
+                        "Cors__AllowedOrigins",
+                        storage.FrontendBucket.WebsiteEndpoint.Apply(ep =>
+                            $"http://{ep},https://www.telehealth.foo,https://telehealth.foo"
+                        )
+                    ),
                     // DB connection — full Npgsql connection string for ASP.NET Core
                     EbEnvVar(
                         "ConnectionStrings__Database",
