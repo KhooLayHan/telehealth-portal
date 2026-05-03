@@ -48,8 +48,8 @@ public static class Observability
                 Threshold = 80,
                 AlarmDescription = "RDS CPU > 80% for 10 minutes",
                 Dimensions = new InputMap<string> { { "DBInstanceIdentifier", db.Instance.Id } },
-                AlarmActions = { msg.MedicalAlertsTopic.Arn },
-                OkActions = { msg.MedicalAlertsTopic.Arn },
+                AlarmActions = { msg.OpsAlertsTopic.Arn },
+                OkActions = { msg.OpsAlertsTopic.Arn },
                 Tags = cfg.Tags,
             }
         );
@@ -68,8 +68,8 @@ public static class Observability
                 Threshold = 2_147_483_648, // 2 GiB in bytes
                 AlarmDescription = "RDS free storage below 2 GiB",
                 Dimensions = new InputMap<string> { { "DBInstanceIdentifier", db.Instance.Id } },
-                AlarmActions = { msg.MedicalAlertsTopic.Arn },
-                OkActions = { msg.MedicalAlertsTopic.Arn },
+                AlarmActions = { msg.OpsAlertsTopic.Arn },
+                OkActions = { msg.OpsAlertsTopic.Arn },
                 Tags = cfg.Tags,
             }
         );

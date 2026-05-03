@@ -8,27 +8,25 @@ internal static class AppointmentFaker
 {
     internal static (
         List<Appointment> Appointments,
-        List<DoctorSchedule> TouchedSchedules
+        List<long> TouchedScheduleIds
     ) BuildAppointments(
         Faker faker,
         List<Doctor> doctors,
         List<Patient> patients,
         List<DoctorSchedule> schedules,
         User createdByUser,
-        Dictionary<string, AppointmentStatus> appointmentStatuses,
-        Dictionary<string, ScheduleStatus> scheduleStatuses
+        Dictionary<string, AppointmentStatus> appointmentStatuses
     )
     {
         var now = SystemClock.Instance.GetCurrentInstant();
         var today = now.InUtc().Date;
 
-        var bookedStatusId = scheduleStatuses["booked"].Id;
         var completedAppointmentStatusId = appointmentStatuses["completed"].Id;
         var bookedAppointmentStatusId = appointmentStatuses["booked"].Id;
         var cancelledAppointmentStatusId = appointmentStatuses["cancelled"].Id;
 
         var appointments = new List<Appointment>();
-        var touchedSchedules = new List<DoctorSchedule>();
+        var touchedScheduleIds = new List<long>();
 
         static Appointment MakeAppointment(
             Guid publicId,
@@ -162,8 +160,7 @@ internal static class AppointmentFaker
                 )
             );
 
-            schedule.StatusId = bookedStatusId;
-            touchedSchedules.Add(schedule);
+            touchedScheduleIds.Add(schedule.Id);
         }
 
         // Upcoming (booked) — 20 future appointments
@@ -192,13 +189,12 @@ internal static class AppointmentFaker
                 )
             );
 
-            schedule.StatusId = bookedStatusId;
-            touchedSchedules.Add(schedule);
+            touchedScheduleIds.Add(schedule.Id);
         }
 
         // Cancelled — 5 cancelled appointments
         var cancelledSchedules = schedules
-            .Where(s => s.Date >= today)
+            .Where(s => s.Date > today) // ← consistent with upcoming filter
             .Skip(upcomingSchedules.Count)
             .Take(5)
             .ToList();
@@ -226,6 +222,6 @@ internal static class AppointmentFaker
             // Cancelled slot reverts to available — no status mutation needed
         }
 
-        return (appointments, touchedSchedules);
+        return (appointments, touchedScheduleIds);
     }
 }

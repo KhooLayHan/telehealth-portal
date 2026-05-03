@@ -18,16 +18,16 @@ export function PatientsListingPage() {
 
   const renderPatientsPage = () => {
     switch (role) {
-      case "patient":
-        return "Do something";
+      // case "patient":
+      //   return "Do something";
       case "receptionist":
         return <ReceptionistPatientsPage />;
       case "doctor":
         return "";
       case "admin":
         return <AdminPatientsPage />;
-      case "lab-tech":
-        return "Do something";
+      // case "lab-tech":
+      //   return "Do something";
       default:
         return <div>Invalid Role Detected</div>;
     }

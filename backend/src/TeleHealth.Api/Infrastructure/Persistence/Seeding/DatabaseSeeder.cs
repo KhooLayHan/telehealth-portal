@@ -18,11 +18,41 @@ public sealed class DatabaseSeeder(
 
     public async Task SeedAsync(ApplicationDbContext db, CancellationToken ct = default)
     {
-        if (await db.Users.AnyAsync(ct))
+        var truncateOnStartup = configuration.GetValue<bool>("Seed:TruncateOnStartup");
+        if (truncateOnStartup)
+        {
+            Log.Warning("Seed:TruncateOnStartup is enabled — truncating all tables...");
+            await db.Database.ExecuteSqlRawAsync(
+                """
+                TRUNCATE TABLE
+                    lab_reports,
+                    prescriptions,
+                    consultations,
+                    appointments,
+                    doctor_schedules,
+                    user_roles,
+                    doctors,
+                    patients,
+                    users,
+                    system_operating_hours,
+                    system_settings
+                RESTART IDENTITY CASCADE
+                """,
+                ct
+            );
+            db.ChangeTracker.Clear();
+            Log.Warning("Truncation complete. Proceeding with seeding.");
+        }
+        else if (await db.Users.AnyAsync(ct))
         {
             Log.Information("Database already contains data. Skipping seeding.");
             return;
         }
+
+        // Phase 0: System settings + operating hours (static clinic config)
+        var systemSettings = SystemSettingFaker.BuildSystemSettings();
+        db.SystemSettings.AddRange(systemSettings);
+        await db.SaveChangesAsync(ct);
 
         Log.Information("Seeding database with Bogus fake data...");
 
@@ -126,22 +156,25 @@ public sealed class DatabaseSeeder(
         );
         db.DoctorSchedules.AddRange(schedules);
         await db.SaveChangesAsync(ct);
+        db.ChangeTracker.Clear();
 
         // Phase 4: Appointments
         var patients = patientData.Select(p => p.Patient).ToList();
 
-        var (appointments, touchedSchedules) = AppointmentFaker.BuildAppointments(
+        var bookedScheduleStatusId = scheduleStatuses["booked"].Id;
+
+        var (appointments, touchedScheduleIds) = AppointmentFaker.BuildAppointments(
             faker,
             doctors,
             patients,
             schedules,
             doctorData[0].User,
-            appointmentStatuses,
-            scheduleStatuses
+            appointmentStatuses
         );
 
-        foreach (var schedule in touchedSchedules)
-            db.Entry(schedule).Property(s => s.StatusId).IsModified = true;
+        await db
+            .DoctorSchedules.Where(s => touchedScheduleIds.Contains(s.Id))
+            .ExecuteUpdateAsync(s => s.SetProperty(x => x.StatusId, bookedScheduleStatusId), ct);
 
         db.Appointments.AddRange(appointments);
         await db.SaveChangesAsync(ct);
@@ -169,10 +202,12 @@ public sealed class DatabaseSeeder(
         await db.SaveChangesAsync(ct);
 
         Log.Information(
-            "Seeding complete: {Admins} admins, {Receptionists} receptionists, {LabTechs} lab techs, "
+            "Seeding complete: {SystemSettings} system settings, {Admins} admins, "
+                + "{Receptionists} receptionists, {LabTechs} lab techs, "
                 + "{Doctors} doctors, {Patients} patients, {Schedules} schedules, "
                 + "{Appointments} appointments, {Consultations} consultations, "
                 + "{Prescriptions} prescriptions, {LabReports} lab reports",
+            systemSettings.Count,
             adminUsers.Count,
             receptionistUsers.Count,
             labTechUsers.Count,

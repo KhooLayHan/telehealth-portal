@@ -1,6 +1,5 @@
 import { useAuthStore } from "@/store/useAuthStore";
 import { LabTechLabReportsPage } from "./roles/LabTechLabReportsPage";
-import { PlaceholderLabReportsPage } from "./roles/PlaceholderLabReportsPage";
 
 export function LabReportsPage() {
   const { user } = useAuthStore();
@@ -9,10 +8,9 @@ export function LabReportsPage() {
   switch (role) {
     case "lab-tech":
       return <LabTechLabReportsPage />;
-    case "admin":
-    case "doctor":
-    case "patient":
-      return <PlaceholderLabReportsPage />;
+    // case "admin":
+    // case "doctor":
+    // case "patient":
     default:
       return <div>Invalid Role Detected</div>;
   }
