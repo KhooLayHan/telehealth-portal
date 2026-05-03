@@ -4,7 +4,7 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { ClinicStaffPatientDto } from './ClinicStaffPatientDto';
+import type { ClinicStaffPatientDto } from "./ClinicStaffPatientDto";
 
 export interface PagedResultOfClinicStaffPatientDto {
   items: ClinicStaffPatientDto[];

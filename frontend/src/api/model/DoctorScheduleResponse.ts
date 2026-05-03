@@ -4,8 +4,8 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { DoctorAppointmentDto } from './DoctorAppointmentDto';
-import type { LocalTime } from './LocalTime';
+import type { DoctorAppointmentDto } from "./DoctorAppointmentDto";
+import type { LocalTime } from "./LocalTime";
 
 export interface DoctorScheduleResponse {
   items: DoctorAppointmentDto[];

@@ -4,7 +4,7 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { LocalTime } from './LocalTime';
+import type { LocalTime } from "./LocalTime";
 
 export interface AdminOperatingHourDto {
   /** @pattern ^-?(?:0|[1-9]\d*)$ */

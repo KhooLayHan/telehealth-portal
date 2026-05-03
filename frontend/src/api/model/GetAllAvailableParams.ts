@@ -6,6 +6,6 @@
  */
 
 export type GetAllAvailableParams = {
-Date: string;
-DoctorPublicId?: string;
+  Date: string;
+  DoctorPublicId?: string;
 };

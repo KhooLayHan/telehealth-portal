@@ -4,7 +4,7 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { AdminUpdateOperatingHourCommand } from './AdminUpdateOperatingHourCommand';
+import type { AdminUpdateOperatingHourCommand } from "./AdminUpdateOperatingHourCommand";
 
 export interface AdminUpdateSettingsCommand {
   clinicName: string;

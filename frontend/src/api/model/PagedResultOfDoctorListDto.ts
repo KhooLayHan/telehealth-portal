@@ -4,7 +4,7 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { DoctorListDto } from './DoctorListDto';
+import type { DoctorListDto } from "./DoctorListDto";
 
 export interface PagedResultOfDoctorListDto {
   items: DoctorListDto[];

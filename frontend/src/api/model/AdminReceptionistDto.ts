@@ -4,9 +4,9 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { Address } from './Address';
-import type { Instant } from './Instant';
-import type { LocalDate } from './LocalDate';
+import type { Address } from "./Address";
+import type { Instant } from "./Instant";
+import type { LocalDate } from "./LocalDate";
 
 export interface AdminReceptionistDto {
   publicId?: string;
@@ -19,9 +19,9 @@ export interface AdminReceptionistDto {
   slug: string;
   icNumber: string;
   /**
-     * @minLength 1
-     * @maxLength 1
-     */
+   * @minLength 1
+   * @maxLength 1
+   */
   gender: string;
   dateOfBirth?: LocalDate;
   /** @nullable */
