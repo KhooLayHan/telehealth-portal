@@ -22,6 +22,9 @@ export interface AppointmentListFilters {
 // Helpers
 // ---------------------------------------------------------------------------
 
+// Sets how often the admin calendar refreshes appointment data.
+const APPOINTMENT_CALENDAR_REFETCH_INTERVAL_MS = 1000;
+
 // Converts year/month/day to ISO "YYYY-MM-DD" string for API date params
 function toIsoDate(year: number, month: number, day: number): string {
   const m = String(month + 1).padStart(2, "0");
@@ -57,6 +60,7 @@ export function useAdminAppointments(
   listPage: number,
   search = "",
   filters: AppointmentListFilters = { status: "", todayOnly: false },
+  shouldPollCalendar = true,
 ) {
   const today = new Date();
   const todayIso = toIsoDate(today.getFullYear(), today.getMonth(), today.getDate());
@@ -64,12 +68,19 @@ export function useAdminAppointments(
   const lastOfMonth = toIsoDate(year, month, daysInMonth(year, month));
 
   // Fetch all appointments in the visible month for calendar dots and today panel
-  const monthQuery = useGetAllAppointmentsForReceptionist({
-    From: firstOfMonth,
-    To: lastOfMonth,
-    PageSize: 50,
-    SortOrder: "asc",
-  });
+  const monthQuery = useGetAllAppointmentsForReceptionist(
+    {
+      From: firstOfMonth,
+      To: lastOfMonth,
+      PageSize: 50,
+      SortOrder: "asc",
+    },
+    {
+      query: {
+        refetchInterval: shouldPollCalendar ? APPOINTMENT_CALENDAR_REFETCH_INTERVAL_MS : false,
+      },
+    },
+  );
 
   const monthItems = useMemo<ReceptionistAppointmentDto[]>(() => {
     if (monthQuery.data?.status === 200) return monthQuery.data.data.items;
