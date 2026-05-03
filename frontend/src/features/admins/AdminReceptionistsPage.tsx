@@ -30,6 +30,7 @@ import { useReceptionistsCsvExport } from "@/features/admins/manageReceptionists
 import { ViewReceptionistDetailDialog } from "@/features/admins/manageReceptionists/ViewReceptionistDetailDialog";
 
 const PAGE_SIZE = 5;
+const RECEPTIONISTS_REFETCH_INTERVAL_MS = 1000;
 
 // Lists the receptionist gender filters supported by the admin receptionist endpoint.
 const GENDER_FILTER_OPTIONS = [
@@ -88,7 +89,11 @@ export function AdminReceptionistsPage() {
     Gender: genderFilter || undefined,
   };
 
-  const { data, isLoading, isError } = useAdminGetAllReceptionists(receptionistListParams);
+  const { data, isLoading, isError } = useAdminGetAllReceptionists(receptionistListParams, {
+    query: {
+      refetchInterval: RECEPTIONISTS_REFETCH_INTERVAL_MS,
+    },
+  });
 
   const result = data?.status === 200 ? data.data : null;
   const receptionists = result?.items ?? [];
