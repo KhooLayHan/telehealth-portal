@@ -246,7 +246,7 @@ public static class Serverless
                         ""Principal"": { ""Service"": ""lambda.amazonaws.com"" },
                         ""Effect"": ""Allow""
                     }]
-                }}",
+                }",
                 Tags = cfg.Tags,
             }
         );
@@ -273,7 +273,7 @@ public static class Serverless
                             ""Action"": [""ses:SendEmail"", ""ses:SendRawEmail""],
                             ""Resource"": ""*""
                         }]
-                    }}",
+                    }",
             }
         );
 
