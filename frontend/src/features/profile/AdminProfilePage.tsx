@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { motion, type Variants } from "framer-motion";
 import {
   Camera,
@@ -16,6 +17,14 @@ import {
 import type * as React from "react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -240,14 +249,26 @@ export function AdminProfilePage() {
       initial="hidden"
       animate="show"
     >
-      {/* Page header */}
-      <motion.div variants={cardAnim}>
-        <p className="text-xs text-muted-foreground">Dashboard › Profile</p>
-        <h1 className="mt-0.5 font-bold text-2xl tracking-tight">My Profile</h1>
-        <p className="text-muted-foreground text-sm">
-          Manage your personal information and account settings.
-        </p>
-      </motion.div>
+      <motion.header className="space-y-6" variants={cardAnim}>
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink render={<Link to="/dashboard" />}>Dashboard</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Profile</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
+        <div className="space-y-1">
+          <h1 className="font-semibold text-3xl tracking-tight">My Profile</h1>
+          <p className="text-lg text-muted-foreground">
+            Manage your personal information and account settings.
+          </p>
+        </div>
+      </motion.header>
 
       {/* Hero card */}
       <motion.div variants={cardAnim}>
