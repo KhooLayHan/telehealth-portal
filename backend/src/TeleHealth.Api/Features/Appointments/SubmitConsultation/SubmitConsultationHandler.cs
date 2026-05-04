@@ -27,7 +27,7 @@ public sealed class SubmitConsultationHandler(ApplicationDbContext db)
         if (appointment is null)
             throw new AppointmentNotFoundException();
 
-        if (appointment.AppointmentStatus.Name != "Booked")
+        if (appointment.AppointmentStatus.Name != "In Progress")
             throw new AppointmentAlreadyTerminatedException(appointment.AppointmentStatus.Name);
 
         var alreadyExists = await db.Consultations.AnyAsync(

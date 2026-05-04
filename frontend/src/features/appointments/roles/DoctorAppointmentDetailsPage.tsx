@@ -675,7 +675,7 @@ export function DoctorApptDetailsPage() {
   // Cast to access the consultation field (populated after backend restart picks up schema)
   const consultation = (appt as typeof appt & { consultation?: ConsultationDetail }).consultation;
 
-  const isBooked = appt.status === "Booked";
+  const isInProgress = appt.status === "In Progress";
   const isCompleted = appt.status === "Completed";
 
   // Errors are only computed (and shown) after the first submit attempt
@@ -874,7 +874,7 @@ export function DoctorApptDetailsPage() {
               </div>
 
               {/* Add Consultation Notes button */}
-              {isBooked && !showForm && (
+              {isInProgress && !showForm && (
                 <div className="mt-auto pt-2">
                   <Button
                     className="w-full border-dashed border-[#0d9488] text-[#0d9488] hover:bg-[#0d9488]/5"
