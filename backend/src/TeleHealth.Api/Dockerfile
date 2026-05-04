@@ -1,5 +1,5 @@
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS base
-RUN apk add --no-cache krb5-libs
+RUN apk add --no-cache krb5-libs icu-libs icu-data-full
 WORKDIR /app
  
 EXPOSE 8080
