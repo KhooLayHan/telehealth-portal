@@ -4,7 +4,13 @@ import { useGetDoctorSchedule } from "@/api/generated/doctors/doctors";
 
 const PAGE_SIZE = 15;
 
-export type StatusFilter = "all" | "booked" | "cancelled" | "completed";
+export type StatusFilter =
+  | "all"
+  | "booked"
+  | "checked-in"
+  | "in-progress"
+  | "cancelled"
+  | "completed";
 
 function getTodayStr(): string {
   const d = new Date();

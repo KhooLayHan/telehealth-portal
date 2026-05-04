@@ -22,6 +22,8 @@ const ACCENT = "#0d9488";
 const STATUS_TABS: { label: string; value: StatusFilter }[] = [
   { label: "All", value: "all" },
   { label: "Booked", value: "booked" },
+  { label: "Checked In", value: "checked-in" },
+  { label: "In Progress", value: "in-progress" },
   { label: "Cancelled", value: "cancelled" },
   { label: "Completed", value: "completed" },
 ];
@@ -29,7 +31,7 @@ const STATUS_TABS: { label: string; value: StatusFilter }[] = [
 function ViewCell({ row }: { row: { original: DoctorAppointmentDto } }) {
   const navigate = useNavigate();
   const status = row.original.status ?? "";
-  const canView = status === "Booked" || status === "Completed";
+  const canView = status === "In Progress" || status === "Completed";
 
   if (!canView) return <span className="text-muted-foreground/40 text-xs">—</span>;
 

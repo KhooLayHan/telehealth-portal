@@ -31,7 +31,7 @@ type Props = {
 function ActionCell({ row }: { row: { original: DoctorAppointmentDto } }) {
   const navigate = useNavigate();
   const status = row.original.status ?? "";
-  const canView = status === "Booked" || status === "Completed";
+  const canView = status === "In Progress" || status === "Completed";
 
   if (!canView) return null;
 
