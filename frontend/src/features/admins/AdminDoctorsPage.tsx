@@ -23,6 +23,7 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import { AddNewDoctorForm } from "./manageDoctors/components/AddNewDoctorForm";
 import { DeleteDoctorDialog } from "./manageDoctors/components/DeleteDoctorDialog";
 import { DoctorCard } from "./manageDoctors/components/DoctorCard";
@@ -30,7 +31,6 @@ import { EditDoctorForm } from "./manageDoctors/components/EditDoctorForm";
 import { ViewDoctorDetailDialog } from "./manageDoctors/components/ViewDoctorDetailDialog";
 import { ViewDoctorScheduleDialog } from "./manageDoctors/components/ViewDoctorScheduleDialog";
 
-const ACCENT = "#0d9488";
 const PAGE_SIZE = 6;
 const CSV_FORMULA_PREFIX_PATTERN = /^\s*[=+\-@]/;
 
@@ -493,8 +493,10 @@ export function AdminDoctorsPage() {
                     key={item}
                     variant={item === page ? "default" : "outline"}
                     size="sm"
-                    className="h-8 w-8 p-0 text-xs"
-                    style={item === page ? { background: ACCENT } : undefined}
+                    className={cn(
+                      "h-8 w-8 p-0 text-xs",
+                      item === page && "bg-black text-white hover:bg-black/85",
+                    )}
                     onClick={() => setPage(item)}
                   >
                     {item}

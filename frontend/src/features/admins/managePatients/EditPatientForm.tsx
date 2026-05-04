@@ -1,7 +1,7 @@
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { Heart, Plus, Trash2 } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -34,29 +34,179 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 // Lists the selectable blood groups for the patient record edit form.
 const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"] as const;
 
+// Lists the gender codes accepted by the patient registration API.
+const GENDERS = ["M", "F", "N"] as const;
+
+// Lists the selectable allergy severities accepted by the patient record API.
+const ALLERGY_SEVERITIES = ["Mild", "Moderate", "Severe"] as const;
+
+// Lists the tab values available in the patient edit dialog.
+const EDIT_PATIENT_TABS = ["personal", "account", "allergies", "emergency"] as const;
+
+// Maps form root fields to the tab where the user can correct them.
+const EDIT_PATIENT_FIELD_TABS = {
+  firstName: "personal",
+  lastName: "personal",
+  dateOfBirth: "personal",
+  gender: "personal",
+  phoneNumber: "personal",
+  bloodGroup: "personal",
+  username: "account",
+  email: "account",
+  icNumber: "account",
+  allergies: "allergies",
+  emergencyContactName: "emergency",
+  emergencyContactRelationship: "emergency",
+  emergencyContactPhone: "emergency",
+} as const satisfies Record<string, EditPatientTab>;
+
+// Describes the tab ids used by the edit-patient form.
+type EditPatientTab = (typeof EDIT_PATIENT_TABS)[number];
+
+// Matches Malaysian IC numbers in the backend format: 12 digits without dashes.
+const MALAYSIAN_IC_REGEX = /^\d{12}$/;
+
+// Matches names containing only letters and spaces.
+const PATIENT_NAME_REGEX = /^[A-Za-z ]+$/;
+
+// Matches usernames containing only letters, numbers, underscores, and dots.
+const USERNAME_REGEX = /^[A-Za-z0-9_.]+$/;
+
+// Matches international phone numbers with a + prefix and 11-12 digits.
+const PHONE_NUMBER_REGEX = /^\+\d{11,12}$/;
+
+// Checks that a form date string is before today's local date.
+function isPastDate(value: string): boolean {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const selectedDate = new Date(`${value}T00:00:00`);
+
+  return !Number.isNaN(selectedDate.getTime()) && selectedDate < today;
+}
+
+// Formats yesterday as a local date input value.
+function getYesterdayDateInputValue(): string {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  const year = yesterday.getFullYear();
+  const month = String(yesterday.getMonth() + 1).padStart(2, "0");
+  const day = String(yesterday.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
 // Validates a single allergy row in the edit-patient form.
 const allergySchema = z.object({
-  allergen: z.string().min(1, "Allergen is required"),
-  severity: z.string().min(1, "Severity is required"),
-  reaction: z.string().min(1, "Reaction is required"),
+  allergen: z.string().trim().min(1, "Allergen is required").max(100),
+  severity: z
+    .string()
+    .refine(
+      (severity) => ALLERGY_SEVERITIES.includes(severity as (typeof ALLERGY_SEVERITIES)[number]),
+      "Severity must be Mild, Moderate, or Severe",
+    ),
+  reaction: z.string().trim().min(1, "Reaction is required").max(255),
 });
 
 // Validates the full patient edit form before saving the record.
-const editPatientSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  username: z.string().min(1, "Username is required").max(50, "Username is too long"),
-  email: z.string().email("Must be a valid email").max(255, "Email is too long"),
-  icNumber: z.string().regex(/^\d{12}$/, "IC number must be exactly 12 digits"),
-  gender: z.string().min(1, "Gender is required"),
-  dateOfBirth: z.string().min(1, "Date of birth is required"),
-  phoneNumber: z.string(),
-  bloodGroup: z.string(),
-  allergies: z.array(allergySchema),
-  emergencyContactName: z.string(),
-  emergencyContactRelationship: z.string(),
-  emergencyContactPhone: z.string(),
-});
+const editPatientSchema = z
+  .object({
+    firstName: z
+      .string()
+      .trim()
+      .min(1, "First name is required")
+      .max(20, "First name must be 20 characters or fewer")
+      .regex(PATIENT_NAME_REGEX, "First name can only contain letters and spaces"),
+    lastName: z
+      .string()
+      .trim()
+      .min(1, "Last name is required")
+      .max(20, "Last name must be 20 characters or fewer")
+      .regex(PATIENT_NAME_REGEX, "Last name can only contain letters and spaces"),
+    username: z
+      .string()
+      .trim()
+      .min(1, "Username is required")
+      .min(3, "Username must be at least 3 characters")
+      .max(20, "Username must be 20 characters or fewer")
+      .regex(USERNAME_REGEX, "Username can only contain letters, numbers, underscores, and dots"),
+    email: z.string().trim().email("Valid email is required").max(255),
+    icNumber: z
+      .string()
+      .trim()
+      .regex(MALAYSIAN_IC_REGEX, "IC number must be exactly 12 digits without dashes"),
+    gender: z
+      .string()
+      .refine(
+        (gender) => GENDERS.includes(gender as (typeof GENDERS)[number]),
+        "Gender must be male, female, or prefer not to say",
+      ),
+    dateOfBirth: z
+      .string()
+      .min(1, "Date of birth is required")
+      .refine(isPastDate, "Date of birth cannot be today or in the future"),
+    phoneNumber: z
+      .string()
+      .trim()
+      .refine((phoneNumber) => {
+        return phoneNumber.length === 0 || PHONE_NUMBER_REGEX.test(phoneNumber);
+      }, "Phone number must be 12-13 characters starting with + followed by digits only"),
+    bloodGroup: z.string().refine((bloodGroup) => {
+      return (
+        bloodGroup === "" || BLOOD_GROUPS.includes(bloodGroup as (typeof BLOOD_GROUPS)[number])
+      );
+    }, "Blood group must be valid"),
+    allergies: z.array(allergySchema),
+    emergencyContactName: z.string().trim().max(100),
+    emergencyContactRelationship: z.string().trim().max(50),
+    emergencyContactPhone: z.string().trim(),
+  })
+  .superRefine((value, context) => {
+    const emergencyContactFields = [
+      {
+        field: "emergencyContactName",
+        message: "Emergency contact name is required",
+        value: value.emergencyContactName,
+      },
+      {
+        field: "emergencyContactRelationship",
+        message: "Emergency contact relationship is required",
+        value: value.emergencyContactRelationship,
+      },
+      {
+        field: "emergencyContactPhone",
+        message: "Emergency contact phone is required",
+        value: value.emergencyContactPhone,
+      },
+    ] as const;
+    const hasEmergencyContact = emergencyContactFields.some((field) => field.value.length > 0);
+
+    if (!hasEmergencyContact) {
+      return;
+    }
+
+    for (const field of emergencyContactFields) {
+      if (field.value.length === 0) {
+        context.addIssue({
+          code: "custom",
+          message: field.message,
+          path: [field.field],
+        });
+      }
+    }
+
+    if (
+      value.emergencyContactPhone.length > 0 &&
+      !PHONE_NUMBER_REGEX.test(value.emergencyContactPhone)
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "Emergency contact phone must be 12-13 characters with + and digits only",
+        path: ["emergencyContactPhone"],
+      });
+    }
+  });
 
 // Describes the values captured by the edit-patient form.
 type EditPatientFormValues = z.infer<typeof editPatientSchema>;
@@ -98,6 +248,13 @@ function buildEditPatientValues(patient: ClinicStaffPatientDto): EditPatientForm
   };
 }
 
+// Builds stable React keys for editable allergy rows.
+function buildAllergyKeys(patient: ClinicStaffPatientDto): string[] {
+  return (patient.allergies ?? []).map(
+    (allergy, index) => `${allergy.allergen}-${allergy.severity}-${index}`,
+  );
+}
+
 // Builds stable initials for the selected patient avatar.
 function getInitials(patient: ClinicStaffPatientDto): string {
   const firstInitial = patient.firstName.trim().at(0) ?? "";
@@ -120,6 +277,59 @@ function toFieldErrors(errors: unknown[]): Array<{ message: string }> {
   }));
 }
 
+// Reads the root form field from a TanStack/Zod validation error object.
+function getErrorRootField(error: unknown): string | null {
+  if (typeof error !== "object" || error === null) {
+    return null;
+  }
+
+  if (
+    "path" in error &&
+    Array.isArray(error.path) &&
+    typeof error.path[0] === "string" &&
+    error.path[0].length > 0
+  ) {
+    return error.path[0];
+  }
+
+  for (const [key, value] of Object.entries(error)) {
+    if (key in EDIT_PATIENT_FIELD_TABS) {
+      return key;
+    }
+
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        const nestedField = getErrorRootField(item);
+
+        if (nestedField) {
+          return nestedField;
+        }
+      }
+    } else {
+      const nestedField = getErrorRootField(value);
+
+      if (nestedField) {
+        return nestedField;
+      }
+    }
+  }
+
+  return null;
+}
+
+// Finds the tab that contains the first invalid edit-patient field.
+function getFirstInvalidTab(errors: unknown[]): EditPatientTab | null {
+  for (const error of errors) {
+    const rootField = getErrorRootField(error);
+
+    if (rootField && rootField in EDIT_PATIENT_FIELD_TABS) {
+      return EDIT_PATIENT_FIELD_TABS[rootField as keyof typeof EDIT_PATIENT_FIELD_TABS];
+    }
+  }
+
+  return null;
+}
+
 // Renders the selected patient edit dialog when a table row is active.
 export function EditPatientForm({ patient, open, onOpenChange }: EditPatientFormProps) {
   if (!patient) {
@@ -139,16 +349,22 @@ export function EditPatientForm({ patient, open, onOpenChange }: EditPatientForm
 // Renders a prefilled form for editing patient details through the backend.
 function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientFormContentProps) {
   const queryClient = useQueryClient();
-  const allergyKeysRef = useRef<string[]>(
-    (patient.allergies ?? []).map(
-      (allergy, index) => `${allergy.allergen}-${allergy.severity}-${index}`,
-    ),
-  );
+  const [activeTab, setActiveTab] = useState<EditPatientTab>("personal");
+  const allergyKeysRef = useRef<string[]>(buildAllergyKeys(patient));
   const { mutateAsync, isPending } = useUpdatePatientRecord();
 
   const form = useForm({
     defaultValues: buildEditPatientValues(patient),
     validators: { onSubmit: editPatientSchema },
+    onSubmitInvalid: ({ formApi }) => {
+      const invalidTab = getFirstInvalidTab(formApi.state.errors);
+
+      if (invalidTab) {
+        setActiveTab(invalidTab);
+      }
+
+      toast.error("Please fix the highlighted fields before saving.");
+    },
     onSubmit: async ({ value }) => {
       const hasEmergencyContact = value.emergencyContactName.trim().length > 0;
       const updatePayload: UpdatePatientRecordCommand = {
@@ -199,6 +415,8 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) {
       form.reset(buildEditPatientValues(patient));
+      allergyKeysRef.current = buildAllergyKeys(patient);
+      setActiveTab("personal");
     }
 
     onOpenChange(nextOpen);
@@ -237,11 +455,15 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
         <form
           onSubmit={(event) => {
             event.preventDefault();
-            form.handleSubmit();
+            void form.handleSubmit();
           }}
           className="flex flex-col"
         >
-          <Tabs defaultValue="personal" className="flex-1 px-6 pb-4">
+          <Tabs
+            value={activeTab}
+            onValueChange={(value) => setActiveTab(value as EditPatientTab)}
+            className="flex-1 px-6 pb-4"
+          >
             <TabsList className="mb-5 grid w-full grid-cols-4">
               <TabsTrigger value="personal">Personal</TabsTrigger>
               <TabsTrigger value="account">Account</TabsTrigger>
@@ -251,6 +473,7 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
 
             <TabsContent
               value="personal"
+              keepMounted
               className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
             >
               <p className="font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
@@ -299,6 +522,7 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
                         value={field.state.value}
                         onChange={(event) => field.handleChange(event.target.value)}
                         onBlur={field.handleBlur}
+                        max={getYesterdayDateInputValue()}
                       />
                       <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                     </Field>
@@ -319,8 +543,7 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
                         <SelectContent>
                           <SelectItem value="M">Male</SelectItem>
                           <SelectItem value="F">Female</SelectItem>
-                          <SelectItem value="O">Other</SelectItem>
-                          <SelectItem value="N">Not Specified</SelectItem>
+                          <SelectItem value="N">Prefer not to say</SelectItem>
                         </SelectContent>
                       </Select>
                       <FieldError errors={toFieldErrors(field.state.meta.errors)} />
@@ -338,7 +561,7 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
                         value={field.state.value}
                         onChange={(event) => field.handleChange(event.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder="+601x-xxxxxxx"
+                        placeholder="+60162173366"
                       />
                       <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                     </Field>
@@ -373,6 +596,7 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
 
             <TabsContent
               value="account"
+              keepMounted
               className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
             >
               <p className="font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
@@ -432,7 +656,11 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
               </form.Field>
             </TabsContent>
 
-            <TabsContent value="allergies" className="mt-0 max-h-[52vh] overflow-y-auto pb-2 pr-1">
+            <TabsContent
+              value="allergies"
+              keepMounted
+              className="mt-0 max-h-[52vh] overflow-y-auto pb-2 pr-1"
+            >
               <form.Field name="allergies" mode="array">
                 {(field) => (
                   <div className="space-y-3">
@@ -554,6 +782,7 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
 
             <TabsContent
               value="emergency"
+              keepMounted
               className="mt-0 max-h-[52vh] space-y-4 overflow-y-auto pb-2 pr-1"
             >
               <p className="font-semibold text-[10px] text-primary uppercase tracking-[0.2em]">
@@ -599,7 +828,7 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
                         value={field.state.value}
                         onChange={(event) => field.handleChange(event.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder="+601x-xxxxxxx"
+                        placeholder="+60162173366"
                       />
                       <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                     </Field>
@@ -613,9 +842,9 @@ function EditPatientFormContent({ patient, open, onOpenChange }: EditPatientForm
             <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
               Cancel
             </Button>
-            <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting] as const}>
-              {([canSubmit, isSubmitting]) => (
-                <Button type="submit" disabled={!canSubmit || isSubmitting || isPending}>
+            <form.Subscribe selector={(state) => state.isSubmitting}>
+              {(isSubmitting) => (
+                <Button type="submit" disabled={isSubmitting || isPending}>
                   {isSubmitting || isPending ? "Saving..." : "Save Changes"}
                 </Button>
               )}

@@ -28,25 +28,178 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Validates the lab technician edit form before local save.
-const editLabTechSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  username: z.string().min(1, "Username is required"),
-  email: z.string().email("Must be a valid email"),
-  icNumber: z
+// Matches Malaysian IC numbers in the backend format: 12 digits without dashes.
+const malaysianIcRegex = /^\d{12}$/;
+
+// Matches names that contain letters and spaces only.
+const nameRegex = /^[A-Za-z ]+$/;
+
+// Matches usernames that contain letters, numbers, underscores, and dots only.
+const usernameRegex = /^[A-Za-z0-9_.]+$/;
+
+// Matches international phone numbers with a + prefix and 11-12 digits.
+const phoneNumberRegex = /^\+\d{11,12}$/;
+
+// Stores the fixed country value used for lab technician addresses.
+const malaysiaCountry = "Malaysia";
+
+// Lists the selectable Malaysian states and federal territories.
+const malaysiaStates: readonly string[] = [
+  "Johor",
+  "Kedah",
+  "Kelantan",
+  "Melaka",
+  "Negeri Sembilan",
+  "Pahang",
+  "Perak",
+  "Perlis",
+  "Pulau Pinang",
+  "Sabah",
+  "Sarawak",
+  "Selangor",
+  "Terengganu",
+  "Kuala Lumpur",
+  "Labuan",
+  "Putrajaya",
+] as const;
+
+// Validates a required person name using the lab technician naming rules.
+const requiredName = (fieldName: string) =>
+  z
     .string()
-    .min(1, "IC number is required")
-    .regex(/^\d{12}$/, "IC number must be exactly 12 digits without dashes"),
-  phoneNumber: z.string(),
-  gender: z.enum(["M", "F", "O", "N"], { message: "Select a gender" }),
-  dateOfBirth: z.string(),
-  street: z.string(),
-  city: z.string(),
-  state: z.string(),
-  postalCode: z.string(),
-  country: z.string(),
-});
+    .refine((value) => value.trim().length > 0, `${fieldName} is required`)
+    .refine((value) => value.trim().length <= 20, `${fieldName} must be 20 characters or fewer`)
+    .refine(
+      (value) => value.trim().length === 0 || nameRegex.test(value.trim()),
+      `${fieldName} may only contain letters and spaces`,
+    );
+
+// Validates usernames using the lab technician account naming rules.
+const requiredUsername = z
+  .string()
+  .refine((value) => value.trim().length > 0, "Username is required")
+  .refine((value) => value.trim().length === 0 || value.trim().length >= 3, {
+    message: "Username must be at least 3 characters",
+  })
+  .refine((value) => value.trim().length <= 20, "Username must be 20 characters or fewer")
+  .refine(
+    (value) => value.trim().length === 0 || usernameRegex.test(value.trim()),
+    "Username may only contain letters, numbers, underscores, and dots",
+  );
+
+// Validates optional trimmed text fields against backend length limits.
+const optionalText = (fieldName: string, maxLength: number) =>
+  z.string().trim().max(maxLength, `${fieldName} must be ${maxLength} characters or fewer`);
+
+// Validates an optional phone number only when one is provided.
+const optionalPhoneNumber = z
+  .string()
+  .trim()
+  .refine((value) => value.length === 0 || phoneNumberRegex.test(value), {
+    message: "Phone must be 12-13 characters starting with + followed by digits only",
+  });
+
+// Checks that a date input value is a real date before today's local date.
+function isValidDateOfBirth(value: string): boolean {
+  const dateOfBirthRegex = /^\d{4}-\d{2}-\d{2}$/;
+
+  if (!dateOfBirthRegex.test(value)) {
+    return false;
+  }
+
+  const [year, month, day] = value.split("-").map(Number);
+  const selectedDate = new Date(year, month - 1, day);
+  const isRealDate =
+    selectedDate.getFullYear() === year &&
+    selectedDate.getMonth() === month - 1 &&
+    selectedDate.getDate() === day;
+
+  if (!isRealDate) {
+    return false;
+  }
+
+  const today = new Date();
+  const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(
+    2,
+    "0",
+  )}-${String(today.getDate()).padStart(2, "0")}`;
+
+  return value < todayKey;
+}
+
+// Formats yesterday as the latest date of birth allowed by the date picker.
+function getYesterdayDateInputValue(): string {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  const year = yesterday.getFullYear();
+  const month = String(yesterday.getMonth() + 1).padStart(2, "0");
+  const day = String(yesterday.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+// Validates the lab technician edit form before local save.
+const editLabTechSchema = z
+  .object({
+    firstName: requiredName("First name"),
+    lastName: requiredName("Last name"),
+    username: requiredUsername,
+    email: z
+      .string()
+      .trim()
+      .min(1, "Email is required")
+      .email("Must be a valid email")
+      .max(254, "Email must be 254 characters or fewer"),
+    icNumber: z
+      .string()
+      .trim()
+      .regex(malaysianIcRegex, "IC number must be exactly 12 digits without dashes"),
+    phoneNumber: optionalPhoneNumber,
+    gender: z.enum(["M", "F", "N"], {
+      message: "Gender must be male, female, or prefer not to say",
+    }),
+    dateOfBirth: z
+      .string()
+      .min(1, "Date of birth is required")
+      .refine(
+        (value) => value.length === 0 || isValidDateOfBirth(value),
+        "Date of birth cannot be today or in the future",
+      ),
+    street: optionalText("Street", 200),
+    city: optionalText("City", 100),
+    state: z
+      .string()
+      .refine(
+        (value) => value.length === 0 || malaysiaStates.includes(value),
+        "Select a Malaysia state",
+      ),
+    postalCode: optionalText("Postal code", 20),
+    country: z.literal(malaysiaCountry),
+  })
+  .superRefine((data, context) => {
+    const addressFields = [
+      { fieldName: "street", label: "Street", value: data.street },
+      { fieldName: "city", label: "City", value: data.city },
+      { fieldName: "state", label: "State", value: data.state },
+      { fieldName: "postalCode", label: "Postal code", value: data.postalCode },
+    ] as const;
+    const hasAnyAddressValue = addressFields.some((field) => field.value.length > 0);
+
+    if (!hasAnyAddressValue) {
+      return;
+    }
+
+    for (const field of addressFields) {
+      if (field.value.length === 0) {
+        context.addIssue({
+          code: "custom",
+          message: `${field.label} is required when address is provided`,
+          path: [field.fieldName],
+        });
+      }
+    }
+  });
 
 // Describes the values collected by the edit lab technician form.
 type EditLabTechFormValues = z.infer<typeof editLabTechSchema>;
@@ -60,13 +213,13 @@ function buildEditDefaultValues(labTech: AdminLabTechDto): EditLabTechFormValues
     email: labTech.email,
     icNumber: labTech.icNumber,
     phoneNumber: labTech.phoneNumber ?? "",
-    gender: (labTech.gender ?? "N") as "M" | "F" | "O" | "N",
+    gender: labTech.gender === "M" || labTech.gender === "F" ? labTech.gender : "N",
     dateOfBirth: labTech.dateOfBirth ?? "",
     street: labTech.address?.street ?? "",
     city: labTech.address?.city ?? "",
     state: labTech.address?.state ?? "",
     postalCode: labTech.address?.postalCode ?? "",
-    country: labTech.address?.country ?? "",
+    country: malaysiaCountry,
   };
 }
 
@@ -143,24 +296,38 @@ function EditLabTechFormContent({ labTech, open, onOpenChange }: EditLabTechForm
         return;
       }
 
+      const firstName = value.firstName.trim();
+      const lastName = value.lastName.trim();
+      const username = value.username.trim();
+      const email = value.email.trim();
+      const icNumber = value.icNumber.trim();
+      const phoneNumber = value.phoneNumber.trim();
+      const street = value.street.trim();
+      const city = value.city.trim();
+      const state = value.state.trim();
+      const postalCode = value.postalCode.trim();
+      const hasAddress = [street, city, state, postalCode].some(
+        (addressPart) => addressPart.length > 0,
+      );
+
       await mutateAsync({
         id: labTech.publicId,
         data: {
-          firstName: value.firstName,
-          lastName: value.lastName,
-          username: value.username,
-          email: value.email,
-          icNumber: value.icNumber,
-          phoneNumber: value.phoneNumber || null,
+          firstName,
+          lastName,
+          username,
+          email,
+          icNumber,
+          phoneNumber: phoneNumber || null,
           gender: value.gender,
           dateOfBirth: value.dateOfBirth,
-          address: value.street
+          address: hasAddress
             ? {
-                street: value.street,
-                city: value.city,
-                state: value.state,
-                postalCode: value.postalCode,
-                country: value.country,
+                street,
+                city,
+                state,
+                postalCode,
+                country: malaysiaCountry,
               }
             : null,
         },
@@ -224,6 +391,7 @@ function EditLabTechFormContent({ labTech, open, onOpenChange }: EditLabTechForm
                         onChange={(event) => field.handleChange(event.target.value)}
                         onBlur={field.handleBlur}
                         placeholder="e.g. Nur"
+                        maxLength={20}
                       />
                       <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                     </Field>
@@ -239,6 +407,7 @@ function EditLabTechFormContent({ labTech, open, onOpenChange }: EditLabTechForm
                         onChange={(event) => field.handleChange(event.target.value)}
                         onBlur={field.handleBlur}
                         placeholder="e.g. Aisyah"
+                        maxLength={20}
                       />
                       <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                     </Field>
@@ -272,7 +441,8 @@ function EditLabTechFormContent({ labTech, open, onOpenChange }: EditLabTechForm
                         value={field.state.value}
                         onChange={(event) => field.handleChange(event.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder="+601x-xxxxxxx"
+                        placeholder="e.g. +60162173366"
+                        maxLength={13}
                       />
                       <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                     </Field>
@@ -286,7 +456,7 @@ function EditLabTechFormContent({ labTech, open, onOpenChange }: EditLabTechForm
                       <Select
                         value={field.state.value}
                         onValueChange={(value) =>
-                          field.handleChange((value ?? "N") as "M" | "F" | "O" | "N")
+                          field.handleChange((value ?? "N") as "M" | "F" | "N")
                         }
                       >
                         <SelectTrigger className="w-full" onBlur={field.handleBlur}>
@@ -295,7 +465,6 @@ function EditLabTechFormContent({ labTech, open, onOpenChange }: EditLabTechForm
                         <SelectContent>
                           <SelectItem value="M">Male</SelectItem>
                           <SelectItem value="F">Female</SelectItem>
-                          <SelectItem value="O">Other</SelectItem>
                           <SelectItem value="N">Prefer not to say</SelectItem>
                         </SelectContent>
                       </Select>
@@ -314,6 +483,7 @@ function EditLabTechFormContent({ labTech, open, onOpenChange }: EditLabTechForm
                       value={field.state.value}
                       onChange={(event) => field.handleChange(event.target.value)}
                       onBlur={field.handleBlur}
+                      max={getYesterdayDateInputValue()}
                     />
                     <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                   </Field>
@@ -334,8 +504,9 @@ function EditLabTechFormContent({ labTech, open, onOpenChange }: EditLabTechForm
                         value={field.state.value}
                         onChange={(event) => field.handleChange(event.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder="e.g. lab.nur"
+                        placeholder="e.g. lab_nur"
                         autoComplete="off"
+                        maxLength={20}
                       />
                       <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                     </Field>
@@ -400,12 +571,21 @@ function EditLabTechFormContent({ labTech, open, onOpenChange }: EditLabTechForm
                   {(field) => (
                     <Field>
                       <FieldLabel>State</FieldLabel>
-                      <Input
+                      <Select
                         value={field.state.value}
-                        onChange={(event) => field.handleChange(event.target.value)}
-                        onBlur={field.handleBlur}
-                        placeholder="e.g. Wilayah Persekutuan"
-                      />
+                        onValueChange={(value) => field.handleChange(value ?? "")}
+                      >
+                        <SelectTrigger className="w-full" onBlur={field.handleBlur}>
+                          <SelectValue placeholder="Select state" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {malaysiaStates.map((state) => (
+                            <SelectItem key={state} value={state}>
+                              {state}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                     </Field>
                   )}
@@ -435,9 +615,9 @@ function EditLabTechFormContent({ labTech, open, onOpenChange }: EditLabTechForm
                       <FieldLabel>Country</FieldLabel>
                       <Input
                         value={field.state.value}
-                        onChange={(event) => field.handleChange(event.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder="e.g. Malaysia"
+                        readOnly
+                        aria-readonly="true"
                       />
                       <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                     </Field>

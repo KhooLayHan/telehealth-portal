@@ -1,9 +1,10 @@
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { Eye, EyeOff, Plus, Trash2 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { useAdminGetAllDepartments } from "@/api/generated/admins/admins";
 import { getGetAllQueryKey, useCreateDoctor } from "@/api/generated/doctors/doctors";
 import type { CreateDoctorCommand } from "@/api/model/CreateDoctorCommand";
 import { ApiError } from "@/api/ofetch-mutator";
@@ -27,38 +28,179 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
-const addDoctorSchema = z.object({
-  firstName: z.string().min(1, "Required"),
-  lastName: z.string().min(1, "Required"),
-  username: z.string().min(1, "Required"),
-  email: z.string().email("Invalid email"),
-  password: z
+const icNumberRegex = /^\d{12}$/;
+const dateOfBirthRegex = /^\d{4}-\d{2}-\d{2}$/;
+const nameRegex = /^[A-Za-z ]+$/;
+const usernameRegex = /^[A-Za-z0-9_.]+$/;
+const phoneNumberRegex = /^\+\d{11,12}$/;
+const specialCharacterRegex = /[^a-zA-Z0-9]/;
+const malaysiaCountry = "Malaysia";
+// Defines how many active departments are loaded for doctor department dropdowns.
+const departmentSelectPageSize = 1000;
+const malaysiaStates: readonly string[] = [
+  "Johor",
+  "Kedah",
+  "Kelantan",
+  "Melaka",
+  "Negeri Sembilan",
+  "Pahang",
+  "Perak",
+  "Perlis",
+  "Pulau Pinang",
+  "Sabah",
+  "Sarawak",
+  "Selangor",
+  "Terengganu",
+  "Kuala Lumpur",
+  "Labuan",
+  "Putrajaya",
+] as const;
+
+const requiredText = (maxLength: number) =>
+  z
     .string()
-    .min(8, "Min 8 characters")
-    .regex(/[A-Z]/, "Must contain an uppercase letter")
-    .regex(/[0-9]/, "Must contain a number"),
-  icNumber: z.string().min(1, "Required"),
-  phoneNumber: z.string(),
-  gender: z.string().min(1, "Required"),
-  dateOfBirth: z.string().min(1, "Required"),
-  bio: z.string(),
-  specialization: z.string().min(1, "Required"),
-  licenseNumber: z.string().min(1, "Required"),
-  consultationFee: z.number().nonnegative("Must be >= 0").nullable(),
-  departmentName: z.string().min(1, "Required"),
-  addressStreet: z.string(),
-  addressCity: z.string(),
-  addressState: z.string(),
-  addressPostalCode: z.string(),
-  addressCountry: z.string(),
-  qualifications: z.array(
-    z.object({
-      degree: z.string().min(1, "Required"),
-      institution: z.string().min(1, "Required"),
-      year: z.number().int().min(1900, "Min 1900").max(2100, "Max 2100"),
-    }),
-  ),
-});
+    .refine((value) => value.trim().length > 0, "Required")
+    .refine((value) => value.trim().length <= maxLength, `Max ${maxLength} characters`);
+
+const requiredName = z
+  .string()
+  .refine((value) => value.trim().length > 0, "Required")
+  .refine((value) => value.trim().length <= 20, "Max 20 characters")
+  .refine(
+    (value) => value.trim().length === 0 || nameRegex.test(value.trim()),
+    "Letters and spaces only",
+  );
+
+const requiredUsername = z
+  .string()
+  .refine((value) => value.trim().length > 0, "Required")
+  .refine((value) => value.trim().length >= 3, "Min 3 characters")
+  .refine((value) => value.trim().length <= 20, "Max 20 characters")
+  .refine(
+    (value) => value.trim().length === 0 || usernameRegex.test(value.trim()),
+    "Letters, numbers, underscores, and dots only",
+  );
+
+const optionalText = (maxLength: number) =>
+  z.string().refine((value) => value.trim().length <= maxLength, `Max ${maxLength} characters`);
+
+const optionalPhoneNumber = z
+  .string()
+  .refine(
+    (value) => value.trim().length === 0 || phoneNumberRegex.test(value.trim()),
+    "Phone number must be 12-13 characters starting with + followed by digits only",
+  );
+
+const isValidDateOfBirth = (value: string) => {
+  if (!dateOfBirthRegex.test(value)) {
+    return false;
+  }
+
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+  const isRealDate =
+    date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
+
+  if (!isRealDate) {
+    return false;
+  }
+
+  const today = new Date();
+  const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(
+    2,
+    "0",
+  )}-${String(today.getDate()).padStart(2, "0")}`;
+
+  return value < todayKey;
+};
+
+// Formats yesterday as a local date input value.
+function getYesterdayDateInputValue(): string {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  const year = yesterday.getFullYear();
+  const month = String(yesterday.getMonth() + 1).padStart(2, "0");
+  const day = String(yesterday.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+const addDoctorSchema = z
+  .object({
+    firstName: requiredName,
+    lastName: requiredName,
+    username: requiredUsername,
+    email: z.string().trim().min(1, "Required").email("Invalid email").max(255),
+    password: z
+      .string()
+      .min(8, "Min 8 characters")
+      .regex(/[A-Z]/, "Must contain an uppercase letter")
+      .regex(/[a-z]/, "Must contain a lowercase letter")
+      .regex(/[0-9]/, "Must contain a number")
+      .regex(specialCharacterRegex, "Must contain a special character"),
+    icNumber: z
+      .string()
+      .refine((value) => value.trim().length > 0, "Required")
+      .refine(
+        (value) => value.trim().length === 0 || icNumberRegex.test(value),
+        "IC Number must be exactly 12 digits without dashes",
+      ),
+    phoneNumber: optionalPhoneNumber,
+    gender: z.enum(["M", "F", "N"], { message: "Required" }),
+    dateOfBirth: z
+      .string()
+      .min(1, "Required")
+      .refine((value) => value.length === 0 || isValidDateOfBirth(value), {
+        message: "Date of birth cannot be today or in the future",
+      }),
+    bio: optionalText(2000),
+    specialization: requiredText(100),
+    licenseNumber: requiredText(50),
+    consultationFee: z.number().nonnegative("Must be >= 0").nullable(),
+    departmentName: requiredText(100),
+    addressStreet: optionalText(200),
+    addressCity: optionalText(100),
+    addressState: z
+      .string()
+      .refine(
+        (value) => value.length === 0 || malaysiaStates.includes(value),
+        "Select a Malaysia state",
+      ),
+    addressPostalCode: optionalText(20),
+    addressCountry: z.literal(malaysiaCountry),
+    qualifications: z.array(
+      z.object({
+        degree: requiredText(100),
+        institution: requiredText(200),
+        year: z.number().int().min(1900, "Min 1900").max(2100, "Max 2100"),
+      }),
+    ),
+  })
+  .superRefine((value, ctx) => {
+    const addressFields = [
+      ["addressStreet", value.addressStreet],
+      ["addressCity", value.addressCity],
+      ["addressState", value.addressState],
+      ["addressPostalCode", value.addressPostalCode],
+    ] as const;
+
+    const hasAnyAddressValue = addressFields.some(([, fieldValue]) => fieldValue.trim().length > 0);
+
+    if (!hasAnyAddressValue) {
+      return;
+    }
+
+    for (const [fieldName, fieldValue] of addressFields) {
+      if (fieldValue.trim().length === 0) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Required",
+          path: [fieldName],
+        });
+      }
+    }
+  });
 
 const addDoctorDefaultValues = {
   firstName: "",
@@ -79,7 +221,7 @@ const addDoctorDefaultValues = {
   addressCity: "",
   addressState: "",
   addressPostalCode: "",
-  addressCountry: "",
+  addressCountry: malaysiaCountry,
   qualifications: [] as Array<{ degree: string; institution: string; year: number }>,
 };
 
@@ -93,38 +235,58 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
   const [showPassword, setShowPassword] = useState(false);
   const queryClient = useQueryClient();
   const { mutateAsync, isPending } = useCreateDoctor();
+  const {
+    data: departmentsResponse,
+    isError: isDepartmentsError,
+    isLoading: isDepartmentsLoading,
+  } = useAdminGetAllDepartments(
+    { Page: 1, PageSize: departmentSelectPageSize },
+    { query: { enabled: open } },
+  );
+  const departments = useMemo(
+    () => (departmentsResponse?.status === 200 ? departmentsResponse.data.items : []),
+    [departmentsResponse],
+  );
 
   const form = useForm({
     defaultValues: addDoctorDefaultValues,
     validators: { onSubmit: addDoctorSchema },
     onSubmit: async ({ value }) => {
+      const addressStreet = value.addressStreet.trim();
+      const addressCity = value.addressCity.trim();
+      const addressState = value.addressState.trim();
+      const addressPostalCode = value.addressPostalCode.trim();
+      const hasAddress = [addressStreet, addressCity, addressState, addressPostalCode].some(
+        (addressPart) => addressPart.length > 0,
+      );
+
       const payload: CreateDoctorCommand = {
-        firstName: value.firstName,
-        lastName: value.lastName,
-        username: value.username,
-        email: value.email,
+        firstName: value.firstName.trim(),
+        lastName: value.lastName.trim(),
+        username: value.username.trim(),
+        email: value.email.trim(),
         password: value.password,
-        icNumber: value.icNumber,
-        phoneNumber: value.phoneNumber || null,
-        gender: value.gender[0] ?? "N",
+        icNumber: value.icNumber.trim(),
+        phoneNumber: value.phoneNumber.trim() || null,
+        gender: value.gender,
         dateOfBirth: value.dateOfBirth,
-        bio: value.bio || null,
-        specialization: value.specialization,
-        licenseNumber: value.licenseNumber,
+        bio: value.bio.trim() || null,
+        specialization: value.specialization.trim(),
+        licenseNumber: value.licenseNumber.trim(),
         consultationFee: value.consultationFee,
-        departmentName: value.departmentName,
-        address: value.addressStreet
+        departmentName: value.departmentName.trim(),
+        address: hasAddress
           ? {
-              street: value.addressStreet,
-              city: value.addressCity,
-              state: value.addressState,
-              postalCode: value.addressPostalCode,
-              country: value.addressCountry,
+              street: addressStreet,
+              city: addressCity,
+              state: addressState,
+              postalCode: addressPostalCode,
+              country: malaysiaCountry,
             }
           : null,
         qualifications: value.qualifications.map((q) => ({
-          degree: q.degree,
-          institution: q.institution,
+          degree: q.degree.trim(),
+          institution: q.institution.trim(),
           year: q.year,
         })),
       };
@@ -197,6 +359,7 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                         onChange={(e) => field.handleChange(e.target.value)}
                         onBlur={field.handleBlur}
                         placeholder="e.g. Ahmad"
+                        maxLength={20}
                       />
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
@@ -211,6 +374,7 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                         onChange={(e) => field.handleChange(e.target.value)}
                         onBlur={field.handleBlur}
                         placeholder="e.g. Rahman"
+                        maxLength={20}
                       />
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
@@ -226,7 +390,8 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                         value={field.state.value}
                         onChange={(e) => field.handleChange(e.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder="e.g. dr.ahmad"
+                        placeholder="e.g. dr_ahmad"
+                        maxLength={20}
                       />
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
@@ -282,7 +447,7 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                       value={field.state.value}
                       onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
-                      placeholder="e.g. 820101-14-5678"
+                      placeholder="e.g. 820101145678"
                       className="font-mono"
                     />
                     <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
@@ -296,9 +461,18 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                       <FieldLabel>Phone Number</FieldLabel>
                       <Input
                         value={field.state.value}
-                        onChange={(e) => field.handleChange(e.target.value)}
+                        onChange={(e) =>
+                          field.handleChange(
+                            e.target.value
+                              .replace(/[^\d+]/g, "")
+                              .replace(/(?!^)\+/g, "")
+                              .slice(0, 13),
+                          )
+                        }
                         onBlur={field.handleBlur}
-                        placeholder="+601x-xxxxxxx"
+                        placeholder="+60162173366"
+                        inputMode="tel"
+                        maxLength={13}
                       />
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
@@ -316,10 +490,9 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                           <SelectValue placeholder="Select gender" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Male">Male</SelectItem>
-                          <SelectItem value="Female">Female</SelectItem>
-                          <SelectItem value="Other">Other</SelectItem>
-                          <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
+                          <SelectItem value="M">Male</SelectItem>
+                          <SelectItem value="F">Female</SelectItem>
+                          <SelectItem value="N">Prefer not to say</SelectItem>
                         </SelectContent>
                       </Select>
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
@@ -336,6 +509,7 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                       value={field.state.value}
                       onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
+                      max={getYesterdayDateInputValue()}
                     />
                     <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                   </Field>
@@ -384,12 +558,38 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                   {(field) => (
                     <Field>
                       <FieldLabel>Department</FieldLabel>
-                      <Input
+                      <Select
                         value={field.state.value}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        onBlur={field.handleBlur}
-                        placeholder="e.g. Cardiology Department"
-                      />
+                        onValueChange={(v) => field.handleChange(v ?? "")}
+                      >
+                        <SelectTrigger className="w-full" onBlur={field.handleBlur}>
+                          <SelectValue placeholder="Select department" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {isDepartmentsLoading && (
+                            <SelectItem value="__loading" disabled>
+                              Loading departments...
+                            </SelectItem>
+                          )}
+                          {isDepartmentsError && (
+                            <SelectItem value="__error" disabled>
+                              Failed to load departments
+                            </SelectItem>
+                          )}
+                          {!isDepartmentsLoading &&
+                            !isDepartmentsError &&
+                            departments.length === 0 && (
+                              <SelectItem value="__empty" disabled>
+                                No departments available
+                              </SelectItem>
+                            )}
+                          {departments.map((department) => (
+                            <SelectItem key={department.slug} value={department.name}>
+                              {department.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
                   )}
@@ -474,12 +674,21 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                   {(field) => (
                     <Field>
                       <FieldLabel>State</FieldLabel>
-                      <Input
+                      <Select
                         value={field.state.value}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        onBlur={field.handleBlur}
-                        placeholder="e.g. Wilayah Persekutuan"
-                      />
+                        onValueChange={(v) => field.handleChange(v ?? "")}
+                      >
+                        <SelectTrigger className="w-full" onBlur={field.handleBlur}>
+                          <SelectValue placeholder="Select state" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {malaysiaStates.map((state) => (
+                            <SelectItem key={state} value={state}>
+                              {state}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
                   )}
@@ -507,9 +716,10 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                       <FieldLabel>Country</FieldLabel>
                       <Input
                         value={field.state.value}
-                        onChange={(e) => field.handleChange(e.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder="e.g. Malaysia"
+                        readOnly
+                        aria-readonly="true"
+                        className="bg-muted/50"
                       />
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>

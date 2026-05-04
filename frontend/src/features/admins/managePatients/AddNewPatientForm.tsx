@@ -34,30 +34,162 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 // Lists the selectable blood groups for the patient record form.
 const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"] as const;
 
+// Lists the gender codes accepted by the patient registration API.
+const GENDERS = ["M", "F", "N"] as const;
+
+// Lists the selectable allergy severities accepted by the patient record API.
+const ALLERGY_SEVERITIES = ["Mild", "Moderate", "Severe"] as const;
+
+// Matches Malaysian IC numbers in the backend format: 12 digits without dashes.
+const MALAYSIAN_IC_REGEX = /^\d{12}$/;
+
+// Matches names containing only letters and spaces.
+const PATIENT_NAME_REGEX = /^[A-Za-z ]+$/;
+
+// Matches usernames containing only letters, numbers, underscores, and dots.
+const USERNAME_REGEX = /^[\w.]+$/;
+
+// Matches international phone numbers with a + prefix and 11–12 digits (e.g. +60162173366).
+const PHONE_NUMBER_REGEX = /^\+\d{11,12}$/;
+
+// Checks that a form date string is before today's local date.
+function isPastDate(value: string): boolean {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const selectedDate = new Date(`${value}T00:00:00`);
+
+  return !Number.isNaN(selectedDate.getTime()) && selectedDate < today;
+}
+
+// Formats yesterday as a local date input value.
+function getYesterdayDateInputValue(): string {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  const year = yesterday.getFullYear();
+  const month = String(yesterday.getMonth() + 1).padStart(2, "0");
+  const day = String(yesterday.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
 // Validates a single allergy row in the add-patient form.
 const allergySchema = z.object({
-  allergen: z.string().min(1, "Allergen is required"),
-  severity: z.string().min(1, "Severity is required"),
-  reaction: z.string().min(1, "Reaction is required"),
+  allergen: z.string().trim().min(1, "Allergen is required").max(100),
+  severity: z
+    .string()
+    .refine(
+      (severity) => ALLERGY_SEVERITIES.includes(severity as (typeof ALLERGY_SEVERITIES)[number]),
+      "Severity must be Mild, Moderate, or Severe",
+    ),
+  reaction: z.string().trim().min(1, "Reaction is required").max(255),
 });
 
 // Validates the full patient registration form.
-const addPatientSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  email: z.string().email("Valid email is required"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  icNumber: z.string().min(1, "IC number is required"),
-  gender: z.string().min(1, "Gender is required"),
-  dateOfBirth: z.string().min(1, "Date of birth is required"),
-  phoneNumber: z.string(),
-  bloodGroup: z.string(),
-  allergies: z.array(allergySchema),
-  emergencyContactName: z.string(),
-  emergencyContactRelationship: z.string(),
-  emergencyContactPhone: z.string(),
-});
+const addPatientSchema = z
+  .object({
+    firstName: z
+      .string()
+      .trim()
+      .min(1, "First name is required")
+      .max(20, "First name must be 20 characters or fewer")
+      .regex(PATIENT_NAME_REGEX, "First name can only contain letters and spaces"),
+    lastName: z
+      .string()
+      .trim()
+      .min(1, "Last name is required")
+      .max(20, "Last name must be 20 characters or fewer")
+      .regex(PATIENT_NAME_REGEX, "Last name can only contain letters and spaces"),
+    username: z
+      .string()
+      .trim()
+      .min(3, "Username must be at least 3 characters")
+      .max(20, "Username must be 20 characters or fewer")
+      .regex(USERNAME_REGEX, "Username can only contain letters, numbers, underscores, and dots"),
+    email: z.string().trim().email("Valid email is required").max(255),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+      .regex(/[0-9]/, "Password must contain at least one digit")
+      .regex(/[^a-zA-Z0-9]/, "Password must contain at least one special character"),
+    icNumber: z
+      .string()
+      .trim()
+      .regex(MALAYSIAN_IC_REGEX, "IC number must be exactly 12 digits without dashes"),
+    gender: z
+      .string()
+      .refine(
+        (gender) => GENDERS.includes(gender as (typeof GENDERS)[number]),
+        "Gender must be male, female, or prefer not to say",
+      ),
+    dateOfBirth: z
+      .string()
+      .min(1, "Date of birth is required")
+      .refine(isPastDate, "Date of birth cannot be today or in the future"),
+    phoneNumber: z
+      .string()
+      .trim()
+      .refine((phoneNumber) => {
+        return phoneNumber.length === 0 || PHONE_NUMBER_REGEX.test(phoneNumber);
+      }, "Phone number must be 12–13 characters starting with + followed by digits only"),
+    bloodGroup: z.string().refine((bloodGroup) => {
+      return (
+        bloodGroup === "" || BLOOD_GROUPS.includes(bloodGroup as (typeof BLOOD_GROUPS)[number])
+      );
+    }, "Blood group must be valid"),
+    allergies: z.array(allergySchema),
+    emergencyContactName: z.string().trim().max(100),
+    emergencyContactRelationship: z.string().trim().max(50),
+    emergencyContactPhone: z.string().trim(),
+  })
+  .superRefine((value, context) => {
+    const emergencyContactFields = [
+      {
+        field: "emergencyContactName",
+        message: "Emergency contact name is required",
+        value: value.emergencyContactName,
+      },
+      {
+        field: "emergencyContactRelationship",
+        message: "Emergency contact relationship is required",
+        value: value.emergencyContactRelationship,
+      },
+      {
+        field: "emergencyContactPhone",
+        message: "Emergency contact phone is required",
+        value: value.emergencyContactPhone,
+      },
+    ] as const;
+    const hasEmergencyContact = emergencyContactFields.some((field) => field.value.length > 0);
+
+    if (!hasEmergencyContact) {
+      return;
+    }
+
+    for (const field of emergencyContactFields) {
+      if (field.value.length === 0) {
+        context.addIssue({
+          code: "custom",
+          message: field.message,
+          path: [field.field],
+        });
+      }
+    }
+
+    if (
+      value.emergencyContactPhone.length > 0 &&
+      !PHONE_NUMBER_REGEX.test(value.emergencyContactPhone)
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "Emergency contact phone must be 12-13 characters with + and digits only",
+        path: ["emergencyContactPhone"],
+      });
+    }
+  });
 
 // Describes the values collected by the add-patient form.
 type AddPatientFormValues = z.infer<typeof addPatientSchema>;
@@ -303,7 +435,7 @@ export function AddNewPatientForm({ open, onOpenChange }: AddNewPatientFormProps
                         value={field.state.value}
                         onChange={(event) => field.handleChange(event.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder="e.g. 920101-01-1234"
+                        placeholder="e.g. 920101011234"
                       />
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
@@ -321,6 +453,7 @@ export function AddNewPatientForm({ open, onOpenChange }: AddNewPatientFormProps
                         value={field.state.value}
                         onChange={(event) => field.handleChange(event.target.value)}
                         onBlur={field.handleBlur}
+                        max={getYesterdayDateInputValue()}
                       />
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
@@ -341,8 +474,7 @@ export function AddNewPatientForm({ open, onOpenChange }: AddNewPatientFormProps
                         <SelectContent>
                           <SelectItem value="M">Male</SelectItem>
                           <SelectItem value="F">Female</SelectItem>
-                          <SelectItem value="O">Other</SelectItem>
-                          <SelectItem value="N">Not Specified</SelectItem>
+                          <SelectItem value="N">Prefer not to say</SelectItem>
                         </SelectContent>
                       </Select>
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
@@ -360,7 +492,7 @@ export function AddNewPatientForm({ open, onOpenChange }: AddNewPatientFormProps
                         value={field.state.value}
                         onChange={(event) => field.handleChange(event.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder="+601x-xxxxxxx"
+                        placeholder="+60162173366"
                       />
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
@@ -566,7 +698,7 @@ export function AddNewPatientForm({ open, onOpenChange }: AddNewPatientFormProps
                         value={field.state.value}
                         onChange={(event) => field.handleChange(event.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder="+601x-xxxxxxx"
+                        placeholder="+60162173366"
                       />
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>

@@ -7,7 +7,6 @@ import {
   Loader2,
   Lock,
   Mail,
-  MapPin,
   Pencil,
   Shield,
   User,
@@ -136,6 +135,26 @@ function SelectFieldRow({
   );
 }
 
+// Lists the Malaysian states and federal territories available for profile addresses.
+const MALAYSIA_STATES = [
+  "Johor",
+  "Kedah",
+  "Kelantan",
+  "Melaka",
+  "Negeri Sembilan",
+  "Pahang",
+  "Perak",
+  "Perlis",
+  "Pulau Pinang",
+  "Sabah",
+  "Sarawak",
+  "Selangor",
+  "Terengganu",
+  "Wilayah Persekutuan Kuala Lumpur",
+  "Wilayah Persekutuan Labuan",
+  "Wilayah Persekutuan Putrajaya",
+] as const;
+
 function PasswordFieldRow({
   label,
   field,
@@ -185,7 +204,7 @@ function PasswordFieldRow({
 const GENDER_OPTIONS = [
   { value: "male", label: "Male" },
   { value: "female", label: "Female" },
-  { value: "other", label: "Other / Prefer not to say" },
+  { value: "N", label: "Prefer not to say" },
 ];
 
 export function AdminProfilePage() {
@@ -432,7 +451,8 @@ export function AdminProfilePage() {
                     field="phone"
                     value={formData.phone}
                     error={formErrors.phone}
-                    placeholder="10-digit phone number"
+                    placeholder="0123456789"
+                    type="tel"
                     onChange={handleFieldChange}
                   />
                   <div className="h-px bg-border" />
@@ -463,80 +483,66 @@ export function AdminProfilePage() {
       <motion.div variants={cardAnim}>
         <Card className="relative overflow-hidden">
           <div className="absolute inset-x-0 top-0 h-0.75 bg-border" />
-          <CardContent className="px-6 pb-6 pt-7">
-            <div className="mb-3 flex items-center gap-2">
-              <MapPin className="size-3.5 text-muted-foreground" />
-              <SectionLabel>Address</SectionLabel>
-            </div>
+          <CardContent className="flex flex-col gap-5 px-6 pb-6 pt-7">
+            <SectionLabel>Address</SectionLabel>
 
             {isEditing ? (
-              <div className="flex flex-col gap-4">
+              <>
                 <FieldRow
-                  label="Address Line 1"
+                  label="Street"
                   field="addressLine1"
                   value={formData.addressLine1}
                   error={formErrors.addressLine1}
-                  placeholder="Unit / floor / building name"
+                  placeholder="e.g. 123 Jalan Ampang"
                   onChange={handleFieldChange}
                 />
-                <FieldRow
-                  label="Address Line 2"
-                  field="addressLine2"
-                  value={formData.addressLine2}
-                  error={formErrors.addressLine2}
-                  placeholder="Street name (optional)"
-                  onChange={handleFieldChange}
-                />
-                <div className="grid grid-cols-3 gap-4">
+                <div className="h-px bg-border" />
+                <div className="grid grid-cols-2 gap-5">
                   <FieldRow
                     label="City"
                     field="city"
                     value={formData.city}
                     error={formErrors.city}
-                    placeholder="City"
+                    placeholder="e.g. Kuala Lumpur"
                     onChange={handleFieldChange}
                   />
-                  <FieldRow
+                  <SelectFieldRow
                     label="State"
                     field="state"
                     value={formData.state}
                     error={formErrors.state}
-                    placeholder="State"
+                    placeholder="Select state"
+                    options={MALAYSIA_STATES.map((s) => ({ value: s, label: s }))}
                     onChange={handleFieldChange}
                   />
+                </div>
+                <div className="h-px bg-border" />
+                <div className="grid grid-cols-2 gap-5">
                   <FieldRow
                     label="Postal Code"
                     field="postalCode"
                     value={formData.postalCode}
                     error={formErrors.postalCode}
-                    placeholder="00000"
+                    placeholder="e.g. 50450"
                     onChange={handleFieldChange}
                   />
+                  <InfoRow label="Country" value={formData.country || "Malaysia"} />
                 </div>
-                <FieldRow
-                  label="Country"
-                  field="country"
-                  value={formData.country}
-                  error={formErrors.country}
-                  placeholder="Country"
-                  onChange={handleFieldChange}
-                />
-              </div>
+              </>
             ) : (
-              <div className="flex flex-col gap-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <InfoRow label="Address Line 1" value={me.addressLine1} />
-                  <InfoRow label="Address Line 2" value={me.addressLine2} />
-                </div>
+              <>
+                <InfoRow label="Street" value={me.addressLine1} />
                 <div className="h-px bg-border" />
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 gap-5">
                   <InfoRow label="City" value={me.city} />
                   <InfoRow label="State" value={me.state} />
-                  <InfoRow label="Postal Code" value={me.postalCode} />
                 </div>
                 <div className="h-px bg-border" />
-                <InfoRow label="Country" value={me.country} />
-              </div>
+                <div className="grid grid-cols-2 gap-5">
+                  <InfoRow label="Postal Code" value={me.postalCode} />
+                  <InfoRow label="Country" value={me.country ?? "Malaysia"} />
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
