@@ -58,18 +58,17 @@ bun run api:gen      # Reads http://localhost:5144/openapi/v1.json via orval
 ## Useful Commands
 
 | Task | Command |
-|------|---------|
+| ------ | --------- |
 | Run all checks | `bun run check` |
 | Fix formatting / lint | `bun run format` |
 | Run all tests | `bun run test` |
 | Stop Docker services | `bun run docker:down` |
-| View structured logs | Open http://localhost:8081 (Seq) |
 
 See [`AGENTS.md`](./AGENTS.md) for the full developer command reference, testing details, code-style rules, and PII/PHI handling guidelines.
 
 ## Project Structure
 
-```
+```text
 frontend/           # React 19 + TypeScript + Vite + Vitest
   src/api/          # Auto-generated OpenAPI client (orval)
   src/routes/       # TanStack Router file-based routes
