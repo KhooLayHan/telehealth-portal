@@ -76,6 +76,7 @@ function FieldRow({
   value,
   error,
   placeholder,
+  required = false,
   type = "text",
   onChange,
 }: {
@@ -84,6 +85,7 @@ function FieldRow({
   value: string;
   error?: string;
   placeholder?: string;
+  required?: boolean;
   type?: string;
   onChange: (field: keyof AdminProfileFormData, value: string) => void;
 }) {
@@ -91,6 +93,11 @@ function FieldRow({
     <div className="flex flex-col gap-1">
       <span className="text-[10px] text-muted-foreground/60 uppercase tracking-[0.15em]">
         {label}
+        {required && (
+          <span className="ml-0.5 text-destructive" aria-hidden>
+            *
+          </span>
+        )}
       </span>
       <Input
         type={type}
@@ -110,6 +117,7 @@ function SelectFieldRow({
   value,
   error,
   placeholder,
+  required = false,
   options,
   onChange,
 }: {
@@ -118,6 +126,7 @@ function SelectFieldRow({
   value: string;
   error?: string;
   placeholder?: string;
+  required?: boolean;
   options: { value: string; label: string }[];
   onChange: (field: keyof AdminProfileFormData, value: string) => void;
 }) {
@@ -125,6 +134,11 @@ function SelectFieldRow({
     <div className="flex flex-col gap-1">
       <span className="text-[10px] text-muted-foreground/60 uppercase tracking-[0.15em]">
         {label}
+        {required && (
+          <span className="ml-0.5 text-destructive" aria-hidden>
+            *
+          </span>
+        )}
       </span>
       <Select value={value || undefined} onValueChange={(val) => onChange(field, val ?? "")}>
         <SelectTrigger
@@ -151,6 +165,7 @@ function PasswordFieldRow({
   value,
   error,
   placeholder,
+  required = false,
   autoComplete = "new-password",
   onChange,
 }: {
@@ -159,6 +174,7 @@ function PasswordFieldRow({
   value: string;
   error?: string;
   placeholder?: string;
+  required?: boolean;
   autoComplete?: string;
   onChange: (field: keyof AdminPasswordFormData, value: string) => void;
 }) {
@@ -167,6 +183,11 @@ function PasswordFieldRow({
     <div className="flex flex-col gap-1">
       <span className="text-[10px] text-muted-foreground/60 uppercase tracking-[0.15em]">
         {label}
+        {required && (
+          <span className="ml-0.5 text-destructive" aria-hidden>
+            *
+          </span>
+        )}
       </span>
       <div className="relative">
         <Input
@@ -380,6 +401,7 @@ export function AdminProfilePage() {
                     value={formData.firstName}
                     error={formErrors.firstName}
                     placeholder="First name"
+                    required
                     onChange={handleFieldChange}
                   />
                   <div className="h-px bg-border" />
@@ -389,6 +411,7 @@ export function AdminProfilePage() {
                     value={formData.lastName}
                     error={formErrors.lastName}
                     placeholder="Last name"
+                    required
                     onChange={handleFieldChange}
                   />
                   <div className="h-px bg-border" />
@@ -445,6 +468,7 @@ export function AdminProfilePage() {
                     value={formData.username}
                     error={formErrors.username}
                     placeholder="e.g. alex_admin"
+                    required
                     onChange={handleFieldChange}
                   />
                   <div className="h-px bg-border" />
@@ -463,6 +487,7 @@ export function AdminProfilePage() {
                     value={formData.icNumber}
                     error={formErrors.icNumber}
                     placeholder="12-digit IC number"
+                    required
                     onChange={handleFieldChange}
                   />
                 </>
@@ -636,6 +661,7 @@ export function AdminProfilePage() {
                   value={passwordData.currentPassword}
                   error={passwordErrors.currentPassword}
                   placeholder="Enter current password"
+                  required
                   autoComplete="current-password"
                   onChange={handlePasswordFieldChange}
                 />
@@ -645,6 +671,7 @@ export function AdminProfilePage() {
                   value={passwordData.newPassword}
                   error={passwordErrors.newPassword}
                   placeholder="Min. 8 chars, uppercase, number, symbol"
+                  required
                   onChange={handlePasswordFieldChange}
                 />
                 <PasswordFieldRow
@@ -653,6 +680,7 @@ export function AdminProfilePage() {
                   value={passwordData.confirmPassword}
                   error={passwordErrors.confirmPassword}
                   placeholder="Repeat new password"
+                  required
                   onChange={handlePasswordFieldChange}
                 />
                 <div className="flex items-center gap-2 pt-1">
