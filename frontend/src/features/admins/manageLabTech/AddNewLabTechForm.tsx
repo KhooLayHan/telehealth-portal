@@ -196,7 +196,12 @@ export function AddNewLabTechForm({ open, onOpenChange }: AddNewLabTechFormProps
                 <form.Field name="firstName">
                   {(field) => (
                     <Field>
-                      <FieldLabel>First Name</FieldLabel>
+                      <FieldLabel>
+                        First Name
+                        <span className="ml-0.5 text-destructive" aria-hidden>
+                          *
+                        </span>
+                      </FieldLabel>
                       <Input
                         value={field.state.value}
                         onChange={(event) => field.handleChange(event.target.value)}
@@ -210,7 +215,12 @@ export function AddNewLabTechForm({ open, onOpenChange }: AddNewLabTechFormProps
                 <form.Field name="lastName">
                   {(field) => (
                     <Field>
-                      <FieldLabel>Last Name</FieldLabel>
+                      <FieldLabel>
+                        Last Name
+                        <span className="ml-0.5 text-destructive" aria-hidden>
+                          *
+                        </span>
+                      </FieldLabel>
                       <Input
                         value={field.state.value}
                         onChange={(event) => field.handleChange(event.target.value)}
@@ -226,7 +236,12 @@ export function AddNewLabTechForm({ open, onOpenChange }: AddNewLabTechFormProps
               <form.Field name="icNumber">
                 {(field) => (
                   <Field>
-                    <FieldLabel>IC Number</FieldLabel>
+                    <FieldLabel>
+                      IC Number
+                      <span className="ml-0.5 text-destructive" aria-hidden>
+                        *
+                      </span>
+                    </FieldLabel>
                     <Input
                       value={field.state.value}
                       onChange={(event) => field.handleChange(event.target.value)}
@@ -305,7 +320,12 @@ export function AddNewLabTechForm({ open, onOpenChange }: AddNewLabTechFormProps
                 <form.Field name="username">
                   {(field) => (
                     <Field>
-                      <FieldLabel>Username</FieldLabel>
+                      <FieldLabel>
+                        Username
+                        <span className="ml-0.5 text-destructive" aria-hidden>
+                          *
+                        </span>
+                      </FieldLabel>
                       <Input
                         value={field.state.value}
                         onChange={(event) => field.handleChange(event.target.value)}
@@ -321,7 +341,12 @@ export function AddNewLabTechForm({ open, onOpenChange }: AddNewLabTechFormProps
                 <form.Field name="email">
                   {(field) => (
                     <Field>
-                      <FieldLabel>Email</FieldLabel>
+                      <FieldLabel>
+                        Email
+                        <span className="ml-0.5 text-destructive" aria-hidden>
+                          *
+                        </span>
+                      </FieldLabel>
                       <Input
                         type="email"
                         value={field.state.value}
@@ -339,7 +364,12 @@ export function AddNewLabTechForm({ open, onOpenChange }: AddNewLabTechFormProps
               <form.Field name="password">
                 {(field) => (
                   <Field>
-                    <FieldLabel>Password</FieldLabel>
+                    <FieldLabel>
+                      Password
+                      <span className="ml-0.5 text-destructive" aria-hidden>
+                        *
+                      </span>
+                    </FieldLabel>
                     <div className="relative">
                       <Input
                         type={showPassword ? "text" : "password"}
@@ -367,7 +397,12 @@ export function AddNewLabTechForm({ open, onOpenChange }: AddNewLabTechFormProps
               <form.Field name="confirmPassword">
                 {(field) => (
                   <Field>
-                    <FieldLabel>Confirm Password</FieldLabel>
+                    <FieldLabel>
+                      Confirm Password
+                      <span className="ml-0.5 text-destructive" aria-hidden>
+                        *
+                      </span>
+                    </FieldLabel>
                     <Input
                       type={showPassword ? "text" : "password"}
                       value={field.state.value}
