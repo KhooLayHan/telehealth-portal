@@ -191,7 +191,9 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                 <form.Field name="firstName">
                   {(field) => (
                     <Field>
-                      <FieldLabel>First Name</FieldLabel>
+                      <FieldLabel>
+                        First Name <span className="text-destructive">*</span>
+                      </FieldLabel>
                       <Input
                         value={field.state.value}
                         onChange={(e) => field.handleChange(e.target.value)}
@@ -205,7 +207,9 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                 <form.Field name="lastName">
                   {(field) => (
                     <Field>
-                      <FieldLabel>Last Name</FieldLabel>
+                      <FieldLabel>
+                        Last Name <span className="text-destructive">*</span>
+                      </FieldLabel>
                       <Input
                         value={field.state.value}
                         onChange={(e) => field.handleChange(e.target.value)}
@@ -221,7 +225,9 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                 <form.Field name="username">
                   {(field) => (
                     <Field>
-                      <FieldLabel>Username</FieldLabel>
+                      <FieldLabel>
+                        Username <span className="text-destructive">*</span>
+                      </FieldLabel>
                       <Input
                         value={field.state.value}
                         onChange={(e) => field.handleChange(e.target.value)}
@@ -235,7 +241,9 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                 <form.Field name="email">
                   {(field) => (
                     <Field>
-                      <FieldLabel>Email</FieldLabel>
+                      <FieldLabel>
+                        Email <span className="text-destructive">*</span>
+                      </FieldLabel>
                       <Input
                         type="email"
                         value={field.state.value}
@@ -251,7 +259,9 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
               <form.Field name="password">
                 {(field) => (
                   <Field>
-                    <FieldLabel>Password</FieldLabel>
+                    <FieldLabel>
+                      Password <span className="text-destructive">*</span>
+                    </FieldLabel>
                     <div className="relative">
                       <Input
                         type={showPassword ? "text" : "password"}
@@ -277,7 +287,9 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
               <form.Field name="icNumber">
                 {(field) => (
                   <Field>
-                    <FieldLabel>IC Number</FieldLabel>
+                    <FieldLabel>
+                      IC Number <span className="text-destructive">*</span>
+                    </FieldLabel>
                     <Input
                       value={field.state.value}
                       onChange={(e) => field.handleChange(e.target.value)}
@@ -307,7 +319,9 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                 <form.Field name="gender">
                   {(field) => (
                     <Field>
-                      <FieldLabel>Gender</FieldLabel>
+                      <FieldLabel>
+                        Gender <span className="text-destructive">*</span>
+                      </FieldLabel>
                       <Select
                         value={field.state.value}
                         onValueChange={(v) => field.handleChange(v ?? "")}
@@ -330,7 +344,9 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
               <form.Field name="dateOfBirth">
                 {(field) => (
                   <Field>
-                    <FieldLabel>Date of Birth</FieldLabel>
+                    <FieldLabel>
+                      Date of Birth <span className="text-destructive">*</span>
+                    </FieldLabel>
                     <Input
                       type="date"
                       value={field.state.value}
@@ -369,7 +385,9 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                 <form.Field name="specialization">
                   {(field) => (
                     <Field>
-                      <FieldLabel>Specialization</FieldLabel>
+                      <FieldLabel>
+                        Specialization <span className="text-destructive">*</span>
+                      </FieldLabel>
                       <Input
                         value={field.state.value}
                         onChange={(e) => field.handleChange(e.target.value)}
@@ -383,7 +401,9 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                 <form.Field name="departmentName">
                   {(field) => (
                     <Field>
-                      <FieldLabel>Department</FieldLabel>
+                      <FieldLabel>
+                        Department <span className="text-destructive">*</span>
+                      </FieldLabel>
                       <Input
                         value={field.state.value}
                         onChange={(e) => field.handleChange(e.target.value)}
@@ -399,7 +419,9 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                 <form.Field name="licenseNumber">
                   {(field) => (
                     <Field>
-                      <FieldLabel>License Number</FieldLabel>
+                      <FieldLabel>
+                        License Number <span className="text-destructive">*</span>
+                      </FieldLabel>
                       <Input
                         value={field.state.value}
                         onChange={(e) => field.handleChange(e.target.value)}
@@ -551,7 +573,9 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                           <form.Field name={`qualifications[${i}].degree`}>
                             {(degreeField) => (
                               <Field>
-                                <FieldLabel>Degree</FieldLabel>
+                                <FieldLabel>
+                                  Degree <span className="text-destructive">*</span>
+                                </FieldLabel>
                                 <Input
                                   value={degreeField.state.value}
                                   onChange={(e) => degreeField.handleChange(e.target.value)}
@@ -570,7 +594,9 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                           <form.Field name={`qualifications[${i}].institution`}>
                             {(instField) => (
                               <Field>
-                                <FieldLabel>Institution</FieldLabel>
+                                <FieldLabel>
+                                  Institution <span className="text-destructive">*</span>
+                                </FieldLabel>
                                 <Input
                                   value={instField.state.value}
                                   onChange={(e) => instField.handleChange(e.target.value)}
@@ -589,7 +615,9 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                           <form.Field name={`qualifications[${i}].year`}>
                             {(yearField) => (
                               <Field>
-                                <FieldLabel>Year</FieldLabel>
+                                <FieldLabel>
+                                  Year <span className="text-destructive">*</span>
+                                </FieldLabel>
                                 <Input
                                   type="number"
                                   value={yearField.state.value}
