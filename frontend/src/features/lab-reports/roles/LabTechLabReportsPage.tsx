@@ -42,6 +42,7 @@ export function LabTechLabReportsPage() {
     Status: statusFilter,
     Page: reportPage,
     PageSize: REPORT_PAGE_SIZE,
+    SortOrder: "desc",
   });
 
   const reportsResult = reportsData?.status === 200 ? reportsData.data : null;
@@ -66,6 +67,7 @@ export function LabTechLabReportsPage() {
   const { data: patientReportsData } = useGetAllLabReports({
     PatientPublicId: selectedPatientId ?? undefined,
     PageSize: PAGE_SIZE,
+    SortOrder: "desc",
   });
 
   const patientReports =
