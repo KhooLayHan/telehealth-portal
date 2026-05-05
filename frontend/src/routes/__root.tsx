@@ -1,5 +1,5 @@
 import { createRootRoute, Outlet } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/router-devtools";
+// import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import { Toaster } from "sonner";
 import { getMe } from "@/api/generated/users/users";
 import { pickPrimaryRole } from "@/features/auth/utils/roleUtils";
@@ -32,7 +32,7 @@ export const Route = createRootRoute({
     <>
       <Outlet />
       <Toaster richColors position="top-right" />
-      <TanStackRouterDevtools />
+      {/* <TanStackRouterDevtools /> */}
     </>
   ),
 });
