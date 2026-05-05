@@ -4,6 +4,7 @@ import type { AdminDepartmentDto } from "@/api/model/AdminDepartmentDto";
 import type { Instant } from "@/api/model/Instant";
 
 const DEPARTMENTS_PAGE_SIZE = 5;
+const DEPARTMENTS_REFETCH_INTERVAL_MS = 1000;
 
 // Represents one department row shown in the admin department table.
 export interface DepartmentTableRow {
@@ -31,11 +32,18 @@ export function useDepartmentsTable(search: string) {
   const [debouncedSearch, setDebouncedSearch] = useState(search);
   const previousSearch = useRef("");
   const normalizedSearch = debouncedSearch.trim();
-  const { data, isError, isLoading } = useAdminGetAllDepartments({
-    Page: page,
-    PageSize: DEPARTMENTS_PAGE_SIZE,
-    Search: normalizedSearch || undefined,
-  });
+  const { data, isError, isLoading } = useAdminGetAllDepartments(
+    {
+      Page: page,
+      PageSize: DEPARTMENTS_PAGE_SIZE,
+      Search: normalizedSearch || undefined,
+    },
+    {
+      query: {
+        refetchInterval: DEPARTMENTS_REFETCH_INTERVAL_MS,
+      },
+    },
+  );
 
   const pagedResult = data?.status === 200 ? data.data : null;
   const departments = useMemo(

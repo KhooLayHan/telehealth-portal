@@ -30,6 +30,7 @@ import { useLabTechCsvExport } from "@/features/admins/manageLabTech/UseLabTechC
 import { ViewLabTechDetailDialog } from "@/features/admins/manageLabTech/ViewLabTechDetailDialog";
 
 const PAGE_SIZE = 5;
+const LAB_TECHS_REFETCH_INTERVAL_MS = 1000;
 
 // Lists the lab technician gender filters supported by the admin lab technician endpoint.
 const GENDER_FILTER_OPTIONS = [
@@ -86,7 +87,11 @@ export function AdminLabTechsPage() {
     Gender: genderFilter || undefined,
   };
 
-  const { data, isLoading, isError } = useAdminGetAllLabTechs(labTechListParams);
+  const { data, isLoading, isError } = useAdminGetAllLabTechs(labTechListParams, {
+    query: {
+      refetchInterval: LAB_TECHS_REFETCH_INTERVAL_MS,
+    },
+  });
 
   const result = data?.status === 200 ? data.data : null;
   const labTechs = result?.items ?? [];

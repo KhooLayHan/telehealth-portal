@@ -180,7 +180,12 @@ function EditDepartmentFormContent({
 
                 return (
                   <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Department Name</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>
+                      Department Name
+                      <span className="ml-0.5 text-destructive" aria-hidden>
+                        *
+                      </span>
+                    </FieldLabel>
                     <Input
                       id={field.name}
                       value={field.state.value}

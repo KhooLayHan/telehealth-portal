@@ -43,10 +43,18 @@ export function AdminAppointmentPage() {
     listTotalPages,
     isListLoading,
     statuses,
-  } = useAdminAppointments(currentYear, currentMonth, listPage, search, {
-    status: statusFilter,
-    todayOnly,
-  });
+  } = useAdminAppointments(
+    currentYear,
+    currentMonth,
+    listPage,
+    search,
+    {
+      status: statusFilter,
+      todayOnly,
+    },
+    viewMode === "calendar",
+    viewMode === "list",
+  );
   const { exportAppointmentsCsv, isExportDisabled } = useAppointmentsCsvExport();
   const activeFilterCount = Number(Boolean(statusFilter)) + Number(todayOnly);
 

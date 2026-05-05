@@ -22,6 +22,9 @@ export interface AppointmentListFilters {
 // Helpers
 // ---------------------------------------------------------------------------
 
+// Sets how often the admin appointment views refresh appointment data.
+const APPOINTMENT_REFETCH_INTERVAL_MS = 1000;
+
 // Converts year/month/day to ISO "YYYY-MM-DD" string for API date params
 function toIsoDate(year: number, month: number, day: number): string {
   const m = String(month + 1).padStart(2, "0");
@@ -57,6 +60,8 @@ export function useAdminAppointments(
   listPage: number,
   search = "",
   filters: AppointmentListFilters = { status: "", todayOnly: false },
+  shouldPollCalendar = true,
+  shouldPollList = false,
 ) {
   const today = new Date();
   const todayIso = toIsoDate(today.getFullYear(), today.getMonth(), today.getDate());
@@ -64,12 +69,19 @@ export function useAdminAppointments(
   const lastOfMonth = toIsoDate(year, month, daysInMonth(year, month));
 
   // Fetch all appointments in the visible month for calendar dots and today panel
-  const monthQuery = useGetAllAppointmentsForReceptionist({
-    From: firstOfMonth,
-    To: lastOfMonth,
-    PageSize: 50,
-    SortOrder: "asc",
-  });
+  const monthQuery = useGetAllAppointmentsForReceptionist(
+    {
+      From: firstOfMonth,
+      To: lastOfMonth,
+      PageSize: 50,
+      SortOrder: "asc",
+    },
+    {
+      query: {
+        refetchInterval: shouldPollCalendar ? APPOINTMENT_REFETCH_INTERVAL_MS : false,
+      },
+    },
+  );
 
   const monthItems = useMemo<ReceptionistAppointmentDto[]>(() => {
     if (monthQuery.data?.status === 200) return monthQuery.data.data.items;
@@ -86,14 +98,21 @@ export function useAdminAppointments(
   );
 
   // Paginated query for the list view tab (separate from the month overview)
-  const listQuery = useGetAllAppointmentsForReceptionist({
-    PageSize: 5,
-    Page: listPage,
-    SortOrder: "asc",
-    ...(search.trim() ? { Search: search.trim() } : {}),
-    ...(filters.status ? { Status: filters.status } : {}),
-    ...(filters.todayOnly ? { From: todayIso, To: todayIso } : {}),
-  });
+  const listQuery = useGetAllAppointmentsForReceptionist(
+    {
+      PageSize: 5,
+      Page: listPage,
+      SortOrder: "asc",
+      ...(search.trim() ? { Search: search.trim() } : {}),
+      ...(filters.status ? { Status: filters.status } : {}),
+      ...(filters.todayOnly ? { From: todayIso, To: todayIso } : {}),
+    },
+    {
+      query: {
+        refetchInterval: shouldPollList ? APPOINTMENT_REFETCH_INTERVAL_MS : false,
+      },
+    },
+  );
 
   const statusQuery = useGetAllStatuses();
 

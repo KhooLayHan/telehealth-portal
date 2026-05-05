@@ -97,10 +97,14 @@ const navItems = [
   },
 ];
 
+const SYSTEM_NAME_POLL_INTERVAL_MS = 1000;
+
 export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const [isSupportDialogOpen, setIsSupportDialogOpen] = useState(false);
-  const { systemName } = useSystemName();
+  const { systemName } = useSystemName({
+    refetchIntervalMs: SYSTEM_NAME_POLL_INTERVAL_MS,
+  });
   const { user, logout } = useAuthStore();
 
   const normalizedRole = user?.role?.toLowerCase();

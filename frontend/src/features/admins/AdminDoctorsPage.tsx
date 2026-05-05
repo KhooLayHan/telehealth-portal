@@ -23,15 +23,16 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { AddNewDoctorForm } from "./manageDoctors/components/AddNewDoctorForm";
-import { DeleteDoctorDialog } from "./manageDoctors/components/DeleteDoctorDialog";
-import { DoctorCard } from "./manageDoctors/components/DoctorCard";
-import { EditDoctorForm } from "./manageDoctors/components/EditDoctorForm";
-import { ViewDoctorDetailDialog } from "./manageDoctors/components/ViewDoctorDetailDialog";
-import { ViewDoctorScheduleDialog } from "./manageDoctors/components/ViewDoctorScheduleDialog";
+import { AddNewDoctorForm } from "./manageDoctors/AddNewDoctorForm";
+import { DeleteDoctorDialog } from "./manageDoctors/DeleteDoctorDialog";
+import { DoctorCard } from "./manageDoctors/DoctorCard";
+import { EditDoctorForm } from "./manageDoctors/EditDoctorForm";
+import { ViewDoctorDetailDialog } from "./manageDoctors/ViewDoctorDetailDialog";
+import { ViewDoctorScheduleDialog } from "./manageDoctors/ViewDoctorScheduleDialog";
 
 const ACCENT = "#0d9488";
 const PAGE_SIZE = 6;
+const DOCTORS_REFETCH_INTERVAL_MS = 1000;
 const CSV_FORMULA_PREFIX_PATTERN = /^\s*[=+\-@]/;
 
 // Defines one exported doctor CSV column and how its value is read.
@@ -122,13 +123,20 @@ export function AdminDoctorsPage() {
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
 
-  const { data, isLoading, isError } = useGetAll({
-    Page: page,
-    PageSize: PAGE_SIZE,
-    Search: search || undefined,
-    Department: departmentFilter || undefined,
-    Specialization: specializationFilter || undefined,
-  });
+  const { data, isLoading, isError } = useGetAll(
+    {
+      Page: page,
+      PageSize: PAGE_SIZE,
+      Search: search || undefined,
+      Department: departmentFilter || undefined,
+      Specialization: specializationFilter || undefined,
+    },
+    {
+      query: {
+        refetchInterval: DOCTORS_REFETCH_INTERVAL_MS,
+      },
+    },
+  );
   const { data: directoryData } = useGetAll({ Page: 1, PageSize: 50 });
   const { data: departmentsData } = useAdminGetAllDepartments({ Page: 1, PageSize: 50 });
   const result = data?.status === 200 ? data.data : null;

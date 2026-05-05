@@ -3,10 +3,16 @@ import { useGetPublicSystemSettings } from "@/api/generated/system-settings/syst
 const DEFAULT_SYSTEM_NAME = "TeleHealth";
 const SYSTEM_NAME_STALE_TIME_MS = 5 * 60 * 1000;
 
+// Options for controlling how the public system name is refreshed.
+interface UseSystemNameOptions {
+  refetchIntervalMs?: number;
+}
+
 // Reads the public system name and falls back while the request is loading or unavailable.
-export function useSystemName() {
+export function useSystemName(options?: UseSystemNameOptions) {
   const systemSettingsQuery = useGetPublicSystemSettings({
     query: {
+      refetchInterval: options?.refetchIntervalMs,
       staleTime: SYSTEM_NAME_STALE_TIME_MS,
     },
   });

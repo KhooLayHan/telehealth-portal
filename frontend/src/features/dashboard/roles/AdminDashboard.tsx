@@ -47,6 +47,9 @@ const clinicActivityData: ClinicActivityDataPoint[] = [
   { label: "Sun", appointments: 12 },
 ];
 
+// Sets the polling cadence for server-backed admin dashboard data.
+const ADMIN_DASHBOARD_REFETCH_INTERVAL_MS = 1_000;
+
 // Describes one aggregate card shown at the top of the admin dashboard.
 type AdminDashboardStat = {
   icon: LucideIcon;
@@ -291,8 +294,13 @@ function AdminDashboardStatCard({
 }
 
 export function AdminDashboard() {
-  const dashboardSummaryQuery = useAdminGetDashboardSummary();
-  const auditLogsQuery = useAdminGetAuditLogs({ Page: 1, PageSize: 5 });
+  const dashboardSummaryQuery = useAdminGetDashboardSummary({
+    query: { refetchInterval: ADMIN_DASHBOARD_REFETCH_INTERVAL_MS },
+  });
+  const auditLogsQuery = useAdminGetAuditLogs(
+    { Page: 1, PageSize: 5 },
+    { query: { refetchInterval: ADMIN_DASHBOARD_REFETCH_INTERVAL_MS } },
+  );
   const dashboardSummary =
     dashboardSummaryQuery.data?.status === 200 ? dashboardSummaryQuery.data.data : null;
   const auditLogs = auditLogsQuery.data?.status === 200 ? auditLogsQuery.data.data.items : [];

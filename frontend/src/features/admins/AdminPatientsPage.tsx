@@ -21,6 +21,7 @@ import { usePatientsCsvExport } from "@/features/admins/managePatients/UsePatien
 import { ViewPatientDetailDialog } from "@/features/admins/managePatients/ViewPatientDetailDialog";
 
 const PAGE_SIZE = 5;
+const PATIENTS_REFETCH_INTERVAL_MS = 1000;
 
 // Lists the patient gender filters supported by the staff patients endpoint.
 const GENDER_FILTER_OPTIONS = [
@@ -62,7 +63,11 @@ export function AdminPatientsPage() {
     Gender: genderFilter || undefined,
   };
 
-  const { data, isLoading } = useGetAllPatientsForClinicStaff(patientListParams);
+  const { data, isLoading } = useGetAllPatientsForClinicStaff(patientListParams, {
+    query: {
+      refetchInterval: PATIENTS_REFETCH_INTERVAL_MS,
+    },
+  });
 
   const pagedResult = data?.status === 200 ? data.data : null;
   const patients = pagedResult?.items ?? [];
