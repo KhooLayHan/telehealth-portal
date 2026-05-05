@@ -6,6 +6,6 @@
  */
 
 export type GetDailySchedulesForReceptionistParams = {
-  Date: string;
-  DoctorPublicId?: string;
+Date: string;
+DoctorPublicId?: string;
 };

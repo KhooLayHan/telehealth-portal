@@ -6,16 +6,16 @@
  */
 
 export type GetAllLabReportsParams = {
-  Search?: string;
-  Status?: string;
-  /**
-   * @pattern ^-?(?:0|[1-9]\d*)$
-   */
-  Page?: number | string;
-  /**
-   * @pattern ^-?(?:0|[1-9]\d*)$
-   */
-  PageSize?: number | string;
-  SortOrder?: string;
-  PatientPublicId?: string;
+Search?: string;
+Status?: string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+Page?: number | string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+PageSize?: number | string;
+SortOrder?: string;
+PatientPublicId?: string;
 };

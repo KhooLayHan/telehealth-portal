@@ -4,10 +4,10 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { AllergyDto } from "./AllergyDto";
-import type { EmergencyContactDto } from "./EmergencyContactDto";
-import type { Instant } from "./Instant";
-import type { LocalDate } from "./LocalDate";
+import type { AllergyDto } from './AllergyDto';
+import type { EmergencyContactDto } from './EmergencyContactDto';
+import type { Instant } from './Instant';
+import type { LocalDate } from './LocalDate';
 
 export interface ClinicStaffPatientDto {
   patientPublicId: string;
@@ -24,9 +24,9 @@ export interface ClinicStaffPatientDto {
   phoneNumber: string;
   bloodGroup: string;
   /**
-   * @minLength 1
-   * @maxLength 1
-   */
+     * @minLength 1
+     * @maxLength 1
+     */
   gender: string;
   /** @nullable */
   allergies: AllergyDto[] | null;

@@ -4,7 +4,7 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { AdminAuditLogDto } from "./AdminAuditLogDto";
+import type { AdminAuditLogDto } from './AdminAuditLogDto';
 
 export interface PagedResultOfAdminAuditLogDto {
   items: AdminAuditLogDto[];

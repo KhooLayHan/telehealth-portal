@@ -4,9 +4,9 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { CreateDoctorAddressCommand } from "./CreateDoctorAddressCommand";
-import type { CreateDoctorQualificationCommand } from "./CreateDoctorQualificationCommand";
-import type { LocalDate } from "./LocalDate";
+import type { CreateDoctorAddressCommand } from './CreateDoctorAddressCommand';
+import type { CreateDoctorQualificationCommand } from './CreateDoctorQualificationCommand';
+import type { LocalDate } from './LocalDate';
 
 export interface CreateDoctorCommand {
   firstName: string;
@@ -24,9 +24,9 @@ export interface CreateDoctorCommand {
   specialization: string;
   licenseNumber: string;
   /**
-   * @nullable
-   * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
-   */
+     * @nullable
+     * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+     */
   consultationFee: number | string | null;
   departmentName: string;
   address: null | CreateDoctorAddressCommand;
