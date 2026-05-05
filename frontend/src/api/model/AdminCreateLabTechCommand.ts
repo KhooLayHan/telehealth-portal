@@ -4,8 +4,8 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { Address } from './Address';
-import type { LocalDate } from './LocalDate';
+import type { Address } from "./Address";
+import type { LocalDate } from "./LocalDate";
 
 export interface AdminCreateLabTechCommand {
   firstName: string;
@@ -16,9 +16,9 @@ export interface AdminCreateLabTechCommand {
   /** @nullable */
   phoneNumber: string | null;
   /**
-     * @minLength 1
-     * @maxLength 1
-     */
+   * @minLength 1
+   * @maxLength 1
+   */
   gender: string;
   dateOfBirth: LocalDate;
   icNumber: string;

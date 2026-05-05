@@ -4,8 +4,8 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { LocalDate } from './LocalDate';
-import type { PrescriptionRequest } from './PrescriptionRequest';
+import type { LocalDate } from "./LocalDate";
+import type { PrescriptionRequest } from "./PrescriptionRequest";
 
 export interface SubmitConsultationRequest {
   subjective: string;

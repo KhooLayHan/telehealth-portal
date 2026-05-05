@@ -4,7 +4,7 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { AdminDepartmentDto } from './AdminDepartmentDto';
+import type { AdminDepartmentDto } from "./AdminDepartmentDto";
 
 export interface PagedResultOfAdminDepartmentDto {
   items: AdminDepartmentDto[];

@@ -4,8 +4,8 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { Instant } from './Instant';
-import type { LabReportStatusDto } from './LabReportStatusDto';
+import type { Instant } from "./Instant";
+import type { LabReportStatusDto } from "./LabReportStatusDto";
 
 export interface LabReportDto {
   publicId: string;

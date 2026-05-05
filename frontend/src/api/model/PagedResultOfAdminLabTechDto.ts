@@ -4,7 +4,7 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { AdminLabTechDto } from './AdminLabTechDto';
+import type { AdminLabTechDto } from "./AdminLabTechDto";
 
 export interface PagedResultOfAdminLabTechDto {
   items: AdminLabTechDto[];

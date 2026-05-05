@@ -4,9 +4,9 @@
  * TeleHealth.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { Allergy } from './Allergy';
-import type { EmergencyContact } from './EmergencyContact';
-import type { LocalDate } from './LocalDate';
+import type { Allergy } from "./Allergy";
+import type { EmergencyContact } from "./EmergencyContact";
+import type { LocalDate } from "./LocalDate";
 
 export interface ReceptionistPatientsDto {
   userPublicId?: string;
