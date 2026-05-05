@@ -174,7 +174,12 @@ export function EditReceptionistForm({
                 <form.Field name="firstName">
                   {(field) => (
                     <Field>
-                      <FieldLabel>First Name</FieldLabel>
+                      <FieldLabel>
+                        First Name
+                        <span className="ml-0.5 text-destructive" aria-hidden>
+                          *
+                        </span>
+                      </FieldLabel>
                       <Input
                         value={field.state.value}
                         onChange={(e) => field.handleChange(e.target.value)}
@@ -189,7 +194,12 @@ export function EditReceptionistForm({
                 <form.Field name="lastName">
                   {(field) => (
                     <Field>
-                      <FieldLabel>Last Name</FieldLabel>
+                      <FieldLabel>
+                        Last Name
+                        <span className="ml-0.5 text-destructive" aria-hidden>
+                          *
+                        </span>
+                      </FieldLabel>
                       <Input
                         value={field.state.value}
                         onChange={(e) => field.handleChange(e.target.value)}
@@ -205,7 +215,12 @@ export function EditReceptionistForm({
               <form.Field name="icNumber">
                 {(field) => (
                   <Field>
-                    <FieldLabel>IC Number</FieldLabel>
+                    <FieldLabel>
+                      IC Number
+                      <span className="ml-0.5 text-destructive" aria-hidden>
+                        *
+                      </span>
+                    </FieldLabel>
                     <Input
                       value={field.state.value}
                       onChange={(e) => field.handleChange(e.target.value)}
@@ -238,7 +253,12 @@ export function EditReceptionistForm({
                 <form.Field name="gender">
                   {(field) => (
                     <Field>
-                      <FieldLabel>Gender</FieldLabel>
+                      <FieldLabel>
+                        Gender
+                        <span className="ml-0.5 text-destructive" aria-hidden>
+                          *
+                        </span>
+                      </FieldLabel>
                       <Select
                         value={field.state.value}
                         onValueChange={(value) =>
@@ -264,7 +284,12 @@ export function EditReceptionistForm({
               <form.Field name="dateOfBirth">
                 {(field) => (
                   <Field>
-                    <FieldLabel>Date of Birth</FieldLabel>
+                    <FieldLabel>
+                      Date of Birth
+                      <span className="ml-0.5 text-destructive" aria-hidden>
+                        *
+                      </span>
+                    </FieldLabel>
                     <Input
                       type="date"
                       value={field.state.value}
@@ -285,7 +310,12 @@ export function EditReceptionistForm({
                 <form.Field name="username">
                   {(field) => (
                     <Field>
-                      <FieldLabel>Username</FieldLabel>
+                      <FieldLabel>
+                        Username
+                        <span className="ml-0.5 text-destructive" aria-hidden>
+                          *
+                        </span>
+                      </FieldLabel>
                       <Input
                         value={field.state.value}
                         onChange={(e) => field.handleChange(e.target.value)}
@@ -301,7 +331,12 @@ export function EditReceptionistForm({
                 <form.Field name="email">
                   {(field) => (
                     <Field>
-                      <FieldLabel>Email</FieldLabel>
+                      <FieldLabel>
+                        Email
+                        <span className="ml-0.5 text-destructive" aria-hidden>
+                          *
+                        </span>
+                      </FieldLabel>
                       <Input
                         type="email"
                         value={field.state.value}
