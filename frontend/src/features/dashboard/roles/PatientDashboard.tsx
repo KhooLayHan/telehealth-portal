@@ -1,6 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { Calendar, CheckCircle2, Clock, FlaskConical } from "lucide-react";
-import { useGetAllLabReports } from "@/api/generated/lab-reports/lab-reports";
+import { Calendar, CheckCircle2, Clock } from "lucide-react";
 import { useGetAllAppointments } from "@/api/generated/patients/patients";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,15 +23,12 @@ export function PatientDashboard() {
     Page: 1,
     PageSize: 1,
   });
-  const { data: labData } = useGetAllLabReports({ Page: 1, PageSize: 1 });
 
   const upcoming = upcomingData?.status === 200 ? upcomingData.data : undefined;
   const past = pastData?.status === 200 ? pastData.data : undefined;
-  const labs = labData?.status === 200 ? labData.data : undefined;
 
   const upcomingCount = Number(upcoming?.totalCount ?? 0);
   const pastCount = Number(past?.totalCount ?? 0);
-  const labCount = Number(labs?.totalCount ?? 0);
   const nextAppt = upcoming?.items[0];
 
   const stats = [
@@ -53,15 +49,6 @@ export function PatientDashboard() {
       iconBg: "bg-green-100 dark:bg-green-900/30",
       iconColor: "text-green-600 dark:text-green-400",
       onClick: () => navigate({ to: "/appointments", search: { today: true } }),
-    },
-    {
-      title: "Lab Reports",
-      value: String(labCount),
-      sub: labCount === 0 ? "none on record" : "reports available",
-      icon: FlaskConical,
-      iconBg: "bg-amber-100 dark:bg-amber-900/30",
-      iconColor: "text-amber-600 dark:text-amber-400",
-      onClick: () => navigate({ to: "/lab-reports" }),
     },
     {
       title: "Next Appointment",
