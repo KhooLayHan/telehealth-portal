@@ -23,12 +23,12 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { AddNewDoctorForm } from "./manageDoctors/components/AddNewDoctorForm";
-import { DeleteDoctorDialog } from "./manageDoctors/components/DeleteDoctorDialog";
-import { DoctorCard } from "./manageDoctors/components/DoctorCard";
-import { EditDoctorForm } from "./manageDoctors/components/EditDoctorForm";
-import { ViewDoctorDetailDialog } from "./manageDoctors/components/ViewDoctorDetailDialog";
-import { ViewDoctorScheduleDialog } from "./manageDoctors/components/ViewDoctorScheduleDialog";
+import { AddNewDoctorForm } from "./manageDoctors/AddNewDoctorForm";
+import { DeleteDoctorDialog } from "./manageDoctors/DeleteDoctorDialog";
+import { DoctorCard } from "./manageDoctors/DoctorCard";
+import { EditDoctorForm } from "./manageDoctors/EditDoctorForm";
+import { ViewDoctorDetailDialog } from "./manageDoctors/ViewDoctorDetailDialog";
+import { ViewDoctorScheduleDialog } from "./manageDoctors/ViewDoctorScheduleDialog";
 
 const ACCENT = "#0d9488";
 const PAGE_SIZE = 6;
