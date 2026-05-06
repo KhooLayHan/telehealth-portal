@@ -1,7 +1,12 @@
+import { useState } from "react";
 import { toast } from "sonner";
 
+import { adminGetAllReceptionists } from "@/api/generated/admins/admins";
+import type { AdminGetAllReceptionistsParams } from "@/api/model/AdminGetAllReceptionistsParams";
 import type { AdminReceptionistDto } from "@/api/model/AdminReceptionistDto";
 
+const RECEPTIONISTS_CSV_FILE_NAME = "receptionists.csv";
+const RECEPTIONISTS_EXPORT_PAGE_SIZE = 100;
 const RECEPTIONISTS_CSV_HEADERS = [
   "Public ID",
   "Slug",
@@ -24,17 +29,11 @@ const CSV_SPECIAL_CHARACTERS_PATTERN = /[",\n]/;
 const WINDOWS_NEWLINES_PATTERN = /\r\n/g;
 const CARRIAGE_RETURN_PATTERN = /\r/g;
 const DOUBLE_QUOTE_PATTERN = /"/g;
-
-// Describes the receptionist records and loading state needed for CSV export.
-interface UseReceptionistsCsvExportOptions {
-  receptionists: AdminReceptionistDto[];
-  isLoading: boolean;
-  isError: boolean;
-}
+const CSV_FORMULA_PREFIX_PATTERN = /^\s*[=+\-@]/;
 
 // Describes the CSV export controls exposed to the receptionist page.
 interface UseReceptionistsCsvExportReturn {
-  exportReceptionistsCsv: () => void;
+  exportReceptionistsCsv: () => Promise<void>;
   isExportDisabled: boolean;
 }
 
@@ -57,17 +56,20 @@ function genderLabel(code: string): string {
   return map[code] ?? code;
 }
 
-// Escapes one cell so commas, quotes, and line breaks remain valid CSV content.
-function escapeCsvCell(value: string | null | undefined): string {
+// Escapes one cell so commas, quotes, line breaks, and formula prefixes remain valid CSV content.
+function escapeCsvCell(value: unknown): string {
   const normalizedValue = String(value ?? "")
     .replace(WINDOWS_NEWLINES_PATTERN, "\n")
     .replace(CARRIAGE_RETURN_PATTERN, "\n");
+  const safeValue = CSV_FORMULA_PREFIX_PATTERN.test(normalizedValue)
+    ? `'${normalizedValue}`
+    : normalizedValue;
 
-  if (!CSV_SPECIAL_CHARACTERS_PATTERN.test(normalizedValue)) {
-    return normalizedValue;
+  if (!CSV_SPECIAL_CHARACTERS_PATTERN.test(safeValue)) {
+    return safeValue;
   }
 
-  return `"${normalizedValue.replace(DOUBLE_QUOTE_PATTERN, '""')}"`;
+  return `"${safeValue.replace(DOUBLE_QUOTE_PATTERN, '""')}"`;
 }
 
 // Converts receptionist records into a CSV document with one row per receptionist.
@@ -116,37 +118,57 @@ function downloadCsvFile(fileName: string, csvContent: string): void {
   URL.revokeObjectURL(url);
 }
 
-// Exports the currently loaded receptionist records as CSV.
-export function useReceptionistsCsvExport({
-  receptionists,
-  isLoading,
-  isError,
-}: UseReceptionistsCsvExportOptions): UseReceptionistsCsvExportReturn {
-  const exportReceptionistsCsv = () => {
-    if (isLoading) {
-      toast.info("Receptionists are still loading.");
+// Fetches every receptionist page from the generated API client and exports it as CSV.
+export function useReceptionistsCsvExport(
+  params: Pick<AdminGetAllReceptionistsParams, "Gender" | "Search"> = {},
+): UseReceptionistsCsvExportReturn {
+  const [isExporting, setIsExporting] = useState(false);
+
+  const exportReceptionistsCsv = async () => {
+    if (isExporting) {
       return;
     }
 
-    if (isError) {
+    setIsExporting(true);
+
+    try {
+      const receptionists: AdminReceptionistDto[] = [];
+      let page = 1;
+      let hasNextPage = true;
+
+      while (hasNextPage) {
+        const response = await adminGetAllReceptionists({
+          ...params,
+          Page: page,
+          PageSize: RECEPTIONISTS_EXPORT_PAGE_SIZE,
+        });
+
+        if (response.status !== 200) {
+          toast.error("Failed to export receptionists.");
+          return;
+        }
+
+        receptionists.push(...response.data.items);
+        hasNextPage = response.data.hasNextPage ?? false;
+        page += 1;
+      }
+
+      if (receptionists.length === 0) {
+        toast.info("No receptionist records available to export.");
+        return;
+      }
+
+      downloadCsvFile(RECEPTIONISTS_CSV_FILE_NAME, buildReceptionistsCsv(receptionists));
+      toast.success("Receptionists CSV downloaded.");
+    } catch {
       toast.error("Failed to export receptionists.");
-      return;
+    } finally {
+      setIsExporting(false);
     }
-
-    if (receptionists.length === 0) {
-      toast.info("No receptionist records available to export.");
-      return;
-    }
-
-    const today = new Date().toISOString().slice(0, 10);
-    downloadCsvFile(`receptionists-${today}.csv`, buildReceptionistsCsv(receptionists));
-    toast.success(
-      `Exported ${receptionists.length} receptionist record${receptionists.length === 1 ? "" : "s"}.`,
-    );
   };
 
   return {
     exportReceptionistsCsv,
-    isExportDisabled: isLoading || isError,
+    isExportDisabled: isExporting,
   };
 }
