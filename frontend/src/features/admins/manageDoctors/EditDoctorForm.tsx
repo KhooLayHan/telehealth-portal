@@ -1,9 +1,10 @@
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2 } from "lucide-react";
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { useAdminGetAllDepartments } from "@/api/generated/admins/admins";
 import { getGetAllQueryKey, useUpdateDoctorById } from "@/api/generated/doctors/doctors";
 import type { DoctorListDto } from "@/api/model/DoctorListDto";
 import type { UpdateDoctorCommand } from "@/api/model/UpdateDoctorCommand";
@@ -93,6 +94,32 @@ interface EditDoctorFormProps {
 export function EditDoctorForm({ doctor, open, onOpenChange }: EditDoctorFormProps) {
   const queryClient = useQueryClient();
   const { mutateAsync, isPending } = useUpdateDoctorById();
+  const {
+    data: departmentsData,
+    isError: isDepartmentsError,
+    isLoading: isDepartmentsLoading,
+  } = useAdminGetAllDepartments(
+    { Page: 1, PageSize: 100 },
+    {
+      query: {
+        enabled: open,
+      },
+    },
+  );
+  const departmentOptions = useMemo(
+    () =>
+      (departmentsData?.status === 200 ? departmentsData.data.items : [])
+        .filter((department) => Boolean(department.name))
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    [departmentsData],
+  );
+  const departmentPlaceholder = isDepartmentsLoading
+    ? "Loading departments..."
+    : isDepartmentsError
+      ? "Failed to load departments"
+      : departmentOptions.length === 0
+        ? "No departments available"
+        : "Select department";
   const initials = `${(doctor.firstName ?? "?")[0]}${(doctor.lastName ?? "?")[0]}`.toUpperCase();
 
   const qualKeysRef = useRef<string[]>(
@@ -376,12 +403,26 @@ export function EditDoctorForm({ doctor, open, onOpenChange }: EditDoctorFormPro
                       <FieldLabel>
                         Department <span className="text-destructive">*</span>
                       </FieldLabel>
-                      <Input
+                      <Select
                         value={field.state.value}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        onBlur={field.handleBlur}
-                        placeholder="e.g. Cardiology Department"
-                      />
+                        onValueChange={(v) => field.handleChange(v ?? "")}
+                        disabled={
+                          isDepartmentsLoading ||
+                          isDepartmentsError ||
+                          departmentOptions.length === 0
+                        }
+                      >
+                        <SelectTrigger className="w-full" onBlur={field.handleBlur}>
+                          <SelectValue placeholder={departmentPlaceholder} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {departmentOptions.map((department) => (
+                            <SelectItem key={department.slug} value={department.name}>
+                              {department.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
                   )}
