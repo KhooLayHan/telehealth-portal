@@ -1,3 +1,4 @@
+import { keepPreviousData } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAdminGetAllDepartments } from "@/api/generated/admins/admins";
 import type { AdminDepartmentDto } from "@/api/model/AdminDepartmentDto";
@@ -40,6 +41,7 @@ export function useDepartmentsTable(search: string) {
     },
     {
       query: {
+        placeholderData: keepPreviousData,
         refetchInterval: DEPARTMENTS_REFETCH_INTERVAL_MS,
       },
     },
@@ -69,8 +71,12 @@ export function useDepartmentsTable(search: string) {
   }, [normalizedSearch]);
 
   useEffect(() => {
+    if (!pagedResult) {
+      return;
+    }
+
     setPage((currentPage) => Math.min(currentPage, totalPages));
-  }, [totalPages]);
+  }, [pagedResult, totalPages]);
 
   function handlePageChange(nextPage: number) {
     setPage(Math.min(Math.max(nextPage, 1), totalPages));

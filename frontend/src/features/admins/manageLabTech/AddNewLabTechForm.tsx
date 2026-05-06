@@ -273,7 +273,12 @@ export function AddNewLabTechForm({ open, onOpenChange }: AddNewLabTechFormProps
                 <form.Field name="gender">
                   {(field) => (
                     <Field>
-                      <FieldLabel>Gender</FieldLabel>
+                      <FieldLabel>
+                        Gender
+                        <span className="ml-0.5 text-destructive" aria-hidden>
+                          *
+                        </span>
+                      </FieldLabel>
                       <Select
                         value={field.state.value}
                         onValueChange={(value) =>
@@ -299,7 +304,12 @@ export function AddNewLabTechForm({ open, onOpenChange }: AddNewLabTechFormProps
               <form.Field name="dateOfBirth">
                 {(field) => (
                   <Field>
-                    <FieldLabel>Date of Birth</FieldLabel>
+                    <FieldLabel>
+                      Date of Birth
+                      <span className="ml-0.5 text-destructive" aria-hidden>
+                        *
+                      </span>
+                    </FieldLabel>
                     <Input
                       type="date"
                       value={field.state.value}

@@ -82,11 +82,15 @@ export function AdminReceptionistsPage() {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
-  const receptionistListParams: AdminGetAllReceptionistsParams & { Gender?: string } = {
+  const receptionistListParams: AdminGetAllReceptionistsParams = {
     Page: page,
     PageSize: PAGE_SIZE,
     Search: search.trim() || undefined,
     Gender: genderFilter || undefined,
+  };
+  const receptionistExportParams: Pick<AdminGetAllReceptionistsParams, "Gender" | "Search"> = {
+    Search: receptionistListParams.Search,
+    Gender: receptionistListParams.Gender,
   };
 
   const { data, isLoading, isError } = useAdminGetAllReceptionists(receptionistListParams, {
@@ -99,11 +103,8 @@ export function AdminReceptionistsPage() {
   const receptionists = result?.items ?? [];
   const totalCount = result ? Number(result.totalCount) : 0;
   const totalPages = result ? Number(result.totalPages ?? 1) : 1;
-  const { exportReceptionistsCsv, isExportDisabled } = useReceptionistsCsvExport({
-    receptionists,
-    isLoading,
-    isError,
-  });
+  const { exportReceptionistsCsv, isExportDisabled } =
+    useReceptionistsCsvExport(receptionistExportParams);
 
   return (
     <div className="space-y-6">
