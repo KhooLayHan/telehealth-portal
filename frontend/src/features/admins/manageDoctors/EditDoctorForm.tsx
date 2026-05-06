@@ -57,6 +57,27 @@ const editDoctorSchema = z.object({
   ),
 });
 
+// Converts doctor gender labels from the list API into form option codes.
+function doctorGenderToCode(gender: string | null | undefined): string {
+  switch (gender?.trim().toLowerCase()) {
+    case "m":
+    case "male":
+      return "M";
+    case "f":
+    case "female":
+      return "F";
+    case "o":
+    case "other":
+      return "O";
+    case "n":
+    case "not specified":
+    case "prefer not to say":
+      return "N";
+    default:
+      return "N";
+  }
+}
+
 function buildEditDefaultValues(doctor: DoctorListDto) {
   return {
     firstName: doctor.firstName ?? "",
@@ -65,7 +86,7 @@ function buildEditDefaultValues(doctor: DoctorListDto) {
     email: doctor.email ?? "",
     icNumber: doctor.icNumber ?? "",
     phoneNumber: doctor.phoneNumber ?? "",
-    gender: doctor.gender ?? "",
+    gender: doctorGenderToCode(doctor.gender),
     dateOfBirth: String(doctor.dateOfBirth ?? ""),
     bio: doctor.bio ?? "",
     specialization: doctor.specialization ?? "",
@@ -137,7 +158,7 @@ export function EditDoctorForm({ doctor, open, onOpenChange }: EditDoctorFormPro
         email: value.email ?? "",
         icNumber: value.icNumber ?? "",
         phoneNumber: value.phoneNumber || null,
-        gender: (value.gender ?? "N")[0] ?? "N",
+        gender: value.gender || "N",
         dateOfBirth: value.dateOfBirth ?? "",
         bio: value.bio || null,
         specialization: value.specialization ?? "",
@@ -329,10 +350,10 @@ export function EditDoctorForm({ doctor, open, onOpenChange }: EditDoctorFormPro
                           <SelectValue placeholder="Select gender" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Male">Male</SelectItem>
-                          <SelectItem value="Female">Female</SelectItem>
-                          <SelectItem value="Other">Other</SelectItem>
-                          <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
+                          <SelectItem value="M">Male</SelectItem>
+                          <SelectItem value="F">Female</SelectItem>
+                          <SelectItem value="O">Other</SelectItem>
+                          <SelectItem value="N">Prefer not to say</SelectItem>
                         </SelectContent>
                       </Select>
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
