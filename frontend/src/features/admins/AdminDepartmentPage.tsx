@@ -42,7 +42,7 @@ export function AdminDepartmentPage() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbPage className="text-muted-foreground">Staff Management</BreadcrumbPage>
+              <BreadcrumbPage className="text-muted-foreground">Dashboard</BreadcrumbPage>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
