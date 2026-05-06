@@ -333,7 +333,7 @@ export function AddNewPatientForm({ open, onOpenChange }: AddNewPatientFormProps
                         value={field.state.value}
                         onChange={(event) => field.handleChange(event.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder="e.g. 920101-01-1234"
+                        placeholder="e.g. 920101011234"
                       />
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
