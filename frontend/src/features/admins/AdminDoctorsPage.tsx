@@ -30,7 +30,6 @@ import { EditDoctorForm } from "./manageDoctors/EditDoctorForm";
 import { ViewDoctorDetailDialog } from "./manageDoctors/ViewDoctorDetailDialog";
 import { ViewDoctorScheduleDialog } from "./manageDoctors/ViewDoctorScheduleDialog";
 
-const ACCENT = "#0d9488";
 const PAGE_SIZE = 6;
 const DOCTORS_REFETCH_INTERVAL_MS = 1000;
 const CSV_FORMULA_PREFIX_PATTERN = /^\s*[=+\-@]/;
@@ -476,7 +475,7 @@ export function AdminDoctorsPage() {
             <Button
               variant="outline"
               size="sm"
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 border-black/20 bg-white p-0 text-black hover:bg-muted"
               disabled={page === 1}
               onClick={() => setPage((p) => p - 1)}
             >
@@ -501,8 +500,11 @@ export function AdminDoctorsPage() {
                     key={item}
                     variant={item === page ? "default" : "outline"}
                     size="sm"
-                    className="h-8 w-8 p-0 text-xs"
-                    style={item === page ? { background: ACCENT } : undefined}
+                    className={`h-8 w-8 p-0 text-xs ${
+                      item === page
+                        ? "border-black bg-black text-white hover:bg-black/85 hover:text-white"
+                        : "border-black/20 bg-white text-black hover:bg-muted"
+                    }`}
                     onClick={() => setPage(item)}
                   >
                     {item}
@@ -513,7 +515,7 @@ export function AdminDoctorsPage() {
             <Button
               variant="outline"
               size="sm"
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 border-black/20 bg-white p-0 text-black hover:bg-muted"
               disabled={page === totalPages}
               onClick={() => setPage((p) => p + 1)}
             >
