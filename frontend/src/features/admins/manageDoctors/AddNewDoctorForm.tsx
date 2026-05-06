@@ -1,9 +1,10 @@
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { Eye, EyeOff, Plus, Trash2 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { useAdminGetAllDepartments } from "@/api/generated/admins/admins";
 import { getGetAllQueryKey, useCreateDoctor } from "@/api/generated/doctors/doctors";
 import type { CreateDoctorCommand } from "@/api/model/CreateDoctorCommand";
 import { ApiError } from "@/api/ofetch-mutator";
@@ -93,6 +94,32 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
   const [showPassword, setShowPassword] = useState(false);
   const queryClient = useQueryClient();
   const { mutateAsync, isPending } = useCreateDoctor();
+  const {
+    data: departmentsData,
+    isError: isDepartmentsError,
+    isLoading: isDepartmentsLoading,
+  } = useAdminGetAllDepartments(
+    { Page: 1, PageSize: 100 },
+    {
+      query: {
+        enabled: open,
+      },
+    },
+  );
+  const departmentOptions = useMemo(
+    () =>
+      (departmentsData?.status === 200 ? departmentsData.data.items : [])
+        .filter((department) => Boolean(department.name))
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    [departmentsData],
+  );
+  const departmentPlaceholder = isDepartmentsLoading
+    ? "Loading departments..."
+    : isDepartmentsError
+      ? "Failed to load departments"
+      : departmentOptions.length === 0
+        ? "No departments available"
+        : "Select department";
 
   const form = useForm({
     defaultValues: addDoctorDefaultValues,
@@ -294,7 +321,7 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                       value={field.state.value}
                       onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
-                      placeholder="e.g. 820101-14-5678"
+                      placeholder="e.g. 820101145678"
                       className="font-mono"
                     />
                     <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
@@ -404,12 +431,26 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                       <FieldLabel>
                         Department <span className="text-destructive">*</span>
                       </FieldLabel>
-                      <Input
+                      <Select
                         value={field.state.value}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        onBlur={field.handleBlur}
-                        placeholder="e.g. Cardiology Department"
-                      />
+                        onValueChange={(v) => field.handleChange(v ?? "")}
+                        disabled={
+                          isDepartmentsLoading ||
+                          isDepartmentsError ||
+                          departmentOptions.length === 0
+                        }
+                      >
+                        <SelectTrigger className="w-full" onBlur={field.handleBlur}>
+                          <SelectValue placeholder={departmentPlaceholder} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {departmentOptions.map((department) => (
+                            <SelectItem key={department.slug} value={department.name}>
+                              {department.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />
                     </Field>
                   )}
