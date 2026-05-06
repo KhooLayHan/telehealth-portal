@@ -253,7 +253,12 @@ export function AddNewReceptionistForm({ open, onOpenChange }: AddNewReceptionis
                 <form.Field name="gender">
                   {(field) => (
                     <Field>
-                      <FieldLabel>Gender</FieldLabel>
+                      <FieldLabel>
+                        Gender
+                        <span className="ml-0.5 text-destructive" aria-hidden>
+                          *
+                        </span>
+                      </FieldLabel>
                       <Select
                         value={field.state.value}
                         onValueChange={(value) =>
