@@ -133,7 +133,7 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
         password: value.password,
         icNumber: value.icNumber,
         phoneNumber: value.phoneNumber || null,
-        gender: value.gender[0] ?? "N",
+        gender: value.gender || "N",
         dateOfBirth: value.dateOfBirth,
         bio: value.bio || null,
         specialization: value.specialization,
@@ -357,10 +357,10 @@ export function AddNewDoctorForm({ open, onOpenChange }: AddNewDoctorFormProps) 
                           <SelectValue placeholder="Select gender" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Male">Male</SelectItem>
-                          <SelectItem value="Female">Female</SelectItem>
-                          <SelectItem value="Other">Other</SelectItem>
-                          <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
+                          <SelectItem value="M">Male</SelectItem>
+                          <SelectItem value="F">Female</SelectItem>
+                          <SelectItem value="O">Other</SelectItem>
+                          <SelectItem value="N">Prefer not to say</SelectItem>
                         </SelectContent>
                       </Select>
                       <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />

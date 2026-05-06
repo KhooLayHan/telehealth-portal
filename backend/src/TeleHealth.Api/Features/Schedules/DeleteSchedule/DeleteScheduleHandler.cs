@@ -7,7 +7,7 @@ using TeleHealth.Api.Infrastructure.Persistence;
 
 namespace TeleHealth.Api.Features.Schedules.DeleteSchedule;
 
-// Soft-deletes an available doctor schedule slot.
+// Soft-deletes an available or blocked doctor schedule slot.
 public sealed class DeleteScheduleHandler(ApplicationDbContext db)
 {
     public async Task HandleAsync(Guid schedulePublicId, CancellationToken ct)
@@ -26,10 +26,13 @@ public sealed class DeleteScheduleHandler(ApplicationDbContext db)
             throw new ScheduleNotFoundException();
         }
 
-        if (schedule.StatusId != StatusId.Schedule.Available)
+        var canDeleteSchedule =
+            schedule.StatusId is StatusId.Schedule.Available or StatusId.Schedule.Blocked;
+
+        if (!canDeleteSchedule)
         {
             Log.Warning(
-                "Schedule delete blocked because schedule is not available. SchedulePublicId: {SchedulePublicId}",
+                "Schedule delete blocked because schedule is not available or blocked. SchedulePublicId: {SchedulePublicId}",
                 schedulePublicId
             );
             throw new CannotDeleteUnavailableScheduleException();

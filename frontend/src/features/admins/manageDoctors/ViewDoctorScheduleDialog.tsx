@@ -135,7 +135,7 @@ function isScheduleStatus(slot: ReceptionistDoctorScheduleSlotDto, status: strin
 
 // Checks whether the schedule slot can be removed by an admin.
 function canRemoveScheduleSlot(slot: ReceptionistDoctorScheduleSlotDto): boolean {
-  return isScheduleStatus(slot, "available");
+  return isScheduleStatus(slot, "available") || isScheduleStatus(slot, "blocked");
 }
 
 // Builds a stable fallback key for schedule slots when generated types mark IDs optional.
@@ -223,7 +223,7 @@ function ScheduleSlotCard({
         className="w-full gap-1.5"
         disabled={!canRemove}
         size="sm"
-        title={canRemove ? "Remove schedule" : "Only available schedules can be removed"}
+        title={canRemove ? "Remove schedule" : "Only available or blocked schedules can be removed"}
         type="button"
         variant="destructive"
         onClick={() => onRemove(slot)}
@@ -492,7 +492,7 @@ export function ViewDoctorScheduleDialog({
                                   title={
                                     canRemoveScheduleSlot(slot)
                                       ? "Remove schedule"
-                                      : "Only available schedules can be removed"
+                                      : "Only available or blocked schedules can be removed"
                                   }
                                   type="button"
                                   variant="destructive"
@@ -581,7 +581,7 @@ export function ViewDoctorScheduleDialog({
                               title={
                                 canRemoveScheduleSlot(slot)
                                   ? "Remove schedule"
-                                  : "Only available schedules can be removed"
+                                  : "Only available or blocked schedules can be removed"
                               }
                               type="button"
                               variant="destructive"
