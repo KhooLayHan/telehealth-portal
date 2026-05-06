@@ -43,7 +43,7 @@ const addReceptionistSchema = z
       .max(12, "IC number must be at most 12 characters"),
     phoneNumber: z.string(),
     gender: z.enum(["M", "F", "O", "N"], { message: "Select a gender" }),
-    dateOfBirth: z.string(),
+    dateOfBirth: z.string().min(1, "Date of birth is required"),
     street: z.string(),
     city: z.string(),
     state: z.string(),
@@ -279,7 +279,12 @@ export function AddNewReceptionistForm({ open, onOpenChange }: AddNewReceptionis
               <form.Field name="dateOfBirth">
                 {(field) => (
                   <Field>
-                    <FieldLabel>Date of Birth</FieldLabel>
+                    <FieldLabel>
+                      Date of Birth
+                      <span className="ml-0.5 text-destructive" aria-hidden>
+                        *
+                      </span>
+                    </FieldLabel>
                     <Input
                       type="date"
                       value={field.state.value}
