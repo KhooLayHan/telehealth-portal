@@ -52,10 +52,12 @@ function formatTimeLabel(time?: string): string {
 
 // Checks whether the selected schedule can be removed.
 function canRemoveScheduleSlot(scheduleSlot: ReceptionistDoctorScheduleSlotDto): boolean {
-  return scheduleSlot.scheduleStatus?.toLowerCase() === "available";
+  const normalizedStatus = scheduleSlot.scheduleStatus?.toLowerCase();
+
+  return normalizedStatus === "available" || normalizedStatus === "blocked";
 }
 
-// Displays a confirmation dialog before removing an available schedule slot.
+// Displays a confirmation dialog before removing an available or blocked schedule slot.
 export function DeleteScheduleDialog({
   open,
   scheduleSlot,
@@ -75,7 +77,7 @@ export function DeleteScheduleDialog({
     }
 
     if (!isRemovable) {
-      toast.error("Only available schedules can be removed.");
+      toast.error("Only available or blocked schedules can be removed.");
       return;
     }
 
@@ -113,7 +115,7 @@ export function DeleteScheduleDialog({
               <DialogDescription>
                 {isRemovable
                   ? "Are you sure you want to delete this schedule slot?"
-                  : "Only available schedule slots can be removed."}
+                  : "Only available or blocked schedule slots can be removed."}
               </DialogDescription>
             </div>
           </div>
