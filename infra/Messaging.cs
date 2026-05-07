@@ -27,6 +27,7 @@ public static class Messaging
             "medical-alerts-topic",
             new Aws.Sns.TopicArgs
             {
+                Name = "medical-alerts-topic", // Fixed name to match MassTransit entity name
                 KmsMasterKeyId = "alias/aws/sns", // Server-side encryption with AWS-managed key
                 Tags = cfg.Tags,
             }
