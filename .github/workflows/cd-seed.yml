@@ -6,6 +6,22 @@ name: CD — Database Seed
 #
 # The seeder is idempotent — it skips if db.Users.Any() is true,
 # so accidental re-runs are safe.
+#
+# ┌─────────────────────────────────────────────────────────────────┐
+# │ POST-SEED MANUAL STEP (SES sandbox compatibility)               │
+# │                                                                 │
+# │ After seeding, connect to the RDS database via SSM port         │
+# │ forwarding and run the following SQL to update patient emails    │
+# │ to verified SES addresses (required for email delivery in       │
+# │ sandbox mode):                                                  │
+# │                                                                 │
+# │   UPDATE users SET email = CASE                                 │
+# │     WHEN id % 3 = 0 THEN 'hongjx0321+patient' || id || '@gmail.com'        │
+# │     WHEN id % 3 = 1 THEN 'wygen123+patient' || id || '@gmail.com'          │
+# │     WHEN id % 3 = 2 THEN 'dummyusersigningin01+patient' || id || '@gmail.com' │
+# │   END                                                           │
+# │   WHERE id IN (SELECT user_id FROM patients);                   │
+# └─────────────────────────────────────────────────────────────────┘
 
 on:
   workflow_call:
