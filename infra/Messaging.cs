@@ -72,7 +72,6 @@ public static class Messaging
             "appointment-booked-topic",
             new Aws.Sns.TopicArgs
             {
-                Name = "appointment-booked-topic",
                 KmsMasterKeyId = "alias/aws/sns",
                 Tags = cfg.Tags,
             }
