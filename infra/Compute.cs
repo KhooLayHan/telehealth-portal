@@ -168,12 +168,17 @@ public static class Compute
                                     ""sns:DeleteTopic"",
                                     ""sns:GetTopicAttributes"",
                                     ""sns:SetTopicAttributes"",
-                                    ""sns:ListTopics"",
                                     ""sns:Subscribe"",
                                     ""sns:Unsubscribe"",
                                     ""sns:Publish""
                                 ],
                                 ""Resource"": ""arn:aws:sns:{cfg.AwsRegion}:*:*""
+                            }},
+                            {{
+                                ""Sid"": ""MassTransitSnsListTopics"",
+                                ""Effect"": ""Allow"",
+                                ""Action"": [""sns:ListTopics""],
+                                ""Resource"": ""*""
                             }}
                         ]
                     }}"
