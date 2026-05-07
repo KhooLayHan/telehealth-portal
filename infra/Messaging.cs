@@ -70,7 +70,12 @@ public static class Messaging
 
         var appointmentBookedTopic = new Aws.Sns.Topic(
             "appointment-booked-topic",
-            new Aws.Sns.TopicArgs { KmsMasterKeyId = "alias/aws/sns", Tags = cfg.Tags }
+            new Aws.Sns.TopicArgs
+            {
+                Name = "appointment-booked-topic",
+                KmsMasterKeyId = "alias/aws/sns",
+                Tags = cfg.Tags,
+            }
         );
 
         var opsAlertsTopic = new Aws.Sns.Topic(
@@ -80,12 +85,22 @@ public static class Messaging
 
         var appointmentCancelledTopic = new Aws.Sns.Topic(
             "appointment-notifications-cancelled-topic",
-            new Aws.Sns.TopicArgs { KmsMasterKeyId = "alias/aws/sns", Tags = cfg.Tags }
+            new Aws.Sns.TopicArgs
+            {
+                Name = "appointment-notifications-cancelled-topic",
+                KmsMasterKeyId = "alias/aws/sns",
+                Tags = cfg.Tags,
+            }
         );
 
         var appointmentRescheduledTopic = new Aws.Sns.Topic(
             "appointment-notifications-rescheduled-topic",
-            new Aws.Sns.TopicArgs { KmsMasterKeyId = "alias/aws/sns", Tags = cfg.Tags }
+            new Aws.Sns.TopicArgs
+            {
+                Name = "appointment-notifications-rescheduled-topic",
+                KmsMasterKeyId = "alias/aws/sns",
+                Tags = cfg.Tags,
+            }
         );
 
         _ = new Aws.Sqs.QueuePolicy(
