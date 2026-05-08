@@ -36,15 +36,3 @@ test-results/
 
 # IDEA-specific
 *.idea
-
-# Claude Code (personal local config — not for shared repo)
-.claude/
-
-# Github Copilot
-.github/copilot-instructions.md
-.github/instructions/
-
-# Instructions
-instructions/
-CLAUDE.local.md
-
