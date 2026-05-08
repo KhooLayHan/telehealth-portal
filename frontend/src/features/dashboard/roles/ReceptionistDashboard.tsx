@@ -9,9 +9,17 @@ import { ScheduleQueueTable } from "./receptionist/ScheduleQueueTable";
 export function ReceptionistDashboard() {
   const today = getTodayStr();
 
-  const { data: scheduleData, isLoading: loadingSlots } = useGetDailySchedulesForReceptionist({
-    Date: today,
-  });
+  const POLL_INTERVAL_MS = 3_000;
+
+  const { data: scheduleData, isLoading: loadingSlots } = useGetDailySchedulesForReceptionist(
+    { Date: today },
+    {
+      query: {
+        refetchInterval: POLL_INTERVAL_MS,
+        refetchIntervalInBackground: false,
+      },
+    },
+  );
 
   const { data: statusData } = useGetAllStatuses();
 

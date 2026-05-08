@@ -36,7 +36,7 @@ type ClinicActivityDataPoint = {
   appointments: number;
 };
 
-// Provides static chart data until the clinic activity endpoint is connected.
+// Provides static chart data until the clinic activity endpoint is connected. [Will be implemented through AWS Lambda and Amazon API Gateway]
 const clinicActivityData: ClinicActivityDataPoint[] = [
   { label: "Mon", appointments: 18 },
   { label: "Tue", appointments: 24 },

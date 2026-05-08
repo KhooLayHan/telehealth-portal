@@ -35,6 +35,7 @@ import {
 
 const ACCENT = "#0d9488";
 const PAGE_SIZE = 10;
+const POLL_INTERVAL_MS = 3_000;
 const TERMINAL_SLUGS = ["cancelled", "completed", "no-show"];
 
 function ActionsCell({ row }: { row: { original: ReceptionistAppointmentDto } }) {
@@ -452,15 +453,23 @@ export function ReceptionistApptPage() {
 
   const today = getTodayStr();
 
-  const { data, isLoading, isError } = useGetAllAppointmentsForReceptionist({
-    Page: page,
-    PageSize: PAGE_SIZE,
-    SortOrder: "desc",
-    Search: search || undefined,
-    Status: statusFilter || undefined,
-    From: todayOnly ? today : undefined,
-    To: todayOnly ? today : undefined,
-  });
+  const { data, isLoading, isError } = useGetAllAppointmentsForReceptionist(
+    {
+      Page: page,
+      PageSize: PAGE_SIZE,
+      SortOrder: "desc",
+      Search: search || undefined,
+      Status: statusFilter || undefined,
+      From: todayOnly ? today : undefined,
+      To: todayOnly ? today : undefined,
+    },
+    {
+      query: {
+        refetchInterval: POLL_INTERVAL_MS,
+        refetchIntervalInBackground: false,
+      },
+    },
+  );
 
   const { data: statusData } = useGetAllStatuses();
   const statuses =
