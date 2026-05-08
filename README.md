@@ -22,38 +22,39 @@ CT071-3-3-DDAC Group Project — Asia Pacific University of Technology and Innov
 
 ## Local Development
 
-### 1. Start backing services
+### 1. Starts backing services
 
 ```bash
 cp .env.example .env
 
-bun run docker:up    # PostgreSQL + Seq (structured log viewer)
+bun run docker:up # PostgreSQL + Seq (structured log viewer)
 ```
 
-### 2. Start the backend
+### 2. Starts the backend
 
 ```bash
 cd backend
-bun run dev          # Runs on http://localhost:5144
+bun run dev # Runs on http://localhost:5144
 # Migrations apply automatically on startup
 ```
 
-### 3. Start the frontend
+### 3. Regenerates API client (after backend schema changes)
 
 ```bash
 cd frontend
 cp .env.example .env
 
-bun install
-bun run dev          # Vite dev server on http://localhost:5173
-# Proxies API calls to localhost:5144
+bun run api:gen # Reads http://localhost:5144/openapi/v1.json via orval
 ```
 
-### 4. Regenerate API client (after backend schema changes)
+### 4. Starts the frontend
 
 ```bash
 cd frontend
-bun run api:gen      # Reads http://localhost:5144/openapi/v1.json via orval
+
+bun install
+bun run dev # Vite dev server on http://localhost:5173
+# Proxies API calls to localhost:5144
 ```
 
 ## Useful Commands
