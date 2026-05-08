@@ -66,7 +66,6 @@ bun run dev # Vite dev server on http://localhost:5173
 | Run all tests | `bun run test` |
 | Stop Docker services | `bun run docker:down` |
 
-See [`AGENTS.md`](./AGENTS.md) for the full developer command reference, testing details, code-style rules, and PII/PHI handling guidelines.
 
 ## Project Structure
 
@@ -89,7 +88,6 @@ docker/             # Docker Compose for local PostgreSQL + Seq
 
 ## Documentation
 
-- [`AGENTS.md`](./AGENTS.md) — Developer reference: commands, conventions, PII rules
 - `infra/README.md` — Pulumi infrastructure details
 - `docs/DATABASE_SCHEMA.md` — Database schema documentation
 
