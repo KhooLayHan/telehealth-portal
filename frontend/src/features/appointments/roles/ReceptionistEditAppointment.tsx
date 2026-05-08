@@ -6,6 +6,8 @@ import { AppointmentEditForm } from "./components/AppointmentEditForm";
 import { TERMINAL_SLUGS } from "./components/constants";
 import { PatientInfoCard } from "./components/PatientInfoCard";
 
+const POLL_INTERVAL_MS = 3_000;
+
 const container: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.08 } },
@@ -39,7 +41,12 @@ function EditFormContent({ appointment }: { appointment: ReceptionistAppointment
 
 export function ReceptionistEditApptPage() {
   const { id } = useParams({ from: "/_protected/appointments/edit/$id" });
-  const { data, isLoading, isError } = useGetAppointmentByIdForReceptionist(id);
+  const { data, isLoading, isError } = useGetAppointmentByIdForReceptionist(id, {
+    query: {
+      refetchInterval: POLL_INTERVAL_MS,
+      refetchIntervalInBackground: false,
+    },
+  });
 
   if (isLoading) return <p className="text-muted-foreground text-sm">Loading...</p>;
   if (isError || !data || data.status !== 200) {
