@@ -26,7 +26,6 @@ CT071-3-3-DDAC Group Project — Asia Pacific University of Technology and Innov
 
 ```bash
 cp .env.example .env
-# Edit .env with your local secrets
 
 bun run docker:up    # PostgreSQL + Seq (structured log viewer)
 ```
@@ -43,6 +42,8 @@ bun run dev          # Runs on http://localhost:5144
 
 ```bash
 cd frontend
+cp .env.example .env
+
 bun install
 bun run dev          # Vite dev server on http://localhost:5173
 # Proxies API calls to localhost:5144
