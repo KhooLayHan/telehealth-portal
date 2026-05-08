@@ -5,6 +5,7 @@ import { useGetAppointmentByIdForReceptionist } from "@/api/generated/appointmen
 import { Card, CardContent } from "@/components/ui/card";
 
 const ACCENT = "#0d9488";
+const POLL_INTERVAL_MS = 3_000;
 
 function Label({ children }: { children: React.ReactNode }) {
   return (
@@ -45,7 +46,12 @@ const card: Variants = {
 
 export function ReceptionistApptDetailsPage() {
   const { id } = useParams({ from: "/_protected/appointments/$id" });
-  const { data, isLoading, isError } = useGetAppointmentByIdForReceptionist(id);
+  const { data, isLoading, isError } = useGetAppointmentByIdForReceptionist(id, {
+    query: {
+      refetchInterval: POLL_INTERVAL_MS,
+      refetchIntervalInBackground: false,
+    },
+  });
 
   if (isLoading) return <p className="text-muted-foreground text-sm">Loading...</p>;
   if (isError || !data || data.status !== 200) {
