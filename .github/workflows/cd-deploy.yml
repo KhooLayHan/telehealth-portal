@@ -13,15 +13,8 @@ on:
       - ".github/workflows/cd-deploy.yml"
       - ".github/workflows/cd-infra.yml"
       - ".github/workflows/cd-frontend.yml"
-      - ".github/workflows/cd-backend.yml"
       - ".github/workflows/cd-lambda.yml"
-      - ".github/workflows/cd-seed.yml"
   workflow_dispatch:
-    inputs:
-      seed:
-        description: "Seed the production database with initial data"
-        type: boolean
-        default: false
 
 permissions:
   id-token: write   # Required by all child workflows for OIDC → AWS
@@ -44,7 +37,7 @@ jobs:
       AWS_DEPLOY_ROLE_ARN: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
       PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
-  # ── 2. Frontend (runs in parallel with backend & lambda) ───────
+  # ── 2. Frontend (runs in parallel with lambda) ─────────────────
   frontend:
     uses: ./.github/workflows/cd-frontend.yml
     with:
@@ -52,20 +45,7 @@ jobs:
     secrets:
       AWS_DEPLOY_ROLE_ARN: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
 
-  # ── 3. Backend (needs infra outputs) ───────────────────────────
-  backend:
-    needs: infra
-    uses: ./.github/workflows/cd-backend.yml
-    with:
-      aws-region:        ${{ vars.AWS_REGION || 'us-east-1' }}
-      ecr-url:           ${{ needs.infra.outputs.ecr-url }}
-      eb-app-name:       ${{ needs.infra.outputs.eb-app-name }}
-      eb-env-name:       ${{ needs.infra.outputs.eb-env-name }}
-      artifacts-bucket:  ${{ needs.infra.outputs.artifacts-bucket }}
-    secrets:
-      AWS_DEPLOY_ROLE_ARN: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
-
-  # ── 4. Lambda functions (needs infra outputs) ──────────────────
+  # ── 3. Lambda functions (needs infra outputs) ──────────────────
   lambda:
     needs: infra
     uses: ./.github/workflows/cd-lambda.yml
@@ -77,13 +57,4 @@ jobs:
     secrets:
       AWS_DEPLOY_ROLE_ARN: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
 
-  # ── 5. Database seed (manual trigger only, after backend) ──────
-  seed:
-    needs: [infra, backend]
-    if: ${{ github.event.inputs.seed == 'true' }}
-    uses: ./.github/workflows/cd-seed.yml
-    with:
-      aws-region:  ${{ vars.AWS_REGION || 'us-east-1' }}
-      eb-env-name: ${{ needs.infra.outputs.eb-env-name }}
-    secrets:
-      AWS_DEPLOY_ROLE_ARN: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+
