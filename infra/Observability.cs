@@ -4,8 +4,7 @@ using Pulumi;
 using Aws = Pulumi.Aws;
 
 /// <summary>
-/// CloudWatch log groups, metric alarms, and X-Ray tracing configuration.
-/// Alarms route to the medical alerts SNS topic for unified notification.
+/// CloudWatch log groups and X-Ray tracing configuration.
 /// </summary>
 public static class Observability
 {
@@ -15,7 +14,7 @@ public static class Observability
         public required Aws.Xray.Group XrayGroup { get; init; }
     }
 
-    public static Result Create(StackConfig cfg, Database.Result db, Messaging.Result msg)
+    public static Result Create(StackConfig cfg)
     {
         // ── CloudWatch log groups ──
         var apiLogGroup = new Aws.CloudWatch.LogGroup(
@@ -24,52 +23,6 @@ public static class Observability
             {
                 Name = $"/telehealth/{cfg.StackName}/api",
                 RetentionInDays = 30,
-                Tags = cfg.Tags,
-            }
-        );
-
-        // NOTE: RDS log groups (/aws/rds/instance/{id}/postgresql, /aws/rds/instance/{id}/upgrade)
-        // are auto-created by AWS when EnabledCloudwatchLogsExports is set on the RDS instance.
-        // Do not create them here — it would conflict with the AWS-managed groups.
-
-        // ── Metric alarms — route to SNS ──
-
-        // RDS CPU > 80% for 10 minutes
-        _ = new Aws.CloudWatch.MetricAlarm(
-            "rds-high-cpu",
-            new Aws.CloudWatch.MetricAlarmArgs
-            {
-                ComparisonOperator = "GreaterThanThreshold",
-                EvaluationPeriods = 2,
-                MetricName = "CPUUtilization",
-                Namespace = "AWS/RDS",
-                Period = 300,
-                Statistic = "Average",
-                Threshold = 80,
-                AlarmDescription = "RDS CPU > 80% for 10 minutes",
-                Dimensions = new InputMap<string> { { "DBInstanceIdentifier", db.Instance.Id } },
-                AlarmActions = { msg.OpsAlertsTopic.Arn },
-                OkActions = { msg.OpsAlertsTopic.Arn },
-                Tags = cfg.Tags,
-            }
-        );
-
-        // RDS free storage < 2 GiB
-        _ = new Aws.CloudWatch.MetricAlarm(
-            "rds-low-storage",
-            new Aws.CloudWatch.MetricAlarmArgs
-            {
-                ComparisonOperator = "LessThanThreshold",
-                EvaluationPeriods = 1,
-                MetricName = "FreeStorageSpace",
-                Namespace = "AWS/RDS",
-                Period = 300,
-                Statistic = "Average",
-                Threshold = 2_147_483_648, // 2 GiB in bytes
-                AlarmDescription = "RDS free storage below 2 GiB",
-                Dimensions = new InputMap<string> { { "DBInstanceIdentifier", db.Instance.Id } },
-                AlarmActions = { msg.OpsAlertsTopic.Arn },
-                OkActions = { msg.OpsAlertsTopic.Arn },
                 Tags = cfg.Tags,
             }
         );
