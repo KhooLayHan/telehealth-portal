@@ -27,5 +27,7 @@ return await Deployment.RunAsync(() =>
         ["LambdaFunctionName"] = serverless.PdfProcessorLambda.Name,
         ["ReminderLambdaName"] = serverless.ReminderLambda.Name,
         ["NotificationsLambdaName"] = serverless.NotificationsLambda.Name,
+        ["AdminAnalyticsLambdaName"] = serverless.AdminAnalyticsLambda.Name,
+        ["AdminAnalyticsApiEndpoint"] = serverless.AdminAnalyticsApi.ApiEndpoint,
     };
 });

@@ -70,11 +70,7 @@ public static class Messaging
 
         var appointmentBookedTopic = new Aws.Sns.Topic(
             "appointment-booked-topic",
-            new Aws.Sns.TopicArgs
-            {
-                KmsMasterKeyId = "alias/aws/sns",
-                Tags = cfg.Tags,
-            }
+            new Aws.Sns.TopicArgs { KmsMasterKeyId = "alias/aws/sns", Tags = cfg.Tags }
         );
 
         var opsAlertsTopic = new Aws.Sns.Topic(

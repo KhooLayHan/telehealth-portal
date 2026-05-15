@@ -8,6 +8,7 @@ using TeleHealth.Api.Features.Admins.GetAllDepartments;
 using TeleHealth.Api.Features.Admins.GetAllLabTechs;
 using TeleHealth.Api.Features.Admins.GetAllReceptionists;
 using TeleHealth.Api.Features.Admins.GetAuditLogs;
+using TeleHealth.Api.Features.Admins.GetClinicActivity;
 using TeleHealth.Api.Features.Admins.GetDashboardSummary;
 using TeleHealth.Api.Features.Admins.GetLabTech;
 using TeleHealth.Api.Features.Admins.GetSettings;
@@ -108,6 +109,7 @@ public static class EndpointMappingExtensions
         api.MapAdminDeleteLabTechEndpoint();
         api.MapAdminGetAuditLogsEndpoint();
         api.MapAdminGetDashboardSummaryEndpoint();
+        api.MapAdminGetClinicActivityEndpoint();
         api.MapAdminGetSettingsEndpoint();
         api.MapAdminUpdateSettingsEndpoint();
         api.MapCreateDoctorEndpoint();
