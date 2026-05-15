@@ -1,5 +1,4 @@
 import { Link } from "@tanstack/react-router";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSystemName } from "@/features/system-settings/useSystemName";
@@ -7,14 +6,12 @@ import { BrandingHeader } from "./components/BrandingHeader";
 import { FormError } from "./components/FormError";
 import { LoginEmailField } from "./components/LoginEmailField";
 import { LoginPasswordField } from "./components/LoginPasswordField";
-import { RememberMeCheckbox } from "./components/RememberMeCheckbox";
 import { useLoginForm } from "./hooks/useLoginForm";
 import { loginSchema } from "./schemas/loginSchema";
 
 export function LoginForm() {
   const { form, globalError } = useLoginForm();
   const { systemName } = useSystemName();
-  const [rememberMe, setRememberMe] = useState(false);
 
   return (
     <div className="space-y-6">
@@ -44,8 +41,6 @@ export function LoginForm() {
             <form.Field name="password" validators={{ onChange: loginSchema.shape.password }}>
               {(field) => <LoginPasswordField field={field} />}
             </form.Field>
-
-            <RememberMeCheckbox checked={rememberMe} onCheckedChange={setRememberMe} />
 
             <form.Subscribe>
               {(state) => (

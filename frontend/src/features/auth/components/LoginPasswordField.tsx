@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { PasswordInput } from "./PasswordInput";
 
@@ -27,16 +26,7 @@ export function LoginPasswordField({
 
   return (
     <Field>
-      <div className="flex items-center justify-between">
-        <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-        <Button
-          className="cursor-pointer text-muted-foreground text-xs hover:text-primary h-auto p-0"
-          type="button"
-          variant="link"
-        >
-          Forgot password?
-        </Button>
-      </div>
+      <FieldLabel htmlFor={field.name}>Password</FieldLabel>
       <PasswordInput
         aria-invalid={errors.length > 0}
         id={field.name}
