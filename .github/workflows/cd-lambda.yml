@@ -1,4 +1,4 @@
-name: CD — Lambda Functions
+name: CD - Lambda Functions
 
 on:
   workflow_call:
@@ -15,13 +15,16 @@ on:
       notifications-lambda-name:
         required: true
         type: string
+      admin-analytics-lambda-name:
+        required: true
+        type: string
     secrets:
       AWS_DEPLOY_ROLE_ARN:
         required: true
 
 jobs:
   deploy-lambda:
-    name: Lambda — Build Native AOT & Deploy
+    name: Lambda - Build & Deploy
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -41,20 +44,14 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
-      # ── Build the Lambda function using Native AOT for Amazon Linux 2023 ──
-      - name: Publish Lambda (Native AOT)
+      - name: Publish lab-pdf-processor Lambda
         working-directory: functions/lab-pdf-processor/src/LabPdfProcessor-dev-ProcessPdfDocument
         run: |
-          # Publish for Linux ARM64 (Graviton) or x64 depending on your preference.
-          # Assuming x64 here to match standard Lambda provided.al2023
           dotnet publish -c Release -r linux-x64 --self-contained true -o ./publish
-
-          # Zip the output (The Native AOT binary is named 'bootstrap')
           cd publish
           zip -r ../../../function.zip *
 
-      # ── Update the Lambda function code directly via AWS CLI ──
-      - name: Deploy to AWS Lambda
+      - name: Deploy lab-pdf-processor to AWS Lambda
         env:
           LAMBDA_NAME: ${{ inputs.lambda-function-name }}
         run: |
@@ -62,13 +59,14 @@ jobs:
             --function-name "$LAMBDA_NAME" \
             --zip-file fileb://functions/lab-pdf-processor/function.zip
 
-          echo "✅ Lab PDF processor Lambda deployment complete."
+          echo "Lab PDF processor Lambda deployment complete."
 
       - name: Publish appointment-reminder Lambda
         working-directory: functions/appointment-reminder/src/AppointmentReminder-dev-SentReminder
         run: |
           dotnet publish -c Release -r linux-x64 --self-contained true -o ./publish
-          cd publish && zip -r ../../../function.zip *
+          cd publish
+          zip -r ../../../function.zip *
 
       - name: Deploy appointment-reminder to AWS Lambda
         env:
@@ -78,13 +76,14 @@ jobs:
             --function-name "$LAMBDA_NAME" \
             --zip-file fileb://functions/appointment-reminder/function.zip
 
-          echo "✅ Appointment reminder Lambda deployment complete."
+          echo "Appointment reminder Lambda deployment complete."
 
       - name: Publish appointment-notifications Lambda
         working-directory: functions/appointment-notifications/src/AppointmentNotifications
         run: |
           dotnet publish -c Release -r linux-x64 --self-contained true -o ./publish
-          cd publish && zip -r ../../../function.zip *
+          cd publish
+          zip -r ../../../function.zip *
 
       - name: Deploy appointment-notifications to AWS Lambda
         env:
@@ -94,4 +93,21 @@ jobs:
             --function-name "$LAMBDA_NAME" \
             --zip-file fileb://functions/appointment-notifications/function.zip
 
-          echo "✅ Appointment notifications Lambda deployment complete."
+          echo "Appointment notifications Lambda deployment complete."
+
+      - name: Publish admin-analytics Lambda
+        working-directory: functions/admin-analytics/src/AdminAnalytics
+        run: |
+          dotnet publish -c Release -r linux-x64 --self-contained true -o ./publish
+          cd publish
+          zip -r ../../../function.zip *
+
+      - name: Deploy admin-analytics to AWS Lambda
+        env:
+          LAMBDA_NAME: ${{ inputs.admin-analytics-lambda-name }}
+        run: |
+          aws lambda update-function-code \
+            --function-name "$LAMBDA_NAME" \
+            --zip-file fileb://functions/admin-analytics/function.zip
+
+          echo "Admin analytics Lambda deployment complete."

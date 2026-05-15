@@ -17,7 +17,11 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { useAdminGetAuditLogs, useAdminGetDashboardSummary } from "@/api/generated/admins/admins";
+import {
+  useAdminGetAuditLogs,
+  useAdminGetClinicActivity,
+  useAdminGetDashboardSummary,
+} from "@/api/generated/admins/admins";
 import type { AdminAuditLogDto } from "@/api/model/AdminAuditLogDto";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,23 +33,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-// Represents mock appointment counts for the admin dashboard clinic activity chart.
-type ClinicActivityDataPoint = {
-  label: string;
-  appointments: number;
-};
-
-// Provides static chart data until the clinic activity endpoint is connected. [Will be implemented through AWS Lambda and Amazon API Gateway]
-const clinicActivityData: ClinicActivityDataPoint[] = [
-  { label: "Mon", appointments: 18 },
-  { label: "Tue", appointments: 24 },
-  { label: "Wed", appointments: 21 },
-  { label: "Thu", appointments: 32 },
-  { label: "Fri", appointments: 29 },
-  { label: "Sat", appointments: 16 },
-  { label: "Sun", appointments: 12 },
-];
 
 // Sets the polling cadence for server-backed admin dashboard data.
 const ADMIN_DASHBOARD_REFETCH_INTERVAL_MS = 1_000;
@@ -297,6 +284,9 @@ export function AdminDashboard() {
   const dashboardSummaryQuery = useAdminGetDashboardSummary({
     query: { refetchInterval: ADMIN_DASHBOARD_REFETCH_INTERVAL_MS },
   });
+  const clinicActivityQuery = useAdminGetClinicActivity({
+    query: { refetchInterval: ADMIN_DASHBOARD_REFETCH_INTERVAL_MS },
+  });
   const auditLogsQuery = useAdminGetAuditLogs(
     { Page: 1, PageSize: 5 },
     { query: { refetchInterval: ADMIN_DASHBOARD_REFETCH_INTERVAL_MS } },
@@ -307,6 +297,16 @@ export function AdminDashboard() {
   const auditLogsUnavailable =
     auditLogsQuery.isError ||
     (auditLogsQuery.data !== undefined && auditLogsQuery.data.status !== 200);
+  const clinicActivityData =
+    clinicActivityQuery.data?.status === 200 ? clinicActivityQuery.data.data : [];
+  const clinicActivityMessage = clinicActivityQuery.isLoading
+    ? "Loading clinic activity"
+    : clinicActivityQuery.isError ||
+        (clinicActivityQuery.data !== undefined && clinicActivityQuery.data.status !== 200)
+      ? "Clinic activity unavailable"
+      : clinicActivityData.length === 0
+        ? "No clinic activity found"
+        : null;
   const stats: AdminDashboardStat[] = [
     {
       title: "Today's Appointments",
@@ -358,44 +358,50 @@ export function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="h-56">
-              <ResponsiveContainer height="100%" width="100%">
-                <AreaChart
-                  data={clinicActivityData}
-                  margin={{ bottom: 0, left: -20, right: 8, top: 8 }}
-                >
-                  <defs>
-                    <linearGradient id="clinic-activity-fill" x1="0" x2="0" y1="0" y2="1">
-                      <stop offset="5%" stopColor="var(--chart-2)" stopOpacity={0.32} />
-                      <stop offset="95%" stopColor="var(--chart-2)" stopOpacity={0.04} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
-                  <XAxis
-                    axisLine={false}
-                    dataKey="label"
-                    tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    axisLine={false}
-                    tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
-                    tickLine={false}
-                    width={36}
-                  />
-                  <Tooltip
-                    content={(props) => <ClinicActivityTooltip {...props} />}
-                    cursor={{ stroke: "var(--border)" }}
-                  />
-                  <Area
-                    dataKey="appointments"
-                    fill="url(#clinic-activity-fill)"
-                    name="Appointments"
-                    stroke="var(--chart-2)"
-                    strokeWidth={2}
-                    type="monotone"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              {clinicActivityMessage === null ? (
+                <ResponsiveContainer height="100%" width="100%">
+                  <AreaChart
+                    data={clinicActivityData}
+                    margin={{ bottom: 0, left: -20, right: 8, top: 8 }}
+                  >
+                    <defs>
+                      <linearGradient id="clinic-activity-fill" x1="0" x2="0" y1="0" y2="1">
+                        <stop offset="5%" stopColor="var(--chart-2)" stopOpacity={0.32} />
+                        <stop offset="95%" stopColor="var(--chart-2)" stopOpacity={0.04} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+                    <XAxis
+                      axisLine={false}
+                      dataKey="label"
+                      tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      axisLine={false}
+                      tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
+                      tickLine={false}
+                      width={36}
+                    />
+                    <Tooltip
+                      content={(props) => <ClinicActivityTooltip {...props} />}
+                      cursor={{ stroke: "var(--border)" }}
+                    />
+                    <Area
+                      dataKey="appointments"
+                      fill="url(#clinic-activity-fill)"
+                      name="Appointments"
+                      stroke="var(--chart-2)"
+                      strokeWidth={2}
+                      type="monotone"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex h-full items-center justify-center text-muted-foreground text-sm">
+                  {clinicActivityMessage}
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

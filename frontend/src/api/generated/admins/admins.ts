@@ -36,6 +36,10 @@ import type {
 } from '../../model/AdminCreateReceptionistCommand';
 
 import type {
+  AdminClinicActivityDataPointDto
+} from '../../model/AdminClinicActivityDataPointDto';
+
+import type {
   AdminDashboardSummaryDto
 } from '../../model/AdminDashboardSummaryDto';
 
@@ -1618,6 +1622,129 @@ export function useAdminGetAuditLogs<TData = Awaited<ReturnType<typeof adminGetA
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getAdminGetAuditLogsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export type adminGetClinicActivityResponse200 = {
+  data: AdminClinicActivityDataPointDto[]
+  status: 200
+}
+
+export type adminGetClinicActivityResponse401 = {
+  data: ProblemDetails
+  status: 401
+}
+
+export type adminGetClinicActivityResponse403 = {
+  data: ProblemDetails
+  status: 403
+}
+
+export type adminGetClinicActivityResponse500 = {
+  data: ProblemDetails
+  status: 500
+}
+
+export type adminGetClinicActivityResponseSuccess = (adminGetClinicActivityResponse200) & {
+  headers: Headers;
+};
+export type adminGetClinicActivityResponseError = (adminGetClinicActivityResponse401 | adminGetClinicActivityResponse403 | adminGetClinicActivityResponse500) & {
+  headers: Headers;
+};
+
+export type adminGetClinicActivityResponse = (adminGetClinicActivityResponseSuccess | adminGetClinicActivityResponseError)
+
+export const getAdminGetClinicActivityUrl = () => {
+
+
+
+
+  return `/api/v1/admins/clinic-activity`
+}
+
+export const adminGetClinicActivity = async ( options?: RequestInit): Promise<adminGetClinicActivityResponse> => {
+
+  return ofetchMutator<adminGetClinicActivityResponse>(getAdminGetClinicActivityUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminGetClinicActivityQueryKey = () => {
+    return [
+    `/api/v1/admins/clinic-activity`
+    ] as const;
+    }
+
+
+export const getAdminGetClinicActivityQueryOptions = <TData = Awaited<ReturnType<typeof adminGetClinicActivity>>, TError = ProblemDetails>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetClinicActivity>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminGetClinicActivityQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetClinicActivity>>> = ({ signal }) => adminGetClinicActivity({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetClinicActivity>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type AdminGetClinicActivityQueryResult = NonNullable<Awaited<ReturnType<typeof adminGetClinicActivity>>>
+export type AdminGetClinicActivityQueryError = ProblemDetails
+
+
+export function useAdminGetClinicActivity<TData = Awaited<ReturnType<typeof adminGetClinicActivity>>, TError = ProblemDetails>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetClinicActivity>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminGetClinicActivity>>,
+          TError,
+          Awaited<ReturnType<typeof adminGetClinicActivity>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminGetClinicActivity<TData = Awaited<ReturnType<typeof adminGetClinicActivity>>, TError = ProblemDetails>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetClinicActivity>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminGetClinicActivity>>,
+          TError,
+          Awaited<ReturnType<typeof adminGetClinicActivity>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminGetClinicActivity<TData = Awaited<ReturnType<typeof adminGetClinicActivity>>, TError = ProblemDetails>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetClinicActivity>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useAdminGetClinicActivity<TData = Awaited<ReturnType<typeof adminGetClinicActivity>>, TError = ProblemDetails>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetClinicActivity>>, TError, TData>>, request?: SecondParameter<typeof ofetchMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getAdminGetClinicActivityQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

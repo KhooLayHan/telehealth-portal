@@ -20,6 +20,8 @@ public static class Serverless
         public required Aws.Lambda.Function PdfProcessorLambda { get; init; }
         public required Aws.Lambda.Function ReminderLambda { get; init; }
         public required Aws.Lambda.Function NotificationsLambda { get; init; }
+        public required Aws.Lambda.Function AdminAnalyticsLambda { get; init; }
+        public required Aws.ApiGatewayV2.Api AdminAnalyticsApi { get; init; }
     }
 
     public static Result Create(StackConfig cfg, Messaging.Result msg, Storage.Result storage)
@@ -346,11 +348,119 @@ public static class Serverless
             }
         );
 
+        // IAM role for Admin Analytics Lambda, invoked through API Gateway.
+        var adminAnalyticsRole = new Aws.Iam.Role(
+            "lambda-admin-analytics-role",
+            new Aws.Iam.RoleArgs
+            {
+                AssumeRolePolicy =
+                    @"{
+                    ""Version"": ""2012-10-17"",
+                    ""Statement"": [{
+                        ""Action"": ""sts:AssumeRole"",
+                        ""Principal"": { ""Service"": ""lambda.amazonaws.com"" },
+                        ""Effect"": ""Allow""
+                    }]
+                }",
+                Tags = cfg.Tags,
+            }
+        );
+
+        _ = new Aws.Iam.RolePolicyAttachment(
+            "admin-analytics-basic-execution",
+            new Aws.Iam.RolePolicyAttachmentArgs
+            {
+                Role = adminAnalyticsRole.Name,
+                PolicyArn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+            }
+        );
+
+        var adminAnalyticsLambda = new Aws.Lambda.Function(
+            "admin-analytics",
+            new Aws.Lambda.FunctionArgs
+            {
+                Name = $"telehealth-admin-analytics-{cfg.StackName}",
+                Role = adminAnalyticsRole.Arn,
+                Runtime = "dotnet10",
+                Handler = "AdminAnalytics::AdminAnalytics.Function::FunctionHandler",
+                MemorySize = 256,
+                Timeout = 15,
+                Code = new FileArchive("./dummy-lambda"),
+                Environment = new Aws.Lambda.Inputs.FunctionEnvironmentArgs
+                {
+                    Variables = new InputMap<string> { { "ENVIRONMENT", cfg.StackName } },
+                },
+                Tags = cfg.Tags,
+            },
+            new CustomResourceOptions { IgnoreChanges = { "sourceCodeHash" } }
+        );
+
+        var adminAnalyticsApi = new Aws.ApiGatewayV2.Api(
+            "admin-analytics-api",
+            new Aws.ApiGatewayV2.ApiArgs
+            {
+                Name = $"telehealth-admin-analytics-api-{cfg.StackName}",
+                ProtocolType = "HTTP",
+                CorsConfiguration = new Aws.ApiGatewayV2.Inputs.ApiCorsConfigurationArgs
+                {
+                    AllowHeaders = { "Content-Type", "Authorization" },
+                    AllowMethods = { "GET", "OPTIONS" },
+                    AllowOrigins = { cfg.FrontendOrigin },
+                },
+                Tags = cfg.Tags,
+            }
+        );
+
+        var adminAnalyticsIntegration = new Aws.ApiGatewayV2.Integration(
+            "admin-analytics-api-lambda-integration",
+            new Aws.ApiGatewayV2.IntegrationArgs
+            {
+                ApiId = adminAnalyticsApi.Id,
+                IntegrationType = "AWS_PROXY",
+                IntegrationUri = adminAnalyticsLambda.InvokeArn,
+                PayloadFormatVersion = "2.0",
+            }
+        );
+
+        _ = new Aws.ApiGatewayV2.Route(
+            "admin-analytics-clinic-activity-route",
+            new Aws.ApiGatewayV2.RouteArgs
+            {
+                ApiId = adminAnalyticsApi.Id,
+                RouteKey = "GET /admin/clinic-activity",
+                Target = adminAnalyticsIntegration.Id.Apply(id => $"integrations/{id}"),
+            }
+        );
+
+        _ = new Aws.ApiGatewayV2.Stage(
+            "admin-analytics-default-stage",
+            new Aws.ApiGatewayV2.StageArgs
+            {
+                ApiId = adminAnalyticsApi.Id,
+                Name = "$default",
+                AutoDeploy = true,
+                Tags = cfg.Tags,
+            }
+        );
+
+        _ = new Aws.Lambda.Permission(
+            "admin-analytics-api-gateway-invoke",
+            new Aws.Lambda.PermissionArgs
+            {
+                Action = "lambda:InvokeFunction",
+                Function = adminAnalyticsLambda.Name,
+                Principal = "apigateway.amazonaws.com",
+                SourceArn = adminAnalyticsApi.ExecutionArn.Apply(arn => $"{arn}/*/*"),
+            }
+        );
+
         return new Result
         {
             PdfProcessorLambda = pdfProcessorLambda,
             ReminderLambda = reminderLambda,
             NotificationsLambda = notificationsLambda,
+            AdminAnalyticsLambda = adminAnalyticsLambda,
+            AdminAnalyticsApi = adminAnalyticsApi,
         };
     }
 }
