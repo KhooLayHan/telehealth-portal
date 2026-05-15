@@ -1,202 +1,202 @@
-# Agent Instructions
+# TeleHealth Portal
 
-Full-stack TeleHealth application. React 19 frontend, .NET 10 minimal-API backend, AWS Lambda functions, Pulumi infrastructure.
+This is a full-stack TeleHealth platform with a React frontend, .NET 10 backend, AWS Lambda functions, and Pulumi infrastructure. Always follow these project-wide conventions.
 
-## Quick Reference
+## Area-Specific Instructions
 
-- **Format code**: `bun x ultracite fix` | `dotnet csharpier format .`
-- **Check for issues**: `bun x ultracite check` | `dotnet csharpier check .`
-- **Diagnose setup**: `bun x ultracite doctor`
+For detailed conventions on specific layers, read the relevant file in [`instructions/`](instructions/) before writing any code in that area:
 
-## Build / Test / Lint Commands
+| File | Covers |
+|------|--------|
+| [instructions/backend-dotnet.instructions.md](instructions/backend-dotnet.instructions.md) | .NET Minimal API, Vertical Slice, MassTransit, NodaTime, EF Core patterns |
+| [instructions/database-ef.instructions.md](instructions/database-ef.instructions.md) | EF Core configuration, migrations, query filters, entity conventions |
+| [instructions/frontend-react.instructions.md](instructions/frontend-react.instructions.md) | React, TanStack Router/Query/Form, Zustand, shadcn/ui, Orval usage |
+| [instructions/infrastructure-pulumi.instructions.md](instructions/infrastructure-pulumi.instructions.md) | Pulumi C# stacks, AWS resource conventions, S3/SQS/SNS/Lambda |
+| [instructions/lambda-functions.instructions.md](instructions/lambda-functions.instructions.md) | AWS Lambda (.NET), SQS event handlers, S3 operations |
+| [instructions/testing.instructions.md](instructions/testing.instructions.md) | TUnit patterns, integration test setup, data-driven tests |
 
-### Root (convenience wrappers)
+## Project Overview
 
-```bash
-bun run dev          # Starts frontend + backend in parallel
-bun run build        # Builds both
-bun run check        # Frontend lint + backend CSharpier check
-bun run format       # Frontend fix + backend CSharpier format
-bun run test         # Frontend unit tests + backend tests
-bun run docker:up    # docker compose up (needs .env)
-bun run docker:down  # docker compose down -v
-```
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 19, TypeScript, TanStack Router/Query/Form, Zustand, shadcn/ui, Tailwind CSS 4, Orval |
+| Backend | .NET 10, Minimal APIs, Vertical Slice, EF Core 10, PostgreSQL 18, MassTransit, NodaTime |
+| Functions | AWS Lambda (.NET), SQS triggers, S3 operations |
+| Infrastructure | Pulumi C# on AWS (S3, SQS, SNS, Lambda) |
+| Dev Services | Docker Compose (LocalStack, Seq, PostgreSQL) |
 
-### Frontend (Bun + Vite + Vitest)
+## Architecture Principles
 
-```bash
-cd frontend
-bun install          # Install dependencies
-bun run dev          # Start dev server (Vite)
-bun run build        # tsc -b && vite build
-bun run check        # ultracite check (Biome)
-bun run fix          # ultracite fix — auto-fixes most issues
-bun run test         # vitest --project=unit
-bun run test:browser # vitest --project=browser (Playwright/Chromium)
-bun run coverage     # vitest run --coverage --project=unit
-bun run api:gen      # orval — regenerates API client from OpenAPI
-```
+- **Vertical Slice**: Backend features are self-contained slices in `Features/<Domain>/<Operation>/`. Each slice has Command + Validator + Handler + Endpoint.
+- **No Repository Pattern**: Handlers use `ApplicationDbContext` directly.
+- **Event-Driven**: State changes publish events via MassTransit + EF Core Outbox. Lambda functions consume from SQS.
+- **API-First**: OpenAPI spec drives frontend client generation (Orval). Never write manual HTTP calls on the frontend.
 
-**Single test file / pattern:**
+## Security Rules (Non-Negotiable)
 
-```bash
-cd frontend
-bun run test -- src/components/Button.test.tsx
-bun run test -- --test-name-pattern="should render"
-```
+- JWT tokens stored in **HttpOnly, Secure cookies only** — never in localStorage or sessionStorage
+- All API endpoints must have explicit `.RequireAuthorization()` unless explicitly public (login, register)
+- Use `AuthConstants.*Policy` for authorization — never use raw role strings
+- Validate all inputs: `ValidationFilter<T>` on backend, Zod on frontend
+- Sensitive configuration loaded from environment variables / AWS Secrets Manager — never hardcode secrets
+- S3 buckets: always block public access and enable server-side encryption
+- CORS: only allow the whitelisted frontend origin
 
-### Backend (.NET 10)
+## ID Strategy
 
-```bash
-cd backend
-bun run build        # dotnet build ../TeleHealth.slnx
-bun run restore      # dotnet restore ../TeleHealth.slnx --locked-mode
-bun run check        # dotnet csharpier check .
-bun run format       # dotnet csharpier format .
-bun run test         # dotnet test --solution ../TeleHealth.slnx
-bun run dev          # dotnet run --project src/TeleHealth.Api/TeleHealth.Api.csproj
-```
+Every entity has three identifiers:
+- `long Id` — internal primary key, **never exposed in API responses or URLs**
+- `Guid PublicId` — external identifier used in all API responses
+- `string Slug` — URL-friendly identifier for human-readable routes
 
-**Single test class / method:**
+## Date/Time
 
-```bash
-cd backend
-dotnet test --filter "FullyQualifiedName~BasicTests"
-dotnet test --filter "Name~Add_ReturnsSum"
-```
+- **Always use NodaTime** — never `DateTime`, `DateTimeOffset`, or `DateOnly`
+- `Instant` for timestamps, `LocalDate` for date-only, `LocalTime` for time-only
+- NodaTime is configured on the JSON serializer, EF Core provider, and OpenAPI schema transformers
 
-> **CI note:** Backend tests are currently commented out in `.github/workflows/ci-backend.yml`. The test suite exists (Unit/Integration/E2E) but is not enforced in CI right now.
+## Soft Deletes
 
-### Pre-commit (Lefthook)
+- **Never hard delete** records — set `DeletedAt` to the current `Instant`
+- EF Core query filters (`HasQueryFilter`) exclude soft-deleted records automatically
+- Every entity that supports deletion must have the query filter in its configuration
 
-```bash
-bun run lefthook     # Install git hooks
-```
+## Code Quality
 
-Hooks run in parallel:
+- All warnings treated as errors (backend: `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>`)
+- Backend formatting: **CSharpier** (enforced by lefthook pre-commit hook)
+- Frontend formatting/linting: **Biome** (enforced by lefthook pre-commit hook)
+- NuGet packages: centrally managed in `Directory.Packages.props` — never add `Version=` to individual `.csproj` files
+- .NET version pinned to `10.0.201` in `global.json`
 
-- Frontend check + fix (staged files only)
-- Backend CSharpier check
-- Root JSON check + fix
+## Build & Format Commands
 
-## Project Structure
+| Task | Command |
+|------|---------|
+| Frontend install | `cd frontend && bun install` |
+| Frontend dev server | `cd frontend && bun run dev` |
+| Frontend build | `cd frontend && bun run build` |
+| Frontend lint check | `cd frontend && bun run check` |
+| Frontend lint fix | `cd frontend && bun run fix` |
+| Frontend tests | `cd frontend && bun run test` |
+| Frontend coverage | `cd frontend && bun run coverage` |
+| Backend build | `cd backend && bun run build` |
+| Backend tests | `cd backend && bun run test` |
+| Backend format check | `dotnet csharpier check .` |
+| Backend format fix | `dotnet csharpier format .` |
+| Global lint fix | `bun x ultracite fix` |
+| Global lint check | `bun x ultracite check` |
 
-```text
-frontend/           # React 19 + TypeScript + Vite + TanStack Router + shadcn/ui
-  src/api/          # Generated OpenAPI client (orval)
-  src/routes/       # File-based TanStack Router routes
-backend/
-  src/
-    TeleHealth.Api/        # Minimal APIs, Vertical Slice features
-    TeleHealth.Contracts/  # Shared DTOs / contracts
-  tests/
-    TeleHealth.UnitTests/
-    TeleHealth.IntegrationTests/
-    TeleHealth.E2ETests/
-functions/          # AWS Lambda functions (C#)
-infra/              # Pulumi infrastructure (C#)
-docker/             # Docker Compose for local PostgreSQL + Seq
-```
+## Naming Conventions
 
-## Key Architecture Notes
+| Context | Convention |
+|---------|-----------|
+| C# classes/methods | PascalCase |
+| C# private fields | `_camelCase` |
+| C# private static fields | `s_camelCase` |
+| Database tables/columns | snake_case (auto-converted by EF) |
+| TypeScript/TSX | PascalCase components, camelCase variables |
+| API routes | kebab-case (`/lab-reports`, `/doctor-schedules`) |
+| Slugs | kebab-case |
+| Role slugs | kebab-case (`"patient"`, `"lab-tech"`, `"doctor"`) |
 
-- **Backend:** .NET 10 minimal APIs with Vertical Slice Architecture. Each feature lives under `backend/src/TeleHealth.Api/Features/<FeatureName>/` with its own endpoint, handler, and DTOs.
-- **API client generation:** Frontend uses [orval](https://orval.dev/) with a custom `ofetch` mutator. OpenAPI spec is served at `http://localhost:5144/openapi/v1.json`. Run `bun run api:gen` in `frontend/` after backend schema changes.
-- **Routing:** TanStack Router file-based routing. Route files under `frontend/src/routes/`.
-- **Database:** PostgreSQL via EF Core. Migrations run automatically on app startup (`app.MigrateAsync()` in `Program.cs`). No manual `dotnet ef database update` needed.
-- **Logging:** Serilog → Console + Seq (structured logs). Local Seq runs in Docker on `http://localhost:8081`.
-- **Dev server:** Frontend Vite dev server proxies to `http://localhost:5144`.
+## Error Handling
 
-## Testing
-
-### Frontend (Vitest)
-
-- Three test projects configured in `vitest.config.ts`: **unit** (happy-dom), **browser** (Playwright/Chromium), **storybook**.
-- Unit tests: `src/**/*.{test,spec}.{ts,tsx}`
-- Setup file: `frontend/src/test/setup.ts`
-
-### Backend (TUnit)
-
-```csharp
-[Test]
-public async Task TestName()
-{
-    await Assert.That(result).IsEqualTo(expected);
-}
-```
-
-- AwesomeAssertions for assertions, NSubstitute for mocking.
-- `[Before(Class)]` / `[After(Class)]` for setup/teardown.
-- `[Before(Test)]` / `[After(Test)]` for per-test hooks.
-
-## Code Style
-
-### Frontend
-
-- **Formatter:** Biome via Ultracite. Most issues auto-fixable with `bun run fix`.
-- React 19: `ref` is a prop (no `forwardRef`).
-- Prefer `for...of` over `.forEach()`.
-- Call hooks at top level only, never conditionally.
-- Use `const` by default, `let` only when needed, never `var`.
-
-### Backend (C#)
-
-- **Formatter:** CSharpier (enforced in CI).
-- File-scoped namespaces, primary constructors where appropriate.
-- `Nullable` and `ImplicitUsings` enabled, `TreatWarningsAsErrors` true.
-- Naming: PascalCase for types/methods, camelCase for locals, `_camelCase` for private fields, `s_camelCase` for private static.
-- Prefer `var` only when type is apparent (disabled by default in `Directory.Build.props`).
-- Sort usings: `System` first, separate groups.
+- Backend: throw `ProblemException` subclasses from handlers; `ProblemExceptionHandler` converts them to RFC 9457 Problem Details responses
+- Frontend: catch `ApiError` (from `@/api/ofetch-mutator`) in mutation `onError` callbacks; show user-friendly messages via `sonner` toast
+- Never swallow exceptions silently
 
 ## PII & Sensitive Data Handling
 
-This is a healthcare application. Treat the following as PII/PHI that must **never** appear in logs, exception messages, or API responses:
+This is a healthcare application. All code must comply with GDPR and health data privacy standards (HIPAA). The following are PII/PHI and must **never** appear in logs, exception messages, or API responses:
 
-- Email addresses
-- IC numbers (also PHI)
-- Full names combined with any other identifier
-- Phone numbers
-- Dates of birth combined with any other identifier
-- Passwords or password hashes
+**Always PII — never log or expose:** email addresses, IC numbers, full names combined with any other identifier, phone numbers, dates of birth combined with any other identifier, passwords or password hashes.
 
-**Safe to log:** `PublicId` (GUIDs), `Slug` values, appointment/record IDs.
-
-### Logging Rules
+**Safe to log:** `PublicId` (GUIDs), `Slug` values, internal record/schedule/appointment IDs.
 
 ```csharp
-// NEVER
-Log.Warning("Login failed for user: {Email}", command.Email);
+// NEVER — logs PII
+Log.Warning("Login failed for {Email}", command.Email);
 
-// CORRECT — generic message, no identifier
+// CORRECT — log intent only, no PII
 Log.Warning("Login failed — account not found.");
 Log.Warning("Patient not found. PatientId: {PatientId}", patient.PublicId);
 ```
 
-For auth failures, **both** "user not found" and "wrong password" must log the **same generic message** with no email attached. Distinguishing them in logs is an enumeration risk.
+For auth failures, both "user not found" and "wrong password" must log the same generic message — distinguishing them is an enumeration risk.
 
-### API Response Rules
-
-Exception `detail` fields surface in ProblemDetails. Never include PII:
+Exception `detail` fields surface in ProblemDetails API responses — never include PII there:
 
 ```csharp
-// NEVER
+// NEVER — PII in response
 throw new ConflictException($"Email '{email}' is already registered.");
 
-// CORRECT
+// CORRECT — generic message, log internally
+Log.Warning("Duplicate email. Email: {Email}", email);
 throw new DuplicateEmailException(); // detail: "An account with this email already exists."
 ```
 
-### IC Numbers — Extra Caution
+IC numbers are PHI — do not log them under any circumstances, even for debugging. Trace IC-related events via the audit log only.
 
-IC numbers are PHI. Do not log them under any circumstances, including duplicate-registration debugging. Trace those events via the audit log only.
+## Testing
 
-## Deployment & Infrastructure
+- Backend test framework: **TUnit** — never xUnit or NUnit attributes
+- All assertions: `await Assert.That(value).IsX()` pattern
+- Data-driven: `[Arguments]`, `[MethodDataSource]`, `[MatrixDataSource]`
+- DI in tests: `[ClassDataSource<T>]`
 
-- **Pulumi** provisions AWS infrastructure (RDS, EB, ECR, S3, Lambda, SNS/SQS). See `infra/README.md` for details.
-- **GitHub Actions CD:** `cd-deploy.yml` orchestrates infra → frontend → backend → lambda → optional seed.
-- **Backend deploy:** Docker image built from repo root (Dockerfile at `backend/src/TeleHealth.Api/Dockerfile`), pushed to ECR, deployed to Elastic Beanstalk.
-- **Database seed:** Manual trigger only (`github.event.inputs.seed == 'true'`).
+## File Locations Quick Reference
 
----
+| What | Where |
+|------|-------|
+| API route constants | `backend/src/TeleHealth.Api/Common/ApiEndpoints.cs` |
+| Auth policy constants | `backend/src/TeleHealth.Api/Common/Security/AuthConstants.cs` |
+| Exception base classes | `backend/src/TeleHealth.Api/Common/Exceptions/` |
+| EF context | `backend/src/TeleHealth.Api/Infrastructure/Persistence/ApplicationDbContext.cs` |
+| Orval-generated hooks | `frontend/src/api/generated/<tag>/` |
+| Auth store | `frontend/src/store/useAuthStore.ts` |
+| UI components | `frontend/src/components/ui/` |
+| Routes | `frontend/src/routes/` |
+| Event contracts | `backend/src/TeleHealth.Contracts/` |
 
-Most formatting and common issues are automatically fixed by Biome. Run `bun x ultracite fix` before committing to ensure compliance.
+## Format & Lint Checks
+
+After touching any files, run the relevant sequence before committing:
+
+| Layer | Command sequence |
+|-------|-----------------|
+| Frontend only | `cd frontend && bun run format` → `bun run check` (zero errors required) |
+| Backend only | `cd backend && bun run format` → `bun run check` (zero errors required) |
+| Both | Run both sequences above |
+
+If `bun run check` reports errors, fix them and re-run until clean. Never skip or bypass with `--no-verify`.
+
+## Feature Summary Format
+
+When asked to list down what was done (e.g. "list down what we did"), always use this exact format:
+
+### Feature: [Feature Name] — [Layer: Backend / Frontend / Both]
+
+**What this feature does**
+One or two sentences explaining the purpose in plain language.
+
+**Files Added**
+Table with columns: `#`, `Path` (as clickable markdown link), `Purpose` (one line, plain English)
+
+**Files Modified**
+Table with columns: `#`, `Path` (as clickable markdown link), `What changed` (one line)
+
+**Commands Run**
+Code block with each command, a short comment, and a ✅/❌ result
+
+**API Endpoint Produced** *(backend features only)*
+Show the route, all query params with types and defaults, and auth requirement
+
+**Next Steps**
+Numbered list of what comes next, in order
+
+Rules:
+- All file paths must be clickable markdown links relative to repo root
+- Keep each table cell to one line — no paragraphs inside tables
+- Plain English only — no jargon the user hasn't seen before
+- Always include the commands section even if only format/check was run
