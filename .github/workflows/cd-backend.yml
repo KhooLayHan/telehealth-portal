@@ -1,0 +1,127 @@
+name: CD — Backend
+
+on:
+  workflow_call:
+    inputs:
+      aws-region:
+        required: true
+        type: string
+      ecr-url:
+        required: true
+        type: string
+      eb-app-name:
+        required: true
+        type: string
+      eb-env-name:
+        required: true
+        type: string
+      artifacts-bucket:
+        required: true
+        type: string
+    secrets:
+      AWS_DEPLOY_ROLE_ARN:
+        required: true
+
+jobs:
+  deploy-backend:
+    name: Backend — Publish, Push to ECR & Deploy to EB
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ inputs.aws-region }}
+
+      # ── Build Docker image (Dockerfile runs `dotnet publish` internally) ──
+      - name: Log in to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag & push image to ECR
+        id: build-image
+        env:
+          ECR_REPOSITORY_URL: ${{ inputs.ecr-url }}
+        run: |
+          SHORT_SHA="${GITHUB_SHA:0:8}"
+          VERSION_LABEL="telehealth-${{ github.run_number }}-${{ github.run_attempt }}-${SHORT_SHA}"
+          IMAGE_URI="${ECR_REPOSITORY_URL}:${SHORT_SHA}"
+
+          # Build from repo root so the Dockerfile can COPY backend/** correctly.
+          # The multi-stage Dockerfile handles `dotnet restore` + `dotnet publish`
+          # so no separate SDK setup is needed in CI.
+          docker build \
+            --file backend/src/TeleHealth.Api/Dockerfile \
+            --build-arg BUILD_CONFIGURATION=Release \
+            --tag "$IMAGE_URI" \
+            --tag "${ECR_REPOSITORY_URL}:latest" \
+            .
+
+          docker push "$IMAGE_URI"
+          docker push "${ECR_REPOSITORY_URL}:latest"
+
+          # Pass image URI and version label to subsequent steps
+          echo "image_uri=$IMAGE_URI" >> "$GITHUB_OUTPUT"
+          echo "version_label=$VERSION_LABEL" >> "$GITHUB_OUTPUT"
+
+      # ── Create a Dockerrun.aws.json that points EB at the ECR image ──
+      - name: Create Dockerrun.aws.json
+        env:
+          IMAGE_URI: ${{ steps.build-image.outputs.image_uri }}
+        run: |
+          cat > Dockerrun.aws.json <<EOF
+          {
+            "AWSEBDockerrunVersion": "1",
+            "Image": {
+              "Name": "$IMAGE_URI",
+              "Update": "true"
+            },
+            "Ports": [
+              { "ContainerPort": 8080, "HostPort": 80 }
+            ],
+            "Logging": "/var/log/app-logs"
+          }
+          EOF
+
+      # ── Upload artifact to S3, create EB version, trigger deployment ──
+      - name: Deploy to Elastic Beanstalk
+        env:
+          VERSION_LABEL:    ${{ steps.build-image.outputs.version_label }}
+          EB_APP_NAME:      ${{ inputs.eb-app-name }}
+          EB_ENV_NAME:      ${{ inputs.eb-env-name }}
+          ARTIFACTS_BUCKET: ${{ inputs.artifacts-bucket }}
+        run: |
+          S3_KEY="eb-deployments/Dockerrun-${VERSION_LABEL}.json"
+
+          # Upload the deployment manifest to the artifacts bucket
+          aws s3 cp Dockerrun.aws.json "s3://${ARTIFACTS_BUCKET}/${S3_KEY}"
+
+          # Register a new application version in EB
+          aws elasticbeanstalk create-application-version \
+            --application-name "$EB_APP_NAME" \
+            --version-label "$VERSION_LABEL" \
+            --source-bundle S3Bucket="$ARTIFACTS_BUCKET",S3Key="$S3_KEY" \
+            --description "SHA ${{ github.sha }} — run #${{ github.run_number }}"
+
+          # Trigger the environment update
+          aws elasticbeanstalk update-environment \
+            --environment-name "$EB_ENV_NAME" \
+            --version-label "$VERSION_LABEL"
+
+          echo "Waiting for environment update to complete..."
+
+          # Poll EB until the environment is back to Ready (up to 10 min)
+          aws elasticbeanstalk wait environment-updated \
+            --environment-names "$EB_ENV_NAME"
+
+          echo "Deployment complete."
+          echo "API URL: $(aws elasticbeanstalk describe-environments \
+            --environment-names "$EB_ENV_NAME" \
+            --query 'Environments[0].CNAME' \
+            --output text)"
