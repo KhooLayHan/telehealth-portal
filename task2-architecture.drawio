@@ -1,0 +1,271 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="HhFjFwD5uixCxy2vtmLx" name="Page-1">
+    <mxGraphModel dx="1179" dy="575" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2400" pageHeight="1400" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;align=left;verticalAlign=middle;resizable=0;strokeColor=none;fillColor=none;fontSize=16;fontStyle=1;" value="TeleHealth Portal — Task #2 Cloud Architecture (Serverless &amp; Monitoring)" vertex="1">
+          <mxGeometry height="36" width="1100" x="220" y="8" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_title" parent="1" style="text;html=1;align=left;fontSize=11;fontStyle=1;fillColor=none;strokeColor=none;" value="Legend" vertex="1">
+          <mxGeometry height="20" width="80" x="30" y="1220" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_solid_lbl" parent="1" style="text;html=1;align=left;fontSize=10;fillColor=none;strokeColor=none;" value="Data / Event Flow" vertex="1">
+          <mxGeometry height="18" width="110" x="75" y="1245" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_solid" edge="1" parent="1" style="endArrow=block;endFill=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="30" y="1254" as="sourcePoint" />
+            <mxPoint x="70" y="1254" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="leg_dash_lbl" parent="1" style="text;html=1;align=left;fontSize=10;fillColor=none;strokeColor=none;" value="CI/CD Deploy" vertex="1">
+          <mxGeometry height="18" width="100" x="75" y="1268" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_dash" edge="1" parent="1" style="endArrow=block;endFill=1;rounded=0;dashed=1;strokeColor=#666666;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="30" y="1277" as="sourcePoint" />
+            <mxPoint x="70" y="1277" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="leg_monitor_lbl" parent="1" style="text;html=1;align=left;fontSize=10;fillColor=none;strokeColor=none;" value="Monitoring / Tracing" vertex="1">
+          <mxGeometry height="18" width="120" x="75" y="1291" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_monitor" edge="1" parent="1" style="endArrow=none;rounded=0;dashed=1;strokeColor=#E7157B;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="30" y="1300" as="sourcePoint" />
+            <mxPoint x="70" y="1300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="aws_cloud" parent="1" style="points=[[0,0],[0.25,0],[0.5,0],[0.75,0],[1,0],[1,0.25],[1,0.5],[1,0.75],[1,1],[0.75,1],[0.5,1],[0.25,1],[0,1],[0,0.75],[0,0.5],[0,0.25]];shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_aws_cloud_alt;strokeColor=#232F3E;fillColor=#FFFFFF;verticalLabelPosition=top;verticalAlign=bottom;align=center;spacingTop=25;fontSize=14;fontStyle=1;whiteSpace=wrap;" value="AWS Cloud (us-east-1)" vertex="1">
+          <mxGeometry height="1260" width="2100" x="210" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="vpc" parent="1" style="points=[[0,0],[0.25,0],[0.5,0],[0.75,0],[1,0],[1,0.25],[1,0.5],[1,0.75],[1,1],[0.75,1],[0.5,1],[0.25,1],[0,1],[0,0.75],[0,0.5],[0,0.25]];shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_vpc;strokeColor=#8C4FFF;fillColor=#F4EBFF;verticalLabelPosition=top;verticalAlign=bottom;align=center;fontSize=12;fontStyle=1;" value="Default VPC (Task #1 Base)" vertex="1">
+          <mxGeometry height="420" width="680" x="240" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="pub_sub" parent="1" style="points=[[0,0],[0.25,0],[0.5,0],[0.75,0],[1,0],[1,0.25],[1,0.5],[1,0.75],[1,1],[0.75,1],[0.5,1],[0.25,1],[0,1],[0,0.75],[0,0.5],[0,0.25]];shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_public_subnet;strokeColor=#147EBA;fillColor=#E6F2F8;verticalLabelPosition=top;verticalAlign=bottom;align=center;fontSize=10;" value="Public Subnets (us-east-1a/b/c/d/f)" vertex="1">
+          <mxGeometry height="160" width="600" x="270" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="beanstalk" parent="1" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#ED7100;labelBackgroundColor=#ffffff;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontStyle=1;fontSize=10;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.elastic_beanstalk;" value="Elastic Beanstalk&#xa;(SingleInstance, Docker&#xa;t3.micro, .NET 10 API)" vertex="1">
+          <mxGeometry height="60" width="60" x="530" y="155" as="geometry" />
+        </mxCell>
+        <mxCell id="s3_fe" parent="1" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#7AA116;labelBackgroundColor=#ffffff;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontStyle=1;fontSize=10;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.s3;" value="Amazon S3&#xa;(React SPA)" vertex="1">
+          <mxGeometry height="60" width="60" x="320" y="155" as="geometry" />
+        </mxCell>
+        <mxCell id="db_sub" parent="1" style="points=[[0,0],[0.25,0],[0.5,0],[0.75,0],[1,0],[1,0.25],[1,0.5],[1,0.75],[1,1],[0.75,1],[0.5,1],[0.25,1],[0,1],[0,0.75],[0,0.5],[0,0.25]];shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_private_subnet;strokeColor=#3F8624;fillColor=#EEF7EE;verticalLabelPosition=top;verticalAlign=bottom;align=center;fontSize=10;" value="DB Subnet Group (Not Publicly Accessible)" vertex="1">
+          <mxGeometry height="140" width="600" x="270" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="rds" parent="1" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#C7131F;labelBackgroundColor=#ffffff;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontStyle=1;fontSize=10;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.rds;" value="Amazon RDS&#xa;PostgreSQL 18.3&#xa;(Encrypted, Enhanced Monitoring)" vertex="1">
+          <mxGeometry height="60" width="60" x="530" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="e_bs_rds" edge="1" parent="1" source="beanstalk" style="rounded=0;orthogonalLoop=1;jettySize=auto;fontSize=9;" target="rds" value="TCP :5432&#xa;(Npgsql / EF Core)">
+          <mxGeometry relative="1" x="-0.0029" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="serverless_zone" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E7;strokeColor=#D6A800;strokeWidth=2;verticalAlign=top;fontSize=13;fontStyle=1;arcSize=3;" value="Part 2 — Serverless Architecture (API Gateway + Lambda + SNS/SQS/S3)" vertex="1">
+          <mxGeometry height="760" width="1100" x="1000" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="apigw_section_lbl" parent="1" style="text;html=1;align=left;fontSize=11;fontStyle=5;fillColor=none;strokeColor=none;fontColor=#555555;" value="Admin Analytics Microservice (API Gateway + Lambda)" vertex="1">
+          <mxGeometry height="20" width="350" x="1020" y="105" as="geometry" />
+        </mxCell>
+        <mxCell id="apigw" parent="1" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#E7157B;labelBackgroundColor=#ffffff;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontStyle=1;fontSize=10;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.api_gateway;" value="Amazon API Gateway&#xa;(HTTP API&#xa;ANY /process)" vertex="1">
+          <mxGeometry height="60" width="60" x="1100" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="lambda_analytics" parent="1" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#ED7100;labelBackgroundColor=#ffffff;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontStyle=1;fontSize=10;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda;" value="AWS Lambda&#xa;(admin-analytics&#xa;.NET 10, 512MB)" vertex="1">
+          <mxGeometry height="60" width="60" x="1380" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="pipeline_lbl" parent="1" style="text;html=1;align=left;fontSize=11;fontStyle=5;fillColor=none;strokeColor=none;fontColor=#555555;" value="Lab Report Processing Pipeline (SNS → SQS → Lambda → S3)" vertex="1">
+          <mxGeometry height="20" width="400" x="1020" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="sns_medical" parent="1" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#E7157B;labelBackgroundColor=#ffffff;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontStyle=1;fontSize=10;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.sns;" value="Amazon SNS&#xa;(medical-alerts-topic&#xa;KMS encrypted)" vertex="1">
+          <mxGeometry height="60" width="60" x="1100" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="sqs_processing" parent="1" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#E7157B;labelBackgroundColor=#ffffff;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontStyle=1;fontSize=10;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.sqs;" value="Amazon SQS&#xa;(report-processing-queue&#xa;SSE, 360s visibility)" vertex="1">
+          <mxGeometry height="60" width="60" x="1380" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="lambda_pdf" parent="1" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#ED7100;labelBackgroundColor=#ffffff;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontStyle=1;fontSize=10;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda;" value="AWS Lambda&#xa;(lab-pdf-processor&#xa;.NET 10, 256MB)" vertex="1">
+          <mxGeometry height="60" width="60" x="1660" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="s3_lab" parent="1" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#7AA116;labelBackgroundColor=#ffffff;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontStyle=1;fontSize=10;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.s3;" value="Amazon S3&#xa;(Lab Reports&#xa;Private, Protected)" vertex="1">
+          <mxGeometry height="60" width="60" x="1920" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="dlq" parent="1" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#C7131F;labelBackgroundColor=#ffffff;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontSize=10;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.sqs;" value="Amazon SQS&#xa;(Dead Letter Queue&#xa;14-day retention)" vertex="1">
+          <mxGeometry height="60" width="60" x="1380" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="appt_lbl" parent="1" style="text;html=1;align=left;fontSize=11;fontStyle=5;fillColor=none;strokeColor=none;fontColor=#555555;" value="Appointment Notification Pipeline (SNS → Lambda → SES)" vertex="1">
+          <mxGeometry height="20" width="380" x="1020" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="sns_booked" parent="1" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#E7157B;labelBackgroundColor=#ffffff;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontStyle=1;fontSize=10;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.sns;" value="Amazon SNS&#xa;(appointment-booked)" vertex="1">
+          <mxGeometry height="60" width="60" x="1100" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="sns_cancelled" parent="1" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#E7157B;labelBackgroundColor=#ffffff;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontStyle=1;fontSize=10;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.sns;" value="Amazon SNS&#xa;(appointment-cancelled)" vertex="1">
+          <mxGeometry height="60" width="60" x="1100" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="sns_rescheduled" parent="1" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#E7157B;labelBackgroundColor=#ffffff;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontStyle=1;fontSize=10;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.sns;" value="Amazon SNS&#xa;(appointment-rescheduled)" vertex="1">
+          <mxGeometry height="60" width="60" x="1380" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="lambda_reminder" parent="1" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#ED7100;labelBackgroundColor=#ffffff;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontStyle=1;fontSize=10;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda;" value="AWS Lambda&#xa;(appointment-reminder&#xa;.NET 10, 256MB)" vertex="1">
+          <mxGeometry height="60" width="60" x="1380" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="lambda_notifications" parent="1" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#ED7100;labelBackgroundColor=#ffffff;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontStyle=1;fontSize=10;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda;" value="AWS Lambda&#xa;(appointment-notifications&#xa;.NET 10, 256MB)" vertex="1">
+          <mxGeometry height="60" width="60" x="1660" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="ses" parent="1" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#DD344C;labelBackgroundColor=#ffffff;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontStyle=1;fontSize=10;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.simple_email_service;" value="Amazon SES&#xa;(Email Delivery)" vertex="1">
+          <mxGeometry height="60" width="60" x="1920" y="640" as="geometry" />
+        </mxCell>
+        <mxCell id="obs_zone" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0F8FF;strokeColor=#147EBA;strokeWidth=2;verticalAlign=top;fontSize=13;fontStyle=1;arcSize=3;" value="Part 3 — Observability &amp; Monitoring (CloudWatch + X-Ray)" vertex="1">
+          <mxGeometry height="330" width="1100" x="1000" y="910" as="geometry" />
+        </mxCell>
+        <mxCell id="cloudwatch" parent="1" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#E7157B;labelBackgroundColor=#ffffff;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontStyle=1;fontSize=10;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cloudwatch;" value="Amazon CloudWatch&#xa;(Log Groups, Metric Alarms&#xa;30-day retention)" vertex="1">
+          <mxGeometry height="60" width="60" x="1150" y="990" as="geometry" />
+        </mxCell>
+        <mxCell id="xray" parent="1" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#E7157B;labelBackgroundColor=#ffffff;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontStyle=1;fontSize=10;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.xray;" value="AWS X-Ray&#xa;(Distributed Tracing&#xa;10% + 5 req/s reservoir)" vertex="1">
+          <mxGeometry height="60" width="60" x="1490" y="990" as="geometry" />
+        </mxCell>
+        <mxCell id="sns_ops" parent="1" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#E7157B;labelBackgroundColor=#ffffff;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontStyle=1;fontSize=10;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.sns;" value="Amazon SNS&#xa;(ops-alerts-topic)" vertex="1">
+          <mxGeometry height="60" width="60" x="1150" y="1130" as="geometry" />
+        </mxCell>
+        <mxCell id="alarm_lbl" parent="1" style="text;html=1;align=left;fontSize=10;fillColor=none;strokeColor=none;fontColor=#555555;" value="CloudWatch Alarms:&#xa;• RDS CPU &gt; 80% for 10 min&#xa;• RDS Free Storage &lt; 2 GiB&#xa;&#xa;EB Log Streaming (30-day)&#xa;RDS Log Exports (postgresql, upgrade)" vertex="1">
+          <mxGeometry height="90" width="230" x="1240" y="1115" as="geometry" />
+        </mxCell>
+        <mxCell id="perf_insights" parent="1" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#C7131F;labelBackgroundColor=#ffffff;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontStyle=1;fontSize=10;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.rds;" value="RDS Enhanced Monitoring&#xa;+ Performance Insights&#xa;(60s interval)" vertex="1">
+          <mxGeometry height="60" width="60" x="1750" y="990" as="geometry" />
+        </mxCell>
+        <mxCell id="xray_rule_lbl" parent="1" style="text;html=1;align=left;fontSize=10;fillColor=none;strokeColor=none;fontColor=#555555;" value="X-Ray Sampling Rule:&#xa;• Service: telehealth-api&#xa;• Path: /api/*&#xa;• Rate: 10% + 5 req/s reservoir&#xa;• Insights enabled" vertex="1">
+          <mxGeometry height="80" width="200" x="1470" y="1110" as="geometry" />
+        </mxCell>
+        <mxCell id="users" parent="1" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#232F3E;labelBackgroundColor=#ffffff;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontSize=11;fontStyle=1;shape=mxgraph.aws4.user;" value="Users&#xa;(Browser)" vertex="1">
+          <mxGeometry height="60" width="60" x="60" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="admin_user" parent="1" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#232F3E;labelBackgroundColor=#ffffff;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontSize=11;fontStyle=1;shape=mxgraph.aws4.user;" value="Admin&#xa;(Dashboard)" vertex="1">
+          <mxGeometry height="60" width="60" x="60" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="github" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#24292E;fontColor=#ffffff;strokeColor=none;fontSize=11;fontStyle=1;arcSize=15;" value="GitHub Actions&#xa;CI/CD" vertex="1">
+          <mxGeometry height="50" width="120" x="35" y="1000" as="geometry" />
+        </mxCell>
+        <mxCell id="email_user" parent="1" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#232F3E;labelBackgroundColor=#ffffff;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontSize=10;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.email;" value="Patient Email&#xa;(Notifications)" vertex="1">
+          <mxGeometry height="60" width="60" x="2150" y="640" as="geometry" />
+        </mxCell>
+        <mxCell id="e_u_s3" edge="1" parent="1" source="users" style="rounded=0;orthogonalLoop=1;jettySize=auto;fontSize=9;" target="s3_fe" value="HTTP&#xa;(Static Assets)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_u_eb" edge="1" parent="1" source="users" style="rounded=0;orthogonalLoop=1;jettySize=auto;fontSize=9;" target="beanstalk" value="HTTP :80&#xa;(REST API)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_admin_apigw" edge="1" parent="1" source="admin_user" style="rounded=0;orthogonalLoop=1;jettySize=auto;fontSize=9;" target="apigw" value="HTTPS&#xa;(ANY /process)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_apigw_lambda" edge="1" parent="1" source="apigw" style="rounded=0;orthogonalLoop=1;jettySize=auto;fontSize=9;" target="lambda_analytics" value="Invoke">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_bs_sns_medical" edge="1" parent="1" source="beanstalk" style="rounded=0;orthogonalLoop=1;jettySize=auto;fontSize=9;" target="sns_medical" value="MassTransit Publish&#xa;(LabReportCompletedEvent)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_bs_sns_booked" edge="1" parent="1" source="beanstalk" style="rounded=0;orthogonalLoop=1;jettySize=auto;fontSize=9;" target="sns_booked" value="MassTransit Publish&#xa;(AppointmentBookedEvent)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_bs_sns_cancelled" edge="1" parent="1" source="beanstalk" style="rounded=0;orthogonalLoop=1;jettySize=auto;fontSize=9;" target="sns_cancelled" value="AppointmentCancelledEvent">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_bs_sns_rescheduled" edge="1" parent="1" source="beanstalk" style="rounded=0;orthogonalLoop=1;jettySize=auto;fontSize=9;" target="sns_rescheduled" value="AppointmentRescheduledEvent">
+          <mxGeometry relative="1" x="0.1053" y="6" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_bs_s3lab" edge="1" parent="1" source="beanstalk" style="rounded=0;orthogonalLoop=1;jettySize=auto;fontSize=9;" target="s3_lab" value="s3:PutObject&#xa;(Upload Lab PDFs)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_sns_sqs" edge="1" parent="1" source="sns_medical" style="rounded=0;orthogonalLoop=1;jettySize=auto;fontSize=9;" target="sqs_processing" value="Subscribe (SQS protocol)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_sqs_lambda" edge="1" parent="1" source="sqs_processing" style="rounded=0;orthogonalLoop=1;jettySize=auto;fontSize=9;" target="lambda_pdf" value="Event Source Mapping&#xa;(batch=10, partial failures)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_lambda_s3" edge="1" parent="1" source="lambda_pdf" style="rounded=0;orthogonalLoop=1;jettySize=auto;fontSize=9;" target="s3_lab" value="s3:GetObject&#xa;(Read PDF)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_sqs_dlq" edge="1" parent="1" source="sqs_processing" style="rounded=0;orthogonalLoop=1;jettySize=auto;fontSize=9;strokeColor=#C7131F;" target="dlq" value="Redrive Policy&#xa;(maxReceiveCount=3)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_sns_booked_lambda" edge="1" parent="1" source="sns_booked" style="rounded=0;orthogonalLoop=1;jettySize=auto;fontSize=9;" target="lambda_reminder" value="Subscribe&#xa;(Lambda protocol)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_sns_cancelled_lambda" edge="1" parent="1" source="sns_cancelled" style="rounded=0;orthogonalLoop=1;jettySize=auto;fontSize=9;" target="lambda_notifications" value="Subscribe (Lambda)">
+          <mxGeometry relative="1" x="-0.44" y="10" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_sns_rescheduled_lambda" edge="1" parent="1" source="sns_rescheduled" style="rounded=0;orthogonalLoop=1;jettySize=auto;fontSize=9;" target="lambda_notifications" value="Subscribe (Lambda)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_reminder_ses" edge="1" parent="1" source="lambda_reminder" style="rounded=0;orthogonalLoop=1;jettySize=auto;fontSize=9;" target="ses" value="ses:SendEmail">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_notifications_ses" edge="1" parent="1" source="lambda_notifications" style="rounded=0;orthogonalLoop=1;jettySize=auto;fontSize=9;" target="ses" value="ses:SendEmail">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ses_email" edge="1" parent="1" source="ses" style="rounded=0;orthogonalLoop=1;jettySize=auto;fontSize=9;" target="email_user" value="SMTP Delivery">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_cw_eb" edge="1" parent="1" source="cloudwatch" style="rounded=0;orthogonalLoop=1;jettySize=auto;fontSize=9;dashed=1;strokeColor=#E7157B;startArrow=none;endArrow=none;" target="beanstalk" value="Log Streaming">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_cw_lpdf" edge="1" parent="1" source="cloudwatch" style="rounded=0;orthogonalLoop=1;jettySize=auto;fontSize=9;dashed=1;strokeColor=#E7157B;startArrow=none;endArrow=none;" target="lambda_pdf" value="Logs">
+          <mxGeometry relative="1" x="0.3704" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_cw_lrem" edge="1" parent="1" source="cloudwatch" style="rounded=0;orthogonalLoop=1;jettySize=auto;fontSize=9;dashed=1;strokeColor=#E7157B;startArrow=none;endArrow=none;" target="lambda_reminder" value="Logs">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_cw_lnotif" edge="1" parent="1" source="cloudwatch" style="rounded=0;orthogonalLoop=1;jettySize=auto;fontSize=9;dashed=1;strokeColor=#E7157B;startArrow=none;endArrow=none;" target="lambda_notifications" value="Logs">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_cw_lanalytics" edge="1" parent="1" source="cloudwatch" style="rounded=0;orthogonalLoop=1;jettySize=auto;fontSize=9;dashed=1;strokeColor=#E7157B;startArrow=none;endArrow=none;" target="lambda_analytics" value="Logs">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_cw_ops" edge="1" parent="1" source="cloudwatch" style="rounded=0;orthogonalLoop=1;jettySize=auto;fontSize=9;" target="sns_ops" value="Alarm Actions&#xa;(RDS CPU / Storage)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_cw_rds" edge="1" parent="1" source="cloudwatch" style="rounded=0;orthogonalLoop=1;jettySize=auto;fontSize=9;dashed=1;strokeColor=#E7157B;startArrow=none;endArrow=none;" target="rds" value="RDS Logs&#xa;(postgresql, upgrade)">
+          <mxGeometry relative="1" x="0.1043" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_xr_eb" edge="1" parent="1" source="xray" style="rounded=0;orthogonalLoop=1;jettySize=auto;fontSize=9;dashed=1;strokeColor=#E7157B;startArrow=none;endArrow=none;" target="beanstalk" value="X-Ray Daemon&#xa;(Traces)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_pi_rds" edge="1" parent="1" source="perf_insights" style="rounded=0;orthogonalLoop=1;jettySize=auto;fontSize=9;dashed=1;strokeColor=#E7157B;startArrow=none;endArrow=none;" target="rds" value="Enhanced Monitoring&#xa;(60s interval)">
+          <mxGeometry relative="1" x="-0.833" y="-2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_gh_s3" edge="1" parent="1" source="github" style="rounded=0;orthogonalLoop=1;jettySize=auto;dashed=1;strokeColor=#555555;fontSize=9;" target="s3_fe" value="aws s3 sync&#xa;(React build)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_gh_eb" edge="1" parent="1" source="github" style="rounded=0;orthogonalLoop=1;jettySize=auto;dashed=1;strokeColor=#555555;fontSize=9;" target="beanstalk" value="docker push&#xa;+ EB deploy">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_gh_lpdf" edge="1" parent="1" source="github" style="rounded=0;orthogonalLoop=1;jettySize=auto;dashed=1;strokeColor=#555555;fontSize=9;" target="lambda_pdf" value="update-function-code">
+          <mxGeometry relative="1" x="-0.155" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_gh_lrem" edge="1" parent="1" source="github" style="rounded=0;orthogonalLoop=1;jettySize=auto;dashed=1;strokeColor=#555555;fontSize=9;" target="lambda_reminder" value="update-function-code">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_gh_lnotif" edge="1" parent="1" source="github" style="rounded=0;orthogonalLoop=1;jettySize=auto;dashed=1;strokeColor=#555555;fontSize=9;" target="lambda_notifications" value="update-function-code">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_gh_lanalytics" edge="1" parent="1" source="github" style="rounded=0;orthogonalLoop=1;jettySize=auto;dashed=1;strokeColor=#555555;fontSize=9;" target="lambda_analytics" value="update-function-code">
+          <mxGeometry relative="1" x="-0.0641" y="-6" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
