@@ -42,10 +42,7 @@ public static class Compute
                         ScanOnPush = true,
                     },
                 Tags = cfg.Tags,
-            },
-            // Import the pre-existing ECR repository so Pulumi adopts it
-            // rather than attempting to create a duplicate.
-            new CustomResourceOptions { ImportId = $"telehealth-api-{cfg.StackName}" }
+            }
         );
 
         _ = new Aws.Ecr.LifecyclePolicy(
