@@ -26,7 +26,8 @@ public static class Compute
         Storage.Result storage,
         Database.Result db,
         Messaging.Result msg,
-        Observability.Result obs
+        Observability.Result obs,
+        Serverless.Result serverless
     )
     {
         // ── ECR — Docker image registry ──
@@ -327,6 +328,10 @@ public static class Compute
                     EbEnvVar("AWS_S3_LAB_REPORTS_BUCKET", storage.LabReportsBucket.BucketName),
                     EbEnvVar("AWS_SNS_TOPIC_ARN", msg.MedicalAlertsTopic.Arn),
                     EbEnvVar("AWS_SQS_QUEUE_URL", msg.ProcessingQueue.Id),
+                    EbEnvVar(
+                        "ADMIN_ANALYTICS_API_BASE_URL",
+                        serverless.AdminAnalyticsApi.ApiEndpoint
+                    ),
                     EbEnvVar("SES_SENDER_EMAIL", "hongjx0321@gmail.com"),
                     EbEnvVar("SES_REGION", "us-east-1"),
                     // JWT authentication
