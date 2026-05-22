@@ -52,7 +52,7 @@ jobs:
 
       - name: Snapshot RDS before seeding
         env:
-          DB_INSTANCE: telehealth-dbfe5a2f2
+          DB_INSTANCE: telehealth-db798d5a0
         run: |
           SNAPSHOT_ID="pre-seed-$(date +%Y%m%d-%H%M%S)"
           echo "Creating RDS snapshot: $SNAPSHOT_ID"

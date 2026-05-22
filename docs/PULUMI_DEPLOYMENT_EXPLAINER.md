@@ -1589,7 +1589,7 @@ Let me continue reading the remaining workflow files and other important infrast
 36: 
 37:       - name: Snapshot RDS before seeding
 38:         env:
-39:           DB_INSTANCE: telehealth-dbfe5a2f2
+39:           DB_INSTANCE: telehealth-db798d5a0
 40:         run: |
 41:           SNAPSHOT_ID="pre-seed-$(date +%Y%m%d-%H%M%S)"
 42:           echo "Creating RDS snapshot: $SNAPSHOT_ID"
@@ -4792,7 +4792,7 @@ on:
 ```yaml
       - name: Snapshot RDS before seeding
         env:
-          DB_INSTANCE: telehealth-dbfe5a2f2
+          DB_INSTANCE: telehealth-db798d5a0
         run: |
           SNAPSHOT_ID="pre-seed-$(date +%Y%m%d-%H%M%S)"
           echo "Creating RDS snapshot: $SNAPSHOT_ID"
