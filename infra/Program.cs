@@ -12,8 +12,8 @@ return await Deployment.RunAsync(() =>
     var msg = Messaging.Create(cfg);
     var db = Database.Create(cfg, net);
     var obs = Observability.Create(cfg, db, msg);
-    var compute = Compute.Create(cfg, net, storage, db, msg, obs);
-    var serverless = Serverless.Create(cfg, msg, storage);
+    var serverless = Serverless.Create(cfg, net, db, msg, storage);
+    var compute = Compute.Create(cfg, net, storage, db, msg, obs, serverless);
 
     // Stack outputs — used by GitHub Actions CD workflow
     return new Dictionary<string, object?>

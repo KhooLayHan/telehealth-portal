@@ -8,4 +8,7 @@
     <PackageReference Include="NSubstitute" />
     <PackageReference Include="TUnit" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\functions\admin-analytics\src\AdminAnalytics\AdminAnalytics.csproj" />
+  </ItemGroup>
 </Project>

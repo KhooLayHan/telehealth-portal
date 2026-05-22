@@ -792,20 +792,6 @@
         "resolved": "13.0.3",
         "contentHash": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ=="
       },
-      "Npgsql": {
-        "type": "Transitive",
-        "resolved": "10.0.2",
-        "contentHash": "q5RfBI+wywJSFUNDE1L4ZbHEHCFTblo8Uf6A6oe4feOUFYiUQXyAf9GBh5qEZpvJaHiEbpBPkQumjEhXCJxdrg=="
-      },
-      "Npgsql.NodaTime": {
-        "type": "Transitive",
-        "resolved": "10.0.2",
-        "contentHash": "p3SslILn0zdM5YTKr0eZJRuWfA6UIFbxrgu82WL4Fhif+gWLpqhFrwntXweLhl5T7oSN5Tmvd6QNHP/7N8sLtg==",
-        "dependencies": {
-          "NodaTime": "3.2.2",
-          "Npgsql": "10.0.2"
-        }
-      },
       "OpenTelemetry": {
         "type": "Transitive",
         "resolved": "1.15.3",
@@ -975,6 +961,22 @@
         "type": "Project",
         "dependencies": {
           "NodaTime": "[3.3.2, )"
+        }
+      },
+      "Npgsql": {
+        "type": "CentralTransitive",
+        "requested": "[10.0.2, )",
+        "resolved": "10.0.2",
+        "contentHash": "q5RfBI+wywJSFUNDE1L4ZbHEHCFTblo8Uf6A6oe4feOUFYiUQXyAf9GBh5qEZpvJaHiEbpBPkQumjEhXCJxdrg=="
+      },
+      "Npgsql.NodaTime": {
+        "type": "CentralTransitive",
+        "requested": "[10.0.2, )",
+        "resolved": "10.0.2",
+        "contentHash": "p3SslILn0zdM5YTKr0eZJRuWfA6UIFbxrgu82WL4Fhif+gWLpqhFrwntXweLhl5T7oSN5Tmvd6QNHP/7N8sLtg==",
+        "dependencies": {
+          "NodaTime": "3.2.2",
+          "Npgsql": "10.0.2"
         }
       }
     }

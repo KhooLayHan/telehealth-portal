@@ -24,7 +24,13 @@ public static class Serverless
         public required Aws.ApiGatewayV2.Api AdminAnalyticsApi { get; init; }
     }
 
-    public static Result Create(StackConfig cfg, Messaging.Result msg, Storage.Result storage)
+    public static Result Create(
+        StackConfig cfg,
+        Networking.Result net,
+        Database.Result db,
+        Messaging.Result msg,
+        Storage.Result storage
+    )
     {
         // ── IAM role for Lambda ──
         var lambdaRole = new Aws.Iam.Role(
@@ -375,6 +381,103 @@ public static class Serverless
             }
         );
 
+        _ = new Aws.Iam.RolePolicyAttachment(
+            "admin-analytics-vpc-execution",
+            new Aws.Iam.RolePolicyAttachmentArgs
+            {
+                Role = adminAnalyticsRole.Name,
+                PolicyArn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole",
+            }
+        );
+
+        _ = new Aws.Iam.RolePolicy(
+            "admin-analytics-db-secret-read",
+            new Aws.Iam.RolePolicyArgs
+            {
+                Role = adminAnalyticsRole.Name,
+                Policy = db.DbSecret.Arn.Apply(arn =>
+                    $@"{{
+                        ""Version"": ""2012-10-17"",
+                        ""Statement"": [{{
+                            ""Effect"": ""Allow"",
+                            ""Action"": [""secretsmanager:GetSecretValue""],
+                            ""Resource"": ""{arn}""
+                        }}]
+                    }}"
+                ),
+            }
+        );
+
+        var adminAnalyticsSecurityGroup = new Aws.Ec2.SecurityGroup(
+            "admin-analytics-lambda-sg",
+            new Aws.Ec2.SecurityGroupArgs
+            {
+                Description = "TeleHealth admin analytics Lambda",
+                VpcId = net.VpcId,
+                Egress = new[]
+                {
+                    new Aws.Ec2.Inputs.SecurityGroupEgressArgs
+                    {
+                        Protocol = "-1",
+                        FromPort = 0,
+                        ToPort = 0,
+                        CidrBlocks = { "0.0.0.0/0" },
+                        Description = "Allow outbound for RDS and AWS APIs",
+                    },
+                },
+                Tags = cfg.Tags,
+            }
+        );
+
+        _ = new Aws.Ec2.SecurityGroupRule(
+            "db-ingress-admin-analytics-lambda",
+            new Aws.Ec2.SecurityGroupRuleArgs
+            {
+                Type = "ingress",
+                SecurityGroupId = net.DbSecurityGroup.Id,
+                SourceSecurityGroupId = adminAnalyticsSecurityGroup.Id,
+                Protocol = "tcp",
+                FromPort = 5432,
+                ToPort = 5432,
+                Description = "PostgreSQL from admin analytics Lambda",
+            }
+        );
+
+        var secretsManagerEndpointSecurityGroup = new Aws.Ec2.SecurityGroup(
+            "secrets-manager-endpoint-sg",
+            new Aws.Ec2.SecurityGroupArgs
+            {
+                Description = "TeleHealth Secrets Manager VPC endpoint",
+                VpcId = net.VpcId,
+                Ingress = new[]
+                {
+                    new Aws.Ec2.Inputs.SecurityGroupIngressArgs
+                    {
+                        Protocol = "tcp",
+                        FromPort = 443,
+                        ToPort = 443,
+                        SecurityGroups = { adminAnalyticsSecurityGroup.Id },
+                        Description = "HTTPS from admin analytics Lambda",
+                    },
+                },
+                Tags = cfg.Tags,
+            }
+        );
+
+        _ = new Aws.Ec2.VpcEndpoint(
+            "secrets-manager-vpc-endpoint",
+            new Aws.Ec2.VpcEndpointArgs
+            {
+                VpcId = net.VpcId,
+                ServiceName = $"com.amazonaws.{cfg.AwsRegion}.secretsmanager",
+                VpcEndpointType = "Interface",
+                PrivateDnsEnabled = true,
+                SubnetIds = net.SubnetIds,
+                SecurityGroupIds = { secretsManagerEndpointSecurityGroup.Id },
+                Tags = cfg.Tags,
+            }
+        );
+
         var adminAnalyticsLambda = new Aws.Lambda.Function(
             "admin-analytics",
             new Aws.Lambda.FunctionArgs
@@ -388,7 +491,21 @@ public static class Serverless
                 Code = new FileArchive("./dummy-lambda"),
                 Environment = new Aws.Lambda.Inputs.FunctionEnvironmentArgs
                 {
-                    Variables = new InputMap<string> { { "ENVIRONMENT", cfg.StackName } },
+                    Variables = new InputMap<string>
+                    {
+                        { "ENVIRONMENT", cfg.StackName },
+                        { "DB_HOST", db.Instance.Address },
+                        { "DB_PORT", "5432" },
+                        { "DB_NAME", cfg.DbName },
+                        { "DB_USERNAME", cfg.DbUsername },
+                        { "DB_PASSWORD_SECRET_ARN", db.DbSecret.Arn },
+                        { "CLINIC_TIME_ZONE", "Asia/Kuala_Lumpur" },
+                    },
+                },
+                VpcConfig = new Aws.Lambda.Inputs.FunctionVpcConfigArgs
+                {
+                    SecurityGroupIds = { adminAnalyticsSecurityGroup.Id },
+                    SubnetIds = net.SubnetIds,
                 },
                 Tags = cfg.Tags,
             },
