@@ -351,7 +351,7 @@ export function AdminDashboard() {
             <div className="flex items-center justify-between gap-3">
               <div>
                 <CardTitle className="font-semibold text-lg">Clinic Activity</CardTitle>
-                <CardDescription>Appointment volume over the last 7 days</CardDescription>
+                <CardDescription>Appointment volume in this week</CardDescription>
               </div>
               <Activity className="size-5 text-muted-foreground" />
             </div>
