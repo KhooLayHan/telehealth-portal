@@ -63,6 +63,28 @@ jobs:
         with:
           dotnet-version: "9.0.x"
 
+      # Delete the conflicting RDS snapshot so the pending telehealth-db deletion
+      # can proceed. This step is idempotent — once the RDS instance is gone this
+      # snapshot will no longer exist and the step becomes a no-op.
+      - name: Remove conflicting RDS snapshot (if present)
+        run: |
+          if aws rds describe-db-snapshots \
+              --db-snapshot-identifier telehealth-db-prod-final \
+              --region ${{ inputs.aws-region }} \
+              --query 'DBSnapshots[0].DBSnapshotIdentifier' \
+              --output text 2>/dev/null | grep -q "telehealth-db-prod-final"; then
+            echo "Deleting conflicting snapshot telehealth-db-prod-final..."
+            aws rds delete-db-snapshot \
+              --db-snapshot-identifier telehealth-db-prod-final \
+              --region ${{ inputs.aws-region }}
+            aws rds wait db-snapshot-deleted \
+              --db-snapshot-identifier telehealth-db-prod-final \
+              --region ${{ inputs.aws-region }}
+            echo "Snapshot deleted."
+          else
+            echo "Snapshot telehealth-db-prod-final not found — nothing to do."
+          fi
+
       - name: Pulumi up
         uses: pulumi/actions@v6
         id: pulumi
@@ -71,8 +93,6 @@ jobs:
           stack-name: prod
           work-dir: infra
           upsert: true
-          # refresh: true — temporarily disabled so the RDS deletion state patch
-          # (skipFinalSnapshot=true) is not overwritten before the instance is
-          # removed. Re-enable once telehealth-db has been successfully deleted.
+          refresh: true
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
