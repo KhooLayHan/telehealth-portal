@@ -15,7 +15,11 @@ public static class Observability
         public required Aws.Xray.Group XrayGroup { get; init; }
     }
 
-    public static Result Create(StackConfig cfg, Database.Result db, Messaging.Result msg)
+    public static Result Create(
+        StackConfig cfg,
+        Database.Result? db = null,
+        Messaging.Result? msg = null
+    )
     {
         // ── CloudWatch log groups ──
         var apiLogGroup = new Aws.CloudWatch.LogGroup(
@@ -32,7 +36,9 @@ public static class Observability
         // are auto-created by AWS when EnabledCloudwatchLogsExports is set on the RDS instance.
         // Do not create them here — it would conflict with the AWS-managed groups.
 
-        // ── Metric alarms — route to SNS ──
+        // ── Metric alarms — only when RDS is active ──
+        if (db is not null && msg is not null)
+        {
 
         // RDS CPU > 80% for 10 minutes
         _ = new Aws.CloudWatch.MetricAlarm(
@@ -73,6 +79,8 @@ public static class Observability
                 Tags = cfg.Tags,
             }
         );
+
+        } // end if (db is not null && msg is not null)
 
         // ── X-Ray — tracing group + sampling rule ──
         _ = new Aws.Xray.SamplingRule(
