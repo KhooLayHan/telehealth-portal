@@ -71,6 +71,8 @@ jobs:
           stack-name: prod
           work-dir: infra
           upsert: true
-          refresh: true
+          # refresh: true — temporarily disabled so the RDS deletion state patch
+          # (skipFinalSnapshot=true) is not overwritten before the instance is
+          # removed. Re-enable once telehealth-db has been successfully deleted.
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
