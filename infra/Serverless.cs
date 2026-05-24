@@ -20,16 +20,18 @@ public static class Serverless
         public required Aws.Lambda.Function PdfProcessorLambda { get; init; }
         public required Aws.Lambda.Function ReminderLambda { get; init; }
         public required Aws.Lambda.Function NotificationsLambda { get; init; }
-        public required Aws.Lambda.Function AdminAnalyticsLambda { get; init; }
-        public required Aws.ApiGatewayV2.Api AdminAnalyticsApi { get; init; }
+        /// <summary>Null when Networking/Database resources are disabled.</summary>
+        public Aws.Lambda.Function? AdminAnalyticsLambda { get; init; }
+        /// <summary>Null when Networking/Database resources are disabled.</summary>
+        public Aws.ApiGatewayV2.Api? AdminAnalyticsApi { get; init; }
     }
 
     public static Result Create(
         StackConfig cfg,
-        Networking.Result net,
-        Database.Result db,
         Messaging.Result msg,
-        Storage.Result storage
+        Storage.Result storage,
+        Networking.Result? net = null,
+        Database.Result? db = null
     )
     {
         // ── IAM role for Lambda ──
@@ -354,6 +356,14 @@ public static class Serverless
             }
         );
 
+        // Admin Analytics Lambda + API Gateway require VPC/RDS access.
+        // These are skipped when Networking and Database resources are disabled.
+        Aws.Lambda.Function? adminAnalyticsLambda = null;
+        Aws.ApiGatewayV2.Api? adminAnalyticsApi = null;
+
+        if (net is not null && db is not null)
+        {
+
         // IAM role for Admin Analytics Lambda, invoked through API Gateway.
         var adminAnalyticsRole = new Aws.Iam.Role(
             "lambda-admin-analytics-role",
@@ -478,7 +488,7 @@ public static class Serverless
             }
         );
 
-        var adminAnalyticsLambda = new Aws.Lambda.Function(
+        adminAnalyticsLambda = new Aws.Lambda.Function(
             "admin-analytics",
             new Aws.Lambda.FunctionArgs
             {
@@ -512,7 +522,7 @@ public static class Serverless
             new CustomResourceOptions { IgnoreChanges = { "sourceCodeHash" } }
         );
 
-        var adminAnalyticsApi = new Aws.ApiGatewayV2.Api(
+        adminAnalyticsApi = new Aws.ApiGatewayV2.Api(
             "admin-analytics-api",
             new Aws.ApiGatewayV2.ApiArgs
             {
@@ -570,6 +580,8 @@ public static class Serverless
                 SourceArn = adminAnalyticsApi.ExecutionArn.Apply(arn => $"{arn}/*/*"),
             }
         );
+
+        } // end if (net is not null && db is not null)
 
         return new Result
         {
