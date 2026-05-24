@@ -12,6 +12,12 @@ return await Deployment.RunAsync(() =>
     // var net = Networking.Create(cfg);
     // var db  = Database.Create(cfg, net);
     // ────────────────────────────────────────────────────────────────────────────────
+    //
+    // Note: the RDS instance deletion previously failed with DBSnapshotAlreadyExists
+    // because a snapshot named "telehealth-db-prod-final" already existed from an
+    // earlier teardown. The Pulumi state was patched to set skipFinalSnapshot=true
+    // so the next pulumi up will delete the instance without creating a new snapshot.
+    // The existing backup remains available in AWS RDS snapshots.
     var storage = Storage.Create(cfg);
     var msg = Messaging.Create(cfg);
     var obs = Observability.Create(cfg);                        // RDS alarms skipped while DB is off
