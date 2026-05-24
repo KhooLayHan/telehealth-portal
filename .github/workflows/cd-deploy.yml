@@ -53,8 +53,10 @@ jobs:
       AWS_DEPLOY_ROLE_ARN: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
 
   # ── 3. Backend (needs infra outputs) ───────────────────────────
+  # Skipped automatically when ECR/EB are disabled (ecr-url will be empty).
   backend:
     needs: infra
+    if: needs.infra.outputs.ecr-url != ''
     uses: ./.github/workflows/cd-backend.yml
     with:
       aws-region:        ${{ vars.AWS_REGION || 'us-east-1' }}
