@@ -74,7 +74,7 @@ cd-infra.yml + cd-frontend.yml + cd-backend.yml + cd-lambda.yml
 | Service | Settings | What it does in this project |
 |---|---|---|
 | API Gateway | HTTP API, ANY /process | Entry point for admin dashboard requests — routes to admin-analytics Lambda |
-| Lambda — admin-analytics | .NET 10, 512 MB | Processes admin analytics requests, triggered by API Gateway |
+| Lambda — admin-analytics | .NET 10, 256 MB | Processes admin analytics requests, triggered by API Gateway |
 | Lambda — lab-pdf-processor | .NET 10, 256 MB | Reads lab report PDFs from S3 and processes them, triggered by SQS |
 | Lambda — appointment-reminder | .NET 10, 256 MB | Sends appointment confirmation emails via SES, triggered by SNS |
 | Lambda — appointment-notifications | .NET 10, 256 MB | Sends cancellation and reschedule emails via SES, triggered by SNS |
@@ -467,19 +467,35 @@ CloudWatch watches two metrics:
 **X-Ray in this project:**
 
 ```
-HTTP request arrives at EB
-    → X-Ray Daemon (running inside the EB container) captures the request
-    → traces every step: how long each function took, which database queries ran
-    → sends trace data to X-Ray service
+Pulumi runs once (cd-infra.yml):
+  → creates X-Ray sampling rule in AWS (always active once created)
+      Service: telehealth-api  |  Path: /api/*
+      Reservoir: 5 req/s guaranteed  |  Fixed rate: 10% of remaining requests
+  → creates X-Ray group filter: service("telehealth-api")
 
-Sampling rule:
-  Service: telehealth-api
-  Path: /api/*
-  Rate: 10% of requests are traced
-  Reservoir: guaranteed 5 requests per second traced even at low traffic
+EB container starts (after cd-backend.yml deploys):
+  → XRayEnabled = true (set in Compute.cs)
+  → AWS automatically starts the X-Ray Daemon as a sidecar process inside the container
+  → Daemon listens on localhost:4317 (OTLP) — ready before the .NET app even starts
+
+.NET API starts (Program.cs calls AddOpenTelemetryConfiguration):
+  → OpenTelemetry SDK initialises (NOT the AWS X-Ray SDK — the app uses OpenTelemetry)
+  → AddAspNetCoreInstrumentation() — auto-captures every HTTP request trace
+  → AddAWSInstrumentation()        — auto-captures every AWS SDK call (S3, SQS, etc.)
+  → AddHttpClientInstrumentation() — auto-captures every outgoing HTTP call
+  → AddOtlpExporter()              — sends trace data to localhost:4317 (the X-Ray Daemon)
+
+HTTP request arrives at EB:
+  → OpenTelemetry SDK captures the trace automatically
+  → sends trace data to X-Ray Daemon via OTLP
+  → Daemon forwards to AWS X-Ray service
+  → X-Ray service applies the sampling rule (keep 5/s + 10%, discard the rest)
+  → kept traces appear in the X-Ray console under the "telehealth-api" group
 ```
 
 The 10% sampling means X-Ray does not trace every single request — that would generate too much data and add latency. The 5 req/s reservoir guarantees traces still appear even during quiet periods.
+
+**Important:** The .NET app does NOT use the AWS X-Ray SDK (`AWSXRayRecorderCore`). It uses the **OpenTelemetry SDK** (`OpenTelemetry.Instrumentation.AspNetCore`, `OpenTelemetry.Instrumentation.AWS`, etc.) which exports traces in OTLP format to the X-Ray Daemon. The X-Ray Daemon acts as the bridge between OpenTelemetry and the AWS X-Ray service.
 
 **RDS Enhanced Monitoring** is a separate agent that runs **inside** the RDS instance and sends OS-level metrics (CPU, memory, disk I/O) to CloudWatch every 60 seconds. Standard CloudWatch RDS metrics come from outside the instance — Enhanced Monitoring comes from inside, showing finer-grained detail.
 
@@ -496,29 +512,57 @@ RDS Enhanced Monitoring (60s interval):
 
 ---
 
-## Concept 11 — Native AOT — Why Lambda Compiles Differently
+## Concept 11 — Self-Contained Deployment — How Lambda Code Is Built
 
-Normal .NET applications start with a **JIT (Just-In-Time) compiler** — when the application first runs, .NET compiles the code into machine instructions on the fly. This takes time — the first invocation of a Lambda function can take several seconds before it is ready. This is called a **cold start**.
+The Lambda functions in this project use **self-contained deployment** with the managed `dotnet10` Lambda runtime.
+
+**What self-contained means:**
 
 ```
-Normal .NET Lambda cold start:
-  Trigger arrives
-      → AWS starts container
-      → .NET runtime loads (slow)
-      → JIT compiles the code on first run (slow)
-      → function finally executes
-      → total cold start: 2–5 seconds
+Normal (framework-dependent) .NET deployment:
+  The build output contains only the app's own DLL files
+  Relies on the .NET runtime already being installed on the host machine
+  If the host has the wrong version, the app fails to start
 
-Native AOT (Ahead-of-Time) Lambda:
-  Trigger arrives
-      → AWS starts container
-      → binary is already compiled — runs immediately (fast)
-      → total cold start: under 100ms
+Self-contained deployment (--self-contained true):
+  The build output bundles the app's DLL files
+  PLUS all required .NET runtime DLL files packaged together in the zip
+  The app carries everything it needs — no dependency on what the host has installed
 ```
 
-**AOT compiles the .NET code into a native binary before deployment.** The binary runs directly without any .NET runtime startup. The trade-off is the binary is larger and some .NET features that rely on runtime reflection are not available — but for Lambda functions (which are small and focused), this is not an issue.
+**How it works in cd-lambda.yml:**
 
-**One-line summary:** Native AOT pre-compiles the code before deployment so Lambda starts instantly instead of spending seconds warming up on first invocation.
+```
+dotnet publish -c Release -r linux-x64 --self-contained true -o ./publish
+cd publish
+zip -r ../../../function.zip *
+aws lambda update-function-code --zip-file fileb://function.zip
+```
+
+`-r linux-x64` compiles for the Linux x64 architecture that Lambda runs on. `--self-contained true` bundles the .NET runtime DLLs into the zip alongside the app code.
+
+**Why `Runtime = "dotnet10"` in Serverless.cs (managed runtime, not custom):**
+
+Because the build is self-contained (not Native AOT), it still produces .NET IL (Intermediate Language) assemblies — not a native binary. The `dotnet10` managed Lambda runtime provides the execution environment that reads and runs those assemblies. This is confirmed in all four Lambda `.csproj` files — none have `<PublishAot>true</PublishAot>` and none use `Runtime = "provided.al2023"` (which Native AOT would require).
+
+**What Native AOT would look like (for comparison — this project does NOT use it):**
+
+```
+Native AOT:
+  dotnet publish --aot  (or <PublishAot>true</PublishAot> in .csproj)
+  → compiles C# directly to a native binary (machine code for linux-x64)
+  → no .NET runtime needed at all — the binary runs directly
+  → Runtime = "provided.al2023" in Serverless.cs (bare Linux container)
+  → cold start: under 100ms
+
+Self-contained (what this project uses):
+  dotnet publish --self-contained true
+  → produces .NET IL assemblies + bundled .NET runtime DLLs
+  → Runtime = "dotnet10" (managed runtime runs the assemblies)
+  → cold start: faster than framework-dependent, but not as fast as AOT
+```
+
+**One-line summary:** Self-contained deployment bundles the .NET runtime DLLs into the zip so Lambda has everything it needs — the managed `dotnet10` runtime then executes the .NET assemblies.
 
 ---
 
@@ -705,11 +749,14 @@ cd-deploy.yml — the orchestrator
       │     Container starts → Secrets Manager → EF Core MigrateAsync() → RDS tables applied
       │
       └── cd-lambda.yml  ──────────────────────────── runs AFTER cd-infra.yml ──
-            dotnet publish (Native AOT) → zip
-            aws lambda update-function-code → deploys three Lambda functions:
+            dotnet publish (self-contained, --self-contained true, -r linux-x64) → zip
+            aws lambda update-function-code → deploys four Lambda functions:
               - lab-pdf-processor
               - appointment-reminder
               - appointment-notifications
+              - admin-analytics
+            Note: Pulumi (cd-infra.yml) already created these 4 Lambda shells (empty containers).
+            cd-lambda.yml only replaces the code inside the already-existing shells — it does not create them.
 ```
 
 **Why cd-lambda.yml runs after cd-infra.yml and not in parallel:**
@@ -728,5 +775,7 @@ cd-lambda.yml needs the Lambda function ARNs and SQS queue URLs that Pulumi outp
 | [`infra/Serverless.cs`](infra/Serverless.cs) | Creates Lambda function shells and their IAM roles |
 | [`functions/lab-pdf-processor/`](functions/lab-pdf-processor/) | Lambda source code for PDF processing |
 | [`functions/appointment-reminder/`](functions/appointment-reminder/) | Lambda source code for appointment reminder emails |
-| [`.github/workflows/cd-lambda.yml`](.github/workflows/cd-lambda.yml) | Builds (Native AOT) and deploys all three Lambda functions |
+| [`functions/appointment-notifications/`](functions/appointment-notifications/) | Lambda source code for cancellation and reschedule notification emails |
+| [`functions/admin-analytics/`](functions/admin-analytics/) | Lambda source code for admin analytics, triggered by API Gateway |
+| [`.github/workflows/cd-lambda.yml`](.github/workflows/cd-lambda.yml) | Builds (self-contained, --self-contained true) and deploys all four Lambda functions |
 | [`task2-architecture.drawio`](task2-architecture.drawio) | The visual diagram this document is based on |
