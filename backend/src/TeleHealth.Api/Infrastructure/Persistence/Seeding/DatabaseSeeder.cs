@@ -50,9 +50,20 @@ public sealed class DatabaseSeeder(
         }
 
         // Phase 0: System settings + operating hours (static clinic config)
-        var systemSettings = SystemSettingFaker.BuildSystemSettings();
-        db.SystemSettings.AddRange(systemSettings);
-        await db.SaveChangesAsync(ct);
+        // Skip slugs that already exist — the AddSystemSettings migration seeds
+        // a "clinic-settings" row on every fresh database, so inserting it again
+        // would violate ix_system_settings_slug and crash before any users are created.
+        var existingSlugs = await db.SystemSettings.Select(s => s.Slug).ToHashSetAsync(ct);
+        var systemSettings = SystemSettingFaker
+            .BuildSystemSettings()
+            .Where(s => !existingSlugs.Contains(s.Slug))
+            .ToList();
+
+        if (systemSettings.Count > 0)
+        {
+            db.SystemSettings.AddRange(systemSettings);
+            await db.SaveChangesAsync(ct);
+        }
 
         Log.Information("Seeding database with Bogus fake data...");
 
