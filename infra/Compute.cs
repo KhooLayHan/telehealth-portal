@@ -330,7 +330,7 @@ public static class Compute
                     EbEnvVar("AWS_SQS_QUEUE_URL", msg.ProcessingQueue.Id),
                     EbEnvVar(
                         "ADMIN_ANALYTICS_API_BASE_URL",
-                        serverless.AdminAnalyticsApi!.ApiEndpoint  // non-null when Compute is active
+                        serverless.AdminAnalyticsApi!.ApiEndpoint // non-null when Compute is active
                     ),
                     EbEnvVar("SES_SENDER_EMAIL", "hongjx0321@gmail.com"),
                     EbEnvVar("SES_REGION", "us-east-1"),

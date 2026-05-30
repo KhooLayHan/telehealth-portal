@@ -39,47 +39,51 @@ public static class Observability
         // ── Metric alarms — only when RDS is active ──
         if (db is not null && msg is not null)
         {
+            // RDS CPU > 80% for 10 minutes
+            _ = new Aws.CloudWatch.MetricAlarm(
+                "rds-high-cpu",
+                new Aws.CloudWatch.MetricAlarmArgs
+                {
+                    ComparisonOperator = "GreaterThanThreshold",
+                    EvaluationPeriods = 2,
+                    MetricName = "CPUUtilization",
+                    Namespace = "AWS/RDS",
+                    Period = 300,
+                    Statistic = "Average",
+                    Threshold = 80,
+                    AlarmDescription = "RDS CPU > 80% for 10 minutes",
+                    Dimensions = new InputMap<string>
+                    {
+                        { "DBInstanceIdentifier", db.Instance.Id },
+                    },
+                    AlarmActions = { msg.OpsAlertsTopic.Arn },
+                    OkActions = { msg.OpsAlertsTopic.Arn },
+                    Tags = cfg.Tags,
+                }
+            );
 
-        // RDS CPU > 80% for 10 minutes
-        _ = new Aws.CloudWatch.MetricAlarm(
-            "rds-high-cpu",
-            new Aws.CloudWatch.MetricAlarmArgs
-            {
-                ComparisonOperator = "GreaterThanThreshold",
-                EvaluationPeriods = 2,
-                MetricName = "CPUUtilization",
-                Namespace = "AWS/RDS",
-                Period = 300,
-                Statistic = "Average",
-                Threshold = 80,
-                AlarmDescription = "RDS CPU > 80% for 10 minutes",
-                Dimensions = new InputMap<string> { { "DBInstanceIdentifier", db.Instance.Id } },
-                AlarmActions = { msg.OpsAlertsTopic.Arn },
-                OkActions = { msg.OpsAlertsTopic.Arn },
-                Tags = cfg.Tags,
-            }
-        );
-
-        // RDS free storage < 2 GiB
-        _ = new Aws.CloudWatch.MetricAlarm(
-            "rds-low-storage",
-            new Aws.CloudWatch.MetricAlarmArgs
-            {
-                ComparisonOperator = "LessThanThreshold",
-                EvaluationPeriods = 1,
-                MetricName = "FreeStorageSpace",
-                Namespace = "AWS/RDS",
-                Period = 300,
-                Statistic = "Average",
-                Threshold = 2_147_483_648, // 2 GiB in bytes
-                AlarmDescription = "RDS free storage below 2 GiB",
-                Dimensions = new InputMap<string> { { "DBInstanceIdentifier", db.Instance.Id } },
-                AlarmActions = { msg.OpsAlertsTopic.Arn },
-                OkActions = { msg.OpsAlertsTopic.Arn },
-                Tags = cfg.Tags,
-            }
-        );
-
+            // RDS free storage < 2 GiB
+            _ = new Aws.CloudWatch.MetricAlarm(
+                "rds-low-storage",
+                new Aws.CloudWatch.MetricAlarmArgs
+                {
+                    ComparisonOperator = "LessThanThreshold",
+                    EvaluationPeriods = 1,
+                    MetricName = "FreeStorageSpace",
+                    Namespace = "AWS/RDS",
+                    Period = 300,
+                    Statistic = "Average",
+                    Threshold = 2_147_483_648, // 2 GiB in bytes
+                    AlarmDescription = "RDS free storage below 2 GiB",
+                    Dimensions = new InputMap<string>
+                    {
+                        { "DBInstanceIdentifier", db.Instance.Id },
+                    },
+                    AlarmActions = { msg.OpsAlertsTopic.Arn },
+                    OkActions = { msg.OpsAlertsTopic.Arn },
+                    Tags = cfg.Tags,
+                }
+            );
         } // end if (db is not null && msg is not null)
 
         // ── X-Ray — tracing group + sampling rule ──

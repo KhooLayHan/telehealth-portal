@@ -20,8 +20,10 @@ public static class Serverless
         public required Aws.Lambda.Function PdfProcessorLambda { get; init; }
         public required Aws.Lambda.Function ReminderLambda { get; init; }
         public required Aws.Lambda.Function NotificationsLambda { get; init; }
+
         /// <summary>Null when Networking/Database resources are disabled.</summary>
         public Aws.Lambda.Function? AdminAnalyticsLambda { get; init; }
+
         /// <summary>Null when Networking/Database resources are disabled.</summary>
         public Aws.ApiGatewayV2.Api? AdminAnalyticsApi { get; init; }
     }
@@ -363,14 +365,13 @@ public static class Serverless
 
         if (net is not null && db is not null)
         {
-
-        // IAM role for Admin Analytics Lambda, invoked through API Gateway.
-        var adminAnalyticsRole = new Aws.Iam.Role(
-            "lambda-admin-analytics-role",
-            new Aws.Iam.RoleArgs
-            {
-                AssumeRolePolicy =
-                    @"{
+            // IAM role for Admin Analytics Lambda, invoked through API Gateway.
+            var adminAnalyticsRole = new Aws.Iam.Role(
+                "lambda-admin-analytics-role",
+                new Aws.Iam.RoleArgs
+                {
+                    AssumeRolePolicy =
+                        @"{
                     ""Version"": ""2012-10-17"",
                     ""Statement"": [{
                         ""Action"": ""sts:AssumeRole"",
@@ -378,35 +379,36 @@ public static class Serverless
                         ""Effect"": ""Allow""
                     }]
                 }",
-                Tags = cfg.Tags,
-            }
-        );
+                    Tags = cfg.Tags,
+                }
+            );
 
-        _ = new Aws.Iam.RolePolicyAttachment(
-            "admin-analytics-basic-execution",
-            new Aws.Iam.RolePolicyAttachmentArgs
-            {
-                Role = adminAnalyticsRole.Name,
-                PolicyArn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-            }
-        );
+            _ = new Aws.Iam.RolePolicyAttachment(
+                "admin-analytics-basic-execution",
+                new Aws.Iam.RolePolicyAttachmentArgs
+                {
+                    Role = adminAnalyticsRole.Name,
+                    PolicyArn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+                }
+            );
 
-        _ = new Aws.Iam.RolePolicyAttachment(
-            "admin-analytics-vpc-execution",
-            new Aws.Iam.RolePolicyAttachmentArgs
-            {
-                Role = adminAnalyticsRole.Name,
-                PolicyArn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole",
-            }
-        );
+            _ = new Aws.Iam.RolePolicyAttachment(
+                "admin-analytics-vpc-execution",
+                new Aws.Iam.RolePolicyAttachmentArgs
+                {
+                    Role = adminAnalyticsRole.Name,
+                    PolicyArn =
+                        "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole",
+                }
+            );
 
-        _ = new Aws.Iam.RolePolicy(
-            "admin-analytics-db-secret-read",
-            new Aws.Iam.RolePolicyArgs
-            {
-                Role = adminAnalyticsRole.Name,
-                Policy = db.DbSecret.Arn.Apply(arn =>
-                    $@"{{
+            _ = new Aws.Iam.RolePolicy(
+                "admin-analytics-db-secret-read",
+                new Aws.Iam.RolePolicyArgs
+                {
+                    Role = adminAnalyticsRole.Name,
+                    Policy = db.DbSecret.Arn.Apply(arn =>
+                        $@"{{
                         ""Version"": ""2012-10-17"",
                         ""Statement"": [{{
                             ""Effect"": ""Allow"",
@@ -414,173 +416,172 @@ public static class Serverless
                             ""Resource"": ""{arn}""
                         }}]
                     }}"
-                ),
-            }
-        );
+                    ),
+                }
+            );
 
-        var adminAnalyticsSecurityGroup = new Aws.Ec2.SecurityGroup(
-            "admin-analytics-lambda-sg",
-            new Aws.Ec2.SecurityGroupArgs
-            {
-                Description = "TeleHealth admin analytics Lambda",
-                VpcId = net.VpcId,
-                Egress = new[]
+            var adminAnalyticsSecurityGroup = new Aws.Ec2.SecurityGroup(
+                "admin-analytics-lambda-sg",
+                new Aws.Ec2.SecurityGroupArgs
                 {
-                    new Aws.Ec2.Inputs.SecurityGroupEgressArgs
+                    Description = "TeleHealth admin analytics Lambda",
+                    VpcId = net.VpcId,
+                    Egress = new[]
                     {
-                        Protocol = "-1",
-                        FromPort = 0,
-                        ToPort = 0,
-                        CidrBlocks = { "0.0.0.0/0" },
-                        Description = "Allow outbound for RDS and AWS APIs",
+                        new Aws.Ec2.Inputs.SecurityGroupEgressArgs
+                        {
+                            Protocol = "-1",
+                            FromPort = 0,
+                            ToPort = 0,
+                            CidrBlocks = { "0.0.0.0/0" },
+                            Description = "Allow outbound for RDS and AWS APIs",
+                        },
                     },
-                },
-                Tags = cfg.Tags,
-            }
-        );
+                    Tags = cfg.Tags,
+                }
+            );
 
-        _ = new Aws.Ec2.SecurityGroupRule(
-            "db-ingress-admin-analytics-lambda",
-            new Aws.Ec2.SecurityGroupRuleArgs
-            {
-                Type = "ingress",
-                SecurityGroupId = net.DbSecurityGroup.Id,
-                SourceSecurityGroupId = adminAnalyticsSecurityGroup.Id,
-                Protocol = "tcp",
-                FromPort = 5432,
-                ToPort = 5432,
-                Description = "PostgreSQL from admin analytics Lambda",
-            }
-        );
-
-        var secretsManagerEndpointSecurityGroup = new Aws.Ec2.SecurityGroup(
-            "secrets-manager-endpoint-sg",
-            new Aws.Ec2.SecurityGroupArgs
-            {
-                Description = "TeleHealth Secrets Manager VPC endpoint",
-                VpcId = net.VpcId,
-                Ingress = new[]
+            _ = new Aws.Ec2.SecurityGroupRule(
+                "db-ingress-admin-analytics-lambda",
+                new Aws.Ec2.SecurityGroupRuleArgs
                 {
-                    new Aws.Ec2.Inputs.SecurityGroupIngressArgs
+                    Type = "ingress",
+                    SecurityGroupId = net.DbSecurityGroup.Id,
+                    SourceSecurityGroupId = adminAnalyticsSecurityGroup.Id,
+                    Protocol = "tcp",
+                    FromPort = 5432,
+                    ToPort = 5432,
+                    Description = "PostgreSQL from admin analytics Lambda",
+                }
+            );
+
+            var secretsManagerEndpointSecurityGroup = new Aws.Ec2.SecurityGroup(
+                "secrets-manager-endpoint-sg",
+                new Aws.Ec2.SecurityGroupArgs
+                {
+                    Description = "TeleHealth Secrets Manager VPC endpoint",
+                    VpcId = net.VpcId,
+                    Ingress = new[]
                     {
-                        Protocol = "tcp",
-                        FromPort = 443,
-                        ToPort = 443,
-                        SecurityGroups = { adminAnalyticsSecurityGroup.Id },
-                        Description = "HTTPS from admin analytics Lambda",
+                        new Aws.Ec2.Inputs.SecurityGroupIngressArgs
+                        {
+                            Protocol = "tcp",
+                            FromPort = 443,
+                            ToPort = 443,
+                            SecurityGroups = { adminAnalyticsSecurityGroup.Id },
+                            Description = "HTTPS from admin analytics Lambda",
+                        },
                     },
-                },
-                Tags = cfg.Tags,
-            }
-        );
+                    Tags = cfg.Tags,
+                }
+            );
 
-        _ = new Aws.Ec2.VpcEndpoint(
-            "secrets-manager-vpc-endpoint",
-            new Aws.Ec2.VpcEndpointArgs
-            {
-                VpcId = net.VpcId,
-                ServiceName = $"com.amazonaws.{cfg.AwsRegion}.secretsmanager",
-                VpcEndpointType = "Interface",
-                PrivateDnsEnabled = true,
-                SubnetIds = net.SubnetIds,
-                SecurityGroupIds = { secretsManagerEndpointSecurityGroup.Id },
-                Tags = cfg.Tags,
-            }
-        );
-
-        adminAnalyticsLambda = new Aws.Lambda.Function(
-            "admin-analytics",
-            new Aws.Lambda.FunctionArgs
-            {
-                Name = $"telehealth-admin-analytics-{cfg.StackName}",
-                Role = adminAnalyticsRole.Arn,
-                Runtime = "dotnet10",
-                Handler = "AdminAnalytics::AdminAnalytics.Function::FunctionHandler",
-                MemorySize = 256,
-                Timeout = 15,
-                Code = new FileArchive("./dummy-lambda"),
-                Environment = new Aws.Lambda.Inputs.FunctionEnvironmentArgs
+            _ = new Aws.Ec2.VpcEndpoint(
+                "secrets-manager-vpc-endpoint",
+                new Aws.Ec2.VpcEndpointArgs
                 {
-                    Variables = new InputMap<string>
-                    {
-                        { "ENVIRONMENT", cfg.StackName },
-                        { "DB_HOST", db.Instance.Address },
-                        { "DB_PORT", "5432" },
-                        { "DB_NAME", cfg.DbName },
-                        { "DB_USERNAME", cfg.DbUsername },
-                        { "DB_PASSWORD_SECRET_ARN", db.DbSecret.Arn },
-                        { "CLINIC_TIME_ZONE", "Asia/Kuala_Lumpur" },
-                    },
-                },
-                VpcConfig = new Aws.Lambda.Inputs.FunctionVpcConfigArgs
-                {
-                    SecurityGroupIds = { adminAnalyticsSecurityGroup.Id },
+                    VpcId = net.VpcId,
+                    ServiceName = $"com.amazonaws.{cfg.AwsRegion}.secretsmanager",
+                    VpcEndpointType = "Interface",
+                    PrivateDnsEnabled = true,
                     SubnetIds = net.SubnetIds,
-                },
-                Tags = cfg.Tags,
-            },
-            new CustomResourceOptions { IgnoreChanges = { "sourceCodeHash" } }
-        );
+                    SecurityGroupIds = { secretsManagerEndpointSecurityGroup.Id },
+                    Tags = cfg.Tags,
+                }
+            );
 
-        adminAnalyticsApi = new Aws.ApiGatewayV2.Api(
-            "admin-analytics-api",
-            new Aws.ApiGatewayV2.ApiArgs
-            {
-                Name = $"telehealth-admin-analytics-api-{cfg.StackName}",
-                ProtocolType = "HTTP",
-                CorsConfiguration = new Aws.ApiGatewayV2.Inputs.ApiCorsConfigurationArgs
+            adminAnalyticsLambda = new Aws.Lambda.Function(
+                "admin-analytics",
+                new Aws.Lambda.FunctionArgs
                 {
-                    AllowHeaders = { "Content-Type", "Authorization" },
-                    AllowMethods = { "GET", "OPTIONS" },
-                    AllowOrigins = { cfg.FrontendOrigin },
+                    Name = $"telehealth-admin-analytics-{cfg.StackName}",
+                    Role = adminAnalyticsRole.Arn,
+                    Runtime = "dotnet10",
+                    Handler = "AdminAnalytics::AdminAnalytics.Function::FunctionHandler",
+                    MemorySize = 256,
+                    Timeout = 15,
+                    Code = new FileArchive("./dummy-lambda"),
+                    Environment = new Aws.Lambda.Inputs.FunctionEnvironmentArgs
+                    {
+                        Variables = new InputMap<string>
+                        {
+                            { "ENVIRONMENT", cfg.StackName },
+                            { "DB_HOST", db.Instance.Address },
+                            { "DB_PORT", "5432" },
+                            { "DB_NAME", cfg.DbName },
+                            { "DB_USERNAME", cfg.DbUsername },
+                            { "DB_PASSWORD_SECRET_ARN", db.DbSecret.Arn },
+                            { "CLINIC_TIME_ZONE", "Asia/Kuala_Lumpur" },
+                        },
+                    },
+                    VpcConfig = new Aws.Lambda.Inputs.FunctionVpcConfigArgs
+                    {
+                        SecurityGroupIds = { adminAnalyticsSecurityGroup.Id },
+                        SubnetIds = net.SubnetIds,
+                    },
+                    Tags = cfg.Tags,
                 },
-                Tags = cfg.Tags,
-            }
-        );
+                new CustomResourceOptions { IgnoreChanges = { "sourceCodeHash" } }
+            );
 
-        var adminAnalyticsIntegration = new Aws.ApiGatewayV2.Integration(
-            "admin-analytics-api-lambda-integration",
-            new Aws.ApiGatewayV2.IntegrationArgs
-            {
-                ApiId = adminAnalyticsApi.Id,
-                IntegrationType = "AWS_PROXY",
-                IntegrationUri = adminAnalyticsLambda.InvokeArn,
-                PayloadFormatVersion = "2.0",
-            }
-        );
+            adminAnalyticsApi = new Aws.ApiGatewayV2.Api(
+                "admin-analytics-api",
+                new Aws.ApiGatewayV2.ApiArgs
+                {
+                    Name = $"telehealth-admin-analytics-api-{cfg.StackName}",
+                    ProtocolType = "HTTP",
+                    CorsConfiguration = new Aws.ApiGatewayV2.Inputs.ApiCorsConfigurationArgs
+                    {
+                        AllowHeaders = { "Content-Type", "Authorization" },
+                        AllowMethods = { "GET", "OPTIONS" },
+                        AllowOrigins = { cfg.FrontendOrigin },
+                    },
+                    Tags = cfg.Tags,
+                }
+            );
 
-        _ = new Aws.ApiGatewayV2.Route(
-            "admin-analytics-clinic-activity-route",
-            new Aws.ApiGatewayV2.RouteArgs
-            {
-                ApiId = adminAnalyticsApi.Id,
-                RouteKey = "GET /admin/clinic-activity",
-                Target = adminAnalyticsIntegration.Id.Apply(id => $"integrations/{id}"),
-            }
-        );
+            var adminAnalyticsIntegration = new Aws.ApiGatewayV2.Integration(
+                "admin-analytics-api-lambda-integration",
+                new Aws.ApiGatewayV2.IntegrationArgs
+                {
+                    ApiId = adminAnalyticsApi.Id,
+                    IntegrationType = "AWS_PROXY",
+                    IntegrationUri = adminAnalyticsLambda.InvokeArn,
+                    PayloadFormatVersion = "2.0",
+                }
+            );
 
-        _ = new Aws.ApiGatewayV2.Stage(
-            "admin-analytics-default-stage",
-            new Aws.ApiGatewayV2.StageArgs
-            {
-                ApiId = adminAnalyticsApi.Id,
-                Name = "$default",
-                AutoDeploy = true,
-                Tags = cfg.Tags,
-            }
-        );
+            _ = new Aws.ApiGatewayV2.Route(
+                "admin-analytics-clinic-activity-route",
+                new Aws.ApiGatewayV2.RouteArgs
+                {
+                    ApiId = adminAnalyticsApi.Id,
+                    RouteKey = "GET /admin/clinic-activity",
+                    Target = adminAnalyticsIntegration.Id.Apply(id => $"integrations/{id}"),
+                }
+            );
 
-        _ = new Aws.Lambda.Permission(
-            "admin-analytics-api-gateway-invoke",
-            new Aws.Lambda.PermissionArgs
-            {
-                Action = "lambda:InvokeFunction",
-                Function = adminAnalyticsLambda.Name,
-                Principal = "apigateway.amazonaws.com",
-                SourceArn = adminAnalyticsApi.ExecutionArn.Apply(arn => $"{arn}/*/*"),
-            }
-        );
+            _ = new Aws.ApiGatewayV2.Stage(
+                "admin-analytics-default-stage",
+                new Aws.ApiGatewayV2.StageArgs
+                {
+                    ApiId = adminAnalyticsApi.Id,
+                    Name = "$default",
+                    AutoDeploy = true,
+                    Tags = cfg.Tags,
+                }
+            );
 
+            _ = new Aws.Lambda.Permission(
+                "admin-analytics-api-gateway-invoke",
+                new Aws.Lambda.PermissionArgs
+                {
+                    Action = "lambda:InvokeFunction",
+                    Function = adminAnalyticsLambda.Name,
+                    Principal = "apigateway.amazonaws.com",
+                    SourceArn = adminAnalyticsApi.ExecutionArn.Apply(arn => $"{arn}/*/*"),
+                }
+            );
         } // end if (net is not null && db is not null)
 
         return new Result
