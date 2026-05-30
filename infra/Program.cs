@@ -32,6 +32,7 @@ return await Deployment.RunAsync(() =>
         ["EbEnvName"] = compute.EbEnv.Name,
         ["EcrRepositoryUrl"] = compute.EcrRepo.RepositoryUrl,
         ["DbSecretArn"] = db.DbSecret.Arn,
+        ["DbInstanceIdentifier"] = db.Instance.Id,
         ["XRayGroupArn"] = obs.XrayGroup.Arn,
         ["ApiLogGroupName"] = obs.ApiLogGroup.Name,
         ["LambdaFunctionName"] = serverless.PdfProcessorLambda.Name,

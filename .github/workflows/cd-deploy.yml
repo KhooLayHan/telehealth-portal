@@ -86,7 +86,8 @@ jobs:
     if: ${{ github.event.inputs.seed == 'true' }}
     uses: ./.github/workflows/cd-seed.yml
     with:
-      aws-region:  ${{ vars.AWS_REGION || 'us-east-1' }}
-      eb-env-name: ${{ needs.infra.outputs.eb-env-name }}
+      aws-region:            ${{ vars.AWS_REGION || 'us-east-1' }}
+      eb-env-name:           ${{ needs.infra.outputs.eb-env-name }}
+      db-instance-identifier: ${{ needs.infra.outputs.db-instance-identifier }}
     secrets:
       AWS_DEPLOY_ROLE_ARN: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
