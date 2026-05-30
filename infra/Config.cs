@@ -43,13 +43,11 @@ public sealed class StackConfig
     public StackConfig()
     {
         var config = new Config("telehealth");
-        // Use GetSecret (not RequireSecret) so the program doesn't throw when
-        // database resources are disabled. Re-enable RequireSecret when restoring.
-        DbPassword = config.GetSecret("dbPassword") ?? Output.Create(string.Empty);
+        DbPassword = config.RequireSecret("dbPassword");
         DbInstanceClass = config.Get("dbInstanceClass") ?? "db.t3.micro";
         DbName = config.Get("dbName") ?? "telehealth_dev";
         DbUsername = config.Get("dbUsername") ?? "telehealth_admin";
-        JwtSecret = config.GetSecret("jwtSecret") ?? Output.Create(string.Empty);
+        JwtSecret = config.RequireSecret("jwtSecret");
         FrontendOrigin = config.Get("frontendOrigin") ?? "*";
 
         var awsConfig = new Config("aws");
