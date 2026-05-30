@@ -30,6 +30,8 @@ on:
         value: ${{ jobs.deploy-infra.outputs.notifications-lambda-name }}
       admin-analytics-lambda-name:
         value: ${{ jobs.deploy-infra.outputs.admin-analytics-lambda-name }}
+      db-instance-identifier:
+        value: ${{ jobs.deploy-infra.outputs.db-instance-identifier }}
 
 jobs:
   deploy-infra:
@@ -48,6 +50,7 @@ jobs:
       reminder-lambda-name:        ${{ steps.pulumi.outputs.ReminderLambdaName }}
       notifications-lambda-name:   ${{ steps.pulumi.outputs.NotificationsLambdaName }}
       admin-analytics-lambda-name: ${{ steps.pulumi.outputs.AdminAnalyticsLambdaName }}
+      db-instance-identifier:      ${{ steps.pulumi.outputs.DbInstanceIdentifier }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

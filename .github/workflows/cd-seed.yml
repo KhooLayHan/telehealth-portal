@@ -32,6 +32,9 @@ on:
       eb-env-name:
         required: true
         type: string
+      db-instance-identifier:
+        required: true
+        type: string
     secrets:
       AWS_DEPLOY_ROLE_ARN:
         required: true
@@ -52,7 +55,7 @@ jobs:
 
       - name: Snapshot RDS before seeding
         env:
-          DB_INSTANCE: telehealth-db798d5a0
+          DB_INSTANCE: ${{ inputs.db-instance-identifier }}
         run: |
           SNAPSHOT_ID="pre-seed-$(date +%Y%m%d-%H%M%S)"
           echo "Creating RDS snapshot: $SNAPSHOT_ID"
