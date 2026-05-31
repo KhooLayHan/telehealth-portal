@@ -88,42 +88,6 @@ jobs:
             echo "Snapshot telehealth-db-prod-final not found — nothing to do."
           fi
 
-      # Purge all images from the ECR repository so Pulumi can delete it.
-      # Idempotent — once the repository is gone this step becomes a no-op.
-      - name: Purge ECR repository images (if present)
-        run: |
-          REPO="telehealth-api-prod"
-          REGION="${{ inputs.aws-region }}"
-
-          # Check if the repository still exists
-          if ! aws ecr describe-repositories \
-              --repository-names "$REPO" \
-              --region "$REGION" \
-              --query 'repositories[0].repositoryName' \
-              --output text 2>/dev/null | grep -q "$REPO"; then
-            echo "ECR repository $REPO not found — nothing to do."
-            exit 0
-          fi
-
-          # List all image IDs
-          IMAGE_IDS=$(aws ecr list-images \
-            --repository-name "$REPO" \
-            --region "$REGION" \
-            --query 'imageIds' \
-            --output json)
-
-          if [ "$IMAGE_IDS" = "[]" ]; then
-            echo "ECR repository $REPO is already empty — nothing to do."
-            exit 0
-          fi
-
-          echo "Deleting all images from $REPO..."
-          aws ecr batch-delete-image \
-            --repository-name "$REPO" \
-            --region "$REGION" \
-            --image-ids "$IMAGE_IDS"
-          echo "ECR images deleted."
-
       - name: Pulumi up
         uses: pulumi/actions@v6
         id: pulumi
