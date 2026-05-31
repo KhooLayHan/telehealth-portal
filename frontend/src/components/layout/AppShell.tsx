@@ -28,6 +28,8 @@ import { SupportDialog } from "@/features/system-settings/SupportDialog";
 import { useSystemName } from "@/features/system-settings/useSystemName";
 import { useAuthStore } from "@/store/useAuthStore";
 
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:5144";
+
 const navItems = [
   {
     icon: LayoutDashboard,
@@ -115,7 +117,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const avatarUrl = user?.avatarUrl;
 
   const handleLogout = async () => {
-    await fetch("/api/v1/auth/logout", { method: "POST", credentials: "include" });
+    await fetch(`${API_BASE}/api/v1/auth/logout`, { method: "POST", credentials: "include" });
     logout();
     navigate({ to: "/login" });
   };
