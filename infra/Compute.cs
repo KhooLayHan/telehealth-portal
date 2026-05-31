@@ -225,6 +225,24 @@ public static class Compute
             }
         );
 
+        // Scoped inline policy: S3 — profile images bucket (avatar uploads via presigned URLs)
+        _ = new Aws.Iam.RolePolicy(
+            "policy-s3-profile-images",
+            new Aws.Iam.RolePolicyArgs
+            {
+                Role = ebRole.Name,
+                Policy =
+                    @"{
+                        ""Version"": ""2012-10-17"",
+                        ""Statement"": [{
+                            ""Effect"": ""Allow"",
+                            ""Action"": [""s3:PutObject"",""s3:GetObject"",""s3:DeleteObject"",""s3:ListBucket""],
+                            ""Resource"": [""arn:aws:s3:::telehealth-profile-images"",""arn:aws:s3:::telehealth-profile-images/*""]
+                        }]
+                    }",
+            }
+        );
+
         // Scoped inline policy: Secrets Manager — only the DB secret
         _ = new Aws.Iam.RolePolicy(
             "policy-secrets-manager",
@@ -326,6 +344,7 @@ public static class Compute
                     // AWS service references
                     EbEnvVar("AWS_REGION", cfg.AwsRegion),
                     EbEnvVar("AWS_S3_LAB_REPORTS_BUCKET", storage.LabReportsBucket.BucketName),
+                    EbEnvVar("AWS_S3_PROFILE_IMAGES_BUCKET", "telehealth-profile-images"),
                     EbEnvVar("AWS_SNS_TOPIC_ARN", msg.MedicalAlertsTopic.Arn),
                     EbEnvVar("AWS_SQS_QUEUE_URL", msg.ProcessingQueue.Id),
                     EbEnvVar(
