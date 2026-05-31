@@ -70,6 +70,7 @@ public static class EndpointMappingExtensions
     public static RouteGroupBuilder MapAllEndpoints(this RouteGroupBuilder api)
     {
         api.MapLoginEndpoint();
+        api.MapLogoutEndpoint();
         api.MapRegisterPatientEndpoint();
         api.MapCreateUserEndpoint();
         api.MapGetProfileEndpoint();
