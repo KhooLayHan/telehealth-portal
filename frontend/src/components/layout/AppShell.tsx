@@ -114,7 +114,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const userInitial = user?.firstName?.charAt(0).toUpperCase() ?? "U";
   const avatarUrl = user?.avatarUrl;
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await fetch("/api/v1/auth/logout", { method: "POST", credentials: "include" });
     logout();
     navigate({ to: "/login" });
   };
