@@ -22,6 +22,37 @@ on:
       AWS_DEPLOY_ROLE_ARN:
         required: true
 
+  # Allows triggering a backend-only build+deploy directly from the GitHub UI,
+  # bypassing the infra step. Useful when ECR is empty and the full CD pipeline
+  # is stuck in an infra-fails → backend-skipped → ECR-empty deadlock.
+  workflow_dispatch:
+    inputs:
+      aws-region:
+        description: "AWS region"
+        required: false
+        default: "us-east-1"
+        type: string
+      ecr-url:
+        description: "ECR repository URL"
+        required: false
+        default: "920263653571.dkr.ecr.us-east-1.amazonaws.com/telehealth-api-prod"
+        type: string
+      eb-app-name:
+        description: "Elastic Beanstalk application name"
+        required: false
+        default: "telehealth-api-ebab98d"
+        type: string
+      eb-env-name:
+        description: "Elastic Beanstalk environment name"
+        required: false
+        default: "telehealth-env-c88b226"
+        type: string
+      artifacts-bucket:
+        description: "S3 artifacts bucket"
+        required: false
+        default: "telehealth-eb-artifacts-55bfc45"
+        type: string
+
 jobs:
   deploy-backend:
     name: Backend — Publish, Push to ECR & Deploy to EB
