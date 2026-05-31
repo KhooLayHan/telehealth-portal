@@ -337,7 +337,7 @@ public static class Compute
                         Output
                             .Tuple(db.Instance.Address, cfg.DbPassword)
                             .Apply(t =>
-                                $"Host={t.Item1};Port=5432;Database={cfg.DbName};Username={cfg.DbUsername};Password={t.Item2};SSL Mode=Prefer"
+                                $"Host={t.Item1};Port=5432;Database={cfg.DbName};Username={cfg.DbUsername};Password={t.Item2};SSL Mode=Require;Trust Server Certificate=true"
                             )
                     ),
                     EbEnvVar("DB_SECRET_ARN", db.DbSecret.Arn),
